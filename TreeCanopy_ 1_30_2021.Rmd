@@ -1,0 +1,75 @@
+---
+title: "Philadelphia Tree Canopy" 
+author: "Palak Argarwal, Anna Duan, Kyle McCarthy" 
+date: 
+output:
+  html_document:
+    toc: true
+    toc_float: true
+---
+
+```{r setup, include=FALSE,message = FALSE,cache=TRUE}
+knitr::opts_chunk$set(echo = TRUE)
+options(scipen=999)
+library(knitr)
+```
+
+
+```{r libraries_Data_Cleaning, message=FALSE, warning=FALSE, include=TRUE}
+library(tidyverse)
+library(tidycensus)
+library(sf)
+library(kableExtra)
+library(dplyr)
+library(viridis)
+root.dir = "https://raw.githubusercontent.com/urbanSpatial/Public-Policy-Analytics-Landing/master/DATA/"
+source("https://raw.githubusercontent.com/urbanSpatial/Public-Policy-Analytics-Landing/master/functions.r")
+```
+
+```{r libraries_Data_Cleaning, message=FALSE, warning=FALSE, include=TRUE}
+
+TreeCanopy <- st_read("C:/Users/Kyle McCarthy/Documents/Practicum/TreeCanopyChange_2008_2018.shp")%>%
+  st_transform('ESRI:102728')
+
+TreeCanopy$SHAPE_Area <- st_area(TreeCanopy)
+
+Philadelphia <- st_read("http://data.phl.opendata.arcgis.com/datasets/405ec3da942d4e20869d4e1449a2be48_0.geojson")%>%
+  st_transform('ESRI:102728')
+  
+
+```
+
+```{r Fishnet, message=FALSE, warning=FALSE, include=TRUE}
+fishnet <- 
+  st_make_grid(Philadelphia,
+               cellsize = 1600) %>%
+  st_sf() %>%
+  mutate(uniqueID = rownames(.))%>%
+  st_transform('ESRI:102728')
+
+TreeCanopyLoss <- 
+  TreeCanopy%>% 
+  filter(CLASS_NAME == "Loss")%>%
+  mutate(AreaM= SHAPE_Area * .093903)
+
+TreeCanopyLoss2<- 
+  fishnet%>%
+  st_join(TreeCanopyLoss)%>%
+  group_by(uniqueID)%>%
+  summarise(Area = sum(AreaM))%>%
+  mutate(pctLoss = Area / 1600)
+
+TreeCanopyLoss2<- 
+  TreeCanopyLoss2%>%
+  mutate(pctLoss = as.numeric(pctLoss))
+
+ggplot()+ 
+  geom_sf(data = TreeCanopyLoss2, aes(fill = pctLoss))+ 
+  scale_fill_viridis()+
+  mapTheme()
+  
+```
+
+
+
+
