@@ -57,19 +57,88 @@ TreeCanopyLoss2<-
   st_join(TreeCanopyLoss)%>%
   group_by(uniqueID)%>%
   summarise(Area = sum(AreaM))%>%
-  mutate(pctLoss = Area / 1600)
-
-TreeCanopyLoss2<- 
-  TreeCanopyLoss2%>%
+  mutate(pctLoss = Area / 1600)%>%
   mutate(pctLoss = as.numeric(pctLoss))
 
 ggplot()+ 
   geom_sf(data = TreeCanopyLoss2, aes(fill = pctLoss))+ 
   scale_fill_viridis()+
+  labs(title= "Tree Canopy Loss/ Grid Cell Size")+
   mapTheme()
   
 ```
 
+```{r Neighborhood, message=FALSE, warning=FALSE, include=TRUE}
+
+Neighborhood <- st_read("C:/Users/Kyle McCarthy/Documents/Practicum/Data/Neighborhoods/Neighborhoods_Philadelphia.shp")%>%
+  st_transform('ESRI:102728')
+
+NeighborhoodTreeLoss<- 
+  Neighborhood%>%
+  st_join(TreeCanopyLoss)%>%
+  group_by(NAME)%>%
+  summarise(Area = sum(AreaM))%>%
+  mutate(AreaNeighborhood = st_area(Neighborhood))%>%
+  mutate(AreaNeighborhood = as.numeric(AreaNeighborhood))%>%
+  mutate(pctLoss = Area / AreaNeighborhood)%>%
+  mutate(pctLoss = as.numeric(pctLoss))
+
+ggplot()+ 
+  geom_sf(data = NeighborhoodTreeLoss, aes(fill = pctLoss))+ 
+  scale_fill_viridis()+
+  labs(title= "Tree Canopy Loss/ Neighborhood Size")+
+  mapTheme()
+
+```
+```{r Tree Canopy All, message=FALSE, warning=FALSE, include=TRUE}
+
+TreeCanopy_attempt<- 
+  fishnet%>%
+  st_join(TreeCanopy)%>%
+  group_by(uniqueID)%>%
+  summarise(Total_Canopy_Area = sum(SHAPE_Area))%>%
+  mutate(Total_Canopy_Area = as.numeric(Total_Canopy_Area))%>%
+  st_join(TreeCanopy)
+
+TreeCanopy_fishnet <- 
+  TreeCanopy_attempt%>%
+  group_by(uniqueID, CLASS_NAME, Total_Canopy_Area)%>%
+  summarise(Area = sum(SHAPE_Area))%>%
+  filter(CLASS_NAME == "Loss")%>% 
+  mutate(pct = Area / Total_Canopy_Area)
+
+TreeCanopy_fishnet <- 
+  TreeCanopy_fishnet%>%
+  mutate(pct = as.numeric(pct))
+
+ggplot()+ 
+  geom_sf(data = TreeCanopy_fishnet, aes(fill = pct))+ 
+  scale_fill_viridis()+
+  labs(title= "Tree Loss / Total Tree Area in Grid Cell")+
+  mapTheme()
+
+```
+```{r Tree Canopy All Neighborhoods, message=FALSE, warning=FALSE, include=TRUE}
+TreeCanopy_attempt_N<- 
+  Neighborhood%>%
+  st_join(TreeCanopy)%>%
+  group_by(NAME)%>%
+  summarise(Total_Canopy_Area = sum(SHAPE_Area))%>%
+  mutate(Total_Canopy_Area = as.numeric(Total_Canopy_Area))%>%
+  st_join(TreeCanopy)
+
+TreeCanopy_Neighborhood <- 
+  TreeCanopy_attempt_N%>%
+  group_by(NAME, CLASS_NAME, Total_Canopy_Area)%>%
+  summarise(Area = sum(SHAPE_Area))%>%
+  filter(CLASS_NAME == "Loss")%>% 
+  mutate(pct = Area / Total_Canopy_Area)%>%
+  mutate(pct = as.numeric(pct))
 
 
-
+ggplot()+ 
+  geom_sf(data = TreeCanopy_Neighborhood, aes(fill = pct))+ 
+  scale_fill_viridis()+
+  labs(title= "Tree Loss / Total Tree Area in Neighborhood")+
+  mapTheme()
+```
