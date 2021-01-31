@@ -122,6 +122,7 @@ TreeCanopy_fishnet <-
 
 
 ggplot()+ 
+  geom_sf(data = Philadelphia, fill = "#A9A9A9")+
   geom_sf(data = TreeCanopy_fishnet, aes(fill = pct))+ 
   scale_fill_viridis()+
   labs(title= "Tree Loss / Total Tree Area in Grid Cell")+
