@@ -92,7 +92,7 @@ ggplot()+
 ```
 ```{r Tree Canopy All, message=FALSE, warning=FALSE, include=TRUE}
 
-TreeCanopy_attempt<- 
+TreeCanopy_part1<- 
   fishnet%>%
   st_join(TreeCanopy)%>%
   group_by(uniqueID)%>%
@@ -101,7 +101,7 @@ TreeCanopy_attempt<-
   st_join(TreeCanopy)
 
 TreeCanopy_fishnet <- 
-  TreeCanopy_attempt%>%
+  TreeCanopy_part1%>%
   group_by(uniqueID, CLASS_NAME, Total_Canopy_Area)%>%
   summarise(Area = sum(SHAPE_Area))%>%
   filter(CLASS_NAME == "Loss")%>% 
@@ -119,7 +119,7 @@ ggplot()+
 
 ```
 ```{r Tree Canopy All Neighborhoods, message=FALSE, warning=FALSE, include=TRUE}
-TreeCanopy_attempt_N<- 
+TreeCanopy_part1_N<- 
   Neighborhood%>%
   st_join(TreeCanopy)%>%
   group_by(NAME)%>%
@@ -128,7 +128,7 @@ TreeCanopy_attempt_N<-
   st_join(TreeCanopy)
 
 TreeCanopy_Neighborhood <- 
-  TreeCanopy_attempt_N%>%
+  TreeCanopy_part1_N%>%
   group_by(NAME, CLASS_NAME, Total_Canopy_Area)%>%
   summarise(Area = sum(SHAPE_Area))%>%
   filter(CLASS_NAME == "Loss")%>% 
