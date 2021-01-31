@@ -7,7 +7,7 @@ output: html_document
 
 
 ## Use Case
-The aim of this project is identify risk for tree canopy loss in Philadelphia, PA. The urban tree canopy is important for many reasons including public health and recreation, and Philadelphia has a goal of achieving 30% tree canopy coverage in each neighborhood. To perform this analysis, we look at risk factors including developmennt and neighborhood demographic attributes.
+The aim of this project is identify risk for tree canopy loss in Philadelphia, PA. The urban tree canopy is important for many reasons including public health and recreation, and Philadelphia has a goal of achieving 30% tree canopy coverage in each neighborhood. To perform this analysis, we look at risk factors including development and neighborhood demographic attributes.
 
 ## Exploratory Analysis Questions
 * How does tree canopy loss vary across neighborhoods and sociodemographic contexts?
@@ -33,7 +33,7 @@ The aim of this project is identify risk for tree canopy loss in Philadelphia, P
 
 
 ## Team Roles
-![Gantt Chart](/Users/annaduan/Documents/GitHub/Canopy Loss/Gantt.png)
+![Gantt Chart](/Users/annaduan/Documents/GitHub/tree-canopy-loss/Gantt.png)
 
 ## Exploratory Analysis
 
