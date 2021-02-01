@@ -204,5 +204,61 @@ ACS <-
                                   (Households_hmow + Households_hmre),0),
          year = "2018") %>%
   dplyr::select(-Households_hmow,-Households_hmre,-noVehicle_hmow,-noVehicle_hmre,-bachelor, -white)
+
+#FISHNET
+fishnet <- 
+  st_make_grid(Philadelphia,
+               cellsize = 1600) %>%
+  st_sf() %>%
+  mutate(uniqueID = rownames(.))%>%
+  st_transform('ESRI:102728')
+
+fishnet <- fishnet %>%
+  st_intersection(.,Philadelphia)
+
+
+TreeCanopy <- st_read("/Users/annaduan/Documents/GitHub/tree-canopy-loss/TreeCanopyChange_2008_2018-shp/TreeCanopyChange_2008_2018.shp")%>%
+  st_transform('ESRI:102728')
+
+TreeCanopy$SHAPE_Area <- st_area(TreeCanopy)
+
+
+
+
+TreeCanopyLoss <- 
+  TreeCanopy%>% 
+  filter(CLASS_NAME == "Loss")%>%
+  mutate(AreaM= SHAPE_Area * .093903)
+
+TreeCanopyLoss2<- 
+  fishnet%>%
+  st_join(TreeCanopyLoss)%>%
+  group_by(uniqueID)%>%
+  summarise(Area = sum(AreaM))%>%
+  mutate(pctLoss = Area / 1600)%>%
+  mutate(pctLoss = as.numeric(pctLoss), Area = as.numeric(Area))
+
+ACS_net <-
+  st_centroid(fishnet) %>%
+  st_join(.,ACS) %>%
+  st_join(fishnet)
+
+ggplot() +
+  geom_sf(data = fishnet, colour = "pink") +
+  geom_sf(data = ACS, colour = "black", fill = "transparent") +
+  mapTheme()
+  
+
+ggplot()+ 
+  geom_sf(data = TreeCanopyLoss2, aes(fill = Area))+ 
+  scale_fill_viridis()+
+  labs(title= "Total Tree Canopy Loss in each Grid Cell")+
+  mapTheme()
+
+ggplot()+ 
+  geom_sf(data = TreeCanopyLoss2, aes(fill = pctLoss))+ 
+  scale_fill_viridis()+
+  labs(title= "Total Tree Canopy Loss / Cell Area ")+
+  mapTheme()
 ```
 
