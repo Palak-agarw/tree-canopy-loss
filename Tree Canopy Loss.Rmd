@@ -1,0 +1,40 @@
+---
+title: "Tree Canopy Loss"
+author: "Anna, Palak, Kyle"
+date: "1/31/2021"
+output: html_document
+---
+
+
+## Use Case
+The aim of this project is identify risk for tree canopy loss in Philadelphia, PA. The urban tree canopy is important for many reasons including public health and recreation, and Philadelphia has a goal of achieving 30% tree canopy coverage in each neighborhood. To perform this analysis, we look at risk factors including development and neighborhood demographic attributes.
+
+## Exploratory Analysis Questions
+* How does tree canopy loss vary across neighborhoods and sociodemographic contexts?
+* How is tree canopy loss affected by development?
+* What’s the relationship between tree canopy health and built density in neighborhoods? (eg effect of urban heat island)
+
+## Independent Variables
+* Impervious surfaces
+* Construction Permits
+* 311 requests - tree based 
+* Urban heat islands
+* Energy transmission/pipelines
+* Bike lanes
+* Distance to Parks
+* NDVI
+* Tree density
+* Soil type
+* Slope, Aspect
+* Hydrology
+* Zoning 
+* Home prices 
+* Demographics
+
+
+## Team Roles
+![Gantt Chart](/Users/annaduan/Documents/GitHub/tree-canopy-loss/Gantt.png)
+
+## Exploratory Analysis
+
+
