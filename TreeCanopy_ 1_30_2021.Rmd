@@ -12,23 +12,25 @@ output:
 knitr::opts_chunk$set(echo = TRUE)
 options(scipen=999)
 library(knitr)
-```
-
-
-```{r libraries_Data_Cleaning, message=FALSE, warning=FALSE, include=TRUE}
 library(tidyverse)
 library(tidycensus)
 library(sf)
 library(kableExtra)
 library(dplyr)
 library(viridis)
+library(mapview)
+
 root.dir = "https://raw.githubusercontent.com/urbanSpatial/Public-Policy-Analytics-Landing/master/DATA/"
 source("https://raw.githubusercontent.com/urbanSpatial/Public-Policy-Analytics-Landing/master/functions.r")
+
+paletteGray <- c("gray90", "gray70", "gray50", "gray30", "gray10")
 ```
 
 ```{r libraries_Data_Cleaning, message=FALSE, warning=FALSE, include=TRUE}
 
-TreeCanopy <- st_read("C:/Users/Kyle McCarthy/Documents/Practicum/TreeCanopyChange_2008_2018.shp")%>%
+TreeCanopy <- 
+  #st_read("C:/Users/KyleMcCarthy/Documents/Practicum/TreeCanopyChange_2008_2018.shp")%>%
+  st_read("/Users/annaduan/Desktop/Y3S2/Practicum/Data/TreeCanopyChange_2008_2018-shp/TreeCanopyChange_2008_2018.shp") %>%
   st_transform('ESRI:102728')
 
 TreeCanopy$SHAPE_Area <- st_area(TreeCanopy)
@@ -76,7 +78,9 @@ ggplot()+
 
 ```{r Neighborhood, message=FALSE, warning=FALSE, include=TRUE}
 
-Neighborhood <- st_read("C:/Users/Kyle McCarthy/Documents/Practicum/Data/Neighborhoods/Neighborhoods_Philadelphia.shp")%>%
+Neighborhood <- 
+  #st_read("C:/Users/Kyle McCarthy/Documents/Practicum/Data/Neighborhoods/Neighborhoods_Philadelphia.shp") %>%
+  st_read("/Users/annaduan/Desktop/Y3S2/Practicum/Data/Neighborhoods_Philadelphia/Neighborhoods_Philadelphia.shp")%>%
   st_transform('ESRI:102728')
 
 NeighborhoodTreeLoss<- 
@@ -154,4 +158,92 @@ ggplot()+
   scale_fill_viridis()+
   labs(title= "Tree Loss / Total Tree Area in Neighborhood")+
   mapTheme()
+```
+
+```{r Demographics, message=FALSE, warning=FALSE, include=TRUE}
+
+census_api_key("d9ebfd04caa0138647fbacd94c657cdecbf705e9", install = FALSE, overwrite = TRUE)
+
+# Variables: Median Rent, Median HH Income, Population, Bachelor's, No Vehicle (home owner, renter), Households (owner, renter-occupied), total housing units, white
+
+ACS <-  
+  get_acs(geography = "tract", variables = c("B25058_001E", "B19013_001E", "B01003_001E", "B06009_005E", "B25044_003E", "B25044_010E", "B07013_002E", "B07013_003E", "B25001_001E", "B01001A_001E"), 
+          year=2018, state=42, county=101, geometry=T) %>% 
+  st_transform('ESRI:102728')
+
+
+#Change to wide form
+ACS <- 
+  ACS %>%
+  dplyr::select( -NAME, -moe) %>%
+  spread(variable, estimate) %>%
+  dplyr::select(-geometry) %>%
+  rename(Rent = B25058_001, 
+         medHHInc = B19013_001,
+         population = B01003_001, 
+         bachelor = B06009_005,
+         noVehicle_hmow = B25044_003, 
+         noVehicle_hmre = B25044_010,
+         Households_hmow = B07013_002,
+         Households_hmre = B07013_003,
+         housing_units = B25001_001,
+         white = B01001A_001)
+st_drop_geometry(ACS)[1:3,]
+
+
+ACS <- 
+  ACS %>%
+  mutate(pctBach = ifelse(population > 0, bachelor / population, 0),
+         pctWhite = ifelse(population > 0, white / population, 0),
+         pctNoVehicle = ifelse(Households_hmow + Households_hmre > 0, 
+                               (noVehicle_hmow + noVehicle_hmre) / 
+                                  (Households_hmow + Households_hmre),0),
+         year = "2018") %>%
+  dplyr::select(-Households_hmow,-Households_hmre,-noVehicle_hmow,-noVehicle_hmre,-bachelor, -white)
+
+#Anna: used this to get rid of fishnet grids outside of census tracts
+fishnet_centroid <- fishnet %>%
+  st_centroid()
+
+tractNames <- ACS %>%
+  dplyr::select(GEOID) 
+
+fishnet <- fishnet_centroid %>%
+  st_join(., tractNames) %>%
+  st_drop_geometry() %>%
+  left_join(fishnet,.,by="uniqueID") %>%
+  dplyr::select(GEOID) %>%
+  na.omit() %>%
+  mutate(uniqueID = as.numeric(rownames(.)))
+
+ACS_net <-   
+  fishnet %>%
+  st_drop_geometry() %>%
+  group_by(uniqueID, GEOID) %>%
+  summarize(count = n()) %>%
+    full_join(fishnet) %>%
+    st_sf() %>%
+    na.omit() %>%
+    ungroup() %>%
+  st_centroid() %>% 
+  dplyr::select(uniqueID) %>%
+  st_join(., ACS) %>%
+  st_drop_geometry() %>%
+  left_join(.,fishnet) %>%
+  st_as_sf()
+
+#Population
+ggplot() +
+  geom_sf(data = ACS_net, aes(fill = q5(population))) +
+  scale_fill_manual(values = paletteGray, name = "Population") +
+  labs(title = "Population by Fishnet, 2018", subtitle = "Philadelphia, PA") +
+  mapTheme()
+
+#Rent
+ggplot() +
+  geom_sf(data = ACS_net, aes(fill = q5(Rent))) +
+  scale_fill_manual(values = paletteGray, name = "Rent in USD") +
+  labs(title = "Rent by Fishnet, 2018", subtitle = "Philadelphia, PA") +
+  mapTheme()
+
 ```
