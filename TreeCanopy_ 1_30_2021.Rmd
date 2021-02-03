@@ -246,4 +246,20 @@ ggplot() +
   labs(title = "Rent by Fishnet, 2018", subtitle = "Philadelphia, PA") +
   mapTheme()
 
+#Percent White
+ggplot() +
+  geom_sf(data = ACS_net, aes(fill = pctWhite)) +
+  scale_fill_viridis(name = "% White") +
+  labs(title = "Percentage of White Residents by Fishnet, 2018", subtitle = "Philadelphia, PA") +
+  mapTheme()
+
+# tree inventory
+tree_inventory <- st_read("/Users/annaduan/Desktop/Y3S2/Practicum/Data/PPR_StreetTrees.geojson") 
+
+ggplot() +
+  geom_sf(data = ACS, colour = "gray80") +
+  geom_sf(data = tree_inventory, colour = "green", size = 0.5, alpha = 0.5) +
+  mapTheme()
+  
+
 ```
