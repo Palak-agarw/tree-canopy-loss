@@ -19,6 +19,7 @@ library(kableExtra)
 library(dplyr)
 library(viridis)
 library(mapview)
+library(lubridate)
 
 root.dir = "https://raw.githubusercontent.com/urbanSpatial/Public-Policy-Analytics-Landing/master/DATA/"
 source("https://raw.githubusercontent.com/urbanSpatial/Public-Policy-Analytics-Landing/master/functions.r")
@@ -257,9 +258,56 @@ ggplot() +
 tree_inventory <- st_read("/Users/annaduan/Desktop/Y3S2/Practicum/Data/PPR_StreetTrees.geojson") 
 
 ggplot() +
-  geom_sf(data = ACS, colour = "gray80") +
-  geom_sf(data = tree_inventory, colour = "green", size = 0.5, alpha = 0.5) +
+  geom_sf(data = ACS, fill = "white", colour = "gray90") +
+  geom_sf(data = tree_inventory, colour = "dark green", size = 0.3, alpha = 0.05) +
+  labs(title = "City Tree Inventory, 2017", subtitle = "Philadelphia, PA") +
   mapTheme()
   
+# income 
+ggplot() +
+  geom_sf(data = ACS, aes(fill = q5(medHHInc))) +
+  scale_fill_manual(values = paletteGray) +
+  labs(title = "Median Household Income, 2018", subtitle = "Philadelphia, PA") +
+  mapTheme()
+
+# neighborhoods
+ggplot() +
+  geom_sf(data = Neighborhood, fill = "blue", colour = "white") +
+  labs(title = "Philadelphia, PA Neighborhoods") +
+  mapTheme()
+
+# demolitions 
+demolitions <- st_read("/Users/annaduan/Desktop/Y3S2/Practicum/Data/demolitions.geojson") %>%
+  mutate(interval60 = ymd_h(substr(completed_date,1,13))) %>%
+    mutate(year = year(interval60)) %>%
+  filter(year == 2017 | year == 2018)
+
+ggplot() + 
+  geom_sf(data = ACS, color = "gray90", fill = "white") +
+  geom_sf(data = demolitions, color = "red") +
+  labs(title = "Demolitions, 2017-2018", subtitle = "Philadelphia, PA") +
+  mapTheme()
+
+# race context
+race_context <- ACS %>%
+  dplyr::select(pctWhite) %>%
+  mutate(Race_Context = ifelse(pctWhite > .5, "Majority_White", "Majority_Non_White"))
+
+ggplot() +
+  geom_sf(data = race_context, aes(fill = Race_Context)) +
+  scale_fill_viridis(option = "B", discrete = TRUE, name = "Race Context") +
+  labs(title = "Neighborhood Racial Context", subtitle = "Philadelphia, PA") +
+  mapTheme()
+
+# income context
+income_context <- ACS %>%
+  dplyr::select(medHHInc) %>%
+  mutate(Income_Context = ifelse(medHHInc > 42614, "Higher", "Lower"))
+  
+ggplot() +
+  geom_sf(data = income_context, aes(fill = Income_Context)) +
+  scale_fill_viridis(option = "B", discrete = TRUE, name = "Income Context") +
+  labs(title = "Neighborhood Income Context", subtitle = "Philadelphia, PA") +
+  mapTheme()
 
 ```
