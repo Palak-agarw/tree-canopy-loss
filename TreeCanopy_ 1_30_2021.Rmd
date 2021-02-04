@@ -270,11 +270,6 @@ ggplot() +
   labs(title = "Median Household Income, 2018", subtitle = "Philadelphia, PA") +
   mapTheme()
 
-# neighborhoods
-ggplot() +
-  geom_sf(data = Neighborhood, fill = "blue", colour = "white") +
-  labs(title = "Philadelphia, PA Neighborhoods") +
-  mapTheme()
 
 # demolitions 
 demolitions <- st_read("/Users/annaduan/Desktop/Y3S2/Practicum/Data/demolitions.geojson") %>%

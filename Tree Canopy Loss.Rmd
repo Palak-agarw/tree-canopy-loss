@@ -35,6 +35,300 @@ The aim of this project is identify risk for tree canopy loss in Philadelphia, P
 ## Team Roles
 ![Gantt Chart](/Users/annaduan/Documents/GitHub/tree-canopy-loss/Gantt.png)
 
-## Exploratory Analysis
+## Data Wrangling
+```{r Data Wrangling}
 
+# Tree Canopy
+TreeCanopy <- 
+  #st_read("C:/Users/KyleMcCarthy/Documents/Practicum/TreeCanopyChange_2008_2018.shp")%>%
+  st_read("/Users/annaduan/Desktop/Y3S2/Practicum/Data/TreeCanopyChange_2008_2018-shp/TreeCanopyChange_2008_2018.shp") %>%
+  st_transform('ESRI:102728')
+
+TreeCanopy$SHAPE_Area <- st_area(TreeCanopy)
+
+# Philadelphia Base Map
+Philadelphia <- st_read("http://data.phl.opendata.arcgis.com/datasets/405ec3da942d4e20869d4e1449a2be48_0.geojson")%>%
+  st_transform('ESRI:102728')
+
+# Neighborhoods
+Neighborhood <- 
+  #st_read("C:/Users/Kyle McCarthy/Documents/Practicum/Data/Neighborhoods/Neighborhoods_Philadelphia.shp") %>%
+  st_read("/Users/annaduan/Desktop/Y3S2/Practicum/Data/Neighborhoods_Philadelphia/Neighborhoods_Philadelphia.shp")%>%
+  st_transform('ESRI:102728')
+
+# Tree inventory
+tree_inventory <- st_read("/Users/annaduan/Desktop/Y3S2/Practicum/Data/PPR_StreetTrees.geojson") 
+
+
+# Census ACS
+census_api_key("d9ebfd04caa0138647fbacd94c657cdecbf705e9", install = FALSE, overwrite = TRUE)
+
+# Variables: Median Rent, Median HH Income, Population, Bachelor's, No Vehicle (home owner, renter), Households (owner, renter-occupied), total housing units, white
+
+ACS <-  
+  get_acs(geography = "tract", variables = c("B25058_001E", "B19013_001E", "B01003_001E", "B06009_005E", "B25044_003E", "B25044_010E", "B07013_002E", "B07013_003E", "B25001_001E", "B01001A_001E"), 
+          year=2018, state=42, county=101, geometry=T) %>% 
+  st_transform('ESRI:102728')
+
+
+#Change to wide form
+ACS <- 
+  ACS %>%
+  dplyr::select( -NAME, -moe) %>%
+  spread(variable, estimate) %>%
+  dplyr::select(-geometry) %>%
+  rename(Rent = B25058_001, 
+         medHHInc = B19013_001,
+         population = B01003_001, 
+         bachelor = B06009_005,
+         noVehicle_hmow = B25044_003, 
+         noVehicle_hmre = B25044_010,
+         Households_hmow = B07013_002,
+         Households_hmre = B07013_003,
+         housing_units = B25001_001,
+         white = B01001A_001)
+st_drop_geometry(ACS)[1:3,]
+
+
+ACS <- 
+  ACS %>%
+  mutate(pctBach = ifelse(population > 0, bachelor / population, 0),
+         pctWhite = ifelse(population > 0, white / population, 0),
+         pctNoVehicle = ifelse(Households_hmow + Households_hmre > 0, 
+                               (noVehicle_hmow + noVehicle_hmre) / 
+                                  (Households_hmow + Households_hmre),0),
+         year = "2018") %>%
+  dplyr::select(-Households_hmow,-Households_hmre,-noVehicle_hmow,-noVehicle_hmre,-bachelor, -white)
+```
+
+```{r Fishnet}
+
+# Make fishnet
+fishnet <- 
+  st_make_grid(Philadelphia,
+               cellsize = 1600) %>%
+  st_sf() %>%
+  mutate(uniqueID = rownames(.))%>%
+  st_transform('ESRI:102728')
+
+#Anna: used this to get rid of fishnet grids outside of census tracts
+fishnet_centroid <- fishnet %>%
+  st_centroid()
+
+tractNames <- ACS %>%
+  dplyr::select(GEOID) 
+
+fishnet <- fishnet_centroid %>%
+  st_join(., tractNames) %>%
+  st_drop_geometry() %>%
+  left_join(fishnet,.,by="uniqueID") %>%
+  dplyr::select(GEOID) %>%
+  na.omit() %>%
+  mutate(uniqueID = as.numeric(rownames(.)))
+
+# Make fishnet with ACS variables
+ACS_net <-   
+  fishnet %>%
+  st_drop_geometry() %>%
+  group_by(uniqueID, GEOID) %>%
+  summarize(count = n()) %>%
+    full_join(fishnet) %>%
+    st_sf() %>%
+    na.omit() %>%
+    ungroup() %>%
+  st_centroid() %>% 
+  dplyr::select(uniqueID) %>%
+  st_join(., ACS) %>%
+  st_drop_geometry() %>%
+  left_join(.,fishnet) %>%
+  st_as_sf()
+
+
+```
+
+## Exploratory Analysis
+```{r Where are we losing trees?}
+# Make canopy loss layers
+TreeCanopyLoss <- 
+  TreeCanopy%>% 
+  filter(CLASS_NAME == "Loss")%>%
+  mutate(AreaM= SHAPE_Area * .093903)
+
+TreeCanopyLoss2<- 
+  fishnet%>%
+  st_join(TreeCanopyLoss)%>%
+  group_by(uniqueID)%>%
+  summarise(Area = sum(AreaM))%>%
+  mutate(pctLoss = Area / 1600)%>%
+  mutate(pctLoss = as.numeric(pctLoss), Area = as.numeric(Area))
+
+# Plot tree canopy loss
+ggplot()+ 
+  geom_sf(data = TreeCanopyLoss2, aes(fill = Area))+ 
+  scale_fill_viridis()+
+  labs(title= "Total Tree Canopy Loss in each Grid Cell")+
+  mapTheme()
+
+ggplot()+ 
+  geom_sf(data = TreeCanopyLoss2, aes(fill = pctLoss))+ 
+  scale_fill_viridis()+
+  labs(title= "Total Tree Canopy Loss / Cell Area ")+
+  mapTheme()
+
+
+TreeCanopy_part1<- 
+  fishnet%>%
+  st_join(TreeCanopy)%>%
+  group_by(uniqueID)%>%
+  summarise(Total_Canopy_Area = sum(SHAPE_Area))%>%
+  mutate(Total_Canopy_Area = as.numeric(Total_Canopy_Area))%>%
+  st_join(TreeCanopy)
+
+TreeCanopy_fishnet <- 
+  TreeCanopy_part1%>%
+  group_by(uniqueID, CLASS_NAME, Total_Canopy_Area)%>%
+  summarise(Area = sum(SHAPE_Area))%>%
+  filter(CLASS_NAME == "Loss")%>% 
+  mutate(pct = Area / Total_Canopy_Area)%>% 
+  mutate(pct = as.numeric(pct), Area =as.numeric(Area))
+
+
+ggplot()+ 
+  geom_sf(data = Philadelphia, fill = "#A9A9A9")+
+  geom_sf(data = TreeCanopy_fishnet, aes(fill = pct))+ 
+  scale_fill_viridis()+
+  labs(title= "Tree Loss / Total Tree Area in Grid Cell")+
+  mapTheme()
+
+```
+
+```{r Which neighborhods have 30 Percent?}
+# Tree Loss by Neighborhood
+NeighborhoodTreeLoss<- 
+  Neighborhood%>%
+  st_join(TreeCanopyLoss)%>%
+  group_by(NAME)%>%
+  summarise(Area = sum(AreaM))%>%
+  mutate(AreaNeighborhood = st_area(Neighborhood))%>%
+  mutate(AreaNeighborhood = as.numeric(AreaNeighborhood))%>%
+  mutate(pctLoss = Area / AreaNeighborhood)%>%
+  mutate(pctLoss = as.numeric(pctLoss), Area = as.numeric(Area))
+
+# Plot Neighborhood Tree Loss
+ggplot()+ 
+  geom_sf(data = NeighborhoodTreeLoss, aes(fill = Area))+ 
+  scale_fill_viridis()+
+  labs(title= "Total Tree Canopy Area Loss by Neighborhood")+
+  mapTheme()
+
+ggplot()+ 
+  geom_sf(data = NeighborhoodTreeLoss, aes(fill = pctLoss))+ 
+  scale_fill_viridis()+
+  labs(title= "Total Tree Canopy Area / Neighborhood Area")+
+  mapTheme()
+
+
+
+# Tree loss by total tree area in neighborhood
+TreeCanopy_part1_N<- 
+  Neighborhood%>%
+  st_join(TreeCanopy)%>%
+  group_by(NAME)%>%
+  summarise(Total_Canopy_Area = sum(SHAPE_Area))%>%
+  mutate(Total_Canopy_Area = as.numeric(Total_Canopy_Area))%>%
+  st_join(TreeCanopy)
+
+TreeCanopy_Neighborhood <- 
+  TreeCanopy_part1_N%>%
+  group_by(NAME, CLASS_NAME, Total_Canopy_Area)%>%
+  summarise(Area = sum(SHAPE_Area))%>%
+  filter(CLASS_NAME == "Loss")%>% 
+  mutate(pct = Area / Total_Canopy_Area)%>%
+  mutate(pct = as.numeric(pct), Area = as.numeric(Area))
+
+
+ggplot()+ 
+  geom_sf(data = TreeCanopy_Neighborhood, aes(fill = pct))+ 
+  scale_fill_viridis()+
+  labs(title= "Tree Loss / Total Tree Area in Neighborhood")+
+  mapTheme()
+```
+
+```{r Demographics}
+
+#Population
+ggplot() +
+  geom_sf(data = ACS_net, aes(fill = q5(population))) +
+  scale_fill_manual(values = paletteGray, name = "Population") +
+  labs(title = "Population by Fishnet, 2018", subtitle = "Philadelphia, PA") +
+  mapTheme()
+
+#Rent
+ggplot() +
+  geom_sf(data = ACS_net, aes(fill = q5(Rent))) +
+  scale_fill_manual(values = paletteGray, name = "Rent in USD") +
+  labs(title = "Rent by Fishnet, 2018", subtitle = "Philadelphia, PA") +
+  mapTheme()
+
+#Percent White
+ggplot() +
+  geom_sf(data = ACS_net, aes(fill = pctWhite)) +
+  scale_fill_viridis(name = "% White") +
+  labs(title = "Percentage of White Residents by Fishnet, 2018", subtitle = "Philadelphia, PA") +
+  mapTheme()
+
+ggplot() +
+  geom_sf(data = ACS, fill = "white", colour = "gray90") +
+  geom_sf(data = tree_inventory, colour = "dark green", size = 0.3, alpha = 0.05) +
+  labs(title = "City Tree Inventory, 2017", subtitle = "Philadelphia, PA") +
+  mapTheme()
+  
+# income 
+ggplot() +
+  geom_sf(data = ACS, aes(fill = q5(medHHInc))) +
+  scale_fill_manual(values = paletteGray) +
+  labs(title = "Median Household Income, 2018", subtitle = "Philadelphia, PA") +
+  mapTheme()
+
+# neighborhoods
+ggplot() +
+  geom_sf(data = Neighborhood, fill = "blue", colour = "white") +
+  labs(title = "Philadelphia, PA Neighborhoods") +
+  mapTheme()
+
+# demolitions 
+demolitions <- st_read("/Users/annaduan/Desktop/Y3S2/Practicum/Data/demolitions.geojson") %>%
+  mutate(interval60 = ymd_h(substr(completed_date,1,13))) %>%
+    mutate(year = year(interval60)) %>%
+  filter(year == 2017 | year == 2018)
+
+ggplot() + 
+  geom_sf(data = ACS, color = "gray90", fill = "white") +
+  geom_sf(data = demolitions, color = "red") +
+  labs(title = "Demolitions, 2017-2018", subtitle = "Philadelphia, PA") +
+  mapTheme()
+
+# race context
+race_context <- ACS %>%
+  dplyr::select(pctWhite) %>%
+  mutate(Race_Context = ifelse(pctWhite > .5, "Majority_White", "Majority_Non_White"))
+
+ggplot() +
+  geom_sf(data = race_context, aes(fill = Race_Context)) +
+  scale_fill_viridis(option = "B", discrete = TRUE, name = "Race Context") +
+  labs(title = "Neighborhood Racial Context", subtitle = "Philadelphia, PA") +
+  mapTheme()
+
+# income context
+income_context <- ACS %>%
+  dplyr::select(medHHInc) %>%
+  mutate(Income_Context = ifelse(medHHInc > 42614, "Higher", "Lower"))
+  
+ggplot() +
+  geom_sf(data = income_context, aes(fill = Income_Context)) +
+  scale_fill_viridis(option = "B", discrete = TRUE, name = "Income Context") +
+  labs(title = "Neighborhood Income Context", subtitle = "Philadelphia, PA") +
+  mapTheme()
+
+```
 
