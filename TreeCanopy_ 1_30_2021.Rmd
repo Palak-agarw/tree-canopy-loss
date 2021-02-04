@@ -247,6 +247,7 @@ ggplot() +
   labs(title = "Rent by Fishnet, 2018", subtitle = "Philadelphia, PA") +
   mapTheme()
 
+
 #Percent White
 ggplot() +
   geom_sf(data = ACS_net, aes(fill = pctWhite)) +
