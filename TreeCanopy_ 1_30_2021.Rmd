@@ -176,39 +176,43 @@ TreeCanopyAll<-
 colnames(fishnet)[2] <- "uniqueID_Fishnet1"
 
 TreeCanopyLoss <- 
-  fishnet%>%
-  mutate(GridArea = st_area(fishnet))%>%
-  mutate(GridArea= as.numeric(GridArea))%>%
-  st_join(TreeCanopyAll)%>%
+  TreeCanopyAll%>%
   filter(CLASS_NAME == "Loss")%>%
-  group_by(uniqueID, GridArea)%>%
+  group_by(uniqueID)%>%
   summarise(AreaLoss = sum(TreeArea))%>%
-  mutate(pctLoss = AreaLoss / GridArea)
+  mutate(pctLoss = AreaLoss / 2560000)%>%
+  st_drop_geometry()
+  
+TreeCanopyLoss<- 
+  fishnet%>%
+  left_join(TreeCanopyLoss)
 
 # Plot tree canopy loss
 ggplot()+ 
   geom_sf(data = TreeCanopyLoss, aes(fill = pctLoss))+ 
   scale_fill_viridis()+
-  labs(title= "Total Tree Canopy Loss in each Grid Cell")+
+  labs(title= "Tree Canopy Loss/ GridCell Size")+
   mapTheme()
 
 ggplot()+ 
   geom_sf(data = TreeCanopyLoss, aes(fill = AreaLoss))+ 
   scale_fill_viridis()+
-  labs(title= "Total Tree Canopy Loss / Cell Area ")+
+  labs(title= "Total Tree Canopy Loss in each Grid Cell ")+
   mapTheme()
 
 # Tree Canopy Coverage
 
+TreeCanopyCoverage <- 
+  TreeCanopyAll%>%
+  group_by(uniqueID)%>%
+  summarise(AreaCoverage = sum(TreeArea))%>%
+  mutate(pctCoverage = AreaCoverage / 2560000)%>%
+  st_drop_geometry()
+
 TreeCanopyCoverage<- 
   fishnet%>%
-  mutate(GridArea = st_area(fishnet))%>%
-  mutate(GridArea = as.numeric(GridArea))%>%
-  st_join(TreeCanopyAll)%>%
-  group_by(uniqueID, GridArea)%>%
-  summarise(AreaCoverage = sum(TreeArea))%>%
-  mutate(pctLoss = AreaCoverage / GridArea)
-  
+  left_join(TreeCanopyCoverage)
+
 ggplot()+ 
   geom_sf(data = TreeCanopyCoverage, aes(fill = AreaCoverage))+ 
   scale_fill_viridis()+
@@ -216,11 +220,12 @@ ggplot()+
   mapTheme()
 
 ggplot()+ 
-  geom_sf(data = TreeCanopyCoverage, aes(fill = pctLoss))+ 
+  geom_sf(data = TreeCanopyCoverage, aes(fill = pctCoverage))+ 
   scale_fill_viridis()+
   labs(title= "Percent Tree Canopy Coverage")+
   mapTheme()
 
+# Loss / Coverage 
 
 TreeCanopyLoss1 <- 
   TreeCanopyLoss%>%
@@ -232,7 +237,6 @@ TreeCanopyCoverage1<-
   dplyr::select('uniqueID', 'AreaCoverage')%>%
   st_drop_geometry()
 
-colnames(fishnet)[2] <- "uniqueID"
 
 LossOverTotal <- 
   left_join(TreeCanopyLoss1, TreeCanopyCoverage)%>%
