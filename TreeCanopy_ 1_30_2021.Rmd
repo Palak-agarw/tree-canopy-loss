@@ -1,168 +1,77 @@
 ---
-title: "Philadelphia Tree Canopy" 
-author: "Palak Argarwal, Anna Duan, Kyle McCarthy" 
-date: 
-output:
-  html_document:
-    toc: true
-    toc_float: true
+title: "Tree Canopy Loss"
+author: "Anna, Palak, Kyle"
+date: "1/31/2021"
+output: html_document
 ---
 
-```{r setup, include=FALSE,message = FALSE,cache=TRUE}
-knitr::opts_chunk$set(echo = TRUE)
-options(scipen=999)
-library(knitr)
+
+## Use Case
+The aim of this project is identify risk for tree canopy loss in Philadelphia, PA. The urban tree canopy is important for many reasons including public health and recreation, and Philadelphia has a goal of achieving 30% tree canopy coverage in each neighborhood. To perform this analysis, we look at risk factors including development and neighborhood demographic attributes.
+
+## Exploratory Analysis Questions
+* How does tree canopy loss vary across neighborhoods and sociodemographic contexts?
+* How is tree canopy loss affected by development?
+* What’s the relationship between tree canopy health and built density in neighborhoods? (eg effect of urban heat island)
+
+## Independent Variables
+* Impervious surfaces
+* Construction Permits
+* 311 requests - tree based 
+* Urban heat islands
+* Energy transmission/pipelines
+* Bike lanes
+* Distance to Parks
+* NDVI
+* Tree density
+* Soil type
+* Slope, Aspect
+* Hydrology
+* Zoning 
+* Home prices 
+* Demographics
+
+
+## Team Roles
+![Gantt Chart](/Users/annaduan/Documents/GitHub/tree-canopy-loss/Gantt.png)
+```{r libraries_Data_Cleaning, message=FALSE, warning=FALSE, include=TRUE}
 library(tidyverse)
 library(tidycensus)
 library(sf)
 library(kableExtra)
 library(dplyr)
 library(viridis)
-library(mapview)
-library(lubridate)
-
+library(rgeos)
 root.dir = "https://raw.githubusercontent.com/urbanSpatial/Public-Policy-Analytics-Landing/master/DATA/"
 source("https://raw.githubusercontent.com/urbanSpatial/Public-Policy-Analytics-Landing/master/functions.r")
+``` 
 
-paletteGray <- c("gray90", "gray70", "gray50", "gray30", "gray10")
-```
+## Data Wrangling
+```{r Data Wrangling}
 
-```{r libraries_Data_Cleaning, message=FALSE, warning=FALSE, include=TRUE}
-
+# Tree Canopy
 TreeCanopy <- 
-  #st_read("C:/Users/KyleMcCarthy/Documents/Practicum/TreeCanopyChange_2008_2018.shp")%>%
-  st_read("/Users/annaduan/Desktop/Y3S2/Practicum/Data/TreeCanopyChange_2008_2018-shp/TreeCanopyChange_2008_2018.shp") %>%
+  st_read("C:/Users/Kyle McCarthy/Documents/Practicum/TreeCanopyChange_2008_2018.shp")%>%
+  #st_read("/Users/annaduan/Desktop/Y3S2/Practicum/Data/TreeCanopyChange_2008_2018-shp/TreeCanopyChange_2008_2018.shp") %>%
   st_transform('ESRI:102728')
 
 TreeCanopy$SHAPE_Area <- st_area(TreeCanopy)
 
+# Philadelphia Base Map
 Philadelphia <- st_read("http://data.phl.opendata.arcgis.com/datasets/405ec3da942d4e20869d4e1449a2be48_0.geojson")%>%
   st_transform('ESRI:102728')
 
-  
-```
-
-```{r Fishnet, message=FALSE, warning=FALSE, include=TRUE}
-fishnet <- 
-  st_make_grid(Philadelphia,
-               cellsize = 1600) %>%
-  st_sf() %>%
-  mutate(uniqueID = rownames(.))%>%
-  st_transform('ESRI:102728')
-
-TreeCanopyLoss <- 
-  TreeCanopy%>% 
-  filter(CLASS_NAME == "Loss")%>%
-  mutate(AreaM= SHAPE_Area * .093903)
-
-TreeCanopyLoss2<- 
-  fishnet%>%
-  st_join(TreeCanopyLoss)%>%
-  group_by(uniqueID)%>%
-  summarise(Area = sum(AreaM))%>%
-  mutate(pctLoss = Area / 1600)%>%
-  mutate(pctLoss = as.numeric(pctLoss), Area = as.numeric(Area))
-
-ggplot()+ 
-  geom_sf(data = TreeCanopyLoss2, aes(fill = Area))+ 
-  scale_fill_viridis()+
-  labs(title= "Total Tree Canopy Loss in each Grid Cell")+
-  mapTheme()
-
-ggplot()+ 
-  geom_sf(data = TreeCanopyLoss2, aes(fill = pctLoss))+ 
-  scale_fill_viridis()+
-  labs(title= "Total Tree Canopy Loss / Cell Area ")+
-  mapTheme()
-  
-```
-
-```{r Neighborhood, message=FALSE, warning=FALSE, include=TRUE}
-
+# Neighborhoods
 Neighborhood <- 
-  #st_read("C:/Users/Kyle McCarthy/Documents/Practicum/Data/Neighborhoods/Neighborhoods_Philadelphia.shp") %>%
-  st_read("/Users/annaduan/Desktop/Y3S2/Practicum/Data/Neighborhoods_Philadelphia/Neighborhoods_Philadelphia.shp")%>%
+  st_read("C:/Users/Kyle McCarthy/Documents/Practicum/Data/Neighborhoods/Neighborhoods_Philadelphia.shp") %>%
+ # st_read("/Users/annaduan/Desktop/Y3S2/Practicum/Data/Neighborhoods_Philadelphia/Neighborhoods_Philadelphia.shp")%>%
   st_transform('ESRI:102728')
 
-NeighborhoodTreeLoss<- 
-  Neighborhood%>%
-  st_join(TreeCanopyLoss)%>%
-  group_by(NAME)%>%
-  summarise(Area = sum(AreaM))%>%
-  mutate(AreaNeighborhood = st_area(Neighborhood))%>%
-  mutate(AreaNeighborhood = as.numeric(AreaNeighborhood))%>%
-  mutate(pctLoss = Area / AreaNeighborhood)%>%
-  mutate(pctLoss = as.numeric(pctLoss), Area = as.numeric(Area))
-
-ggplot()+ 
-  geom_sf(data = NeighborhoodTreeLoss, aes(fill = Area))+ 
-  scale_fill_viridis()+
-  labs(title= "Total Tree Canopy Area Loss by Neighborhood")+
-  mapTheme()
-
-ggplot()+ 
-  geom_sf(data = NeighborhoodTreeLoss, aes(fill = pctLoss))+ 
-  scale_fill_viridis()+
-  labs(title= "Total Tree Canopy Area / Neighborhood Area")+
-  mapTheme()
-
-```
-```{r Tree Canopy All, message=FALSE, warning=FALSE, include=TRUE}
-
-TreeCanopy_part1<- 
-  fishnet%>%
-  st_join(TreeCanopy)%>%
-  group_by(uniqueID)%>%
-  summarise(Total_Canopy_Area = sum(SHAPE_Area))%>%
-  mutate(Total_Canopy_Area = as.numeric(Total_Canopy_Area))%>%
-  st_join(TreeCanopy)
-
-TreeCanopy_fishnet <- 
-  TreeCanopy_part1%>%
-  group_by(uniqueID, CLASS_NAME, Total_Canopy_Area)%>%
-  summarise(Area = sum(SHAPE_Area))%>%
-  filter(CLASS_NAME == "Loss")%>% 
-  mutate(pct = Area / Total_Canopy_Area)%>% 
-  mutate(pct = as.numeric(pct), Area =as.numeric(Area))
+# Tree inventory
+tree_inventory <- st_read("/Users/annaduan/Desktop/Y3S2/Practicum/Data/PPR_StreetTrees.geojson") 
 
 
-ggplot()+ 
-  geom_sf(data = Philadelphia, fill = "#A9A9A9")+
-  geom_sf(data = TreeCanopy_fishnet, aes(fill = pct))+ 
-  scale_fill_viridis()+
-  labs(title= "Tree Loss / Total Tree Area in Grid Cell")+
-  mapTheme()
-
-```
-
-
-```{r Tree Canopy All Neighborhoods, message=FALSE, warning=FALSE, include=TRUE}
-TreeCanopy_part1_N<- 
-  Neighborhood%>%
-  st_join(TreeCanopy)%>%
-  group_by(NAME)%>%
-  summarise(Total_Canopy_Area = sum(SHAPE_Area))%>%
-  mutate(Total_Canopy_Area = as.numeric(Total_Canopy_Area))%>%
-  st_join(TreeCanopy)
-
-TreeCanopy_Neighborhood <- 
-  TreeCanopy_part1_N%>%
-  group_by(NAME, CLASS_NAME, Total_Canopy_Area)%>%
-  summarise(Area = sum(SHAPE_Area))%>%
-  filter(CLASS_NAME == "Loss")%>% 
-  mutate(pct = Area / Total_Canopy_Area)%>%
-  mutate(pct = as.numeric(pct), Area = as.numeric(Area))
-
-
-ggplot()+ 
-  geom_sf(data = TreeCanopy_Neighborhood, aes(fill = pct))+ 
-  scale_fill_viridis()+
-  labs(title= "Tree Loss / Total Tree Area in Neighborhood")+
-  mapTheme()
-```
-
-```{r Demographics, message=FALSE, warning=FALSE, include=TRUE}
-
+# Census ACS
 census_api_key("d9ebfd04caa0138647fbacd94c657cdecbf705e9", install = FALSE, overwrite = TRUE)
 
 # Variables: Median Rent, Median HH Income, Population, Bachelor's, No Vehicle (home owner, renter), Households (owner, renter-occupied), total housing units, white
@@ -201,6 +110,19 @@ ACS <-
                                   (Households_hmow + Households_hmre),0),
          year = "2018") %>%
   dplyr::select(-Households_hmow,-Households_hmre,-noVehicle_hmow,-noVehicle_hmre,-bachelor, -white)
+```
+
+```{r Fishnet}
+
+# Make fishnet
+fishnet <- 
+  st_make_grid(Philadelphia,
+               cellsize = 1600) %>%
+  st_sf() %>%
+  mutate(uniqueID = rownames(.))%>%
+  st_transform('ESRI:102728')%>%
+  st_make_valid()
+
 
 #Anna: used this to get rid of fishnet grids outside of census tracts
 fishnet_centroid <- fishnet %>%
@@ -217,6 +139,7 @@ fishnet <- fishnet_centroid %>%
   na.omit() %>%
   mutate(uniqueID = as.numeric(rownames(.)))
 
+# Make fishnet with ACS variables
 ACS_net <-   
   fishnet %>%
   st_drop_geometry() %>%
@@ -232,6 +155,169 @@ ACS_net <-
   st_drop_geometry() %>%
   left_join(.,fishnet) %>%
   st_as_sf()
+
+
+```
+
+## Exploratory Analysis
+```{r Where are we losing trees?}
+# Make canopy loss layers
+
+TreeCanopyAll<- 
+  TreeCanopy%>%
+  st_make_valid()%>%
+  st_intersection(fishnet)
+
+TreeCanopyAll<- 
+  TreeCanopyAll%>%
+  mutate(TreeArea = st_area(TreeCanopyAll))%>%
+  mutate(TreeArea = as.numeric(TreeArea))
+
+colnames(fishnet)[2] <- "uniqueID_Fishnet1"
+
+TreeCanopyLoss <- 
+  fishnet%>%
+  mutate(GridArea = st_area(fishnet))%>%
+  mutate(GridArea= as.numeric(GridArea))%>%
+  st_join(TreeCanopyAll)%>%
+  filter(CLASS_NAME == "Loss")%>%
+  group_by(uniqueID, GridArea)%>%
+  summarise(AreaLoss = sum(TreeArea))%>%
+  mutate(pctLoss = AreaLoss / GridArea)
+
+# Plot tree canopy loss
+ggplot()+ 
+  geom_sf(data = TreeCanopyLoss, aes(fill = pctLoss))+ 
+  scale_fill_viridis()+
+  labs(title= "Total Tree Canopy Loss in each Grid Cell")+
+  mapTheme()
+
+ggplot()+ 
+  geom_sf(data = TreeCanopyLoss, aes(fill = AreaLoss))+ 
+  scale_fill_viridis()+
+  labs(title= "Total Tree Canopy Loss / Cell Area ")+
+  mapTheme()
+
+# Tree Canopy Coverage
+
+TreeCanopyCoverage<- 
+  fishnet%>%
+  mutate(GridArea = st_area(fishnet))%>%
+  mutate(GridArea = as.numeric(GridArea))%>%
+  st_join(TreeCanopyAll)%>%
+  group_by(uniqueID, GridArea)%>%
+  summarise(AreaCoverage = sum(TreeArea))%>%
+  mutate(pctLoss = AreaCoverage / GridArea)
+  
+ggplot()+ 
+  geom_sf(data = TreeCanopyCoverage, aes(fill = AreaCoverage))+ 
+  scale_fill_viridis()+
+  labs(title= "Tree Canopy Coverage (ft^2)")+
+  mapTheme()
+
+ggplot()+ 
+  geom_sf(data = TreeCanopyCoverage, aes(fill = pctLoss))+ 
+  scale_fill_viridis()+
+  labs(title= "Percent Tree Canopy Coverage")+
+  mapTheme()
+
+
+TreeCanopyLoss1 <- 
+  TreeCanopyLoss%>%
+  dplyr::select('uniqueID', 'AreaLoss')%>%
+  st_drop_geometry()
+
+TreeCanopyCoverage1<-
+  TreeCanopyCoverage%>%
+  dplyr::select('uniqueID', 'AreaCoverage')%>%
+  st_drop_geometry()
+
+colnames(fishnet)[2] <- "uniqueID"
+
+LossOverTotal <- 
+  left_join(TreeCanopyLoss1, TreeCanopyCoverage)%>%
+  mutate(pctLoss = AreaLoss/AreaCoverage)%>%
+  dplyr::select(pctLoss, uniqueID)
+
+LossOverTotal<- 
+  fishnet%>%
+  left_join(LossOverTotal)
+
+
+ggplot()+ 
+  geom_sf(data = Philadelphia, fill = "#A9A9A9")+
+  geom_sf(data = LossOverTotal, aes(fill = pctLoss))+ 
+  scale_fill_viridis()+
+  labs(title= "Tree Loss / Total Tree Area in Grid Cell")+
+  mapTheme()
+
+```
+
+```{r Which neighborhods have 30 Percent?}
+# Tree Loss by Neighborhood
+TreeCanopyAllN<- 
+  TreeCanopy%>%
+  st_make_valid()%>%
+  st_intersection(Neighborhood) 
+
+
+TreeCanopyAllN<- 
+  TreeCanopyAllN%>%
+  mutate(TreeArea = st_area(TreeCanopyAllN))%>%
+  mutate(TreeArea = as.numeric(TreeArea))
+
+TreeCanopyLossN <- 
+  Neighborhood%>%
+  st_join(TreeCanopyAllN)%>%
+  filter(CLASS_NAME == "Loss")%>%
+  group_by(NAME)%>%
+  summarise(AreaLoss = sum(TreeArea))%>%
+  mutate(NeighborhoodArea = st_area(Neighborhood))%>%
+  mutate(NeighborhoodArea = as.numeric(NeighborhoodArea))%>%
+  mutate(pctLoss = AreaLoss / NeighborhoodArea)
+
+
+# Plot Neighborhood Tree Loss
+ggplot()+ 
+  geom_sf(data = TreeCanopyLossN, aes(fill = AreaLoss))+ 
+  scale_fill_viridis()+
+  labs(title= "Total Tree Canopy Area Loss by Neighborhood")+
+  mapTheme()
+
+ggplot()+ 
+  geom_sf(data = TreeCanopyLossN, aes(fill = pctLoss))+ 
+  scale_fill_viridis()+
+  labs(title= "Total Tree Canopy Area / Neighborhood Area")+
+  mapTheme()
+
+
+# Tree loss by total tree area in neighborhood
+TreeCanopyCoverageN<- 
+  fishnet%>%
+  st_join(TreeCanopyAllN)%>%
+  group_by(NAME)%>%
+  summarise(AreaCoverage = sum(TreeArea))%>%
+  mutate(NeighborhoodArea = st_area(Neighborhood))%>%
+  mutate(NeighborhoodArea = as.numeric(NeighborhoodArea))%>%
+  mutate(PercentCoverage = AreaCoverage/NeighborhoodArea)
+
+TreeCanopy_Neighborhood <- 
+  TreeCanopy_part1_N%>%
+  group_by(NAME, CLASS_NAME, Total_Canopy_Area)%>%
+  summarise(Area = sum(SHAPE_Area))%>%
+  filter(CLASS_NAME == "Loss")%>% 
+  mutate(pct = Area / Total_Canopy_Area)%>%
+  mutate(pct = as.numeric(pct), Area = as.numeric(Area))
+
+
+ggplot()+ 
+  geom_sf(data = TreeCanopy_Neighborhood, aes(fill = pct))+ 
+  scale_fill_viridis()+
+  labs(title= "Tree Loss / Total Tree Area in Neighborhood")+
+  mapTheme()
+```
+
+```{r Demographics}
 
 #Population
 ggplot() +
@@ -254,9 +340,6 @@ ggplot() +
   labs(title = "Percentage of White Residents by Fishnet, 2018", subtitle = "Philadelphia, PA") +
   mapTheme()
 
-# tree inventory
-tree_inventory <- st_read("/Users/annaduan/Desktop/Y3S2/Practicum/Data/PPR_StreetTrees.geojson") 
-
 ggplot() +
   geom_sf(data = ACS, fill = "white", colour = "gray90") +
   geom_sf(data = tree_inventory, colour = "dark green", size = 0.3, alpha = 0.05) +
@@ -270,6 +353,11 @@ ggplot() +
   labs(title = "Median Household Income, 2018", subtitle = "Philadelphia, PA") +
   mapTheme()
 
+# neighborhoods
+ggplot() +
+  geom_sf(data = Neighborhood, fill = "blue", colour = "white") +
+  labs(title = "Philadelphia, PA Neighborhoods") +
+  mapTheme()
 
 # demolitions 
 demolitions <- st_read("/Users/annaduan/Desktop/Y3S2/Practicum/Data/demolitions.geojson") %>%
@@ -305,6 +393,5 @@ ggplot() +
   labs(title = "Neighborhood Income Context", subtitle = "Philadelphia, PA") +
   mapTheme()
 
-
-
 ```
+
