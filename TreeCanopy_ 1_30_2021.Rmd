@@ -8,9 +8,9 @@ output:
     toc_float: true
 ---
 
-```{r setup, include=FALSE,message = FALSE,cache=TRUE}
-knitr::opts_chunk$set(echo = TRUE)
-options(scipen=999)
+```{r setup, message=FALSE, warning=FALSE, include=TRUE, results='hide'}
+knitr::opts_chunk$set(message = FALSE, warning = FALSE)
+options(scipen=10000000)
 library(knitr)
 library(tidyverse)
 library(tidycensus)
@@ -254,13 +254,27 @@ ggplot() +
   labs(title = "Percentage of White Residents by Fishnet, 2018", subtitle = "Philadelphia, PA") +
   mapTheme()
 
-# tree inventory
-tree_inventory <- st_read("/Users/annaduan/Desktop/Y3S2/Practicum/Data/PPR_StreetTrees.geojson") 
+# trees
+tree_inventory <- st_read("/Users/annaduan/Desktop/Y3S2/Practicum/Data/PPR_StreetTrees.geojson") %>%
+  st_transform('ESRI:102728')
 
 ggplot() +
   geom_sf(data = ACS, fill = "white", colour = "gray90") +
   geom_sf(data = tree_inventory, colour = "dark green", size = 0.3, alpha = 0.05) +
   labs(title = "City Tree Inventory, 2017", subtitle = "Philadelphia, PA") +
+  mapTheme() 
+
+# TRee Density
+ggplot() + 
+  geom_sf(data = ACS, fill = "black", colour = "transparent") +
+  stat_density2d(data = data.frame(st_coordinates(tree_inventory)), 
+                 aes(X, Y, fill = ..level.., alpha = ..level..),
+                 size = 0.1, bins = 200, geom = 'polygon') +
+  scale_fill_gradient(low = "purple", high = "green", 
+                      breaks=c(0.000000003,0.00000003),
+                      labels=c("Minimum","Maximum"), name = "Density") +
+  scale_alpha(range = c(0.0, 0.5), guide = FALSE) +
+  labs(title = "Tree Density, 2017", subtitle = "Philadelphia, PA") +
   mapTheme()
   
 # income 
@@ -271,11 +285,27 @@ ggplot() +
   mapTheme()
 
 
-# demolitions 
+# Demolitions 
+
 demolitions <- st_read("/Users/annaduan/Desktop/Y3S2/Practicum/Data/demolitions.geojson") %>%
   mutate(interval60 = ymd_h(substr(completed_date,1,13))) %>%
     mutate(year = year(interval60)) %>%
-  filter(year == 2017 | year == 2018)
+  filter(year == 2017 | year == 2018) %>%
+    st_transform('ESRI:102728')
+
+# Demolition Density
+ggplot() + 
+  geom_sf(data = ACS, fill = "black", colour = "transparent") +
+  stat_density2d(data = data.frame(st_coordinates(demolitions)), 
+                 aes(X, Y, fill = ..level.., alpha = ..level..),
+                 size = 0.1, bins = 200, geom = 'polygon') +
+  scale_fill_gradient(low = "blue", high = "yellow", 
+                      breaks=c(0.000000003,0.00000003),
+                      labels=c("Minimum","Maximum"), name = "Density") +
+  scale_alpha(range = c(0.0, 0.5), guide = FALSE) +
+  labs(title = "Demolition Density, 2017-2018", subtitle = "Philadelphia, PA") +
+  mapTheme()
+  
 
 ggplot() + 
   geom_sf(data = ACS, color = "gray90", fill = "white") +
