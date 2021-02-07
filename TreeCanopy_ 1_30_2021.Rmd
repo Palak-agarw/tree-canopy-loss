@@ -50,6 +50,9 @@ library(viridis)
 library(rgeos)
 root.dir = "https://raw.githubusercontent.com/urbanSpatial/Public-Policy-Analytics-Landing/master/DATA/"
 source("https://raw.githubusercontent.com/urbanSpatial/Public-Policy-Analytics-Landing/master/functions.r")
+
+
+palette1 <- c("#d2f2d4","#7be382","#26cc00","#22b600","#009c1a")
 ``` 
 
 ## Data Wrangling
@@ -72,6 +75,10 @@ Neighborhood <-
   st_read("C:/Users/Kyle McCarthy/Documents/Practicum/Data/Neighborhoods/Neighborhoods_Philadelphia.shp") %>%
  # st_read("/Users/annaduan/Desktop/Y3S2/Practicum/Data/Neighborhoods_Philadelphia/Neighborhoods_Philadelphia.shp")%>%
   st_transform('ESRI:102728')
+Neighborhood <- 
+  Neighborhood%>%
+  mutate(NArea = st_area(Neighborhood))%>%
+  mutate(NArea = as.numeric(NArea))
 
 # Tree inventory
 tree_inventory <- st_read("/Users/annaduan/Desktop/Y3S2/Practicum/Data/PPR_StreetTrees.geojson") 
@@ -167,7 +174,7 @@ ACS_net <-
 
 ## Exploratory Analysis
 ```{r Where are we losing trees?}
-# Make canopy loss layers
+# Tree Canopy Fishnet Intersection
 
 TreeCanopyAll<- 
   TreeCanopy%>%
@@ -179,7 +186,9 @@ TreeCanopyAll<-
   mutate(TreeArea = st_area(TreeCanopyAll))%>%
   mutate(TreeArea = as.numeric(TreeArea))
 
-colnames(fishnet)[2] <- "uniqueID_Fishnet1"
+colnames(fishnet)[2] <- "uniqueID_Fishnet"
+
+# Tree Canopy Loss
 
 TreeCanopyLoss <- 
   TreeCanopyAll%>%
@@ -193,7 +202,6 @@ TreeCanopyLoss<-
   fishnet%>%
   left_join(TreeCanopyLoss)
 
-# Plot tree canopy loss
 ggplot()+ 
   geom_sf(data = TreeCanopyLoss, aes(fill = pctLoss))+ 
   scale_fill_viridis()+
@@ -246,7 +254,7 @@ TreeCanopyCoverage1<-
 
 LossOverTotal <- 
   left_join(TreeCanopyLoss1, TreeCanopyCoverage)%>%
-  mutate(pctLoss = AreaLoss/AreaCoverage)%>%
+  mutate(pctLoss = AreaLoss/AreaCoverage * 100)%>%
   dplyr::select(pctLoss, uniqueID)
 
 LossOverTotal<- 
@@ -256,10 +264,45 @@ LossOverTotal<-
 
 ggplot()+ 
   geom_sf(data = Philadelphia, fill = "#A9A9A9")+
-  geom_sf(data = LossOverTotal, aes(fill = pctLoss))+ 
-  scale_fill_viridis()+
+  geom_sf(data = LossOverTotal, aes(fill = q5(pctLoss)))+ 
+  scale_fill_manual(values = palette1,
+                    labels = qBr(LossOverTotal, "pctLoss"),
+                    name = "Percent Tree Loss\n(Quintile Breaks)")+
   labs(title= "Tree Loss / Total Tree Area in Grid Cell")+
   mapTheme()
+
+# Tree Canopy Gain - Loss
+
+TreeCanopyGain <- 
+  TreeCanopyAll%>%
+  filter(CLASS_NAME == "Gain")%>%
+  group_by(uniqueID)%>%
+  summarise(AreaGain = sum(TreeArea))%>%
+  mutate(pctGain = AreaGain / 2560000)%>%
+  st_drop_geometry()
+
+TreeCanopyGain<- 
+  TreeCanopyGain%>% 
+  dplyr::select(uniqueID, pctLoss, AreaGain)
+
+GainMinusLoss<- 
+  TreeCanopyLoss%>%
+  #st_drop_geometry()%>%
+  dplyr::select(uniqueID, pctLoss, AreaLoss)%>%
+  left_join(TreeCanopyGain, by = 'uniqueID')%>% 
+  mutate_all(~replace(., is.na(.), 0))%>%
+  mutate(GainLoss = AreaGain - AreaLoss)
+  
+
+ggplot()+ 
+  geom_sf(data = Philadelphia, fill = "#A9A9A9")+
+  geom_sf(data = GainMinusLoss, aes(fill = q5(GainLoss)))+ 
+  scale_fill_manual(values = palette1,
+                    labels = qBr(GainMinusLoss, "GainLoss"),
+                    name = "Net Tree Canopy\n(Quintile Breaks)")+ 
+  labs(title= "Gain - Loss")+
+  mapTheme()
+
 
 ```
 
@@ -268,8 +311,9 @@ ggplot()+
 TreeCanopyAllN<- 
   TreeCanopy%>%
   st_make_valid()%>%
-  st_intersection(Neighborhood) 
-
+  st_intersection(Neighborhood)%>%
+  mutate(TreeArea = st_area(TreeCanopyAllN))%>%
+  mutate(TreeArea = as.numeric(TreeArea))
 
 TreeCanopyAllN<- 
   TreeCanopyAllN%>%
@@ -277,14 +321,20 @@ TreeCanopyAllN<-
   mutate(TreeArea = as.numeric(TreeArea))
 
 TreeCanopyLossN <- 
-  Neighborhood%>%
-  st_join(TreeCanopyAllN)%>%
+  TreeCanopyAllN%>%
   filter(CLASS_NAME == "Loss")%>%
-  group_by(NAME)%>%
+  group_by(NAME, NArea)%>%
   summarise(AreaLoss = sum(TreeArea))%>%
-  mutate(NeighborhoodArea = st_area(Neighborhood))%>%
-  mutate(NeighborhoodArea = as.numeric(NeighborhoodArea))%>%
-  mutate(pctLoss = AreaLoss / NeighborhoodArea)
+  mutate(pctLoss = AreaLoss / NArea)
+  st_drop_geometry()
+
+TreeCanopyLossN<- 
+  Neighborhood%>%
+  left_join(TreeCanopyLossN)
+  
+TreeCanopyLossN<- 
+  TreeCanopyLossN%>%
+  mutate(pctLoss = as.numeric(pctLoss))
 
 
 # Plot Neighborhood Tree Loss
@@ -302,29 +352,97 @@ ggplot()+
 
 
 # Tree loss by total tree area in neighborhood
-TreeCanopyCoverageN<- 
-  fishnet%>%
-  st_join(TreeCanopyAllN)%>%
-  group_by(NAME)%>%
+TreeCanopyCoverageN <- 
+  TreeCanopyAllN%>%
+  group_by(NAME, NArea)%>%
   summarise(AreaCoverage = sum(TreeArea))%>%
-  mutate(NeighborhoodArea = st_area(Neighborhood))%>%
-  mutate(NeighborhoodArea = as.numeric(NeighborhoodArea))%>%
-  mutate(PercentCoverage = AreaCoverage/NeighborhoodArea)
+  mutate(AreaCoverage = as.numeric(AreaCoverage))%>%
+  mutate(pctCoverage = AreaCoverage / NArea * 100)%>%
+  st_drop_geometry()
 
-TreeCanopy_Neighborhood <- 
-  TreeCanopy_part1_N%>%
-  group_by(NAME, CLASS_NAME, Total_Canopy_Area)%>%
-  summarise(Area = sum(SHAPE_Area))%>%
-  filter(CLASS_NAME == "Loss")%>% 
-  mutate(pct = Area / Total_Canopy_Area)%>%
-  mutate(pct = as.numeric(pct), Area = as.numeric(Area))
 
+TreeCanopyCoverageN<- 
+  Neighborhood%>%
+  left_join(TreeCanopyCoverageN)
 
 ggplot()+ 
-  geom_sf(data = TreeCanopy_Neighborhood, aes(fill = pct))+ 
+  geom_sf(data = TreeCanopyCoverageN, aes(fill = pctCoverage))+ 
   scale_fill_viridis()+
   labs(title= "Tree Loss / Total Tree Area in Neighborhood")+
   mapTheme()
+
+
+TreeCanopyLoss1N <- 
+  TreeCanopyLossN%>%
+  dplyr::select('NAME', 'AreaLoss')%>%
+  st_drop_geometry()
+
+TreeCanopyCoverage1N<-
+  TreeCanopyCoverageN%>%
+  dplyr::select('NAME', 'AreaCoverage')%>%
+  st_drop_geometry()
+
+
+LossOverTotalN <- 
+  left_join(TreeCanopyLoss1N, TreeCanopyCoverageN)%>%
+  mutate(pctLoss = AreaLoss/AreaCoverage * 100)%>%
+  dplyr::select(pctLoss, NAME)
+
+LossOverTotalN<- 
+  Neighborhood%>%  
+  left_join(LossOverTotalN)
+
+
+ggplot()+ 
+  geom_sf(data = Philadelphia, fill = "#A9A9A9")+
+  geom_sf(data = LossOverTotalN, aes(fill = q5(pctLoss)))+ 
+ scale_fill_manual(values = palette1,
+                    labels = qBr(LossOverTotalN, "pctLoss"),
+                    name = "Percent Tree Loss\n(Quintile Breaks)")+ 
+  labs(title= "Tree Loss / Total Tree Area in Neighborhood")+
+  mapTheme()
+
+# Gain - Loss 
+
+# Tree Canopy Gain - Loss
+
+TreeCanopyGainN <- 
+  TreeCanopyAllN%>%
+  filter(CLASS_NAME == "Gain")%>%
+  group_by(NAME, NArea)%>%
+  summarise(AreaGain = sum(TreeArea))%>%
+  mutate(pctGain = AreaGain / NArea)%>%
+  st_drop_geometry()
+
+TreeCanopyGainN<- 
+  TreeCanopyGainN%>% 
+  dplyr::select(NAME, pctGain, AreaGain)
+
+GainMinusLossN<- 
+  TreeCanopyLossN%>%
+  #st_drop_geometry()%>%
+  dplyr::select(NAME, pctLoss, AreaLoss)%>%
+  left_join(TreeCanopyGainN, by = 'NAME')%>% 
+  mutate_all(~replace(., is.na(.), 0))%>%
+  mutate(GainMinusLoss = AreaGain - AreaLoss)%>%
+  mutate(GainOrLoss = ifelse(GainMinusLoss > 0, "Gain", "Loss"))
+  
+
+ggplot()+ 
+  geom_sf(data = Philadelphia, fill = "#A9A9A9")+
+  geom_sf(data = GainMinusLossN, aes(fill = q5(GainMinusLoss)))+ 
+    scale_fill_manual(values = palette1,
+                    labels = qBr(GainMinusLoss, "GainLoss"),
+                    name = "Net Tree Canopy\n(Quintile Breaks)")+
+  labs(title= "Gain - Loss")+
+  mapTheme()
+
+ggplot()+ 
+  geom_sf(data = Philadelphia, fill = "#A9A9A9")+
+  geom_sf(data = GainMinusLossN, aes(fill = GainOrLoss))+
+  labs(title= "Net Gain or Loss")+
+  mapTheme()
+
 ```
 
 ```{r Demographics}
