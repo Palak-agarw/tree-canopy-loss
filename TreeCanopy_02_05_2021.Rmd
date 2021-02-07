@@ -142,7 +142,15 @@ const_permits <-
 
 const_permits[const_permits==""]<-NA
 const <- const_permits %>% drop_na(X,Y)
-const_spatial <- st_as_sf(const, coords = c("X","Y"), crs = 102728, agr = "constant")
+const_spatial <- st_as_sf(const, coords = c("X","Y"), crs = 6565, agr = "constant")
+const_spatial <- const_spatial %>% st_transform('ESRI:102728')
+
+const <- const_spatial %>%
+  filter(permitissuedate <= '30/06/2017 00:00')
+
+ggplot()+
+  geom_sf(data = Philadelphia) +
+  geom_sf(data = const)
 ```
 
 ```{r Fishnet}
