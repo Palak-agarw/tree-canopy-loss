@@ -9,12 +9,36 @@ output: html_document
 ## Use Case
 The aim of this project is identify risk for tree canopy loss in Philadelphia, PA. The urban tree canopy is important for many reasons including public health and recreation, and Philadelphia has a goal of achieving 30% tree canopy coverage in each neighborhood. To perform this analysis, we look at risk factors including development and neighborhood demographic attributes.
 
-## Exploratory Analysis Questions
+
+## Team Roles
+![Gantt Chart](/Users/annaduan/Documents/GitHub/tree-canopy-loss/Gantt.png)
+```{r setup, message=FALSE, warning=FALSE, include=TRUE, results='hide'}
+knitr::opts_chunk$set(message = FALSE, warning = FALSE)
+options(scipen=10000000)
+library(knitr)
+library(tidyverse)
+library(tidycensus)
+library(sf)
+library(kableExtra)
+library(dplyr)
+library(viridis)
+library(mapview)
+library(lubridate)
+
+root.dir = "https://raw.githubusercontent.com/urbanSpatial/Public-Policy-Analytics-Landing/master/DATA/"
+source("https://raw.githubusercontent.com/urbanSpatial/Public-Policy-Analytics-Landing/master/functions.r")
+
+paletteGray <- c("gray90", "gray70", "gray50", "gray30", "gray10")
+```
+
+## Methods
+
+### Exploratory Analysis Questions
 * How does tree canopy loss vary across neighborhoods and sociodemographic contexts?
 * How is tree canopy loss affected by development?
 * What’s the relationship between tree canopy health and built density in neighborhoods? (eg effect of urban heat island)
 
-## Independent Variables
+### Independent Variables
 * Impervious surfaces
 * Construction Permits
 * 311 requests - tree based 
@@ -31,12 +55,7 @@ The aim of this project is identify risk for tree canopy loss in Philadelphia, P
 * Home prices 
 * Demographics
 
-
-## Team Roles
-![Gantt Chart](/Users/annaduan/Documents/GitHub/tree-canopy-loss/Gantt.png)
-
-## Data Wrangling
-```{r Data Wrangling}
+```{r Data Wrangling, cache=TRUE, message=FALSE, warning=FALSE, include=TRUE, results='hide'}
 
 # Tree Canopy
 TreeCanopy <- 
@@ -101,7 +120,7 @@ ACS <-
   dplyr::select(-Households_hmow,-Households_hmre,-noVehicle_hmow,-noVehicle_hmre,-bachelor, -white)
 ```
 
-```{r Fishnet}
+```{r Fishnet, message=FALSE, warning=FALSE, cache=TRUE, include=TRUE, results='hide'}
 
 # Make fishnet
 fishnet <- 
@@ -147,7 +166,7 @@ ACS_net <-
 ```
 
 ## Exploratory Analysis
-```{r Where are we losing trees?}
+```{r Where are we losing trees, message=FALSE, warning=FALSE, results='hide'}
 # Make canopy loss layers
 TreeCanopyLoss <- 
   TreeCanopy%>% 
@@ -202,7 +221,7 @@ ggplot()+
 
 ```
 
-```{r Which neighborhods have 30 Percent?}
+```{r Which neighborhods have 30 Percent, message=FALSE, warning=FALSE, results='hide'}
 # Tree Loss by Neighborhood
 NeighborhoodTreeLoss<- 
   Neighborhood%>%
@@ -254,7 +273,7 @@ ggplot()+
   mapTheme()
 ```
 
-```{r Demographics}
+```{r Demographics, message=FALSE, warning=FALSE, results='hide'}
 
 #Population
 ggplot() +
