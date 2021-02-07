@@ -24,6 +24,8 @@ library(dplyr)
 library(viridis)
 library(mapview)
 library(lubridate)
+library(grid)
+library(gridExtra)
 
 
 root.dir = "https://raw.githubusercontent.com/urbanSpatial/Public-Policy-Analytics-Landing/master/DATA/"
@@ -137,7 +139,7 @@ ACS <-
 # Make fishnet
 fishnet <- 
   st_make_grid(Philadelphia,
-               cellsize = 1600) %>%
+               cellsize = 2153) %>%
   st_sf() %>%
   mutate(uniqueID = rownames(.))%>%
   st_transform('ESRI:102728')
@@ -199,7 +201,7 @@ TreeCanopyLoss <-
   filter(CLASS_NAME == "Loss")%>%
   group_by(uniqueID)%>%
   summarise(AreaLoss = sum(TreeArea))%>%
-  mutate(pctLoss = AreaLoss / 2560000)%>%
+  mutate(pctLoss = AreaLoss / 4635409)%>%
   st_drop_geometry()
   
 TreeCanopyLoss<- 
@@ -225,7 +227,7 @@ TreeCanopyGain <-
   filter(CLASS_NAME == "Gain")%>%
   group_by(uniqueID)%>%
   summarise(AreaGain = sum(TreeArea))%>%
-  mutate(pctGain = AreaGain / 2560000)%>%
+  mutate(pctGain = AreaGain / 4635409)%>%
   st_drop_geometry()
 
 TreeCanopyGain<- 
@@ -248,7 +250,7 @@ TreeCanopyCoverage <-
   TreeCanopyAll%>%
   group_by(uniqueID)%>%
   summarise(AreaCoverage = sum(TreeArea))%>%
-  mutate(pctCoverage = AreaCoverage / 2560000)%>%
+  mutate(pctCoverage = AreaCoverage / 4635409)%>%
   st_drop_geometry()
 
 TreeCanopyCoverage<- 
@@ -291,14 +293,17 @@ FinalFishnet <-
   mutate_all(~replace(., is.na(.), 0))%>%
   mutate(pctLoss = AreaLoss/AreaCoverage * 100, 
          pctGain = AreaGain/AreaCoverage * 100)%>%
-  mutate(GainToLossM = pctGain - pctLoss, 
-         GainToLossD = pctGain/pctLoss * 100)%>%
-  dplyr::select(pctLoss, pctGain, GainToLossM, GainToLossD,
-                AreaGain, AreaLoss, AreaCoverage, uniqueID)
+  mutate(GainMinusLoss = pctGain - pctLoss)%>%
+  dplyr::select(pctLoss, pctGain, GainMinusLoss,
+                AreaGain, AreaLoss, AreaCoverage, uniqueID, pctCoverage)
 
 FinalFishnet<- 
   fishnet%>%
   left_join(FinalFishnet)
+
+FinalFishnet <- 
+  FinalFishnet%>%
+  mutate(pctCoverage = pctCoverage * 100)
 
 
 ggplot()+ 
@@ -315,17 +320,26 @@ ggplot()+
   geom_sf(data = FinalFishnet, aes(fill = q5(pctGain)))+ 
   scale_fill_manual(values = palette2,
                     labels = qBr(FinalFishnet, "pctGain"),
-                    name = "Percent Tree Loss\n(Quintile Breaks)")+
+                    name = "Percent Tree Gain\n(Quintile Breaks)")+
   labs(title= "Tree Gain / Total Tree Area in Grid Cell")+
   mapTheme()
 
 ggplot()+ 
   geom_sf(data = Philadelphia, fill = "#A9A9A9")+
-  geom_sf(data = FinalFishnet, aes(fill = q5(GainToLossM)))+ 
+  geom_sf(data = FinalFishnet, aes(fill = q5(GainMinusLoss)))+ 
   scale_fill_manual(values = palette2,
-                    labels = qBr(FinalFishnet, "GainToLossM"),
+                    labels = qBr(FinalFishnet, "GainMinusLoss"),
                     name = "Pct Gain - Pct Loss\n(Quintile Breaks)")+
   labs(title= "PctGain - pctLoss")+
+  mapTheme()
+
+ggplot()+ 
+  geom_sf(data = Philadelphia, fill = "#A9A9A9")+
+  geom_sf(data = FinalFishnet, aes(fill = q5(pctCoverage)))+ 
+  scale_fill_manual(values = palette2,
+                    labels = qBr(FinalFishnet, "pctCoverage"),
+                    name = "Tree Canopy Area/ Grid Cell Size\n(Quintile Breaks)")+
+  labs(title= "Percent Coverage ")+
   mapTheme()
 
 ```
@@ -485,20 +499,21 @@ ggplot() +
   labs(title = "Met 30% Goal?", subtitle = "Philadelphia, PA") +
   mapTheme()
 
-ggplot(FinalFishnet, aes(x = pctLoss, y = AreaCoverage))+ 
+grid.arrange(ncol=2,
+             
+ggplot(FinalFishnet, aes(x = pctLoss, y = pctCoverage))+ 
+  geom_point()+ 
+  labs(title = "Tree Loss vs Coverage"),
+
+ggplot(FinalFishnet, aes(x = pctGain, y = pctCoverage))+ 
   geom_point()+ 
   geom_smooth(method = 'gam', formula = y ~ poly(x, 2), se = FALSE)+
-  labs(title = "AreaCoverage VS. Pct TreeCanopyLoss")
+  labs(title = "Tree Gain vs Coverage"))
 
-ggplot(FinalFishnet, aes(x = pctGain, y = AreaCoverage))+ 
-  geom_point()+ 
-  geom_smooth(method = 'gam', formula = y ~ poly(x, 2), se = FALSE)+
-  labs(title = "AreaCoverage VS. Pct TreeCanopyGain")
-
-ggplot(FinalFishnet, aes(x = GainToLossM, y = AreaCoverage))+ 
+ggplot(FinalFishnet, aes(x = GainMinusLoss, y = pctCoverage))+ 
   geom_point()+ 
   geom_smooth(method = 'gam', se = FALSE)+
-  labs(title = "AreaCoverage VS. Pct TreeCanopyGain")
+  labs(title = "Percent Coverage VS. Pct Tree Gain - Pct Tree loss", x = "Percent Tree Gain - Percent Tree Loss", y = "Percent Coverage" )
 
 
 
