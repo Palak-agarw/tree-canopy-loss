@@ -30,9 +30,12 @@ root.dir = "https://raw.githubusercontent.com/urbanSpatial/Public-Policy-Analyti
 source("https://raw.githubusercontent.com/urbanSpatial/Public-Policy-Analytics-Landing/master/functions.r")
 
 paletteGray <- c("gray90", "gray70", "gray50", "gray30", "gray10")
+
 palette1 <- c("#d2f2d4","#7be382","#26cc00","#22b600","#009c1a")
 
 palette2 <- c("#f9de59","#e8a628","#f68365","#c33124","#a1dffb")
+
+palette3 <- c("#2C5F2D","#97BC62FF")
 ```
 
 ## Methods
@@ -382,12 +385,6 @@ TreeCanopyGainN<-
   left_join(TreeCanopyGainN)
 
 
-ggplot()+ 
-  geom_sf(data = TreeCanopyGainN, aes(fill = pctGain))+ 
-  scale_fill_viridis()+
-  labs(title= "Total Tree Canopy Area / Neighborhood Area")+
-  mapTheme()
-
 
 # Tree loss by total tree area in neighborhood
 TreeCanopyCoverageN <- 
@@ -404,9 +401,11 @@ TreeCanopyCoverageN<-
   left_join(TreeCanopyCoverageN)
 
 ggplot()+ 
-  geom_sf(data = TreeCanopyCoverageN, aes(fill = pctCoverage))+ 
-  scale_fill_viridis()+
-  labs(title= "Tree Loss / Total Tree Area in Neighborhood")+
+  geom_sf(data = TreeCanopyCoverageN, aes(fill = q5(pctCoverage)))+ 
+  scale_fill_manual(values = palette2,
+                    labels = qBr(FinalNeighborhood, "pctCoverage"),
+                    name = "Percent Tree Coverage\n(Quintile Breaks)")+
+  labs(title= "Percent Tree Coverage by Neighborhood")+
   mapTheme()
 
 
@@ -435,7 +434,7 @@ FinalNeighborhood <-
          pctGain = AreaGain/AreaCoverage * 100)%>%
   mutate(GainMinusLoss = pctGain - pctLoss)%>%
   dplyr::select(pctLoss, pctGain, GainMinusLoss,
-                AreaGain, AreaLoss, AreaCoverage, NAME)
+                AreaGain, AreaLoss, AreaCoverage, NAME, pctCoverage)
 
 FinalNeighborhood<- 
   Neighborhood%>%
@@ -470,6 +469,43 @@ ggplot()+
   mapTheme()
 
 ```
+
+```{r Additional Fishnet/Neighborhood Visualizations, message=FALSE, warning=FALSE}
+
+
+ggplot() +
+  geom_sf(data = FinalNeighborhood, aes(fill = LossOrGain)) +
+  scale_fill_manual(values = palette3, name = "Gain or Loss")+ 
+  labs(title = "Gain or Loss", subtitle = "Philadelphia, PA") +
+  mapTheme()
+
+ggplot() +
+  geom_sf(data = FinalNeighborhood, aes(fill = Goal)) +
+  scale_fill_manual(values = palette3, name = "Gain or Loss")+ 
+  labs(title = "Met 30% Goal?", subtitle = "Philadelphia, PA") +
+  mapTheme()
+
+ggplot(FinalFishnet, aes(x = pctLoss, y = AreaCoverage))+ 
+  geom_point()+ 
+  geom_smooth(method = 'gam', formula = y ~ poly(x, 2), se = FALSE)+
+  labs(title = "AreaCoverage VS. Pct TreeCanopyLoss")
+
+ggplot(FinalFishnet, aes(x = pctGain, y = AreaCoverage))+ 
+  geom_point()+ 
+  geom_smooth(method = 'gam', formula = y ~ poly(x, 2), se = FALSE)+
+  labs(title = "AreaCoverage VS. Pct TreeCanopyGain")
+
+ggplot(FinalFishnet, aes(x = GainToLossM, y = AreaCoverage))+ 
+  geom_point()+ 
+  geom_smooth(method = 'gam', se = FALSE)+
+  labs(title = "AreaCoverage VS. Pct TreeCanopyGain")
+
+
+
+```
+
+
+
 
 ```{r Demographics, message=FALSE, warning=FALSE, results='hide'}
 
