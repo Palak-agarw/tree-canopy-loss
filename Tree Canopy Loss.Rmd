@@ -474,15 +474,16 @@ FinalNeighborhood<-
   Neighborhood%>%
   left_join(FinalNeighborhood)
 
-
+grid.arrange(ncol=2,
+             
 ggplot()+ 
   geom_sf(data = Philadelphia, fill = "#A9A9A9")+
   geom_sf(data = FinalNeighborhood, aes(fill = q5(pctLoss)))+ 
   scale_fill_manual(values = palette2,
                     labels = qBr(FinalNeighborhood, "pctLoss"),
                     name = "Percent Tree Loss\n(Quintile Breaks)")+
-  labs(title= "Tree Loss / Total Tree Area in Grid Cell")+
-  mapTheme()
+  labs(title= "Percent Loss")+
+  mapTheme(),
 
 ggplot()+ 
   geom_sf(data = Philadelphia, fill = "#A9A9A9")+
@@ -490,8 +491,8 @@ ggplot()+
   scale_fill_manual(values = palette2,
                     labels = qBr(FinalNeighborhood, "pctGain"),
                     name = "Percent Tree Gain\n(Quintile Breaks)")+
-  labs(title= "Tree Gain / Total Tree Area in Grid Cell")+
-  mapTheme()
+  labs(title= "Percent Gain")+
+  mapTheme(),
 
 ggplot()+ 
   geom_sf(data = Philadelphia, fill = "#A9A9A9")+
@@ -500,7 +501,16 @@ ggplot()+
                     labels = qBr(FinalNeighborhood, "GainMinusLoss"),
                     name = "Pct Gain - Pct Loss\n(Quintile Breaks)")+
   labs(title= "PctGain - pctLoss")+
-  mapTheme()
+  mapTheme(), 
+
+ggplot()+ 
+  geom_sf(data = Philadelphia, fill = "#A9A9A9")+
+  geom_sf(data = FinalNeighborhood, aes(fill = q5(pctCoverage)))+ 
+  scale_fill_manual(values = palette2,
+                    labels = qBr(FinalNeighborhood, "pctCoverage"),
+                    name = "PctCoverage \n(Quintile Breaks)")+
+  labs(title= "Percent Coverage ")+
+  mapTheme())
 
 ```
 
