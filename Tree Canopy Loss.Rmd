@@ -417,7 +417,7 @@ TreeCanopyCoverageN<-
 ggplot()+ 
   geom_sf(data = TreeCanopyCoverageN, aes(fill = q5(pctCoverage)))+ 
   scale_fill_manual(values = palette2,
-                    labels = qBr(FinalNeighborhood, "pctCoverage"),
+                    labels = qBr(TreeCanopyCoverageN, "pctCoverage"),
                     name = "Percent Tree Coverage\n(Quintile Breaks)")+
   labs(title= "Percent Tree Coverage by Neighborhood")+
   mapTheme()
@@ -485,7 +485,10 @@ ggplot()+
 ```
 
 ```{r Additional Fishnet/Neighborhood Visualizations, message=FALSE, warning=FALSE}
-
+FinalNeighborhood <- 
+  FinalNeighborhood %>%
+  mutate(LossOrGain = ifelse(GainMinusLoss > 0, "Gain", "Loss"), 
+         Goal = ifelse(pctCoverage > 30, "Goal Met", "Under Goal"))
 
 ggplot() +
   geom_sf(data = FinalNeighborhood, aes(fill = LossOrGain)) +
