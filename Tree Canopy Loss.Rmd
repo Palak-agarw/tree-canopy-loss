@@ -310,8 +310,8 @@ FinalFishnet <-
   left_join(TreeCanopyLoss1, TreeCanopyGain1)%>%
   left_join(TreeCanopyCoverage1)%>%
   mutate_all(~replace(., is.na(.), 0))%>%
-  mutate(pctLoss = AreaLoss/AreaCoverage * 100, 
-         pctGain = AreaGain/AreaCoverage * 100)%>%
+  mutate(pctLoss = round(AreaLoss/AreaCoverage * 100, 2), 
+         pctGain = round(AreaGain/AreaCoverage * 100, 2))%>%
   mutate(GainMinusLoss = pctGain - pctLoss)%>%
   dplyr::select(pctLoss, pctGain, GainMinusLoss,
                 AreaGain, AreaLoss, AreaCoverage, uniqueID, pctCoverage)
@@ -324,15 +324,16 @@ FinalFishnet <-
   FinalFishnet%>%
   mutate(pctCoverage = pctCoverage * 100)
 
-
+grid.arrange(ncol=2,
+             
 ggplot()+ 
   geom_sf(data = Philadelphia, fill = "#A9A9A9")+
   geom_sf(data = FinalFishnet, aes(fill = q5(pctLoss)))+ 
   scale_fill_manual(values = palette2,
                     labels = qBr(FinalFishnet, "pctLoss"),
                     name = "Percent Tree Loss\n(Quintile Breaks)")+
-  labs(title= "Tree Loss / Total Tree Area in Grid Cell")+
-  mapTheme()
+  labs(title= "Tree Loss / Total Tree Area in Cell")+
+  mapTheme(),
 
 ggplot()+ 
   geom_sf(data = Philadelphia, fill = "#A9A9A9")+
@@ -340,8 +341,8 @@ ggplot()+
   scale_fill_manual(values = palette2,
                     labels = qBr(FinalFishnet, "pctGain"),
                     name = "Percent Tree Gain\n(Quintile Breaks)")+
-  labs(title= "Tree Gain / Total Tree Area in Grid Cell")+
-  mapTheme()
+  labs(title= "Tree Gain / Total Tree Area in Cell")+
+  mapTheme(),
 
 ggplot()+ 
   geom_sf(data = Philadelphia, fill = "#A9A9A9")+
@@ -350,16 +351,16 @@ ggplot()+
                     labels = qBr(FinalFishnet, "GainMinusLoss"),
                     name = "Pct Gain - Pct Loss\n(Quintile Breaks)")+
   labs(title= "PctGain - pctLoss")+
-  mapTheme()
+  mapTheme(),
 
 ggplot()+ 
   geom_sf(data = Philadelphia, fill = "#A9A9A9")+
   geom_sf(data = FinalFishnet, aes(fill = q5(pctCoverage)))+ 
   scale_fill_manual(values = palette2,
                     labels = qBr(FinalFishnet, "pctCoverage"),
-                    name = "Tree Canopy Area/ Grid Cell Size\n(Quintile Breaks)")+
+                    name = "PctCoverage \n(Quintile Breaks)")+
   labs(title= "Percent Coverage ")+
-  mapTheme()
+  mapTheme())
 
 ```
 
@@ -473,15 +474,16 @@ FinalNeighborhood<-
   Neighborhood%>%
   left_join(FinalNeighborhood)
 
-
+grid.arrange(ncol=2,
+             
 ggplot()+ 
   geom_sf(data = Philadelphia, fill = "#A9A9A9")+
   geom_sf(data = FinalNeighborhood, aes(fill = q5(pctLoss)))+ 
   scale_fill_manual(values = palette2,
                     labels = qBr(FinalNeighborhood, "pctLoss"),
                     name = "Percent Tree Loss\n(Quintile Breaks)")+
-  labs(title= "Tree Loss / Total Tree Area in Grid Cell")+
-  mapTheme()
+  labs(title= "Percent Loss")+
+  mapTheme(),
 
 ggplot()+ 
   geom_sf(data = Philadelphia, fill = "#A9A9A9")+
@@ -489,8 +491,8 @@ ggplot()+
   scale_fill_manual(values = palette2,
                     labels = qBr(FinalNeighborhood, "pctGain"),
                     name = "Percent Tree Gain\n(Quintile Breaks)")+
-  labs(title= "Tree Gain / Total Tree Area in Grid Cell")+
-  mapTheme()
+  labs(title= "Percent Gain")+
+  mapTheme(),
 
 ggplot()+ 
   geom_sf(data = Philadelphia, fill = "#A9A9A9")+
@@ -499,7 +501,16 @@ ggplot()+
                     labels = qBr(FinalNeighborhood, "GainMinusLoss"),
                     name = "Pct Gain - Pct Loss\n(Quintile Breaks)")+
   labs(title= "PctGain - pctLoss")+
-  mapTheme()
+  mapTheme(), 
+
+ggplot()+ 
+  geom_sf(data = Philadelphia, fill = "#A9A9A9")+
+  geom_sf(data = FinalNeighborhood, aes(fill = q5(pctCoverage)))+ 
+  scale_fill_manual(values = palette2,
+                    labels = qBr(FinalNeighborhood, "pctCoverage"),
+                    name = "PctCoverage \n(Quintile Breaks)")+
+  labs(title= "Percent Coverage ")+
+  mapTheme())
 
 ```
 
@@ -534,12 +545,13 @@ ggplot(FinalFishnet, aes(x = pctGain, y = pctCoverage))+
 
 ggplot(FinalFishnet, aes(x = GainMinusLoss, y = pctCoverage))+ 
   geom_point()+ 
-  geom_smooth(method = 'gam', se = FALSE)+
+  geom_smooth(method = 'gam', se = FALSE) 
   labs(title = "Percent Coverage VS. Pct Tree Gain - Pct Tree loss", x = "Percent Tree Gain - Percent Tree Loss", y = "Percent Coverage" )
+
 
 ```
 
-```{r Additional Fishnet/Neighborhood Visualizations, message=FALSE, warning=FALSE, fig.height = 10, fig.width = 6}
+```{r Additional Fishnet/Neighborhood Visualizations, message=FALSE, warning=FALSE, fig.height = 13, fig.width = 9}
 
 correlation.long <-
   st_drop_geometry(FinalFishnet) %>%
@@ -550,15 +562,6 @@ correlation.cor <-
   correlation.long %>%
     group_by(Variable) %>%
     summarize(correlation = cor(Value, GainMinusLoss, use = "complete.obs"))
-
-ggplot(correlation.long, aes(Value, GainMinusLoss)) +
-  geom_point(size = 0.1) +
-  geom_text(data = correlation.cor, aes(label = paste("r =", round(correlation, 2))),
-            x=-Inf, y=Inf, vjust = 1.5, hjust = -.1) +
-  geom_smooth(method = "lm", se = FALSE, colour = "red") +
-  facet_wrap(~Variable, ncol = 2, scales = "free") +
-  labs(title = "Gain - Loss as a function of Demographic Risk Factors") +
-  plotTheme()
 
 
 correlation.long1 <-
@@ -571,14 +574,7 @@ correlation.cor1 <-
     group_by(Variable) %>%
     summarize(correlation = cor(Value, pctLoss, use = "complete.obs"))
 
-ggplot(correlation.long1, aes(Value, pctLoss)) +
-  geom_point(size = 0.1) +
-  geom_text(data = correlation.cor1, aes(label = paste("r =", round(correlation, 2))),
-            x=-Inf, y=Inf, vjust = 1.5, hjust = -.1) +
-  geom_smooth(method = "lm", se = FALSE, colour = "red") +
-  facet_wrap(~Variable, ncol = 2, scales = "free") +
-  labs(title = "Percent Loss as a function of Demographic Risk Factors") +
-  plotTheme()
+
 
 correlation.long2 <-
   st_drop_geometry(FinalFishnet) %>%
@@ -590,15 +586,66 @@ correlation.cor2 <-
     group_by(Variable) %>%
     summarize(correlation = cor(Value, pctGain, use = "complete.obs"))
 
-ggplot(correlation.long2, aes(Value, pctGain)) +
+
+
+correlation.long3 <-
+  st_drop_geometry(FinalFishnet) %>%
+     dplyr::select(population, medHHInc, housing_units, Rent, pctBach, pctWhite, pctNoVehicle, pctCoverage) %>%
+    gather(Variable, Value, -pctCoverage)
+
+correlation.cor3 <-
+  correlation.long3 %>%
+    group_by(Variable) %>%
+    summarize(correlation = cor(Value, pctCoverage, use = "complete.obs"))
+
+
+grid.arrange(ncol=2,
+             ggplot(correlation.long, aes(Value, GainMinusLoss)) +
+  geom_point(size = 0.1) +
+  geom_text(data = correlation.cor, aes(label = paste("r =", round(correlation, 2))),
+            x=-Inf, y=Inf, vjust = 1.5, hjust = -.1) +
+  geom_smooth(method = "lm", se = FALSE, colour = "red") +
+  facet_wrap(~Variable, ncol = 2, scales = "free") +
+  labs(title = "Gain - Loss") +
+  plotTheme(), 
+  
+  ggplot(correlation.long1, aes(Value, pctLoss)) +
+  geom_point(size = 0.1) +
+  geom_text(data = correlation.cor1, aes(label = paste("r =", round(correlation, 2))),
+            x=-Inf, y=Inf, vjust = 1.5, hjust = -.1) +
+  geom_smooth(method = "lm", se = FALSE, colour = "red") +
+  facet_wrap(~Variable, ncol = 2, scales = "free") +
+  labs(title = "Percent Loss ") +
+  plotTheme(), 
+  
+  ggplot(correlation.long2, aes(Value, pctGain)) +
   geom_point(size = 0.1) +
   geom_text(data = correlation.cor2, aes(label = paste("r =", round(correlation, 2))),
             x=-Inf, y=Inf, vjust = 1.5, hjust = -.1) +
   geom_smooth(method = "lm", se = FALSE, colour = "red") +
   facet_wrap(~Variable, ncol = 2, scales = "free") +
-  labs(title = "Percent Gain as a function of Demographic Risk Factors") +
-  plotTheme()
+  labs(title = "Percent Gain") +
+  plotTheme(), 
+  
+  ggplot(correlation.long3, aes(Value, pctCoverage)) +
+  geom_point(size = 0.1) +
+  geom_text(data = correlation.cor3, aes(label = paste("r =", round(correlation, 2))),
+            x=-Inf, y=Inf, vjust = 1.5, hjust = -.1) +
+  geom_smooth(method = "lm", se = FALSE, colour = "red") +
+  facet_wrap(~Variable, ncol = 2, scales = "free") +
+  labs(title = "Percent Coverage") +
+  plotTheme()) 
+  
+  
+  
+  
+
+  
+  
+             
 ```
+
+
 
 
 ```{r Demographics, message=FALSE, warning=FALSE, results='hide'}
