@@ -523,8 +523,6 @@ ggplot(FinalFishnet, aes(x = GainMinusLoss, y = pctCoverage))+
 ```
 
 
-
-
 ```{r Demographics, message=FALSE, warning=FALSE, results='hide'}
 
 #Population
