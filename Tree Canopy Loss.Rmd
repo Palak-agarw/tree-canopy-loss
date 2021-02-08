@@ -534,12 +534,13 @@ ggplot(FinalFishnet, aes(x = pctGain, y = pctCoverage))+
 
 ggplot(FinalFishnet, aes(x = GainMinusLoss, y = pctCoverage))+ 
   geom_point()+ 
-  geom_smooth(method = 'gam', se = FALSE)+
+  geom_smooth(method = 'gam', se = FALSE) 
   labs(title = "Percent Coverage VS. Pct Tree Gain - Pct Tree loss", x = "Percent Tree Gain - Percent Tree Loss", y = "Percent Coverage" )
+
 
 ```
 
-```{r Additional Fishnet/Neighborhood Visualizations, message=FALSE, warning=FALSE, fig.height = 10, fig.width = 6}
+```{r Additional Fishnet/Neighborhood Visualizations, message=FALSE, warning=FALSE, fig.height = 13, fig.width = 9}
 
 correlation.long <-
   st_drop_geometry(FinalFishnet) %>%
@@ -550,15 +551,6 @@ correlation.cor <-
   correlation.long %>%
     group_by(Variable) %>%
     summarize(correlation = cor(Value, GainMinusLoss, use = "complete.obs"))
-
-ggplot(correlation.long, aes(Value, GainMinusLoss)) +
-  geom_point(size = 0.1) +
-  geom_text(data = correlation.cor, aes(label = paste("r =", round(correlation, 2))),
-            x=-Inf, y=Inf, vjust = 1.5, hjust = -.1) +
-  geom_smooth(method = "lm", se = FALSE, colour = "red") +
-  facet_wrap(~Variable, ncol = 2, scales = "free") +
-  labs(title = "Gain - Loss as a function of Demographic Risk Factors") +
-  plotTheme()
 
 
 correlation.long1 <-
@@ -571,14 +563,7 @@ correlation.cor1 <-
     group_by(Variable) %>%
     summarize(correlation = cor(Value, pctLoss, use = "complete.obs"))
 
-ggplot(correlation.long1, aes(Value, pctLoss)) +
-  geom_point(size = 0.1) +
-  geom_text(data = correlation.cor1, aes(label = paste("r =", round(correlation, 2))),
-            x=-Inf, y=Inf, vjust = 1.5, hjust = -.1) +
-  geom_smooth(method = "lm", se = FALSE, colour = "red") +
-  facet_wrap(~Variable, ncol = 2, scales = "free") +
-  labs(title = "Percent Loss as a function of Demographic Risk Factors") +
-  plotTheme()
+
 
 correlation.long2 <-
   st_drop_geometry(FinalFishnet) %>%
@@ -590,15 +575,66 @@ correlation.cor2 <-
     group_by(Variable) %>%
     summarize(correlation = cor(Value, pctGain, use = "complete.obs"))
 
-ggplot(correlation.long2, aes(Value, pctGain)) +
+
+
+correlation.long3 <-
+  st_drop_geometry(FinalFishnet) %>%
+     dplyr::select(population, medHHInc, housing_units, Rent, pctBach, pctWhite, pctNoVehicle, pctCoverage) %>%
+    gather(Variable, Value, -pctCoverage)
+
+correlation.cor3 <-
+  correlation.long3 %>%
+    group_by(Variable) %>%
+    summarize(correlation = cor(Value, pctCoverage, use = "complete.obs"))
+
+
+grid.arrange(ncol=2,
+             ggplot(correlation.long, aes(Value, GainMinusLoss)) +
+  geom_point(size = 0.1) +
+  geom_text(data = correlation.cor, aes(label = paste("r =", round(correlation, 2))),
+            x=-Inf, y=Inf, vjust = 1.5, hjust = -.1) +
+  geom_smooth(method = "lm", se = FALSE, colour = "red") +
+  facet_wrap(~Variable, ncol = 2, scales = "free") +
+  labs(title = "Gain - Loss") +
+  plotTheme(), 
+  
+  ggplot(correlation.long1, aes(Value, pctLoss)) +
+  geom_point(size = 0.1) +
+  geom_text(data = correlation.cor1, aes(label = paste("r =", round(correlation, 2))),
+            x=-Inf, y=Inf, vjust = 1.5, hjust = -.1) +
+  geom_smooth(method = "lm", se = FALSE, colour = "red") +
+  facet_wrap(~Variable, ncol = 2, scales = "free") +
+  labs(title = "Percent Loss ") +
+  plotTheme(), 
+  
+  ggplot(correlation.long2, aes(Value, pctGain)) +
   geom_point(size = 0.1) +
   geom_text(data = correlation.cor2, aes(label = paste("r =", round(correlation, 2))),
             x=-Inf, y=Inf, vjust = 1.5, hjust = -.1) +
   geom_smooth(method = "lm", se = FALSE, colour = "red") +
   facet_wrap(~Variable, ncol = 2, scales = "free") +
-  labs(title = "Percent Gain as a function of Demographic Risk Factors") +
-  plotTheme()
+  labs(title = "Percent Gain") +
+  plotTheme(), 
+  
+  ggplot(correlation.long3, aes(Value, pctCoverage)) +
+  geom_point(size = 0.1) +
+  geom_text(data = correlation.cor3, aes(label = paste("r =", round(correlation, 2))),
+            x=-Inf, y=Inf, vjust = 1.5, hjust = -.1) +
+  geom_smooth(method = "lm", se = FALSE, colour = "red") +
+  facet_wrap(~Variable, ncol = 2, scales = "free") +
+  labs(title = "Percent Coverage") +
+  plotTheme()) 
+  
+  
+  
+  
+
+  
+  
+             
 ```
+
+
 
 
 ```{r Demographics, message=FALSE, warning=FALSE, results='hide'}
