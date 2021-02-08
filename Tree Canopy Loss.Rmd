@@ -90,7 +90,7 @@ Neighborhood <-
   mutate(NArea = as.numeric(NArea))
 
 # Tree inventory
-tree_inventory <- st_read("/Users/annaduan/Desktop/Y3S2/Practicum/Data/PPR_StreetTrees.geojson") 
+tree_inventory <- st_read("http://data.phl.opendata.arcgis.com/datasets/957f032f9c874327a1ad800abd887d17_0.geojson") 
 
 
 # Census ACS
@@ -132,6 +132,21 @@ ACS <-
                                   (Households_hmow + Households_hmre),0),
          year = "2018") %>%
   dplyr::select(-Households_hmow,-Households_hmre,-noVehicle_hmow,-noVehicle_hmre,-bachelor, -white)
+
+#Construction permits
+const_permits <- 
+  st_read("C:/Users/agarw/Documents/MUSA 801/Data/const_permit.csv") %>%
+  mutate(X = geocode_x,
+         Y = geocode_y) 
+const_permits[const_permits==""]<-NA
+const <- const_permits %>% drop_na(X,Y)
+const_spatial <- st_as_sf(const, coords = c("X","Y"), crs = 6565, agr = "constant")
+const_spatial <- const_spatial %>% st_transform('ESRI:102728')
+const <- const_spatial %>%
+  filter(permitissuedate <= '30/06/2017 00:00')
+ggplot()+
+  geom_sf(data = Philadelphia) +
+  geom_sf(data = const)
 ```
 
 ```{r Fishnet, message=FALSE, warning=FALSE, cache=TRUE, include=TRUE, results='hide'}
@@ -175,6 +190,10 @@ ACS_net <-
   st_drop_geometry() %>%
   left_join(.,fishnet) %>%
   st_as_sf()
+
+fishnet <- ACS_net
+
+
 
 
 ```
@@ -518,8 +537,67 @@ ggplot(FinalFishnet, aes(x = GainMinusLoss, y = pctCoverage))+
   geom_smooth(method = 'gam', se = FALSE)+
   labs(title = "Percent Coverage VS. Pct Tree Gain - Pct Tree loss", x = "Percent Tree Gain - Percent Tree Loss", y = "Percent Coverage" )
 
+```
+
+```{r Additional Fishnet/Neighborhood Visualizations, message=FALSE, warning=FALSE, fig.height = 10, fig.width = 6}
+
+correlation.long <-
+  st_drop_geometry(FinalFishnet) %>%
+     dplyr::select(population, medHHInc, housing_units, Rent, pctBach, pctWhite, pctNoVehicle, GainMinusLoss) %>%
+    gather(Variable, Value, -GainMinusLoss)
+
+correlation.cor <-
+  correlation.long %>%
+    group_by(Variable) %>%
+    summarize(correlation = cor(Value, GainMinusLoss, use = "complete.obs"))
+
+ggplot(correlation.long, aes(Value, GainMinusLoss)) +
+  geom_point(size = 0.1) +
+  geom_text(data = correlation.cor, aes(label = paste("r =", round(correlation, 2))),
+            x=-Inf, y=Inf, vjust = 1.5, hjust = -.1) +
+  geom_smooth(method = "lm", se = FALSE, colour = "red") +
+  facet_wrap(~Variable, ncol = 2, scales = "free") +
+  labs(title = "Gain - Loss as a function of Demographic Risk Factors") +
+  plotTheme()
 
 
+correlation.long1 <-
+  st_drop_geometry(FinalFishnet) %>%
+     dplyr::select(population, medHHInc, housing_units, Rent, pctBach, pctWhite, pctNoVehicle, pctLoss) %>%
+    gather(Variable, Value, -pctLoss)
+
+correlation.cor1 <-
+  correlation.long1 %>%
+    group_by(Variable) %>%
+    summarize(correlation = cor(Value, pctLoss, use = "complete.obs"))
+
+ggplot(correlation.long1, aes(Value, pctLoss)) +
+  geom_point(size = 0.1) +
+  geom_text(data = correlation.cor1, aes(label = paste("r =", round(correlation, 2))),
+            x=-Inf, y=Inf, vjust = 1.5, hjust = -.1) +
+  geom_smooth(method = "lm", se = FALSE, colour = "red") +
+  facet_wrap(~Variable, ncol = 2, scales = "free") +
+  labs(title = "Percent Loss as a function of Demographic Risk Factors") +
+  plotTheme()
+
+correlation.long2 <-
+  st_drop_geometry(FinalFishnet) %>%
+     dplyr::select(population, medHHInc, housing_units, Rent, pctBach, pctWhite, pctNoVehicle, pctGain) %>%
+    gather(Variable, Value, -pctGain)
+
+correlation.cor2 <-
+  correlation.long2 %>%
+    group_by(Variable) %>%
+    summarize(correlation = cor(Value, pctGain, use = "complete.obs"))
+
+ggplot(correlation.long2, aes(Value, pctGain)) +
+  geom_point(size = 0.1) +
+  geom_text(data = correlation.cor2, aes(label = paste("r =", round(correlation, 2))),
+            x=-Inf, y=Inf, vjust = 1.5, hjust = -.1) +
+  geom_smooth(method = "lm", se = FALSE, colour = "red") +
+  facet_wrap(~Variable, ncol = 2, scales = "free") +
+  labs(title = "Percent Gain as a function of Demographic Risk Factors") +
+  plotTheme()
 ```
 
 
@@ -529,8 +607,10 @@ ggplot(FinalFishnet, aes(x = GainMinusLoss, y = pctCoverage))+
 
 #Population
 ggplot() +
-  geom_sf(data = ACS_net, aes(fill = q5(population))) +
-  scale_fill_manual(values = paletteGray, name = "Population") +
+  geom_sf(data = FinalFishnet, aes(fill = q5(population))) +
+  scale_fill_manual(values = paletteGray,
+                    labels = qBr(FinalFishnet, "population"), 
+                    name = "Population") +
   labs(title = "Population by Fishnet, 2018", subtitle = "Philadelphia, PA") +
   mapTheme()
 
@@ -543,7 +623,7 @@ ggplot() +
 
 #Percent White
 ggplot() +
-  geom_sf(data = ACS_net, aes(fill = pctWhite)) +
+  geom_sf(data = FinalFishnet, aes(fill = pctWhite)) +
   scale_fill_viridis(name = "% White") +
   labs(title = "Percentage of White Residents by Fishnet, 2018", subtitle = "Philadelphia, PA") +
   mapTheme()
@@ -568,7 +648,8 @@ ggplot() +
   mapTheme()
 
 # demolitions 
-demolitions <- st_read("/Users/annaduan/Desktop/Y3S2/Practicum/Data/demolitions.geojson") %>%
+demolitions <- #st_read("/Users/annaduan/Desktop/Y3S2/Practicum/Data/demolitions.geojson") %>%
+  st_read("C:/UsersKyle McCarthy/Documents/Practicum/Data/Demolitions/demolitions.shp") %>%
   mutate(interval60 = ymd_h(substr(completed_date,1,13))) %>%
     mutate(year = year(interval60)) %>%
   filter(year == 2017 | year == 2018)
