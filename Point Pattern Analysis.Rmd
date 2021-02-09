@@ -118,3 +118,12 @@ plot(K1_vs_pred$pred ~ K1_vs_pred$K1, pch=20,
 abline(a=0, b = 1, col = "red")
 
 ```
+
+```{r point pattern analysis}
+if (!require("rspatial")) devtools::install_github('rspatial/rspatial')
+library(rspatial)
+city <- sp_data('city')
+crime <- sp_data('crime')
+
+```
+
