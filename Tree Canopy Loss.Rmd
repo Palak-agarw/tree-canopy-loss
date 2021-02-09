@@ -11,7 +11,7 @@ The aim of this project is identify risk for tree canopy loss in Philadelphia, P
 
 
 ## Team Roles
-![Gantt Chart](/Users/annaduan/Documents/GitHub/tree-canopy-loss/Gantt.png)
+###![Gantt Chart](/Users/annaduan/Documents/GitHub/tree-canopy-loss/Gantt.png)
 ```{r setup, message=FALSE, warning=FALSE, include=TRUE, results='hide'}
 knitr::opts_chunk$set(message = FALSE, warning = FALSE)
 options(scipen=10000000)
@@ -68,8 +68,9 @@ palette3 <- c("#2C5F2D","#97BC62FF")
 
 # Tree Canopy
 TreeCanopy <- 
-  st_read("C:/Users/Kyle McCarthy/Documents/Practicum/TreeCanopyChange_2008_2018.shp")%>%
+  #st_read("C:/Users/Kyle McCarthy/Documents/Practicum/TreeCanopyChange_2008_2018.shp")%>%
   #st_read("/Users/annaduan/Desktop/Y3S2/Practicum/Data/TreeCanopyChange_2008_2018-shp/TreeCanopyChange_2008_2018.shp") %>%
+  st_read("C:/Users/agarw/Documents/MUSA 801/Data/TreeCanopyChange_2008_2018.shp") %>%
   st_transform('ESRI:102728')
 
 TreeCanopy$SHAPE_Area <- st_area(TreeCanopy)
@@ -80,8 +81,9 @@ Philadelphia <- st_read("http://data.phl.opendata.arcgis.com/datasets/405ec3da94
 
 # Neighborhoods
 Neighborhood <- 
-  st_read("C:/Users/Kyle McCarthy/Documents/Practicum/Data/Neighborhoods/Neighborhoods_Philadelphia.shp") %>%
+  #st_read("C:/Users/Kyle McCarthy/Documents/Practicum/Data/Neighborhoods/Neighborhoods_Philadelphia.shp") %>%
   #st_read("/Users/annaduan/Desktop/Y3S2/Practicum/Data/Neighborhoods_Philadelphia/Neighborhoods_Philadelphia.shp")%>%
+  st_read("C:/Users/agarw/Documents/MUSA 801/Data/Neighborhoods_Philadelphia.shp") %>%
   st_transform('ESRI:102728')
 
 Neighborhood <- 
@@ -90,7 +92,10 @@ Neighborhood <-
   mutate(NArea = as.numeric(NArea))
 
 # Tree inventory
-tree_inventory <- st_read("http://data.phl.opendata.arcgis.com/datasets/957f032f9c874327a1ad800abd887d17_0.geojson") 
+tree_inventory <- 
+  # st_read("http://data.phl.opendata.arcgis.com/datasets/957f032f9c874327a1ad800abd887d17_0.geojson") %>%
+  st_read("C:/Users/agarw/Documents/MUSA 801/Data/PPR_StreetTrees.geojson") %>%
+  st_transform('ESRI:102728')
 
 
 # Census ACS
@@ -514,7 +519,7 @@ ggplot()+
 
 ```
 
-```{r Additional Fishnet/Neighborhood Visualizations, message=FALSE, warning=FALSE}
+```{r Additional Fishnet/Neighborhood Visualization, message=FALSE, warning=FALSE}
 FinalNeighborhood <- 
   FinalNeighborhood %>%
   mutate(LossOrGain = ifelse(GainMinusLoss > 0, "Gain", "Loss"), 
@@ -693,17 +698,17 @@ ggplot() +
   mapTheme()
 
 # demolitions 
-demolitions <- #st_read("/Users/annaduan/Desktop/Y3S2/Practicum/Data/demolitions.geojson") %>%
-  st_read("C:/UsersKyle McCarthy/Documents/Practicum/Data/Demolitions/demolitions.shp") %>%
-  mutate(interval60 = ymd_h(substr(completed_date,1,13))) %>%
-    mutate(year = year(interval60)) %>%
-  filter(year == 2017 | year == 2018)
+#demolitions <- #st_read("/Users/annaduan/Desktop/Y3S2/Practicum/Data/demolitions.geojson") %>%
+  #st_read("C:/UsersKyle McCarthy/Documents/Practicum/Data/Demolitions/demolitions.shp") %>%
+  #mutate(interval60 = ymd_h(substr(completed_date,1,13))) %>%
+    #mutate(year = year(interval60)) %>%
+  #filter(year == 2017 | year == 2018)
 
-ggplot() + 
-  geom_sf(data = ACS, color = "gray90", fill = "white") +
-  geom_sf(data = demolitions, color = "red") +
-  labs(title = "Demolitions, 2017-2018", subtitle = "Philadelphia, PA") +
-  mapTheme()
+#ggplot() + 
+  #geom_sf(data = ACS, color = "gray90", fill = "white") +
+  #geom_sf(data = demolitions, color = "red") +
+  #labs(title = "Demolitions, 2017-2018", subtitle = "Philadelphia, PA") +
+  #mapTheme()
 
 # race context
 race_context <- ACS %>%
