@@ -1,8 +1,18 @@
 ---
-title: "Tree Canopy Loss"
+title: "Tree Canopy Loss Practium"
 author: "Anna, Palak, Kyle"
-date: "1/31/2021"
-output: html_document
+date: "2/8/2021"
+output:
+  html_document:
+    keep_md: true
+    toc: yes
+    toc_float: yes
+    code_folding: show
+    code_download: no
+  word_document:
+    toc: yes
+  pdf_document:
+    toc: yes
 ---
 
 
@@ -11,8 +21,9 @@ The aim of this project is identify risk for tree canopy loss in Philadelphia, P
 
 
 ## Team Roles
-![Gantt Chart](/Users/annaduan/Documents/GitHub/tree-canopy-loss/Gantt.png)
-```{r setup, message=FALSE, warning=FALSE, include=TRUE, results='hide'}
+![Gantt Chart](Gantt.png)
+
+```r
 knitr::opts_chunk$set(message = FALSE, warning = FALSE)
 options(scipen=10000000)
 library(knitr)
@@ -64,12 +75,12 @@ palette3 <- c("#2C5F2D","#97BC62FF")
 * Home prices 
 * Demographics
 
-```{r Data Wrangling, cache=TRUE, message=FALSE, warning=FALSE, include=TRUE, results='hide'}
 
+```r
 # Tree Canopy
 TreeCanopy <- 
- # st_read("C:/Users/Kyle McCarthy/Documents/Practicum/TreeCanopyChange_2008_2018.shp")%>%
-  st_read("/Users/annaduan/Desktop/Y3S2/Practicum/Data/TreeCanopyChange_2008_2018-shp/TreeCanopyChange_2008_2018.shp") %>%
+  st_read("C:/Users/Kyle McCarthy/Documents/Practicum/TreeCanopyChange_2008_2018.shp")%>%
+  #st_read("/Users/annaduan/Desktop/Y3S2/Practicum/Data/TreeCanopyChange_2008_2018-shp/TreeCanopyChange_2008_2018.shp") %>%
   st_transform('ESRI:102728')
 
 TreeCanopy$SHAPE_Area <- st_area(TreeCanopy)
@@ -80,8 +91,8 @@ Philadelphia <- st_read("http://data.phl.opendata.arcgis.com/datasets/405ec3da94
 
 # Neighborhoods
 Neighborhood <- 
-#  st_read("C:/Users/Kyle McCarthy/Documents/Practicum/Data/Neighborhoods/Neighborhoods_Philadelphia.shp") %>%
-  st_read("/Users/annaduan/Desktop/Y3S2/Practicum/Data/Neighborhoods_Philadelphia/Neighborhoods_Philadelphia.shp")%>%
+  st_read("C:/Users/Kyle McCarthy/Documents/Practicum/Data/Neighborhoods/Neighborhoods_Philadelphia.shp") %>%
+  #st_read("/Users/annaduan/Desktop/Y3S2/Practicum/Data/Neighborhoods_Philadelphia/Neighborhoods_Philadelphia.shp")%>%
   st_transform('ESRI:102728')
 
 Neighborhood <- 
@@ -135,22 +146,22 @@ ACS <-
 
 #Construction permits
 #const_permits <- 
-#  st_read("C:/Users/agarw/Documents/MUSA 801/Data/const_permit.csv") %>%
-#  mutate(X = geocode_x,
-#         Y = geocode_y) 
+ # st_read("C:/Users/agarw/Documents/MUSA 801/Data/const_permit.csv") %>%
+  #mutate(X = geocode_x,
+   #      Y = geocode_y) 
 #const_permits[const_permits==""]<-NA
 #const <- const_permits %>% drop_na(X,Y)
 #const_spatial <- st_as_sf(const, coords = c("X","Y"), crs = 6565, agr = "constant")
 #const_spatial <- const_spatial %>% st_transform('ESRI:102728')
 #const <- const_spatial %>%
-#  filter(permitissuedate <= '30/06/2017 00:00')
+ # filter(permitissuedate <= '30/06/2017 00:00')
 #ggplot()+
  # geom_sf(data = Philadelphia) +
   #geom_sf(data = const)
 ```
 
-```{r Fishnet, message=FALSE, warning=FALSE, cache=TRUE, include=TRUE, results='hide'}
 
+```r
 # Make fishnet
 fishnet <- 
   st_make_grid(Philadelphia,
@@ -192,15 +203,13 @@ ACS_net <-
   st_as_sf()
 
 fishnet <- ACS_net
-
-
-
-
 ```
 
 ## Exploratory Analysis
-```{r Where are we losing trees, message=FALSE, warning=FALSE, results='hide'}
+
+```r
 # Make canopy loss layers
+FinalFishnet<- st_read("C:/Users/Kyle McCarthy/Documents/Practicum/Data/FF.shp")
 TreeCanopyAll<- 
   TreeCanopy%>%
   st_make_valid()%>%
@@ -227,17 +236,17 @@ TreeCanopyLoss<-
   fishnet%>%
   left_join(TreeCanopyLoss, by = 'uniqueID')
 
-ggplot()+ 
-  geom_sf(data = TreeCanopyLoss, aes(fill = pctLoss))+ 
-  scale_fill_viridis()+
-  labs(title= "Tree Canopy Loss/ GridCell Size")+
-  mapTheme()
-
-ggplot()+ 
-  geom_sf(data = TreeCanopyLoss, aes(fill = AreaLoss))+ 
-  scale_fill_viridis()+
-  labs(title= "Total Tree Canopy Loss in each Grid Cell ")+
-  mapTheme()
+# ggplot()+ 
+#   geom_sf(data = TreeCanopyLoss, aes(fill = pctLoss))+ 
+#   scale_fill_viridis()+
+#   labs(title= "Tree Canopy Loss/ GridCell Size")+
+#   mapTheme()
+# 
+# ggplot()+ 
+#   geom_sf(data = TreeCanopyLoss, aes(fill = AreaLoss))+ 
+#   scale_fill_viridis()+
+#   labs(title= "Total Tree Canopy Loss in each Grid Cell ")+
+#   mapTheme()
 
 # Tree Canopy Gain 
 
@@ -257,11 +266,11 @@ TreeCanopyGain<-
   fishnet%>%
   left_join(TreeCanopyGain, by = 'uniqueID')
 
-ggplot()+ 
-  geom_sf(data = TreeCanopyGain, aes(fill = pctGain))+ 
-  scale_fill_viridis()+
-  labs(title= "Tree Canopy Gain/ GridCell Size")+
-  mapTheme()
+# ggplot()+ 
+#   geom_sf(data = TreeCanopyGain, aes(fill = pctGain))+ 
+#   scale_fill_viridis()+
+#   labs(title= "Tree Canopy Gain/ GridCell Size")+
+#   mapTheme()
 
 # Tree Canopy Coverage
 
@@ -276,17 +285,17 @@ TreeCanopyCoverage<-
   fishnet%>%
   left_join(TreeCanopyCoverage)
 
-ggplot()+ 
-  geom_sf(data = TreeCanopyCoverage, aes(fill = AreaCoverage))+ 
-  scale_fill_viridis()+
-  labs(title= "Tree Canopy Coverage (ft^2)")+
-  mapTheme()
-
-ggplot()+ 
-  geom_sf(data = TreeCanopyCoverage, aes(fill = pctCoverage))+ 
-  scale_fill_viridis()+
-  labs(title= "Percent Tree Canopy Coverage")+
-  mapTheme()
+# ggplot()+ 
+#   geom_sf(data = TreeCanopyCoverage, aes(fill = AreaCoverage))+ 
+#   scale_fill_viridis()+
+#   labs(title= "Tree Canopy Coverage (ft^2)")+
+#   mapTheme()
+# 
+# ggplot()+ 
+#   geom_sf(data = TreeCanopyCoverage, aes(fill = pctCoverage))+ 
+#   scale_fill_viridis()+
+#   labs(title= "Percent Tree Canopy Coverage")+
+#   mapTheme()
 
 # Loss / Coverage 
 
@@ -323,7 +332,23 @@ FinalFishnet<-
 FinalFishnet <- 
   FinalFishnet%>%
   mutate(pctCoverage = pctCoverage * 100)
+```
 
+
+```r
+FinalFishnet<- st_read("C:/Users/Kyle McCarthy/Documents/Practicum/Data/FF.shp")
+```
+
+```
+## Reading layer `FF' from data source `C:\Users\Kyle McCarthy\Documents\Practicum\Data\FF.shp' using driver `ESRI Shapefile'
+## Simple feature collection with 852 features and 17 fields
+## geometry type:  POLYGON
+## dimension:      XY
+## bbox:           xmin: 2660762 ymin: -98579.26 xmax: 2751188 ymax: 458.7356
+## projected CRS:  NAD83 / Pennsylvania North (ftUS)
+```
+
+```r
 grid.arrange(ncol=2,
              
 ggplot()+ 
@@ -332,7 +357,7 @@ ggplot()+
   scale_fill_manual(values = palette2,
                     labels = qBr(FinalFishnet, "pctLoss"),
                     name = "Percent Tree Loss\n(Quintile Breaks)")+
-  labs(title= "Tree Loss / Total Tree Area in Cell")+
+  labs(title= "PctLoss")+
   mapTheme(),
 
 ggplot()+ 
@@ -341,30 +366,32 @@ ggplot()+
   scale_fill_manual(values = palette2,
                     labels = qBr(FinalFishnet, "pctGain"),
                     name = "Percent Tree Gain\n(Quintile Breaks)")+
-  labs(title= "Tree Gain / Total Tree Area in Cell")+
+  labs(title= "PctGain")+
   mapTheme(),
 
 ggplot()+ 
   geom_sf(data = Philadelphia, fill = "#A9A9A9")+
-  geom_sf(data = FinalFishnet, aes(fill = q5(GainMinusLoss)))+ 
+  geom_sf(data = FinalFishnet, aes(fill = q5(GnMnsLs)))+ 
   scale_fill_manual(values = palette2,
-                    labels = qBr(FinalFishnet, "GainMinusLoss"),
+                    labels = qBr(FinalFishnet, "GnMnsLs"),
                     name = "Pct Gain - Pct Loss\n(Quintile Breaks)")+
   labs(title= "PctGain - pctLoss")+
   mapTheme(),
 
 ggplot()+ 
   geom_sf(data = Philadelphia, fill = "#A9A9A9")+
-  geom_sf(data = FinalFishnet, aes(fill = q5(pctCoverage)))+ 
+  geom_sf(data = FinalFishnet, aes(fill = q5(pctCvrg)))+ 
   scale_fill_manual(values = palette2,
-                    labels = qBr(FinalFishnet, "pctCoverage"),
+                    labels = qBr(FinalFishnet, "pctCvrg"),
                     name = "PctCoverage \n(Quintile Breaks)")+
   labs(title= "Percent Coverage ")+
   mapTheme())
-
 ```
 
-```{r Which neighborhods have 30 Percent, message=FALSE, warning=FALSE, results='hide'}
+![](TreeCanopyLoss_files/figure-html/Print This-1.png)<!-- -->
+
+
+```r
 # Tree Loss by Neighborhood
 TreeCanopyAllN<- 
   TreeCanopy%>%
@@ -391,17 +418,17 @@ TreeCanopyLossN<-
 
 
 # Plot Neighborhood Tree Loss
-ggplot()+ 
-  geom_sf(data = TreeCanopyLossN, aes(fill = AreaLoss))+ 
-  scale_fill_viridis()+
-  labs(title= "Total Tree Canopy Area Loss by Neighborhood")+
-  mapTheme()
-
-ggplot()+ 
-  geom_sf(data = TreeCanopyLossN, aes(fill = pctLoss))+ 
-  scale_fill_viridis()+
-  labs(title= "Total Tree Canopy Area / Neighborhood Area")+
-  mapTheme()
+# ggplot()+ 
+#   geom_sf(data = TreeCanopyLossN, aes(fill = AreaLoss))+ 
+#   scale_fill_viridis()+
+#   labs(title= "Total Tree Canopy Area Loss by Neighborhood")+
+#   mapTheme()
+# 
+# ggplot()+ 
+#   geom_sf(data = TreeCanopyLossN, aes(fill = pctLoss))+ 
+#   scale_fill_viridis()+
+#   labs(title= "Total Tree Canopy Area / Neighborhood Area")+
+#   mapTheme()
 
 # Tree Gain 
 
@@ -419,7 +446,6 @@ TreeCanopyGainN<-
   left_join(TreeCanopyGainN)
 
 
-
 # Tree loss by total tree area in neighborhood
 TreeCanopyCoverageN <- 
   TreeCanopyAllN%>%
@@ -433,14 +459,6 @@ TreeCanopyCoverageN <-
 TreeCanopyCoverageN<- 
   Neighborhood%>%
   left_join(TreeCanopyCoverageN)
-
-ggplot()+ 
-  geom_sf(data = TreeCanopyCoverageN, aes(fill = q5(pctCoverage)))+ 
-  scale_fill_manual(values = palette2,
-                    labels = qBr(TreeCanopyCoverageN, "pctCoverage"),
-                    name = "Percent Tree Coverage\n(Quintile Breaks)")+
-  labs(title= "Percent Tree Coverage by Neighborhood")+
-  mapTheme()
 
 
 TreeCanopyLoss1N <- 
@@ -473,7 +491,23 @@ FinalNeighborhood <-
 FinalNeighborhood<- 
   Neighborhood%>%
   left_join(FinalNeighborhood)
+```
 
+
+```r
+FinalNeighborhood <- st_read("C:/Users/Kyle McCarthy/Documents/Practicum/Data/FN.shp")
+```
+
+```
+## Reading layer `FN' from data source `C:\Users\Kyle McCarthy\Documents\Practicum\Data\FN.shp' using driver `ESRI Shapefile'
+## Simple feature collection with 158 features and 15 fields
+## geometry type:  POLYGON
+## dimension:      XY
+## bbox:           xmin: 2660774 ymin: -98745.45 xmax: 2750293 ymax: 1626.778
+## projected CRS:  NAD83 / Pennsylvania North (ftUS)
+```
+
+```r
 grid.arrange(ncol=2,
              
 ggplot()+ 
@@ -496,77 +530,108 @@ ggplot()+
 
 ggplot()+ 
   geom_sf(data = Philadelphia, fill = "#A9A9A9")+
-  geom_sf(data = FinalNeighborhood, aes(fill = q5(GainMinusLoss)))+ 
+  geom_sf(data = FinalNeighborhood, aes(fill = q5(GnMnsLs)))+ 
   scale_fill_manual(values = palette2,
-                    labels = qBr(FinalNeighborhood, "GainMinusLoss"),
+                    labels = qBr(FinalNeighborhood, "GnMnsLs"),
                     name = "Pct Gain - Pct Loss\n(Quintile Breaks)")+
   labs(title= "PctGain - pctLoss")+
   mapTheme(), 
 
 ggplot()+ 
   geom_sf(data = Philadelphia, fill = "#A9A9A9")+
-  geom_sf(data = FinalNeighborhood, aes(fill = q5(pctCoverage)))+ 
+  geom_sf(data = FinalNeighborhood, aes(fill = q5(pctCvrg)))+ 
   scale_fill_manual(values = palette2,
-                    labels = qBr(FinalNeighborhood, "pctCoverage"),
+                    labels = qBr(FinalNeighborhood, "pctCvrg"),
                     name = "PctCoverage \n(Quintile Breaks)")+
   labs(title= "Percent Coverage ")+
   mapTheme())
-
 ```
 
-```{r Additional Fishnet/Neighborhood Visualizations, message=FALSE, warning=FALSE}
-FinalNeighborhood <- 
+![](TreeCanopyLoss_files/figure-html/printThisN-1.png)<!-- -->
+
+
+```r
+FinalNeighborhood <-
   FinalNeighborhood %>%
-  mutate(LossOrGain = ifelse(GainMinusLoss > 0, "Gain", "Loss"), 
-         Goal = ifelse(pctCoverage > 30, "Goal Met", "Under Goal"))
+  mutate(LossOrGain = ifelse(GnMnsLs > 0, "Gain", "Loss"),
+         Goal = ifelse(pctCvrg > 30, "Goal Met", "Under Goal"))
 
 ggplot() +
   geom_sf(data = FinalNeighborhood, aes(fill = LossOrGain)) +
-  scale_fill_manual(values = palette3, name = "Gain or Loss")+ 
+  scale_fill_manual(values = palette3, name = "Gain or Loss")+
   labs(title = "Gain or Loss", subtitle = "Philadelphia, PA") +
   mapTheme()
+```
 
+![](TreeCanopyLoss_files/figure-html/Additional Fishnet/Neighborhood Visualizations-1.png)<!-- -->
+
+```r
 ggplot() +
   geom_sf(data = FinalNeighborhood, aes(fill = Goal)) +
-  scale_fill_manual(values = palette3, name = "Gain or Loss")+ 
+  scale_fill_manual(values = palette3, name = "Gain or Loss")+
   labs(title = "Met 30% Goal?", subtitle = "Philadelphia, PA") +
   mapTheme()
+```
 
+![](TreeCanopyLoss_files/figure-html/Additional Fishnet/Neighborhood Visualizations-2.png)<!-- -->
+
+```r
 grid.arrange(ncol=2,
              
-ggplot(FinalFishnet, aes(x = pctLoss, y = pctCoverage))+ 
+ggplot(FinalFishnet, aes(x = pctLoss, y = pctCvrg))+ 
   geom_point()+ 
   labs(title = "Tree Loss vs Coverage"),
 
-ggplot(FinalFishnet, aes(x = pctGain, y = pctCoverage))+ 
+ggplot(FinalFishnet, aes(x = pctGain, y = pctCvrg))+ 
   geom_point()+ 
   geom_smooth(method = 'gam', formula = y ~ poly(x, 2), se = FALSE)+
   labs(title = "Tree Gain vs Coverage"))
-
-ggplot(FinalFishnet, aes(x = GainMinusLoss, y = pctCoverage))+ 
-  geom_point()+ 
-  geom_smooth(method = 'gam', se = FALSE) 
-  labs(title = "Percent Coverage VS. Pct Tree Gain - Pct Tree loss", x = "Percent Tree Gain - Percent Tree Loss", y = "Percent Coverage" )
-
-
 ```
 
-```{r Additional Fishnet/Neighborhood Visualizations 2, message=FALSE, warning=FALSE, fig.height = 13, fig.width = 9}
+![](TreeCanopyLoss_files/figure-html/Additional Fishnet/Neighborhood Visualizations-3.png)<!-- -->
 
+```r
+ggplot(FinalFishnet, aes(x = GnMnsLs, y = pctCvrg))+ 
+  geom_point()+ 
+  geom_smooth(method = 'gam', se = FALSE) 
+```
+
+![](TreeCanopyLoss_files/figure-html/Additional Fishnet/Neighborhood Visualizations-4.png)<!-- -->
+
+```r
+  labs(title = "Percent Coverage VS. Pct Tree Gain - Pct Tree loss", x = "Percent Tree Gain - Percent Tree Loss", y = "Percent Coverage" )
+```
+
+```
+## $x
+## [1] "Percent Tree Gain - Percent Tree Loss"
+## 
+## $y
+## [1] "Percent Coverage"
+## 
+## $title
+## [1] "Percent Coverage VS. Pct Tree Gain - Pct Tree loss"
+## 
+## attr(,"class")
+## [1] "labels"
+```
+
+
+```r
 correlation.long <-
   st_drop_geometry(FinalFishnet) %>%
-     dplyr::select(population, medHHInc, housing_units, Rent, pctBach, pctWhite, pctNoVehicle, GainMinusLoss) %>%
-    gather(Variable, Value, -GainMinusLoss)
+     dplyr::select(popultn, mdHHInc, hsng_nt, Rent, pctBach, pctWhit, pctNVhc, GnMnsLs) %>%
+    gather(Variable, Value, -GnMnsLs)
 
 correlation.cor <-
   correlation.long %>%
     group_by(Variable) %>%
-    summarize(correlation = cor(Value, GainMinusLoss, use = "complete.obs"))
+    summarize(correlation = cor(Value, GnMnsLs, use = "complete.obs"))
 
 
 correlation.long1 <-
   st_drop_geometry(FinalFishnet) %>%
-     dplyr::select(population, medHHInc, housing_units, Rent, pctBach, pctWhite, pctNoVehicle, pctLoss) %>%
+     dplyr::select(popultn, mdHHInc, hsng_nt, Rent, pctBach, pctWhit, pctNVhc, pctLoss) %>%
     gather(Variable, Value, -pctLoss)
 
 correlation.cor1 <-
@@ -578,7 +643,7 @@ correlation.cor1 <-
 
 correlation.long2 <-
   st_drop_geometry(FinalFishnet) %>%
-     dplyr::select(population, medHHInc, housing_units, Rent, pctBach, pctWhite, pctNoVehicle, pctGain) %>%
+     dplyr::select(popultn, mdHHInc, hsng_nt, Rent, pctBach, pctWhit, pctNVhc, pctGain) %>%
     gather(Variable, Value, -pctGain)
 
 correlation.cor2 <-
@@ -590,17 +655,17 @@ correlation.cor2 <-
 
 correlation.long3 <-
   st_drop_geometry(FinalFishnet) %>%
-     dplyr::select(population, medHHInc, housing_units, Rent, pctBach, pctWhite, pctNoVehicle, pctCoverage) %>%
-    gather(Variable, Value, -pctCoverage)
+     dplyr::select(popultn, mdHHInc, hsng_nt, Rent, pctBach, pctWhit, pctNVhc,  pctCvrg) %>%
+    gather(Variable, Value, -pctCvrg)
 
 correlation.cor3 <-
   correlation.long3 %>%
     group_by(Variable) %>%
-    summarize(correlation = cor(Value, pctCoverage, use = "complete.obs"))
+    summarize(correlation = cor(Value, pctCvrg, use = "complete.obs"))
 
 
 grid.arrange(ncol=2,
-             ggplot(correlation.long, aes(Value, GainMinusLoss)) +
+             ggplot(correlation.long, aes(Value, GnMnsLs)) +
   geom_point(size = 0.1) +
   geom_text(data = correlation.cor, aes(label = paste("r =", round(correlation, 2))),
             x=-Inf, y=Inf, vjust = 1.5, hjust = -.1) +
@@ -627,7 +692,7 @@ grid.arrange(ncol=2,
   labs(title = "Percent Gain") +
   plotTheme(), 
   
-  ggplot(correlation.long3, aes(Value, pctCoverage)) +
+  ggplot(correlation.long3, aes(Value, pctCvrg)) +
   geom_point(size = 0.1) +
   geom_text(data = correlation.cor3, aes(label = paste("r =", round(correlation, 2))),
             x=-Inf, y=Inf, vjust = 1.5, hjust = -.1) +
@@ -635,74 +700,89 @@ grid.arrange(ncol=2,
   facet_wrap(~Variable, ncol = 2, scales = "free") +
   labs(title = "Percent Coverage") +
   plotTheme()) 
-  
-  
-  
-  
-
-  
-  
-             
 ```
 
+![](TreeCanopyLoss_files/figure-html/Correlations with Neighborhood-1.png)<!-- -->
 
 
-```{r Demographics, message=FALSE, warning=FALSE, results='hide'}
 
+
+
+```r
 #Population
 ggplot() +
-  geom_sf(data = FinalFishnet, aes(fill = q5(population))) +
+  geom_sf(data = FinalFishnet, aes(fill = q5(popultn))) +
   scale_fill_manual(values = paletteGray,
-                    labels = qBr(FinalFishnet, "population"), 
+                    labels = qBr(FinalFishnet, "popultn"), 
                     name = "Population") +
   labs(title = "Population by Fishnet, 2018", subtitle = "Philadelphia, PA") +
   mapTheme()
+```
 
+![](TreeCanopyLoss_files/figure-html/Demographics-1.png)<!-- -->
+
+```r
 #Rent
 ggplot() +
   geom_sf(data = ACS_net, aes(fill = q5(Rent))) +
   scale_fill_manual(values = paletteGray, name = "Rent in USD") +
   labs(title = "Rent by Fishnet, 2018", subtitle = "Philadelphia, PA") +
   mapTheme()
+```
 
+![](TreeCanopyLoss_files/figure-html/Demographics-2.png)<!-- -->
+
+```r
 #Percent White
 ggplot() +
-  geom_sf(data = FinalFishnet, aes(fill = pctWhite)) +
+  geom_sf(data = FinalFishnet, aes(fill = pctWhit)) +
   scale_fill_viridis(name = "% White") +
   labs(title = "Percentage of White Residents by Fishnet, 2018", subtitle = "Philadelphia, PA") +
   mapTheme()
+```
 
+![](TreeCanopyLoss_files/figure-html/Demographics-3.png)<!-- -->
+
+```r
 ggplot() +
-  geom_sf(data = ACS, fill = "white", colour = "gray90") +
+  geom_sf(data = FinalFishnet, fill = "white", colour = "gray90") +
   geom_sf(data = tree_inventory, colour = "dark green", size = 0.3, alpha = 0.05) +
   labs(title = "City Tree Inventory, 2017", subtitle = "Philadelphia, PA") +
   mapTheme()
-  
+```
+
+![](TreeCanopyLoss_files/figure-html/Demographics-4.png)<!-- -->
+
+```r
 # income 
 ggplot() +
-  geom_sf(data = ACS, aes(fill = q5(medHHInc))) +
+  geom_sf(data = FinalFishnet, aes(fill = q5(mdHHInc))) +
   scale_fill_manual(values = paletteGray) +
   labs(title = "Median Household Income, 2018", subtitle = "Philadelphia, PA") +
   mapTheme()
+```
 
+![](TreeCanopyLoss_files/figure-html/Demographics-5.png)<!-- -->
+
+```r
 # neighborhoods
-ggplot() +
-  geom_sf(data = Neighborhood, fill = "blue", colour = "white") +
-  labs(title = "Philadelphia, PA Neighborhoods") +
-  mapTheme()
+# ggplot() +
+#   geom_sf(data = Neighborhood, fill = "blue", colour = "white") +
+#   labs(title = "Philadelphia, PA Neighborhoods") +
+#   mapTheme()
 
 # demolitions 
-demolitions <- #st_read("/Users/annaduan/Desktop/Y3S2/Practicum/Data/demolitions.geojson") %>%
-  st_read("C:/UsersKyle McCarthy/Documents/Practicum/Data/Demolitions/demolitions.shp") %>%
-  mutate(interval60 = ymd_h(substr(completed_date,1,13))) %>%
-    mutate(year = year(interval60)) %>%
-  filter(year == 2017 | year == 2018)
+#demolitions <- #st_read("/Users/annaduan/Desktop/Y3S2/Practicum/Data/demolitions.geojson") %>%
+ # st_read("C:/Users/Kyle McCarthy/Documents/Practicum/Data/Demolitions/demolitions.shp") %>%
+  #mutate(interval60 = ymd_h(substr(completed_date,1,13))) %>%
+   # mutate(year = year(interval60)) %>%
+  #filter(year == 2017 | year == 2018)
 
-ggplot() + 
-  geom_sf(data = ACS, color = "gray90", fill = "white") +
-  geom_sf(data = demolitions, color = "red") +
-  labs(title = "Demolitions, 2017-2018", subtitle = "Philadelphia, PA") +
-  mapTheme()
+#ggplot() + 
+ # geom_sf(data = ACS, color = "gray90", fill = "white") +
+  #geom_sf(data = demolitions, color = "red") +
+  #labs(title = "Demolitions, 2017-2018", subtitle = "Philadelphia, PA") +
+  #mapTheme()
 
 # race context
 race_context <- ACS %>%
@@ -714,7 +794,11 @@ ggplot() +
   scale_fill_viridis(option = "B", discrete = TRUE, name = "Race Context") +
   labs(title = "Neighborhood Racial Context", subtitle = "Philadelphia, PA") +
   mapTheme()
+```
 
+![](TreeCanopyLoss_files/figure-html/Demographics-6.png)<!-- -->
+
+```r
 # income context
 income_context <- ACS %>%
   dplyr::select(medHHInc) %>%
@@ -725,6 +809,7 @@ ggplot() +
   scale_fill_viridis(option = "B", discrete = TRUE, name = "Income Context") +
   labs(title = "Neighborhood Income Context", subtitle = "Philadelphia, PA") +
   mapTheme()
-
 ```
+
+![](TreeCanopyLoss_files/figure-html/Demographics-7.png)<!-- -->
 
