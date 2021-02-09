@@ -1,5 +1,5 @@
 ---
-title: "Tree Canopy Loss"
+title: "Tree Canopy Loss Practium"
 author: "Anna, Palak, Kyle"
 date: "2/8/2021"
 output:
