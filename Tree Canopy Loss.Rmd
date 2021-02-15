@@ -11,7 +11,9 @@ The aim of this project is identify risk for tree canopy loss in Philadelphia, P
 
 
 ## Team Roles
-###![Gantt Chart](/Users/annaduan/Documents/GitHub/tree-canopy-loss/Gantt.png)
+
+[Gantt Chart](Gantt.png)
+
 ```{r setup, message=FALSE, warning=FALSE, include=TRUE, results='hide'}
 knitr::opts_chunk$set(message = FALSE, warning = FALSE)
 options(scipen=10000000)
@@ -99,47 +101,6 @@ tree_inventory <-
   #st_read("C:/Users/agarw/Documents/MUSA 801/Data/PPR_StreetTrees.geojson") %>%
   st_transform('ESRI:102728')
 
-
-# Census ACS
-census_api_key("d9ebfd04caa0138647fbacd94c657cdecbf705e9", install = FALSE, overwrite = TRUE)
-
-# Variables: Median Rent, Median HH Income, Population, Bachelor's, No Vehicle (home owner, renter), Households (owner, renter-occupied), total housing units, white
-
-ACS <-  
-  get_acs(geography = "tract", variables = c("B25058_001E", "B19013_001E", "B01003_001E", "B06009_005E", "B25044_003E", "B25044_010E", "B07013_002E", "B07013_003E", "B25001_001E", "B01001A_001E"), 
-          year=2018, state=42, county=101, geometry=T) %>% 
-  st_transform('ESRI:102728')
-
-
-#Change to wide form
-ACS <- 
-  ACS %>%
-  dplyr::select( -NAME, -moe) %>%
-  spread(variable, estimate) %>%
-  dplyr::select(-geometry) %>%
-  rename(Rent = B25058_001, 
-         medHHInc = B19013_001,
-         population = B01003_001, 
-         bachelor = B06009_005,
-         noVehicle_hmow = B25044_003, 
-         noVehicle_hmre = B25044_010,
-         Households_hmow = B07013_002,
-         Households_hmre = B07013_003,
-         housing_units = B25001_001,
-         white = B01001A_001)
-st_drop_geometry(ACS)[1:3,]
-
-
-ACS <- 
-  ACS %>%
-  mutate(pctBach = ifelse(population > 0, bachelor / population, 0),
-         pctWhite = ifelse(population > 0, white / population, 0),
-         pctNoVehicle = ifelse(Households_hmow + Households_hmre > 0, 
-                               (noVehicle_hmow + noVehicle_hmre) / 
-                                  (Households_hmow + Households_hmre),0),
-         year = "2018") %>%
-  dplyr::select(-Households_hmow,-Households_hmre,-noVehicle_hmow,-noVehicle_hmre,-bachelor, -white)
-
 #Construction permits
 # const_permits <- 
 #   st_read("C:/Users/agarw/Documents/MUSA 801/Data/const_permit.csv") %>%
@@ -159,7 +120,7 @@ ACS <-
 
 The University of Vermont Spatial Analysis Lab defines each tree canopy area as either having a loss, gain, or no change in tree canopy between 2008 and 2018. Areas where trees were removed are marked as having tree canopy loss. Areas where trees were planted
 
-```{r Tree Canopy 08, 18, message=FALSE, warning=FALSE, cache=TRUE, include=TRUE, results='hide', fig.height = 13, fig.width = 9}
+```{r Tree Canopy 08, 18, message=FALSE, warning=FALSE, cache=TRUE, include=TRUE, results='hide', fig.height = 8, fig.width = 9}
 
 # Where is tree canopy coverage 
 Canopy18 <- 
@@ -178,7 +139,7 @@ ggplot()+
 
 ggplot()+ 
   geom_sf(data = Canopy18, fill = "red", color = NA)+ 
-  labs(title= "Tree Canopy Coverage, 2008 ")+
+  labs(title= "Tree Canopy Coverage, 2018 ")+
   theme(plot.title = element_text(hjust = 0.1, size= 12))+
   mapTheme())
 
@@ -187,14 +148,13 @@ ggplot()+
 ```{r Tree Canopy Change, message=FALSE, warning=FALSE, cache=TRUE, include=TRUE, results='hide'}
 
 ggplot()+ 
-  geom_sf(data = Canopy18, aes(fill = CLASS_NAME), color = NA)+ 
+  geom_sf(data = TreeCanopy, aes(fill = CLASS_NAME), color = NA)+ 
   scale_fill_manual(values = palette4,
                     name = "Tree Loss/ Gain")+
   labs(title= "Tree Canopy Change, 2008 - 2018")+
   theme(legend.position = "bottom", plot.title = element_text(hjust = 0.1, size = 12)) + mapTheme()
 
 ```
-
 
 
 ```{r Fishnet, message=FALSE, warning=FALSE, cache=TRUE, include=TRUE, results='hide'}
@@ -206,47 +166,6 @@ fishnet <-
   st_sf() %>%
   mutate(uniqueID = rownames(.))%>%
   st_transform('ESRI:102728')
-
-#Anna: used this to get rid of fishnet grids outside of census tracts
-fishnet_centroid <- fishnet %>%
-  st_centroid()
-
-tractNames <- ACS %>%
-  dplyr::select(GEOID) 
-
-fishnet <- fishnet_centroid %>%
-  st_join(., tractNames) %>%
-  st_drop_geometry() %>%
-  left_join(fishnet,.,by="uniqueID") %>%
-  dplyr::select(GEOID) %>%
-  na.omit() %>%
-  mutate(uniqueID = as.numeric(rownames(.)))
-
-# Make fishnet with ACS variables
-ACS_net <-   
-  fishnet %>%
-  st_drop_geometry() %>%
-  group_by(uniqueID, GEOID) %>%
-  summarize(count = n()) %>%
-    full_join(fishnet) %>%
-    st_sf() %>%
-    na.omit() %>%
-    ungroup() %>%
-  st_centroid() %>% 
-  dplyr::select(uniqueID) %>%
-  st_join(., ACS) %>%
-  st_drop_geometry() %>%
-  left_join(.,fishnet) %>%
-  st_as_sf()
-
-fishnet <- ACS_net
-
-ggplot()+ 
-  geom_sf(data = Philadelphia, fill = "gray10")+
-  geom_sf(data = fishnet, color = "black")+ 
-  labs(title = "Philadelphia Fishnet : 200m x 200m")+ 
-  mapTheme()
-
 
 ```
 
@@ -374,7 +293,7 @@ ggplot() +
   scale_fill_manual(values = palette3, name = "Reached 30%?")+ 
   labs(title = "Met 30% Goal?") +
   theme(plot.title = element_text(hjust = 0.5, size = 8))+
-  mapTheme()) 
+  +mapTheme()) 
 
 ```
 
@@ -514,7 +433,7 @@ ggplot()+
   geom_sf(data = FinalFishnet, aes(fill = q5(pctGain)))+ 
   scale_fill_manual(values = palette2,
                     labels = qBr(FinalFishnet, "pctGain"),
-                    name = "Percent Gain (ft^2)")+
+                    name = "Percent Gain")+
   labs(title= "Percent Tree Canopy Gain, 2008 - 2018", 
        subtitle = "2008 - 2018 Tree Canopy Gain / Total Tree Canopy Coverage (2008, 2018)")+
   theme(plot.title = element_text(hjust = 0.3)) + mapTheme(),
@@ -523,7 +442,7 @@ ggplot()+
   geom_sf(data = FinalFishnet, aes(fill = q5(pctLoss)))+ 
   scale_fill_manual(values = palette2,
                     labels = qBr(FinalFishnet, "pctLoss"),
-                    name = "Percent Loss (ft^2)")+
+                    name = "Percent Loss")+
   labs(title= "Percent Tree Canopy Loss, 2008 - 2018", 
        subtitle = "2008 - 2018 Tree Canopy Loss / Total Tree Canopy Coverage (2008, 2018)")+
   theme(plot.title = element_text(hjust = 0.3)) + mapTheme(),
@@ -532,7 +451,7 @@ ggplot()+
   geom_sf(data = FinalFishnet, aes(fill = q5(GainMinusLoss)))+ 
   scale_fill_manual(values = palette2,
                     labels = qBr(FinalFishnet, "GainMinusLoss"),
-                    name = "Area Gain (ft^2)")+
+                    name = "Percent Gain - Percent Loss")+
   labs(title= "Net Percent Gain / Loss (2018 - 2019)", 
        subtitle = "Percent Tree Canopy Gain (2008 - 2018) Minus Percent Tree Canopy Loss (2008 - 2018)") +
   theme(plot.title = element_text(hjust = 0.3)) + mapTheme()) 
@@ -543,19 +462,21 @@ ggplot()+
 
 TreeCanopyCoverage18 <- 
   TreeCanopyAll%>%
-  filter(CLASS_NAME != "Loss")
+  filter(CLASS_NAME != "Loss")%>%
   group_by(uniqueID)%>%
   summarise(AreaCoverage18 = sum(TreeArea))%>%
-  mutate(pctCoverage18 = AreaCoverage / 4635409)%>%
+  mutate(pctCoverage18 = AreaCoverage18 / 4635409)%>%
+  dplyr::select(pctCoverage18, AreaCoverage18, uniqueID)%>%
   st_drop_geometry()
 
+  
 FinalFishnet<- 
   FinalFishnet%>%
   left_join(TreeCanopyCoverage18)
 
 grid.arrange(ncol=2,
              
-ggplot(TreeCanopyCoverage18, aes(x = pctGain, y = pctCoverage))+
+ggplot(FinalFishnet, aes(x = pctGain, y = pctCoverage18))+
   geom_point()+ 
   labs(title = "Percent Tree Canopy Gain (2008 - 2018) vs. \n Percent Tree Canopy Coverage (2018)", 
        subtilte = "Aggregated by Fishnet") + 
@@ -563,7 +484,7 @@ ggplot(TreeCanopyCoverage18, aes(x = pctGain, y = pctCoverage))+
   ylab("Percent of Tree Canopy Coverage of Fishnet Cell (2018)") + 
   theme(plot.title = element_text(hjust = 0.3, size = 12), plot.subtitle = element_text(hjust = 0.3, size = 8)), 
 
-ggplot(TreeCanopyCoverage18, aes(x = pctLoss, y = pctCoverage))+
+ggplot(FinalFishnet, aes(x = pctLoss, y = pctCoverage18))+
   geom_point()+ 
   labs(title = "Percent Tree Canopy Loss (2008 - 2018) vs. \n Percent Tree Canopy Coverage (2018) ", 
        subtilte = "Aggregated by Fishnet") + 
@@ -571,11 +492,11 @@ ggplot(TreeCanopyCoverage18, aes(x = pctLoss, y = pctCoverage))+
   ylab("Percent of Tree Canopy Coverage of Fishnet Cell (2018)") + 
   theme(plot.title = element_text(hjust = 0.3, size = 12), plot.subtitle = element_text(hjust = 0.3, size = 8))) 
 
-ggplot(FinalFishnet, aes(x = GainMinusLoss, y = pctCoverage))+
+ggplot(FinalFishnet, aes(x = GainMinusLoss, y = pctCoverage18))+
   geom_point()+ 
   labs(title = "Percent Tree Canopy Gain (2008 - 2018) Minust Percent Tree Canopy Loss \n vs. Percent Tree Canopy Coverage (2018)", 
        subtilte = "Aggregated by Fishnet") + 
-  xlab("Percent of Tree Canopy GainedFrom 2008 - 2018 \n Minus Percent of Tree Canopy Lossed From 2008 - 2018 ") + 
+  xlab("Percent of Tree Canopy GainedFrom 2008 - 2018 \n Minus Percent of Tree Canopy Lost From 2008 - 2018 ") + 
   ylab("Percent of Tree Canopy Coverage of Fishnet Cell (2018)") + 
   theme(plot.title = element_text(hjust = 0.5, size = 12), plot.subtitle = element_text(hjust = 0.5, size = 8))
 
@@ -584,27 +505,67 @@ ggplot(FinalFishnet, aes(x = GainMinusLoss, y = pctCoverage))+
 ```{r Comparing Tree Canopy Area to Loss/Gain, message=FALSE, warning=FALSE, fig.height = 7, fig.width = 10 }
 
 
-fishnet_centroid <- FinalFishnet %>%
+# Census ACS
+census_api_key("d9ebfd04caa0138647fbacd94c657cdecbf705e9", install = FALSE, overwrite = TRUE)
+
+# Variables: Median Rent, Median HH Income, Population, Bachelor's, No Vehicle (home owner, renter), Households (owner, renter-occupied), total housing units, white
+
+ACS <-  
+  get_acs(geography = "tract", variables = c("B25058_001E", "B19013_001E", "B01003_001E", "B06009_005E", "B25044_003E", "B25044_010E", "B07013_002E", "B07013_003E", "B25001_001E", "B01001A_001E"), 
+          year=2018, state=42, county=101, geometry=T) %>% 
+  st_transform('ESRI:102728')
+
+
+#Change to wide form
+ACS <- 
+  ACS %>%
+  dplyr::select( -NAME, -moe) %>%
+  spread(variable, estimate) %>%
+  dplyr::select(-geometry) %>%
+  rename(Rent = B25058_001, 
+         medHHInc = B19013_001,
+         population = B01003_001, 
+         bachelor = B06009_005,
+         noVehicle_hmow = B25044_003, 
+         noVehicle_hmre = B25044_010,
+         Households_hmow = B07013_002,
+         Households_hmre = B07013_003,
+         housing_units = B25001_001,
+         white = B01001A_001)
+st_drop_geometry(ACS)[1:3,]
+
+
+ACS <- 
+  ACS %>%
+  mutate(pctBach = ifelse(population > 0, bachelor / population, 0),
+         pctWhite = ifelse(population > 0, white / population, 0),
+         pctNoVehicle = ifelse(Households_hmow + Households_hmre > 0, 
+                               (noVehicle_hmow + noVehicle_hmre) / 
+                                  (Households_hmow + Households_hmre),0),
+         year = "2018") %>%
+  dplyr::select(-Households_hmow,-Households_hmre,-noVehicle_hmow,-noVehicle_hmre,-bachelor, -white)
+
+fishnet_centroid <- FinalFishnet%>%
   st_centroid()
 
 tractNames <- ACS %>%
   dplyr::select(GEOID) 
 
-ACS_net <- fishnet_centroid %>%
+FinalFishnet1 <- fishnet_centroid %>%
   st_join(., tractNames) %>%
   st_drop_geometry() %>%
-  left_join(fishnet,.,by="uniqueID") %>%
+  left_join(FinalFishnet,.,by="uniqueID") %>%
   dplyr::select(GEOID) %>%
   na.omit() %>%
   mutate(uniqueID = as.numeric(rownames(.)))
 
 # Make fishnet with ACS variables
 ACS_net <-   
-  fishnet %>%
+  FinalFishnet1 %>%
   st_drop_geometry() %>%
   group_by(uniqueID, GEOID) %>%
   summarize(count = n()) %>%
-    full_join(fishnet) %>%
+    full_join(FinalFishnet1) %>%
     st_sf() %>%
     na.omit() %>%
     ungroup() %>%
@@ -612,17 +573,25 @@ ACS_net <-
   dplyr::select(uniqueID) %>%
   st_join(., ACS) %>%
   st_drop_geometry() %>%
-  left_join(.,FinalFishnet) %>%
-  st_as_sf()
+  left_join(.,FinalFishnet1) %>%
+  st_as_sf()%>%
+  st_drop_geometry()%>%
+  mutate(uniqueID = as.character(uniqueID))
 
-ACS_net <- FinalFishnet
+
+
+FinalFishnet <- 
+  FinalFishnet%>%
+  left_join(ACS_net)
+  
+
 
 
 ```
 
 
 
-```{r Additional Fishnet/Neighborhood Visualizations, message=FALSE, warning=FALSE, fig.height = 18, fig.width = 13}
+```{r Comparing Demographics to Fishnet Variables, fig.height = 18, fig.width = 13}
 
 correlation.long <-
   st_drop_geometry(FinalFishnet) %>%
@@ -661,13 +630,13 @@ correlation.cor2 <-
 
 correlation.long3 <-
   st_drop_geometry(FinalFishnet) %>%
-     dplyr::select(population, medHHInc, housing_units, Rent, pctBach, pctWhite, pctNoVehicle, pctCoverage) %>%
-    gather(Variable, Value, -pctCoverage)
+     dplyr::select(population, medHHInc, housing_units, Rent, pctBach, pctWhite, pctNoVehicle, pctCoverage18) %>%
+    gather(Variable, Value, -pctCoverage18)
 
 correlation.cor3 <-
   correlation.long3 %>%
     group_by(Variable) %>%
-    summarize(correlation = cor(Value, pctCoverage, use = "complete.obs"))
+    summarize(correlation = cor(Value, pctCoverage18, use = "complete.obs"))
 
 
 grid.arrange(ncol=2, top=textGrob("Ishnet Variables in Comparison to Local Demographis"),
@@ -698,7 +667,7 @@ grid.arrange(ncol=2, top=textGrob("Ishnet Variables in Comparison to Local Demog
   labs(title = "Percent Tree Canopy Gained From 2008 - 2018 ") +
   plotTheme(), 
   
-  ggplot(correlation.long3, aes(Value, pctCoverage)) +
+  ggplot(correlation.long3, aes(Value, pctCoverage18)) +
   geom_point(size = 0.1) +
   geom_text(data = correlation.cor3, aes(label = paste("r =", round(correlation, 2))),
             x=-Inf, y=Inf, vjust = 1.5, hjust = -.1) +
@@ -717,82 +686,87 @@ grid.arrange(ncol=2, top=textGrob("Ishnet Variables in Comparison to Local Demog
 
 ```{r Demographics, message=FALSE, warning=FALSE, results='hide'}
 
-#Population
-ggplot() +
-  geom_sf(data = FinalFishnet, aes(fill = q5(population))) +
-  scale_fill_manual(values = paletteGray,
-                    labels = qBr(FinalFishnet, "population"), 
-                    name = "Population") +
-  labs(title = "Population by Fishnet, 2018", subtitle = "Philadelphia, PA") +
-  mapTheme()
+# #Population
+# ggplot() +
+#   geom_sf(data = FinalFishnet, aes(fill = q5(population))) +
+#   scale_fill_manual(values = paletteGray,
+#                     labels = qBr(FinalFishnet, "population"), 
+#                     name = "Population") +
+#   labs(title = "Population by Fishnet, 2018", subtitle = "Philadelphia, PA") +
+#   mapTheme()
+# 
+# #Rent
+# ggplot() +
+#   geom_sf(data = ACS_net, aes(fill = q5(Rent))) +
+#   scale_fill_manual(values = paletteGray, name = "Rent in USD") +
+#   labs(title = "Rent by Fishnet, 2018", subtitle = "Philadelphia, PA") +
+#   mapTheme()
+# 
+# #Percent White
+# ggplot() +
+#   geom_sf(data = FinalFishnet, aes(fill = pctWhite)) +
+#   scale_fill_viridis(name = "% White") +
+#   labs(title = "Percentage of White Residents by Fishnet, 2018", subtitle = "Philadelphia, PA") +
+#   mapTheme()
+# 
+# ggplot() +
+#   geom_sf(data = ACS, fill = "white", colour = "gray90") +
+#   geom_sf(data = tree_inventory, colour = "dark green", size = 0.3, alpha = 0.05) +
+#   labs(title = "City Tree Inventory, 2017", subtitle = "Philadelphia, PA") +
+#   mapTheme()
+#   
+# # income 
+# ggplot() +
+#   geom_sf(data = ACS, aes(fill = q5(medHHInc))) +
+#   scale_fill_manual(values = paletteGray) +
+#   labs(title = "Median Household Income, 2018", subtitle = "Philadelphia, PA") +
+#   mapTheme()
+# 
+# # neighborhoods
+# ggplot() +
+#   geom_sf(data = Neighborhood, fill = "blue", colour = "white") +
+#   labs(title = "Philadelphia, PA Neighborhoods") +
+#   mapTheme()
+# 
+# # demolitions 
+# #demolitions <- #st_read("/Users/annaduan/Desktop/Y3S2/Practicum/Data/demolitions.geojson") %>%
+#   #st_read("C:/UsersKyle McCarthy/Documents/Practicum/Data/Demolitions/demolitions.shp") %>%
+#   #mutate(interval60 = ymd_h(substr(completed_date,1,13))) %>%
+#     #mutate(year = year(interval60)) %>%
+#   #filter(year == 2017 | year == 2018)
+# 
+# #ggplot() + 
+#   #geom_sf(data = ACS, color = "gray90", fill = "white") +
+#   #geom_sf(data = demolitions, color = "red") +
+#   #labs(title = "Demolitions, 2017-2018", subtitle = "Philadelphia, PA") +
+#   #mapTheme()
+# 
+# # race context
+# race_context <- ACS %>%
+#   dplyr::select(pctWhite) %>%
+#   mutate(Race_Context = ifelse(pctWhite > .5, "Majority_White", "Majority_Non_White"))
+# 
+# ggplot() +
+#   geom_sf(data = race_context, aes(fill = Race_Context)) +
+#   scale_fill_viridis(option = "B", discrete = TRUE, name = "Race Context") +
+#   labs(title = "Neighborhood Racial Context", subtitle = "Philadelphia, PA") +
+#   mapTheme()
+# 
+# # income context
+# income_context <- ACS %>%
+#   dplyr::select(medHHInc) %>%
+#   mutate(Income_Context = ifelse(medHHInc > 42614, "Higher", "Lower"))
+#   
+# ggplot() +
+#   geom_sf(data = income_context, aes(fill = Income_Context)) +
+#   scale_fill_viridis(option = "B", discrete = TRUE, name = "Income Context") +
+#   labs(title = "Neighborhood Income Context", subtitle = "Philadelphia, PA") +
+#   mapTheme()
 
-#Rent
-ggplot() +
-  geom_sf(data = ACS_net, aes(fill = q5(Rent))) +
-  scale_fill_manual(values = paletteGray, name = "Rent in USD") +
-  labs(title = "Rent by Fishnet, 2018", subtitle = "Philadelphia, PA") +
-  mapTheme()
+```
 
-#Percent White
-ggplot() +
-  geom_sf(data = FinalFishnet, aes(fill = pctWhite)) +
-  scale_fill_viridis(name = "% White") +
-  labs(title = "Percentage of White Residents by Fishnet, 2018", subtitle = "Philadelphia, PA") +
-  mapTheme()
+```{r Potential Risk Factors, fig.height = 18, fig.width = 13}
 
-ggplot() +
-  geom_sf(data = ACS, fill = "white", colour = "gray90") +
-  geom_sf(data = tree_inventory, colour = "dark green", size = 0.3, alpha = 0.05) +
-  labs(title = "City Tree Inventory, 2017", subtitle = "Philadelphia, PA") +
-  mapTheme()
-  
-# income 
-ggplot() +
-  geom_sf(data = ACS, aes(fill = q5(medHHInc))) +
-  scale_fill_manual(values = paletteGray) +
-  labs(title = "Median Household Income, 2018", subtitle = "Philadelphia, PA") +
-  mapTheme()
-
-# neighborhoods
-ggplot() +
-  geom_sf(data = Neighborhood, fill = "blue", colour = "white") +
-  labs(title = "Philadelphia, PA Neighborhoods") +
-  mapTheme()
-
-# demolitions 
-#demolitions <- #st_read("/Users/annaduan/Desktop/Y3S2/Practicum/Data/demolitions.geojson") %>%
-  #st_read("C:/UsersKyle McCarthy/Documents/Practicum/Data/Demolitions/demolitions.shp") %>%
-  #mutate(interval60 = ymd_h(substr(completed_date,1,13))) %>%
-    #mutate(year = year(interval60)) %>%
-  #filter(year == 2017 | year == 2018)
-
-#ggplot() + 
-  #geom_sf(data = ACS, color = "gray90", fill = "white") +
-  #geom_sf(data = demolitions, color = "red") +
-  #labs(title = "Demolitions, 2017-2018", subtitle = "Philadelphia, PA") +
-  #mapTheme()
-
-# race context
-race_context <- ACS %>%
-  dplyr::select(pctWhite) %>%
-  mutate(Race_Context = ifelse(pctWhite > .5, "Majority_White", "Majority_Non_White"))
-
-ggplot() +
-  geom_sf(data = race_context, aes(fill = Race_Context)) +
-  scale_fill_viridis(option = "B", discrete = TRUE, name = "Race Context") +
-  labs(title = "Neighborhood Racial Context", subtitle = "Philadelphia, PA") +
-  mapTheme()
-
-# income context
-income_context <- ACS %>%
-  dplyr::select(medHHInc) %>%
-  mutate(Income_Context = ifelse(medHHInc > 42614, "Higher", "Lower"))
-  
-ggplot() +
-  geom_sf(data = income_context, aes(fill = Income_Context)) +
-  scale_fill_viridis(option = "B", discrete = TRUE, name = "Income Context") +
-  labs(title = "Neighborhood Income Context", subtitle = "Philadelphia, PA") +
-  mapTheme()
 
 ```
 
