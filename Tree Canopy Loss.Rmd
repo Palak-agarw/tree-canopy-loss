@@ -484,7 +484,7 @@ ggplot(FinalFishnet, aes(x = pctGain, y = pctCoverage18))+
   ylab("Percent of Tree Canopy Coverage of Fishnet Cell (2018)") + 
   theme(plot.title = element_text(hjust = 0.3, size = 12), plot.subtitle = element_text(hjust = 0.3, size = 8)), 
 
-ggplot(FinalFishnet, aes(x = pctLoss, y = pctCoverage18))+
+ggplot(FinalFishnet, aes(x = pctLoss, y = AreaCoverage18))+
   geom_point()+ 
   labs(title = "Percent Tree Canopy Loss (2008 - 2018) vs. \n Percent Tree Canopy Coverage (2018) ", 
        subtilte = "Aggregated by Fishnet") + 
@@ -492,12 +492,12 @@ ggplot(FinalFishnet, aes(x = pctLoss, y = pctCoverage18))+
   ylab("Percent of Tree Canopy Coverage of Fishnet Cell (2018)") + 
   theme(plot.title = element_text(hjust = 0.3, size = 12), plot.subtitle = element_text(hjust = 0.3, size = 8))) 
 
-ggplot(FinalFishnet, aes(x = GainMinusLoss, y = pctCoverage18))+
+ggplot(FinalFishnet, aes(x = GainMinusLoss, y = AreaCoverage18))+
   geom_point()+ 
   labs(title = "Percent Tree Canopy Gain (2008 - 2018) Minust Percent Tree Canopy Loss \n vs. Percent Tree Canopy Coverage (2018)", 
        subtilte = "Aggregated by Fishnet") + 
   xlab("Percent of Tree Canopy GainedFrom 2008 - 2018 \n Minus Percent of Tree Canopy Lost From 2008 - 2018 ") + 
-  ylab("Percent of Tree Canopy Coverage of Fishnet Cell (2018)") + 
+  ylab("Area of Tree Canopy Coverage of Fishnet Cell (2018)") + 
   theme(plot.title = element_text(hjust = 0.5, size = 12), plot.subtitle = element_text(hjust = 0.5, size = 8))
 
 
@@ -767,6 +767,28 @@ grid.arrange(ncol=2, top=textGrob("Ishnet Variables in Comparison to Local Demog
 
 ```{r Potential Risk Factors, fig.height = 18, fig.width = 13}
 
+# Parcels 
+
+parcels <- st_read("http://data-phl.opendata.arcgis.com/datasets/1c57dd1b3ff84449a4b0e3fb29d3cafd_0.geojson")%>%
+  st_transform('ESRI:102728')%>%
+  mutate(ParcelArea = st_area(parcels))%>%
+  st_centroid()%>%
+  dplyr:: select(ParcelArea)
+
+
+FinalFishnet1 <- 
+  FinalFishnet%>%
+  st_join(parcels)%>%
+  group_by(uniqueID)%>%
+  summarise(avgParcelSize = mean(ParcelArea))%>%
+  st_drop_geometry() 
+
+FinalFishnet1 <- 
+  FinalFishnet%>% 
+  left_join(FinalFishnet1)
+
+ParcelReg <- lm(pctLoss ~ AreaCoverage18, data = FinalFishnet1)
+summary(ParcelReg)
 
 ```
 
