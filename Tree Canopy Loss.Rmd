@@ -7,7 +7,12 @@ output: html_document
 
 
 ## Use Case
-The aim of this project is identify risk for tree canopy loss in Philadelphia, PA. The urban tree canopy is important for many reasons including public health and recreation, and Philadelphia has a goal of achieving 30% tree canopy coverage in each neighborhood. To perform this analysis, we look at risk factors including development and neighborhood demographic attributes.
+The aim of this project is identify risk for tree canopy loss in Philadelphia, PA. The urban tree canopy is important for many reasons including public health and recreation, and Philadelphia has a goal of achieving 30% tree canopy coverage in each neighborhood.
+
+In this analysis, we ask the following questions:  
+1. How does tree canopy loss vary across neighborhoods and sociodemographic contexts?
+2. How is tree canopy loss affected by development?
+3. What’s the relationship between tree canopy health and built density in neighborhoods? (eg effect of urban heat island)
 
 
 ## Team Roles
@@ -45,11 +50,9 @@ palette4 <- c("#F65058FF", '#28334AFF', '#FBDE44FF')
 ```
 
 ## Methods
+Our model primarily uses data from the City of Philadelphia's tree canopy layer dataset, which consists of tree canopy polygons layered as loss or gain from 2008-2018. In addition, we use tract-level neighborhood sociodemographic attribute data from the American Community Survey (ACS), environmental and city service data from OpenDataPhilly, and Home Owner's Loan Corporation redlining data from 1937.
 
-### Exploratory Analysis Questions
-* How does tree canopy loss vary across neighborhoods and sociodemographic contexts?
-* How is tree canopy loss affected by development?
-* What’s the relationship between tree canopy health and built density in neighborhoods? (eg effect of urban heat island)
+Data from the American Community Survey and the Home Owner's Loan Corporation represent the current and past social conditions which affect tree canopy coverage in a given neighborhood. Data from OpenDataPhilly gives us an idea of recent city services and environmental conditions which may impact tree canopy coverage. Following is a list of the independent variables we use:  
 
 ### Independent Variables
 * Impervious surfaces
@@ -68,13 +71,18 @@ palette4 <- c("#F65058FF", '#28334AFF', '#FBDE44FF')
 * Home prices 
 * Demographics
 
+
+We divide the city into ____ fishnet grid cells of ________ each and use these cells as our unit of analysis.
+
+
+
 ```{r Data Wrangling, cache=TRUE, message=FALSE, warning=FALSE, include=TRUE, results='hide'}
 
 # Tree Canopy
 TreeCanopy <- 
-  st_read("C:/Users/Kyle McCarthy/Documents/Practicum/TreeCanopyChange_2008_2018.shp")%>%
-  #st_read("/Users/annaduan/Desktop/Y3S2/Practicum/Data/TreeCanopyChange_2008_2018-shp/TreeCanopyChange_2008_2018.shp") %>%
-  #st_read("C:/Users/agarw/Documents/MUSA 801/Data/TreeCanopyChange_2008_2018.shp") %>%
+ # st_read("C:/Users/Kyle McCarthy/Documents/Practicum/TreeCanopyChange_2008_2018.shp")%>%
+  st_read("/Users/annaduan/Desktop/Y3S2/Practicum/Data/TreeCanopyChange_2008_2018-shp/TreeCanopyChange_2008_2018.shp") %>%
+# st_read("C:/Users/agarw/Documents/MUSA 801/Data/TreeCanopyChange_2008_2018.shp") %>%
   st_transform('ESRI:102728')
 
 TreeCanopy$SHAPE_Area <- as.numeric(st_area(TreeCanopy))
@@ -85,8 +93,8 @@ Philadelphia <- st_read("http://data.phl.opendata.arcgis.com/datasets/405ec3da94
 
 # Neighborhoods
 Neighborhood <- 
-  st_read("C:/Users/Kyle McCarthy/Documents/Practicum/Data/Neighborhoods/Neighborhoods_Philadelphia.shp") %>%
-  #st_read("/Users/annaduan/Desktop/Y3S2/Practicum/Data/Neighborhoods_Philadelphia/Neighborhoods_Philadelphia.shp")%>%
+ # st_read("C:/Users/Kyle McCarthy/Documents/Practicum/Data/Neighborhoods/Neighborhoods_Philadelphia.shp") %>%
+  st_read("/Users/annaduan/Desktop/Y3S2/Practicum/Data/Neighborhoods_Philadelphia/Neighborhoods_Philadelphia.shp")%>%
   #st_read("C:/Users/agarw/Documents/MUSA 801/Data/Neighborhoods_Philadelphia.shp") %>%
   st_transform('ESRI:102728')
 
@@ -275,8 +283,6 @@ FinalNeighborhood<-
   Neighborhood%>%
   left_join(FinalNeighborhood)%>%
   mutate(LossOrGain = ifelse(GainMinusLoss > 0, "Gain", "Loss"))
-
-
 
 
 grid.arrange(ncol=2,
@@ -502,6 +508,8 @@ ggplot(FinalFishnet, aes(x = GainMinusLoss, y = pctCoverage18))+
 
 
 ```
+
+
 ```{r Comparing Tree Canopy Area to Loss/Gain, message=FALSE, warning=FALSE, fig.height = 7, fig.width = 10 }
 
 
@@ -680,7 +688,6 @@ grid.arrange(ncol=2, top=textGrob("Ishnet Variables in Comparison to Local Demog
   
              
 ```
-
 
 
 
