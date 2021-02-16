@@ -197,7 +197,7 @@ fishnet <-
 
 ## Exploratory Analysis
 
-```{r Where is Philadelphia achieving The 30 Percent Goal?, message=FALSE, warning=FALSE, results='hide', fig.height = 7, fig.width = 13}
+```{r Where is Philadelphia achieving The 30 Percent Goal?, message=FALSE, warning=FALSE, results='hide', fig.height = 7, fig.width = 13, cache=TRUE}
 
 # Tree Loss by Neighborhood
 TreeCanopyAllN<- 
@@ -269,7 +269,7 @@ TreeCanopyCoverageN18<-
   mutate(Goal = ifelse(pctCoverage > 30, "Met Goal", "GoalNotMet"))
   
 
-ggplot()+ 
+ggplot() + 
   geom_sf(data = TreeCanopyCoverageN18, aes(fill = q5(pctCoverage)))+ 
   scale_fill_manual(values = palette2,
                     labels = qBr(TreeCanopyCoverageN18, "pctCoverage"),
@@ -305,21 +305,21 @@ FinalNeighborhood<-
 
 
 
-grid.arrange(ncol=2,
+#grid.arrange(ncol=2,
              
 ggplot() +
   geom_sf(data = FinalNeighborhood, aes(fill = LossOrGain)) +
   scale_fill_manual(values = palette3, name = "Gain or Loss")+ 
   labs(title = "What Neighborhoods are losing trees?") +
   theme(plot.title = element_text(hjust = 0.5, size = 8))+
-  mapTheme(), 
+  mapTheme()
 
 ggplot() +
   geom_sf(data = TreeCanopyCoverageN18, aes(fill = Goal)) +
   scale_fill_manual(values = palette3, name = "Reached 30%?")+ 
   labs(title = "Met 30% Goal?") +
   theme(plot.title = element_text(hjust = 0.5, size = 8))+
-  +mapTheme()) 
+  mapTheme()
 
 ```
 
