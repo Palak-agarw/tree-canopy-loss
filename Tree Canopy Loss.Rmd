@@ -1,3 +1,4 @@
+
 ---
 title: "Tree Canopy Loss"
 author: "Anna, Palak, Kyle"
@@ -776,4 +777,3 @@ grid.arrange(ncol=2, top=textGrob("Ishnet Variables in Comparison to Local Demog
 
 
 ```
-
