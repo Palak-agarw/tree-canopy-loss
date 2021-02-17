@@ -1,0 +1,53 @@
+---
+title: "Untitled"
+author: "Anna, Palak, Kyle"
+date: "2/16/2021"
+output: html_document
+---
+
+```{r setup, include=FALSE}
+knitr::opts_chunk$set(echo = TRUE)
+library(knitr)
+library(tidyverse)
+library(tidycensus)
+library(sf)
+library(kableExtra)
+library(dplyr)
+library(viridis)
+library(mapview)
+library(lubridate)
+library(grid)
+library(gridExtra)
+
+
+root.dir = "https://raw.githubusercontent.com/urbanSpatial/Public-Policy-Analytics-Landing/master/DATA/"
+source("https://raw.githubusercontent.com/urbanSpatial/Public-Policy-Analytics-Landing/master/functions.r")
+
+paletteGray <- c("gray90", "gray70", "gray50", "gray30", "gray10")
+
+palette1 <- c("#d2f2d4","#7be382","#26cc00","#22b600","#009c1a")
+
+palette2 <- c("#f9de59","#e8a628","#f68365","#c33124","#a1dffb")
+
+palette3 <- c("#2C5F2D","#97BC62FF")
+
+palette4 <- c("#F65058FF", '#28334AFF', '#FBDE44FF')
+```
+
+```{r HOLC, echo=FALSE}
+redline <- st_read("/Users/annaduan/Desktop/Y3S2/Practicum/Data/PAPhiladelphia1937.geojson") %>%
+  st_transform('ESRI:102728')
+
+Philadelphia <- st_read("http://data.phl.opendata.arcgis.com/datasets/405ec3da942d4e20869d4e1449a2be48_0.geojson")%>%
+  st_transform('ESRI:102728')
+
+
+paletteHolc <- c("light green", "light blue", "yellow", "pink")
+
+ggplot(data = redline) +
+  geom_sf(data = Philadelphia, fill = "gray") +
+  geom_sf(aes(fill = holc_grade), colour = "black") +
+  scale_fill_manual(values = paletteHolc, name = "HOLC Grade") +
+  labs(title = "1937 Home Owner's Loan Corporation Redlining", subtitle = "Philadelphia, PA") +
+  mapTheme()
+```

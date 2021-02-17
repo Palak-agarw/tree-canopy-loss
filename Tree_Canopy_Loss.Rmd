@@ -9,7 +9,7 @@ output: html_document
 ## Use Case
 The aim of this project is identify risk for tree canopy loss in Philadelphia, PA. The urban tree canopy is important for many reasons including public health and recreation, and Philadelphia has a goal of achieving 30% tree canopy coverage in each neighborhood. To perform this analysis, we look at risk factors including development and neighborhood demographic attributes.
 
-Our use case mainly includes theses 3 important questions and explorations :   
+Our use case mainly includes theses 3 important questions and explorations:   
 - What are the risk factors for tree canopy loss?
 - Which neighborhood do not meet the 30% tree canopy coverage and is this disinvestment a result of redlining and older planning practices?
 - After identifying the neighborhood, where and how should PPR or other agencies intervene.
@@ -22,7 +22,7 @@ The redlined neighborhoods included sections of West Philadelphia and South Phil
 Planning tool :
 
 The first phase of Philadelphia2035 is the Citywide Vision, which establishes broad planning goals. It is the foundation of PCPC's current planning efforts. As a part of the vision, greening the city through the Renew program is one of the most important strategy. 
-The most basic rule for greening is Philly is that *every 10 mintue walk should lead to an acre of park*. 
+The most basic rule for greening is Philly is that *every 10 minute walk should lead to an acre of park*. 
 
 [Sizes of Park](Park_1.JPG)
 
@@ -41,7 +41,7 @@ So using the information above, we will create a planning tool that allows plann
 [Gantt Chart](Gantt.png)
 
 ```{r setup, message=FALSE, warning=FALSE, include=TRUE, results='hide'}
-knitr::opts_chunk$set(message = FALSE, warning = FALSE)
+knitr::opts_chunk$set(warning = FALSE, message = FALSE)
 options(scipen=10000000)
 library(knitr)
 library(tidyverse)
@@ -54,6 +54,7 @@ library(mapview)
 library(lubridate)
 library(grid)
 library(gridExtra)
+library(ggplot2)
 
 
 root.dir = "https://raw.githubusercontent.com/urbanSpatial/Public-Policy-Analytics-Landing/master/DATA/"
@@ -68,6 +69,8 @@ palette2 <- c("#f9de59","#e8a628","#f68365","#c33124","#a1dffb")
 palette3 <- c("#2C5F2D","#97BC62FF")
 
 palette4 <- c("#F65058FF", '#28334AFF', '#FBDE44FF')
+
+paletteHolc <- c("light green", "light blue", "yellow", "pink")
 ```
 
 ## Methods
@@ -99,8 +102,8 @@ palette4 <- c("#F65058FF", '#28334AFF', '#FBDE44FF')
 # Tree Canopy
 TreeCanopy <- 
   #st_read("C:/Users/Kyle McCarthy/Documents/Practicum/TreeCanopyChange_2008_2018.shp")%>%
-  #st_read("/Users/annaduan/Desktop/Y3S2/Practicum/Data/TreeCanopyChange_2008_2018-shp/TreeCanopyChange_2008_2018.shp") %>%
-  st_read("C:/Users/agarw/Documents/MUSA 801/Data/TreeCanopyChange_2008_2018.shp") %>%
+  st_read("/Users/annaduan/Desktop/Y3S2/Practicum/Data/TreeCanopyChange_2008_2018-shp/TreeCanopyChange_2008_2018.shp") %>%
+#  st_read("C:/Users/agarw/Documents/MUSA 801/Data/TreeCanopyChange_2008_2018.shp") %>%
   st_transform('ESRI:102728')
 
 TreeCanopy$SHAPE_Area <- as.numeric(st_area(TreeCanopy))
@@ -112,8 +115,8 @@ Philadelphia <- st_read("http://data.phl.opendata.arcgis.com/datasets/405ec3da94
 # Neighborhoods
 Neighborhood <- 
   #st_read("C:/Users/Kyle McCarthy/Documents/Practicum/Data/Neighborhoods/Neighborhoods_Philadelphia.shp") %>%
-  #st_read("/Users/annaduan/Desktop/Y3S2/Practicum/Data/Neighborhoods_Philadelphia/Neighborhoods_Philadelphia.shp")%>%
-  st_read("C:/Users/agarw/Documents/MUSA 801/Data/Neighborhoods_Philadelphia.shp") %>%
+  st_read("/Users/annaduan/Desktop/Y3S2/Practicum/Data/Neighborhoods_Philadelphia/Neighborhoods_Philadelphia.shp")%>%
+ # st_read("C:/Users/agarw/Documents/MUSA 801/Data/Neighborhoods_Philadelphia.shp") %>%
   st_transform('ESRI:102728')
 
 Neighborhood <- 
@@ -141,10 +144,18 @@ tree_inventory <-
 # ggplot()+
 #   geom_sf(data = Philadelphia) +
 #   geom_sf(data = const)
+
+HOLC <- st_read("/Users/annaduan/Desktop/Y3S2/Practicum/Data/PAPhiladelphia1937.geojson") %>%
+  st_transform('ESRI:102728')
+
+HOLC <- 
+  HOLC%>%
+  mutate(HOLCArea = st_area(HOLC))%>% 
+  mutate(HOLCArea = as.numeric(HOLCArea))
 ```
 
 
-The University of Vermont Spatial Analysis Lab defines each tree canopy area as either having a loss, gain, or no change in tree canopy between 2008 and 2018. Areas where trees were removed are marked as having tree canopy loss. Areas where trees were planted
+The University of Vermont Spatial Analysis Lab defines each tree canopy area as either having a loss, gain, or no change in tree canopy between 2008 and 2018. Areas where trees were removed are marked as having tree canopy loss. Areas where trees were planted are marked as tree canopy gain.
 
 ```{r Tree Canopy 08, 18, message=FALSE, warning=FALSE, cache=TRUE, include=TRUE, results='hide', fig.height = 8, fig.width = 9}
 
@@ -156,6 +167,9 @@ Canopy18 <-
 Canopy08 <- 
   TreeCanopy%>%
   filter(CLASS_NAME != "Gain")
+
+
+library(ggplot2)
 
 grid.arrange(ncol=2,
 ggplot()+ 
@@ -528,6 +542,7 @@ ggplot(FinalFishnet, aes(x = GainMinusLoss, y = AreaCoverage18))+
 
 
 ```
+
 ```{r Comparing Tree Canopy Area to Loss/Gain, message=FALSE, warning=FALSE, fig.height = 7, fig.width = 10 }
 
 
@@ -615,8 +630,7 @@ FinalFishnet <-
 
 ```
 
-
-
+The demographic attribute most correlated with tree canopy coverage is income, as expected.
 ```{r Comparing Demographics to Fishnet Variables, fig.height = 18, fig.width = 13}
 
 correlation.long <-
@@ -707,9 +721,6 @@ grid.arrange(ncol=2, top=textGrob("Ishnet Variables in Comparison to Local Demog
              
 ```
 
-
-
-
 ```{r Demographics, message=FALSE, warning=FALSE, results='hide'}
 
 # #Population
@@ -788,6 +799,51 @@ grid.arrange(ncol=2, top=textGrob("Ishnet Variables in Comparison to Local Demog
 #   scale_fill_viridis(option = "B", discrete = TRUE, name = "Income Context") +
 #   labs(title = "Neighborhood Income Context", subtitle = "Philadelphia, PA") +
 #   mapTheme()
+
+```
+
+```{r HOLC, message=FALSE, warning=FALSE, results='hide'}
+TreeCanopyAllHOLC <-
+TreeCanopy%>%
+st_make_valid() %>%
+st_intersection(HOLC)
+
+TreeCanopyAllHOLC <-
+  TreeCanopyAllHOLC %>%
+  mutate(TreeArea = st_area(TreeCanopyAllHOLC))%>%
+  mutate(TreeArea = as.numeric(TreeArea))
+
+TreeCanopyLossHOLC <- 
+  TreeCanopyAllHOLC%>%
+  filter(CLASS_NAME == "Loss")%>%
+  group_by(area_description_data, HOLCArea)%>%
+  summarise(AreaLoss = sum(TreeArea))%>%
+  mutate(pctLoss = AreaLoss / HOLCArea)%>%
+  mutate(pctLoss = as.numeric(pctLoss))%>%
+  st_drop_geometry()
+
+TreeCanopyLossHOLC<- 
+  HOLC%>%
+  left_join(TreeCanopyLossHOLC)
+
+ggplot() +
+  geom_sf(data = Philadelphia, colour = "gray90", fill = "gray90") + 
+  geom_sf(data = HOLC, aes(fill = holc_grade), colour = "gray90") +
+  geom_sf(data = TreeCanopy %>% filter(CLASS_NAME == "Loss"), colour = "red", fill = "transparent") +
+  scale_fill_manual(values = paletteHolc) +
+  labs(title = "Tree Canopy Loss and Redlining", subtitle = "Philadelphia, PA") +
+  mapTheme()
+
+TreeCanopyLossHOLC %>%
+ # group_by(holc_grade) %>%
+ggplot()+
+  geom_histogram(aes(pctLoss), binwidth = 1, fill = "red")+
+  labs(title="Tree Canopy Loss by HOLC Grade from 2008-2018",
+  subtitle="Philadelphia, PA",
+       x="HOLC Rating", 
+       y="% Loss")+
+  facet_wrap(~holc_grade, nrow = 1)+
+  plotTheme()
 
 ```
 
