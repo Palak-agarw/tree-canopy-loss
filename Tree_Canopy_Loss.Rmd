@@ -486,12 +486,12 @@ FinalFishnet$AreaGainCat <- cut(FinalFishnet$AreaGain,
 
 FinalFishnet$pctGainCat <- cut(FinalFishnet$pctGain, 
                       breaks = c(-Inf,10, 20, 30, 40, 50, 60, 70, 80, 90, Inf), 
-                       labels = c("0-10", "10-20", "20-30-", "30-40", "40-50", "50-60", "60-70", "70-80", "80-90", "90-100'"), 
+                       labels = c("0%-10%", "10%-20%", "20%-30%-", "30%-40%", "40%-50%", "50%-60%", "60%-70%", "70%-80%", "80%-90%", "90%-100%"), 
                        right = FALSE)
 
 FinalFishnet$pctLossCat <- cut(FinalFishnet$pctLoss, 
                        breaks = c(-Inf,10, 20, 30, 40, 50, 60, 70, 80, 90, Inf), 
-                       labels = c("0-10", "10-20", "20-30-", "30-40", "40-50", "50-60", "60-70", "70-80", "80-90", "90-100'"), 
+                       labels = c("0%-10%", "10%-20%", "20%-30%-", "30%-40%", "40%-50%", "50%-60%", "60%-70%", "70%-80%", "80%-90%", "90%-100%"), 
                        right = FALSE)
 
 
@@ -544,9 +544,9 @@ grid.arrange(ncol=2,
 ggplot()+ 
   geom_sf(data = FinalFishnet, aes(fill = pctLossCat))+ 
   scale_fill_manual(values = palette6,
-                    name = "Percent Gain")+
-  labs(title= "What was the Percent Tree Canopy Gain in Each Gridcell?", 
-       subtitle = "Tree Canopy Gain From 2008 - 2018/ Total Tree Canopy Coverage in 2018")+
+                    name = "Percent Loss")+
+  labs(title= "What was the Percent of Tree Canopy Loss in Each Grid Cell?", 
+       subtitle = "Tree Canopy Lost From 2008 - 2018 / Total Tree Canopy Coverage in 2008")+
   theme(plot.title = element_text(hjust = 0.3), 
         plot.subtitle = element_text(hjust = 0.3)) + mapTheme(),
              
@@ -554,8 +554,8 @@ ggplot()+
   geom_sf(data = FinalFishnet, aes(fill = pctGainCat))+ 
   scale_fill_manual(values = palette6,
                     name = "Percent Gain")+
-  labs(title= "What was the Percent Tree Canopy Gain in Each Gridcell?", 
-       subtitle = "Tree Canopy Gain From 2008 - 2018/ Total Tree Canopy Coverage in 2018")+
+  labs(title= "What was the Percent of Tree Canopy Gain in Each Grid Cell?", 
+       subtitle = "Tree Canopy Gained From 2008 - 2018 / Total Tree Canopy Coverage in 2018")+
   theme(plot.title = element_text(hjust = 0.3), 
         plot.subtitle = element_text(hjust = 0.3)) + mapTheme())  
 ```
