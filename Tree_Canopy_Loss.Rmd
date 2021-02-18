@@ -826,10 +826,11 @@ TreeCanopyLossHOLC<-
   HOLC%>%
   left_join(TreeCanopyLossHOLC)
 
+paletteHolc <- c("light green", "light blue", "yellow", "pink")
 ggplot() +
   geom_sf(data = Philadelphia, colour = "gray90", fill = "gray90") + 
   geom_sf(data = HOLC, aes(fill = holc_grade), colour = "gray90") +
-  geom_sf(data = TreeCanopy %>% filter(CLASS_NAME == "Loss"), colour = "red", fill = "transparent") +
+  geom_sf(data = TreeCanopyLoss, colour = "red", fill = "transparent") +
   scale_fill_manual(values = paletteHolc) +
   labs(title = "Tree Canopy Loss and Redlining", subtitle = "Philadelphia, PA") +
   mapTheme()
