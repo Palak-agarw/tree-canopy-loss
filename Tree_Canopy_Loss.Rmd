@@ -177,7 +177,7 @@ HOLC <-
 
 The University of Vermont Spatial Analysis Lab defines each tree canopy area as either having a loss, gain, or no change in tree canopy between 2008 and 2018. Areas where trees were removed are marked as having tree canopy loss. Areas where trees were planted are marked as tree canopy gain.
 
-```{r Tree Canopy 08, 18, message=FALSE, warning=FALSE, cache=TRUE, include=TRUE, results='hide', fig.height = 8, fig.width = 9}
+```{r Tree Canopy 08, 18, message=FALSE, warning=FALSE, cache=TRUE, include=TRUE, results='hide', fig.height = 6, fig.width = 9}
 
 # Where is tree canopy coverage 
 Canopy18 <- 
@@ -319,9 +319,9 @@ FinalNeighborhood$GoalCat <- cut(FinalNeighborhood$PctUnderGoal,
                        labels = c("Reached Goal!", "0-6 % Under Goal", "6-12% Under Goal", "12-18% Under Goal", "18-24% Under Goal", "24-30% Under Goal"), 
                        right = FALSE)
 
-FinalNeighborhood$GainMinusLossCat <- cut(FinalNeighborhood$PctUnderGoal, 
+FinalNeighborhood$GainMinusLossCat <- cut(FinalNeighborhood$GainMinusLoss, 
                       breaks = c(-Inf, -75000, -50000, -25000, 0, Inf), 
-                       labels = c("Greater Than 75000 Squared Feett lost", "50000-75000 Squared Feet Loss", "25000-50000 Squared Feet Loss", "0-25000 Squared Feet Loss", "Tree Canopy Gain!"), 
+                       labels = c("Greater Than 75000 Squared Feet lost", "50000-75000 Squared Feet Lost", "25000-50000 Squared Feet Lost", "0-25000 Squared Feet Lost", "Tree Canopy Gain!"), 
                        right = FALSE)
 
 
@@ -338,11 +338,10 @@ ggplot() +
   mapTheme() 
 
 ggplot() +
-  geom_sf(data = FinalNeighborhood, aes(fill = q5(GainMinusLossCat))) +
-  scale_fill_manual(values = palette2, name = "Gain or Loss", 
-                    labels = qBr(FinalNeighborhood, "GainMinusLoss"))+ 
-  labs(title = "What Neighborhoods are Losing More Tree Canopy Area \n than Gaining Tree Canopy Area?") +
-  theme(plot.title = element_text(hjust = 0.1, size = 8))+
+  geom_sf(data = FinalNeighborhood, aes(fill = GainMinusLossCat)) +
+  scale_fill_manual(values = palette2, name = "Gain or Loss")+ 
+  labs(title = "What is the Tree Canopy Net Gain or Loss \nin Each Neighborhood from 2008 - 2018?") +
+  theme(plot.title = element_text(hjust = 0.5, size = 6))+
   mapTheme()
 
 ```
@@ -465,24 +464,24 @@ FinalFishnet<-
 
 ```{r Fishnet Aggregation, message=FALSE, warning=FALSE, results='hide', fig.height = 8, fig.width = 15}
 
-FinalFishnet$AreaCoverage08Cat <- cut(FinalFishnet$AreaCoverage08, 
-                       breaks = c(-Inf, 500000, 1000000, 1500000, 2000000, 2500000, Inf), 
-                       labels = c("0-500000", "500000-1000000", "1000000-1500000", "1500000 - 2000000", "2000000 - 2500000", "Greater than 2500000"), 
+FinalFishnet$pctCoverage08Cat <- cut(FinalFishnet$pctCoverage08, 
+                      breaks = c(-Inf, 5, 10, 15, 20, 25, 30, 50, Inf), 
+                       labels = c("0-5", "5-10", "10-15", "15-20", "20-25", "25-30", "30-50", "50-100"), 
                        right = FALSE)
 
-FinalFishnet$AreaCoverage18Cat <- cut(FinalFishnet$AreaCoverage18, 
-                       breaks = c(-Inf, 500000, 1000000, 1500000, 2000000, 2500000, Inf), 
-                       labels = c("0-500000", "500000-1000000", "1000000-1500000", "1500000 - 2000000", "2000000 - 2500000", "Greater than 2500000"), 
+FinalFishnet$pctCoverage18Cat <- cut(FinalFishnet$pctCoverage18, 
+                      breaks = c(-Inf, 5, 10, 15, 20, 25, 30, 50, Inf), 
+                       labels = c("0-5", "5-10", "10-15", "15-20", "20-25", "25-30", "30-50", "50-100"), 
                        right = FALSE)
 
 FinalFishnet$AreaLossCat <- cut(FinalFishnet$AreaLoss, 
                        breaks = c(-Inf, 50000, 100000, 200000, 400000, 800000, Inf), 
-                       labels = c("Less Than 50,000", "50,000 - 100,000", "100,000-200,000", "200,000 - 400,000", "400,000 - 800,000", "Greater than 800,000"), 
+                       labels = c("Less Than 50,000", "50,000 - 100,000", "100,000-200,000", "200,000 - 400,000", "400,000 - 800,000", "> 800,000"), 
                        right = FALSE)
 
 FinalFishnet$AreaGainCat <- cut(FinalFishnet$AreaGain, 
                        breaks = c(-Inf, 50000, 100000, 200000, 400000, 800000, Inf), 
-                       labels = c("Less Than 50,000", "50,000 - 100,000", "100,000-200,000", "200,000 - 400,000", "400,000 - 800,000", "Greater than 800,000"), 
+                       labels = c("Less Than 50,000", "50,000 - 100,000", "100,000-200,000", "200,000 - 400,000", "400,000 - 800,000", "> 800,000"), 
                        right = FALSE)
 
 FinalFishnet$pctGainCat <- cut(FinalFishnet$pctGain, 
@@ -500,9 +499,9 @@ FinalFishnet$pctLossCat <- cut(FinalFishnet$pctLoss,
 grid.arrange(ncol=2,
              
 ggplot()+ 
-  geom_sf(data = FinalFishnet, aes(fill = AreaCoverage08Cat))+ 
-  scale_fill_manual(values = palette5, 
-                    name = "2008 Area Coverage (ft^2)")+
+  geom_sf(data = FinalFishnet, aes(fill = pctCoverage08Cat))+ 
+  scale_fill_manual(values = palette6, 
+                    name = "2008 Percent Coverage")+
   labs(title = "Tree Canopy Coverage, 2008", 
        subtitle = "2018 Tree Canopy Area / Gridcell Size")+ 
   theme(plot.title = element_text(size = 30, face = "bold"), 
@@ -510,9 +509,9 @@ ggplot()+
         legend.text = element_text(size = 10)) + mapTheme(), 
 
 ggplot()+ 
-  geom_sf(data = FinalFishnet, aes(fill = AreaCoverage18Cat))+ 
-     scale_fill_manual(values = palette2, 
-                    name = "2008 Area Coverage (ft^2)")+ 
+  geom_sf(data = FinalFishnet, aes(fill = pctCoverage18Cat))+ 
+     scale_fill_manual(values = palette6, 
+                    name = "2008 Percent Coverage")+ 
   labs(title = "Tree Canopy Coverage, 2018", 
 subtitle = "2018 Tree Canopy Area / Gridcell Size") + 
   theme(plot.title = element_text(size = 30, face = "bold"), 
@@ -525,17 +524,17 @@ ggplot()+
   geom_sf(data = FinalFishnet, aes(fill = AreaGainCat))+ 
   scale_fill_manual(values = palette2,
                     name = "Area Gain (ft^2)")+
-  labs(title= "How Much Tree Canopy was Gained in Each Gridcell from 2008 - 2018?")+
- theme(plot.title = element_text(size = 24), 
+  labs(title= "How Much Tree Canopy was Gained in Each Gridcell \n from 2008 - 2018?")+
+ theme(plot.title = element_text(size = 24, face = "bold", hjust = 0.5), 
         legend.title = element_text(size =12), 
         legend.text = element_text(size = 10)) + mapTheme(),
 
 ggplot()+ 
   geom_sf(data = FinalFishnet, aes(fill = AreaLossCat))+ 
   scale_fill_manual(values = palette2,
-                    name = "Tree Canopy Loss (f^2) \n(Quintile Breaks)")+
-  labs(title= "How Much Tree Canopy Was Lost in Each Gridcell from 2008 - 2018?")+
-  theme(plot.title = element_text( size = 24), 
+                    name = "Area Loss (f^2)")+
+  labs(title= "How Much Tree Canopy Was Lost in Each Gridcell \n From 2008 - 2018?")+
+  theme(plot.title = element_text( size = 24, face = "bold", hjust = 0.5), 
         legend.title = element_text(size = 12), 
         legend.text = element_text(size = 10)) + mapTheme()) 
 
@@ -543,38 +542,47 @@ ggplot()+
 grid.arrange(ncol=2,
              
 ggplot()+ 
+  geom_sf(data = FinalFishnet, aes(fill = pctLossCat))+ 
+  scale_fill_manual(values = palette6,
+                    name = "Percent Gain")+
+  labs(title= "What was the Percent Tree Canopy Gain in Each Gridcell?", 
+       subtitle = "Tree Canopy Gain From 2008 - 2018/ Total Tree Canopy Coverage in 2018")+
+  theme(plot.title = element_text(hjust = 0.3), 
+        plot.subtitle = element_text(hjust = 0.3)) + mapTheme(),
+             
+ggplot()+ 
   geom_sf(data = FinalFishnet, aes(fill = pctGainCat))+ 
   scale_fill_manual(values = palette6,
                     name = "Percent Gain")+
   labs(title= "What was the Percent Tree Canopy Gain in Each Gridcell?", 
-       subtitle = "2008 - 2018 Tree Canopy Gain / Total Tree Canopy Coverage (2008, 2018)")+
-  theme(plot.title = element_text(hjust = 0.3)) + mapTheme(),
-
-ggplot()+ 
-  geom_sf(data = FinalFishnet, aes(fill = pctLossCat))+ 
-  scale_fill_manual(values = palette6,
-                    name = "Percent Loss")+
-  labs(title= "What was the Percent Tree Canopy Loss in Each Gridcell?", 
-       subtitle = " Tree Canopy Loss From 2008 - 2018/ Total Tree Canopy Coverage in 2008")+
-  theme(plot.title = element_text(hjust = 0.3)) + mapTheme()) 
+       subtitle = "Tree Canopy Gain From 2008 - 2018/ Total Tree Canopy Coverage in 2018")+
+  theme(plot.title = element_text(hjust = 0.3), 
+        plot.subtitle = element_text(hjust = 0.3)) + mapTheme())  
 ```
 
 
-``````{r Gain Minus Loss, message=FALSE, warning=FALSE, results='hide', fig.height = 8, fig.width = 8}
+```{r Gain Minus Loss, message=FALSE, warning=FALSE, results='hide', fig.height = 8, fig.width = 8}
+
+FinalFishnet$PctGainMinusLossCat <- cut(FinalFishnet$PctGainMinusLoss, 
+                       breaks = c(-Inf, -50, -40, -30, -20, -10, 0, 10, 20, Inf), 
+                       labels = c("Greater Than 50% Loss", "40-50% Loss", "30-40% Loss", "20-30% Loss", "10-20% Loss", "0-10% Loss", "0-10% Gain", "10-20% Gain", "Greater Than 20% Gain"), 
+                       right = FALSE)
+
+
+
 ggplot()+ 
-  geom_sf(data = FinalFishnet, aes(fill = q5(PctGainMinusLoss)))+ 
-  scale_fill_manual(values = palette2,
-                    labels = qBr(FinalFishnet, "PctGainMinusLoss"),
+  geom_sf(data = FinalFishnet, aes(fill = PctGainMinusLossCat))+ 
+  scale_fill_manual(values = palette6,
                     name = "Percent Gain - Percent Loss")+
   labs(title= " What is the Net Percent Gain or Loss from 2008- 2018?", 
-       subtitle = "Tree Canopy Gain From 2008 - 2018/ Total Tree Canopy Coverage in 2018") +
+       subtitle = "Percent Tree Canopy Gain - Percent Tree Canopy Loss") +
   theme(plot.title = element_text(hjust = 0.3), 
         legend.title = element_text(size = 12), 
         legend.text = element_text(size = 10)) + mapTheme()
 
 ```
 
-```{r Comparing Tree Canopy Area to Loss/Gain2, message=FALSE, warning=FALSE, fig.height = 7, fig.width = 10 }
+```{r Comparing Tree Canopy Area to Loss/Gain2, message=FALSE, warning=FALSE, fig.height = 8, fig.width = 12 }
 
 grid.arrange(ncol=2,
              
@@ -586,7 +594,7 @@ ggplot(FinalFishnet, aes(x = pctGain, y = pctCoverage18))+
   ylab("Percent of Tree Canopy Coverage of Each Fishnet Cell (2018)") + 
   theme(plot.title = element_text(hjust = 0.3, size = 12), plot.subtitle = element_text(hjust = 0.3, size = 8)), 
 
-ggplot(FinalFishnet, aes(x = pctLoss, y = AreaCoverage18))+
+ggplot(FinalFishnet, aes(x = pctLoss, y = pctCoverage18))+
   geom_point()+ 
   labs(title = "Percent Tree Canopy Loss (2008 - 2018) vs. \n Percent Tree Canopy Coverage (2018) ", 
        subtilte = "Aggregated by Fishnet") + 
@@ -600,7 +608,7 @@ ggplot(FinalFishnet, aes(x = PctGainMinusLoss, y = AreaCoverage18))+
        subtilte = "Aggregated by Fishnet") + 
   xlab("Percent of Tree Canopy GainedFrom 2008 - 2018 \n Minus Percent of Tree Canopy Lost From 2008 - 2018 ") + 
   ylab("Area of Tree Canopy Coverage of Fishnet Cell (2018)") + 
-  theme(plot.title = element_text(hjust = 0.5, size = 12), plot.subtitle = element_text(hjust = 0.5, size = 8))
+  theme(plot.title = element_text(hjust = 0.5, size = 15, face = "bold"), plot.subtitle = element_text(hjust = 0.5, size = 8))
 
 
 ```
