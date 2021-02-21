@@ -68,23 +68,6 @@ tree_inventory <-
   st_read("http://data.phl.opendata.arcgis.com/datasets/957f032f9c874327a1ad800abd887d17_0.geojson") %>%
   st_transform('ESRI:102728')
 
-#Construction permits
-
-const_permits <- 
-   st_read("C:/Users/agarw/Documents/MUSA 801/Data/const_permit.csv") %>%
-   mutate(X = geocode_x,
-          Y = geocode_y) 
-const_permits[const_permits==""]<-NA
-const <- const_permits %>% drop_na(X,Y)
-const_spatial <- st_as_sf(const, coords = c("X","Y"), crs = 6565, agr = "constant")
-const_spatial <- const_spatial %>% st_transform('ESRI:102728')
-# const <- const_spatial %>%
-#   filter(permitissuedate <= '30/06/2017 00:00')
-
-ggplot()+
- geom_sf(data = Philadelphia) +
- geom_sf(data = const)
-
 HOLC <- 
   #st_read("/Users/annaduan/Desktop/Y3S2/Practicum/Data/PAPhiladelphia1937.geojson") %>%
   st_read("C:/Users/agarw/Documents/MUSA 801/Data/PAPhiladelphia1937.geojson") %>%
@@ -155,7 +138,7 @@ TreeCanopyLossN <-
   mutate(pctLoss = as.numeric(pctLoss))%>%
   st_drop_geometry()
 
-TreeCanopyLossN<- 
+ TreeCanopyLossN<- 
   Neighborhood%>%
   left_join(TreeCanopyLossN)
 
@@ -791,7 +774,6 @@ parcels <- st_read("http://data-phl.opendata.arcgis.com/datasets/1c57dd1b3ff8444
   st_centroid()%>%
   dplyr:: select(ParcelArea)
 
-
 FinalFishnet1 <- 
   FinalFishnet%>%
   st_join(parcels)%>%
@@ -806,4 +788,34 @@ FinalFishnet1 <-
 ParcelReg <- lm(pctLoss ~ Rent, data = FinalFishnet1)
 summary(ParcelReg)
 
+#Construction permits
 
+const_permits <- 
+  st_read("C:/Users/agarw/Documents/MUSA 801/Data/const_permit.csv") %>%
+  mutate(X = geocode_x,
+         Y = geocode_y) 
+const_permits[const_permits==""]<-NA
+const <- const_permits %>% drop_na(X,Y)
+const_spatial <- st_as_sf(const, coords = c("X","Y"), crs = 6565, agr = "constant")
+const_spatial <- const_spatial %>% st_transform('ESRI:102728')
+# const <- const_spatial %>%
+#   filter(permitissuedate <= '30/06/2017 00:00')
+
+ggplot()+
+  geom_sf(data = Philadelphia) +
+  geom_sf(data = const_spatial)
+
+### Aggregate points to the neighborhood
+## add a value of 1 to each crime, sum them with aggregate
+const_net <- 
+  dplyr::select(const_spatial) %>% 
+  mutate(countConst = 1) %>% 
+  aggregate(., Neighborhood, sum) %>%
+  mutate(countConst = replace_na(countConst, 0),
+         neigh = Neighborhood$NAME)
+
+ggplot() +
+  geom_sf(data = const_net, aes(fill = countConst), color = NA) +
+  scale_fill_viridis() +
+  labs(title = "Count of Construction permits for the neighborhood") +
+  mapTheme()
