@@ -24,11 +24,12 @@ Planning tool :
 The first phase of Philadelphia2035 is the Citywide Vision, which establishes broad planning goals. It is the foundation of PCPC's current planning efforts. As a part of the vision, greening the city through the Renew program is one of the most important strategy. 
 The most basic rule for greening is Philly is that *every 10 minute walk should lead to an acre of park*. 
 
+[Possible locations of intervention](Park_2.JPG)
 [Sizes of Park](Park_1.JPG)
 
 As a part of that initiative, PCPC looked at different parcels and methods to reach that goal. Combining their efforts with community agencies and NGOs is a big part. 
 
-[Possible locations of intervention](Park_2.JPG)
+
 
 Through the process they have highlighted few areas which have a lack of green spaces and you can see the pattern of those areas and the redlined areas.
 
@@ -109,12 +110,10 @@ GoalPalette <- c("#D8F3DC", "#B7E4C7", "#95D5B2", "#74C69D", "#52B788", "#40916C
 
 # Tree Canopy
 TreeCanopy <- 
-  st_read("C:/Users/Kyle McCarthy/Documents/Practicum/TreeCanopyChange_2008_2018.shp")%>%
+ # st_read("C:/Users/Kyle McCarthy/Documents/Practicum/TreeCanopyChange_2008_2018.shp")%>%
   #st_read("/Users/annaduan/Desktop/Y3S2/Practicum/Data/TreeCanopyChange_2008_2018-shp/TreeCanopyChange_2008_2018.shp") %>%
 #  st_read("C:/Users/agarw/Documents/MUSA 801/Data/TreeCanopyChange_2008_2018.shp") %>%
-
-  #st_read("/Users/annaduan/Desktop/Y3S2/Practicum/Data/TreeCanopyChange_2008_2018-shp/TreeCanopyChange_2008_2018.shp") %>%
-  #st_read("C:/Users/agarw/Documents/MUSA 801/Data/TreeCanopyChange_2008_2018.shp") %>%
+st_read("C:/Users/Prince/Desktop/Tree Canopy Data/TreeCanopyChange_2008_2018.shp") %>%
 
   st_transform('ESRI:102728')
 
@@ -133,11 +132,7 @@ Neighborhood <-
   #st_read("C:/Users/Kyle McCarthy/Documents/Practicum/Data/Neighborhoods/Neighborhoods_Philadelphia.shp") %>%
   #st_read("/Users/annaduan/Desktop/Y3S2/Practicum/Data/Neighborhoods_Philadelphia/Neighborhoods_Philadelphia.shp")%>%
  # st_read("C:/Users/agarw/Documents/MUSA 801/Data/Neighborhoods_Philadelphia.shp") %>%
-
-  st_read("C:/Users/Kyle McCarthy/Documents/Practicum/Data/Neighborhoods/Neighborhoods_Philadelphia.shp") %>%
-  #st_read("/Users/annaduan/Desktop/Y3S2/Practicum/Data/Neighborhoods_Philadelphia/Neighborhoods_Philadelphia.shp")%>%
-  #st_read("C:/Users/agarw/Documents/MUSA 801/Data/Neighborhoods_Philadelphia.shp") %>%
-
+  st_read("C:/Users/Prince/Desktop/Tree Canopy Data/Neighborhoods_Philadelphia/Neighborhoods_Philadelphia.shp") %>%
   st_transform('ESRI:102728')
 
 Neighborhood <- 
@@ -146,11 +141,12 @@ Neighborhood <-
   mutate(NArea = as.numeric(NArea))
 
 # Tree inventory
-tree_inventory <- 
-  st_read("http://data.phl.opendata.arcgis.com/datasets/957f032f9c874327a1ad800abd887d17_0.geojson") %>%
-  st_transform('ESRI:102728')
+#tree_inventory <- 
+ # st_read("http://data.phl.opendata.arcgis.com/datasets/957f032f9c874327a1ad800abd887d17_0.geojson") %>%
+ # st_transform('ESRI:102728')
 
-HOLC <- st_read("/Users/annaduan/Desktop/Y3S2/Practicum/Data/PAPhiladelphia1937.geojson") %>%
+HOLC <- #st_read("/Users/annaduan/Desktop/Y3S2/Practicum/Data/PAPhiladelphia1937.geojson") %>%
+  st_read("C:/Users/Prince/Desktop/Tree Canopy Data/PAPhiladelphia1937.geojson") %>%
   st_transform('ESRI:102728')
 
 HOLC <- 
@@ -173,6 +169,7 @@ Canopy08 <-
   TreeCanopy%>%
   filter(CLASS_NAME != "Gain")
 
+rm(TreeCanopy)
 
 library(ggplot2)
 
