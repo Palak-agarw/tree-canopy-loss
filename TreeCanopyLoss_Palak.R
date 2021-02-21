@@ -814,8 +814,42 @@ const_net <-
   mutate(countConst = replace_na(countConst, 0),
          neigh = Neighborhood$NAME)
 
-ggplot() +
-  geom_sf(data = const_net, aes(fill = countConst), color = NA) +
-  scale_fill_viridis() +
-  labs(title = "Count of Construction permits for the neighborhood") +
-  mapTheme()
+grid.arrange(ncol=2,
+             
+                ggplot() +
+                  geom_sf(data = const_net, aes(fill = countConst), color = NA) +
+                  scale_fill_viridis() +
+                  labs(title = "Count of Construction permits for the neighborhood") +
+                  mapTheme(),
+                
+                ggplot() +
+                  geom_sf(data = FinalNeighborhood, aes(fill = GoalCat), color = NA) +
+                  scale_fill_manual(values = palette5, 
+                                    name = "Percent Away From Achieving 30% Goal")+
+                  labs(title = "How Far is Each Neighborhood Away From Meeting\n Philadelphia's 30% Tree Canopy Goal in Each Neighborhood?") +
+                  theme(plot.title = element_text(hjust = 0.5, size = 8), 
+                        legend.position = "bottom", 
+                        legend.title = element_blank())+
+                  mapTheme())
+
+const_net_fish <- 
+  dplyr::select(const_spatial) %>% 
+  mutate(countConst = 1) %>% 
+  aggregate(., fishnet, sum) %>%
+  mutate(countConst = replace_na(countConst, 0),
+         uniqueID = rownames(.))
+
+grid.arrange(ncol=2,
+             
+             ggplot() +
+               geom_sf(data = const_net_fish, aes(fill = countConst), color = NA) +
+               scale_fill_viridis() +
+               labs(title = "Count of Construction permits for the fishnet") +
+               mapTheme(),
+             
+             ggplot()+ 
+               geom_sf(data = FinalFishnet, aes(fill = AreaLossCat))+ 
+               scale_fill_manual(values = palette5,
+                                 name = "Area Loss (f^2)")+
+               labs(title= "How Much Tree Canopy Was Lost in Each Gridcell \n From 2008 - 2018?")+
+               mapTheme())
