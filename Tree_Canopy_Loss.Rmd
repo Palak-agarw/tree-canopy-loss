@@ -111,9 +111,9 @@ GoalPalette <- c("#D8F3DC", "#B7E4C7", "#95D5B2", "#74C69D", "#52B788", "#40916C
 # Tree Canopy
 TreeCanopy <- 
  # st_read("C:/Users/Kyle McCarthy/Documents/Practicum/TreeCanopyChange_2008_2018.shp")%>%
-  st_read("/Users/annaduan/Desktop/Y3S2/Practicum/Data/TreeCanopyChange_2008_2018-shp/TreeCanopyChange_2008_2018.shp") %>%
+#  st_read("/Users/annaduan/Desktop/Y3S2/Practicum/Data/TreeCanopyChange_2008_2018-shp/TreeCanopyChange_2008_2018.shp") %>%
 #  st_read("C:/Users/agarw/Documents/MUSA 801/Data/TreeCanopyChange_2008_2018.shp") %>%
-#st_read("C:/Users/Prince/Desktop/Tree Canopy Data/TreeCanopyChange_2008_2018.shp") %>%
+st_read("C:/Users/Prince/Desktop/Tree Canopy Data/TreeCanopyChange_2008_2018.shp") %>%
 
   st_transform('ESRI:102728')
 
@@ -130,9 +130,9 @@ Philadelphia <- st_read("http://data.phl.opendata.arcgis.com/datasets/405ec3da94
 Neighborhood <- 
 
   #st_read("C:/Users/Kyle McCarthy/Documents/Practicum/Data/Neighborhoods/Neighborhoods_Philadelphia.shp") %>%
-  st_read("/Users/annaduan/Desktop/Y3S2/Practicum/Data/Neighborhoods_Philadelphia/Neighborhoods_Philadelphia.shp")%>%
+ # st_read("/Users/annaduan/Desktop/Y3S2/Practicum/Data/Neighborhoods_Philadelphia/Neighborhoods_Philadelphia.shp")%>%
  # st_read("C:/Users/agarw/Documents/MUSA 801/Data/Neighborhoods_Philadelphia.shp") %>%
-  #st_read("C:/Users/Prince/Desktop/Tree Canopy Data/Neighborhoods_Philadelphia/Neighborhoods_Philadelphia.shp") %>%
+st_read("C:/Users/Prince/Desktop/Tree Canopy Data/Neighborhoods_Philadelphia/Neighborhoods_Philadelphia.shp") %>%
   st_transform('ESRI:102728')
 
 Neighborhood <- 
@@ -145,8 +145,8 @@ Neighborhood <-
  # st_read("http://data.phl.opendata.arcgis.com/datasets/957f032f9c874327a1ad800abd887d17_0.geojson") %>%
  # st_transform('ESRI:102728')
 
-HOLC <- st_read("/Users/annaduan/Desktop/Y3S2/Practicum/Data/PAPhiladelphia1937.geojson") %>%
- # st_read("C:/Users/Prince/Desktop/Tree Canopy Data/PAPhiladelphia1937.geojson") %>%
+HOLC <- #st_read("/Users/annaduan/Desktop/Y3S2/Practicum/Data/PAPhiladelphia1937.geojson") %>%
+  st_read("C:/Users/Prince/Desktop/Tree Canopy Data/PAPhiladelphia1937.geojson") %>%
   st_transform('ESRI:102728')
 
 HOLC <- 
@@ -165,15 +165,11 @@ Canopy18 <-
   TreeCanopy%>%
   filter(CLASS_NAME != "Loss")
 
-Canopy18%>%
-  st_union()
 
 Canopy08 <- 
   TreeCanopy%>%
   filter(CLASS_NAME != "Gain")
-
-Canopy08%>%
-  st_union()
+ 
 
 
 grid.arrange(ncol=2,
@@ -930,7 +926,8 @@ summary(ParcelReg)
 
 const_permits <- 
   #st_read("C:/Users/agarw/Documents/MUSA 801/Data/const_permit.csv") %>%
-  st_read("/Users/annaduan/Desktop/Y3S2/Practicum/Data/const_permit.csv") %>%
+ # st_read("/Users/annaduan/Desktop/Y3S2/Practicum/Data/const_permit.csv") %>%
+  st_read("C:\Users\Prince\Desktop\Tree Canopy Data\const_permit.csv")%>%
   mutate(X = geocode_x,
          Y = geocode_y) 
 const_permits[const_permits==""]<-NA
