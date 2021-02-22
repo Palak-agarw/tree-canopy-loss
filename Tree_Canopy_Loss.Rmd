@@ -111,9 +111,9 @@ GoalPalette <- c("#D8F3DC", "#B7E4C7", "#95D5B2", "#74C69D", "#52B788", "#40916C
 # Tree Canopy
 TreeCanopy <- 
  # st_read("C:/Users/Kyle McCarthy/Documents/Practicum/TreeCanopyChange_2008_2018.shp")%>%
-  #st_read("/Users/annaduan/Desktop/Y3S2/Practicum/Data/TreeCanopyChange_2008_2018-shp/TreeCanopyChange_2008_2018.shp") %>%
+  st_read("/Users/annaduan/Desktop/Y3S2/Practicum/Data/TreeCanopyChange_2008_2018-shp/TreeCanopyChange_2008_2018.shp") %>%
 #  st_read("C:/Users/agarw/Documents/MUSA 801/Data/TreeCanopyChange_2008_2018.shp") %>%
-st_read("C:/Users/Prince/Desktop/Tree Canopy Data/TreeCanopyChange_2008_2018.shp") %>%
+#st_read("C:/Users/Prince/Desktop/Tree Canopy Data/TreeCanopyChange_2008_2018.shp") %>%
 
   st_transform('ESRI:102728')
 
@@ -130,9 +130,9 @@ Philadelphia <- st_read("http://data.phl.opendata.arcgis.com/datasets/405ec3da94
 Neighborhood <- 
 
   #st_read("C:/Users/Kyle McCarthy/Documents/Practicum/Data/Neighborhoods/Neighborhoods_Philadelphia.shp") %>%
-  #st_read("/Users/annaduan/Desktop/Y3S2/Practicum/Data/Neighborhoods_Philadelphia/Neighborhoods_Philadelphia.shp")%>%
+  st_read("/Users/annaduan/Desktop/Y3S2/Practicum/Data/Neighborhoods_Philadelphia/Neighborhoods_Philadelphia.shp")%>%
  # st_read("C:/Users/agarw/Documents/MUSA 801/Data/Neighborhoods_Philadelphia.shp") %>%
-  st_read("C:/Users/Prince/Desktop/Tree Canopy Data/Neighborhoods_Philadelphia/Neighborhoods_Philadelphia.shp") %>%
+  #st_read("C:/Users/Prince/Desktop/Tree Canopy Data/Neighborhoods_Philadelphia/Neighborhoods_Philadelphia.shp") %>%
   st_transform('ESRI:102728')
 
 Neighborhood <- 
@@ -141,12 +141,12 @@ Neighborhood <-
   mutate(NArea = as.numeric(NArea))
 
 # Tree inventory
-#tree_inventory <- 
+#tree_inventory <-
  # st_read("http://data.phl.opendata.arcgis.com/datasets/957f032f9c874327a1ad800abd887d17_0.geojson") %>%
  # st_transform('ESRI:102728')
 
-HOLC <- #st_read("/Users/annaduan/Desktop/Y3S2/Practicum/Data/PAPhiladelphia1937.geojson") %>%
-  st_read("C:/Users/Prince/Desktop/Tree Canopy Data/PAPhiladelphia1937.geojson") %>%
+HOLC <- st_read("/Users/annaduan/Desktop/Y3S2/Practicum/Data/PAPhiladelphia1937.geojson") %>%
+ # st_read("C:/Users/Prince/Desktop/Tree Canopy Data/PAPhiladelphia1937.geojson") %>%
   st_transform('ESRI:102728')
 
 HOLC <- 
@@ -187,6 +187,9 @@ ggplot()+
   labs(title= "Tree Canopy Coverage, 2018 ")+
   theme(plot.title = element_text(hjust = 0.1, size= 12))+
   mapTheme())
+
+rm(Canopy08)
+rm(Canopy18)
 
 ```
 
@@ -604,10 +607,10 @@ ggplot(FinalFishnet, aes(x = PctGainMinusLoss, y = AreaCoverage18))+
 # Census ACS
 census_api_key("d9ebfd04caa0138647fbacd94c657cdecbf705e9", install = FALSE, overwrite = TRUE)
 
-# Variables: Median Rent, Median HH Income, Population, Bachelor's, No Vehicle (home owner, renter), Households (owner, renter-occupied), total housing units, white
+# Variables: Median Rent, Median HH Income, Population, Bachelor's, No Vehicle (home owner, renter), Households (owner, renter-occupied), total housing units, white, italian
 
 ACS <-  
-  get_acs(geography = "tract", variables = c("B25058_001E", "B19013_001E", "B01003_001E", "B06009_005E", "B25044_003E", "B25044_010E", "B07013_002E", "B07013_003E", "B25001_001E", "B01001A_001E"), 
+  get_acs(geography = "tract", variables = c("B25058_001E", "B19013_001E", "B01003_001E", "B06009_005E", "B25044_003E", "B25044_010E", "B07013_002E", "B07013_003E", "B25001_001E", "B01001A_001E", "B04001_051E"), 
           year=2018, state=42, county=101, geometry=T) %>% 
   st_transform('ESRI:102728')
 
@@ -627,7 +630,8 @@ ACS <-
          Households_hmow = B07013_002,
          Households_hmre = B07013_003,
          housing_units = B25001_001,
-         white = B01001A_001)
+         white = B01001A_001, 
+         italian = B04001_051)
 st_drop_geometry(ACS)[1:3,]
 
 
@@ -675,22 +679,17 @@ ACS_net <-
   mutate(uniqueID = as.character(uniqueID))
 
 
-
 FinalFishnet <- 
   FinalFishnet%>%
   left_join(ACS_net)
-  
-
-
-
 ```
 
-The demographic attribute most correlated with tree canopy coverage is income, as expected.
+The demographic attribute most correlated with tree canopy coverage is income.
 ```{r Comparing Demographics to Fishnet Variables, fig.height = 18, fig.width = 13}
 
 correlation.long <-
   st_drop_geometry(FinalFishnet) %>%
-     dplyr::select(population, medHHInc, housing_units, Rent, pctBach, pctWhite, pctNoVehicle, GainMinusLoss) %>%
+     dplyr::select(population, medHHInc, housing_units, Rent, pctBach, pctWhite, pctNoVehicle, GainMinusLoss, italian) %>%
     gather(Variable, Value, -GainMinusLoss)
 
 correlation.cor <-
@@ -713,7 +712,7 @@ correlation.cor1 <-
 
 correlation.long2 <-
   st_drop_geometry(FinalFishnet) %>%
-     dplyr::select(population, medHHInc, housing_units, Rent, pctBach, pctWhite, pctNoVehicle, pctGain) %>%
+     dplyr::select(population, medHHInc, housing_units, Rent, pctBach, pctWhite, italian, pctNoVehicle, pctGain) %>%
     gather(Variable, Value, -pctGain)
 
 correlation.cor2 <-
@@ -725,7 +724,7 @@ correlation.cor2 <-
 
 correlation.long3 <-
   st_drop_geometry(FinalFishnet) %>%
-     dplyr::select(population, medHHInc, housing_units, Rent, pctBach, pctWhite, pctNoVehicle, pctCoverage18) %>%
+     dplyr::select(population, medHHInc, housing_units, Rent, pctBach, pctWhite, italian, pctNoVehicle, pctCoverage18) %>%
     gather(Variable, Value, -pctCoverage18)
 
 correlation.cor3 <-
@@ -770,10 +769,7 @@ grid.arrange(ncol=2, top=textGrob("Ishnet Variables in Comparison to Local Demog
   facet_wrap(~Variable, ncol = 2, scales = "free") +
   labs(title = "Percent Tree Canopy Coverage (2018)") +
   plotTheme()) 
-  
-  
-  
-             
+           
 ```
 
 ```{r Demographics, message=FALSE, warning=FALSE, results='hide'}
@@ -884,8 +880,8 @@ TreeCanopyLossHOLC<-
 
 ggplot() +
   geom_sf(data = Philadelphia, colour = "gray90", fill = "gray90") + 
-  geom_sf(data = HOLC, aes(fill = holc_grade), colour = "gray90") +
-  geom_sf(data = Loss, colour = "red", fill = "transparent") +
+    geom_sf(data = Loss, colour = "red", fill = "transparent") +
+  geom_sf(data = HOLC, aes(fill = holc_grade), alpha = 0.5, colour = "gray90") +
   scale_fill_manual(values = paletteHolc) +
   labs(title = "Tree Canopy Loss and Redlining", subtitle = "Philadelphia, PA") +
   mapTheme()
@@ -933,14 +929,16 @@ summary(ParcelReg)
 ```{r Const_Permit, message=FALSE, warning=FALSE, results='hide', fig.height = 7, fig.width = 8, cache=TRUE}
 
 const_permits <- 
-  st_read("C:/Users/agarw/Documents/MUSA 801/Data/const_permit.csv") %>%
+  #st_read("C:/Users/agarw/Documents/MUSA 801/Data/const_permit.csv") %>%
+  st_read("/Users/annaduan/Desktop/Y3S2/Practicum/Data/const_permit.csv") %>%
   mutate(X = geocode_x,
          Y = geocode_y) 
 const_permits[const_permits==""]<-NA
 const <- const_permits %>% drop_na(X,Y)
 const_spatial <- st_as_sf(const, coords = c("X","Y"), crs = 6565, agr = "constant")
 const_spatial <- const_spatial %>% st_transform('ESRI:102728')
-# const <- const_spatial %>%
+
+# const <- const_spatial %>% 
 #   filter(permitissuedate <= '30/06/2017 00:00')
 
 ggplot()+
@@ -959,7 +957,7 @@ const_net <-
 grid.arrange(ncol=2,
              
                 ggplot() +
-                  geom_sf(data = const_net, aes(fill = countConst), color = NA) +
+                 geom_sf(data = const_net, aes(fill = countConst), color = NA) +
                   scale_fill_viridis() +
                   labs(title = "Count of Construction permits for the neighborhood") +
                   mapTheme(),
@@ -984,7 +982,7 @@ const_net_fish <-
 grid.arrange(ncol=2,
              
              ggplot() +
-               geom_sf(data = const_net_fish, aes(fill = countConst), color = NA) +
+             geom_sf(data = const_net_fish, aes(fill = countConst), color = NA) +
                scale_fill_viridis() +
                labs(title = "Count of Construction permits for the fishnet") +
                mapTheme(),
