@@ -165,13 +165,16 @@ Canopy18 <-
   TreeCanopy%>%
   filter(CLASS_NAME != "Loss")
 
+Canopy18%>%
+  st_union()
+
 Canopy08 <- 
   TreeCanopy%>%
   filter(CLASS_NAME != "Gain")
 
-rm(TreeCanopy)
+Canopy08%>%
+  st_union()
 
-library(ggplot2)
 
 grid.arrange(ncol=2,
 ggplot()+ 
