@@ -1,7 +1,7 @@
 ---
-title: "Tree Canopy Loss in Philadelphia, PA"
+title: "Tree_Canopy_Loss"
 author: "Anna, Palak, Kyle"
-date: "2/21/2021"
+date: "1/31/2021"
 output: html_document
 ---
 
@@ -24,12 +24,11 @@ Planning tool :
 The first phase of Philadelphia2035 is the Citywide Vision, which establishes broad planning goals. It is the foundation of PCPC's current planning efforts. As a part of the vision, greening the city through the Renew program is one of the most important strategy. 
 The most basic rule for greening is Philly is that *every 10 minute walk should lead to an acre of park*. 
 
-[Possible locations of intervention](Park_2.JPG)
 [Sizes of Park](Park_1.JPG)
 
 As a part of that initiative, PCPC looked at different parcels and methods to reach that goal. Combining their efforts with community agencies and NGOs is a big part. 
 
-
+[Possible locations of intervention](Park_2.JPG)
 
 Through the process they have highlighted few areas which have a lack of green spaces and you can see the pattern of those areas and the redlined areas.
 
@@ -78,7 +77,13 @@ palette5 <- c("#205072", "#329D9C", "#56C596", "#7BE495", "#CFF4D2", "#05001c")
 
 palette6 <- c("#D8F3DC", "#B7E4C7", "#95D5B2", "#74C69D", "#52B788", "#40916C", "#2D6A4F", "#1B4332", "#123024", "#081C15")
 
-GoalPalette <- c("#D8F3DC", "#B7E4C7", "#95D5B2", "#74C69D", "#52B788", "#40916C", "#2D6A4F", "#1B4332")
+GoalPalette <- c("light blue", "#D8F3DC",  "#95D5B2",  "#52B788",  "#2D6A4F", "#1B4332")
+GainPalette <- c("#D8F3DC",  "#95D5B2",  "#52B788",  "#2D6A4F","light blue")
+
+palette7 <- c("#D8F3DC", "#95D5B2", "#52B788", "#2D6A4F", "#1B4332", "#123024")
+
+GoalPalette2 <- c("#95D5B2", "#52B788", "#2D6A4F", "#1B4332", "#123024", "blue")
+
 
 ```
 
@@ -110,10 +115,12 @@ GoalPalette <- c("#D8F3DC", "#B7E4C7", "#95D5B2", "#74C69D", "#52B788", "#40916C
 
 # Tree Canopy
 TreeCanopy <- 
- # st_read("C:/Users/Kyle McCarthy/Documents/Practicum/TreeCanopyChange_2008_2018.shp")%>%
-#  st_read("/Users/annaduan/Desktop/Y3S2/Practicum/Data/TreeCanopyChange_2008_2018-shp/TreeCanopyChange_2008_2018.shp") %>%
+  st_read("C:/Users/Kyle McCarthy/Documents/Practicum/TreeCanopyChange_2008_2018.shp")%>%
+  #st_read("/Users/annaduan/Desktop/Y3S2/Practicum/Data/TreeCanopyChange_2008_2018-shp/TreeCanopyChange_2008_2018.shp") %>%
 #  st_read("C:/Users/agarw/Documents/MUSA 801/Data/TreeCanopyChange_2008_2018.shp") %>%
-st_read("C:/Users/Prince/Desktop/Tree Canopy Data/TreeCanopyChange_2008_2018.shp") %>%
+
+  #st_read("/Users/annaduan/Desktop/Y3S2/Practicum/Data/TreeCanopyChange_2008_2018-shp/TreeCanopyChange_2008_2018.shp") %>%
+  #st_read("C:/Users/agarw/Documents/MUSA 801/Data/TreeCanopyChange_2008_2018.shp") %>%
 
   st_transform('ESRI:102728')
 
@@ -130,9 +137,13 @@ Philadelphia <- st_read("http://data.phl.opendata.arcgis.com/datasets/405ec3da94
 Neighborhood <- 
 
   #st_read("C:/Users/Kyle McCarthy/Documents/Practicum/Data/Neighborhoods/Neighborhoods_Philadelphia.shp") %>%
- # st_read("/Users/annaduan/Desktop/Y3S2/Practicum/Data/Neighborhoods_Philadelphia/Neighborhoods_Philadelphia.shp")%>%
+  #st_read("/Users/annaduan/Desktop/Y3S2/Practicum/Data/Neighborhoods_Philadelphia/Neighborhoods_Philadelphia.shp")%>%
  # st_read("C:/Users/agarw/Documents/MUSA 801/Data/Neighborhoods_Philadelphia.shp") %>%
-st_read("C:/Users/Prince/Desktop/Tree Canopy Data/Neighborhoods_Philadelphia/Neighborhoods_Philadelphia.shp") %>%
+
+  st_read("C:/Users/Kyle McCarthy/Documents/Practicum/Data/Neighborhoods/Neighborhoods_Philadelphia.shp") %>%
+  #st_read("/Users/annaduan/Desktop/Y3S2/Practicum/Data/Neighborhoods_Philadelphia/Neighborhoods_Philadelphia.shp")%>%
+  #st_read("C:/Users/agarw/Documents/MUSA 801/Data/Neighborhoods_Philadelphia.shp") %>%
+
   st_transform('ESRI:102728')
 
 Neighborhood <- 
@@ -141,12 +152,26 @@ Neighborhood <-
   mutate(NArea = as.numeric(NArea))
 
 # Tree inventory
-#tree_inventory <-
- # st_read("http://data.phl.opendata.arcgis.com/datasets/957f032f9c874327a1ad800abd887d17_0.geojson") %>%
- # st_transform('ESRI:102728')
+tree_inventory <- 
+  st_read("http://data.phl.opendata.arcgis.com/datasets/957f032f9c874327a1ad800abd887d17_0.geojson") %>%
+  st_transform('ESRI:102728')
 
-HOLC <- #st_read("/Users/annaduan/Desktop/Y3S2/Practicum/Data/PAPhiladelphia1937.geojson") %>%
-  st_read("C:/Users/Prince/Desktop/Tree Canopy Data/PAPhiladelphia1937.geojson") %>%
+#Construction permits
+# const_permits <- 
+#   st_read("C:/Users/agarw/Documents/MUSA 801/Data/const_permit.csv") %>%
+#   mutate(X = geocode_x,
+#          Y = geocode_y) 
+# const_permits[const_permits==""]<-NA
+# const <- const_permits %>% drop_na(X,Y)
+# const_spatial <- st_as_sf(const, coords = c("X","Y"), crs = 6565, agr = "constant")
+# const_spatial <- const_spatial %>% st_transform('ESRI:102728')
+# const <- const_spatial %>%
+#   filter(permitissuedate <= '30/06/2017 00:00')
+# ggplot()+
+#   geom_sf(data = Philadelphia) +
+#   geom_sf(data = const)
+
+HOLC <- st_read("/Users/annaduan/Desktop/Y3S2/Practicum/Data/PAPhiladelphia1937.geojson") %>%
   st_transform('ESRI:102728')
 
 HOLC <- 
@@ -165,12 +190,12 @@ Canopy18 <-
   TreeCanopy%>%
   filter(CLASS_NAME != "Loss")
 
-
 Canopy08 <- 
   TreeCanopy%>%
   filter(CLASS_NAME != "Gain")
- 
 
+
+library(ggplot2)
 
 grid.arrange(ncol=2,
 ggplot()+ 
@@ -183,9 +208,6 @@ ggplot()+
   labs(title= "Tree Canopy Coverage, 2018 ")+
   theme(plot.title = element_text(hjust = 0.1, size= 12))+
   mapTheme())
-
-rm(Canopy08)
-rm(Canopy18)
 
 ```
 
@@ -304,8 +326,8 @@ FinalNeighborhood$GoalCat <- cut(FinalNeighborhood$PctUnderGoal,
                        right = FALSE)
 
 FinalNeighborhood$GainMinusLossCat <- cut(FinalNeighborhood$GainMinusLoss, 
-                      breaks = c(-Inf, -75000, -50000, -25000, 0, Inf), 
-                       labels = c("Greater Than 75000 Squared Feet lost", "50000-75000 Squared Feet Lost", "25000-50000 Squared Feet Lost", "0-25000 Squared Feet Lost", "Tree Canopy Gain!"), 
+                      breaks = c(-Inf, -1500000, -1000000, -500000, 0, Inf), 
+                       labels = c("Greater Than 1500000 Squared Feet lost", "1000000-1500000 Squared Feet Lost", "500000-1000000 Squared Feet Lost", "0-25000 Squared Feet Lost", "Tree Canopy Gain!"), 
                        right = FALSE)
 
 
@@ -313,7 +335,7 @@ FinalNeighborhood$GainMinusLossCat <- cut(FinalNeighborhood$GainMinusLoss,
 
 ggplot() +
   geom_sf(data = FinalNeighborhood, aes(fill = GoalCat), color = "white") +
-  scale_fill_manual(values = palette2, 
+  scale_fill_manual(values = GoalPalette, 
                     name = "Percent Away From Achieving 30% Goal")+
   labs(title = "How Far is Each Neighborhood Away From Meeting\n Philadelphia's 30% Tree Canopy Goal in Each Neighborhood?") +
   theme(plot.title = element_text(hjust = 0.5, size = 8), 
@@ -322,8 +344,8 @@ ggplot() +
   mapTheme() 
 
 ggplot() +
-  geom_sf(data = FinalNeighborhood, aes(fill = GainMinusLossCat)) +
-  scale_fill_manual(values = palette2, name = "Gain or Loss")+ 
+  geom_sf(data = FinalNeighborhood, aes(fill = GainMinusLossCat), color = "white") +
+  scale_fill_manual(values = GainPalette, name = "Gain or Loss")+ 
   labs(title = "What is the Tree Canopy Net Gain or Loss \nin Each Neighborhood from 2008 - 2018?") +
   theme(plot.title = element_text(hjust = 0.5, size = 6))+
   mapTheme()
@@ -440,7 +462,8 @@ FinalFishnet <-
 
 FinalFishnet<- 
   fishnet%>%
-  left_join(FinalFishnet)
+  left_join(FinalFishnet)%>%
+  na.omit()
 
 
 ```
@@ -450,12 +473,12 @@ FinalFishnet<-
 
 FinalFishnet$pctCoverage08Cat <- cut(FinalFishnet$pctCoverage08, 
                       breaks = c(-Inf, 5, 10, 15, 20, 25, 30, 50, Inf), 
-                       labels = c("0-5", "5-10", "10-15", "15-20", "20-25", "25-30", "30-50", "50-100"), 
+                       labels = c("0%-5%", "5%-10%", "10%-15%", "15%-20%", "20%-25%", "25%-30%", "30%-50%", "50%-100%"), 
                        right = FALSE)
 
 FinalFishnet$pctCoverage18Cat <- cut(FinalFishnet$pctCoverage18, 
                       breaks = c(-Inf, 5, 10, 15, 20, 25, 30, 50, Inf), 
-                       labels = c("0-5", "5-10", "10-15", "15-20", "20-25", "25-30", "30-50", "50-100"), 
+                       labels = c("0%-5%", "5%-10%", "10%-15%", "15%-20%", "20%-25%", "25%-30%", "30%-50", "50%-100%"), 
                        right = FALSE)
 
 FinalFishnet$AreaLossCat <- cut(FinalFishnet$AreaLoss, 
@@ -469,13 +492,13 @@ FinalFishnet$AreaGainCat <- cut(FinalFishnet$AreaGain,
                        right = FALSE)
 
 FinalFishnet$pctGainCat <- cut(FinalFishnet$pctGain, 
-                      breaks = c(-Inf,10, 20, 30, 40, 50, 60, 70, 80, 90, Inf), 
-                       labels = c("0%-10%", "10%-20%", "20%-30%-", "30%-40%", "40%-50%", "50%-60%", "60%-70%", "70%-80%", "80%-90%", "90%-100%"), 
+                      breaks = c(-Inf,20, 40, 60, 80, Inf), 
+                       labels = c("0%-20% Gain", "20%-40% Gain", "40%-60% Gain", "60%-80% Gain", "80%-100% Gain"), 
                        right = FALSE)
 
 FinalFishnet$pctLossCat <- cut(FinalFishnet$pctLoss, 
-                       breaks = c(-Inf,10, 20, 30, 40, 50, 60, 70, 80, 90, Inf), 
-                       labels = c("0%-10%", "10%-20%", "20%-30%-", "30%-40%", "40%-50%", "50%-60%", "60%-70%", "70%-80%", "80%-90%", "90%-100%"), 
+                       breaks = c(-Inf,20, 40, 60, 80, Inf), 
+                       labels = c("0%-20% Loss", "20%-40% Loss", "40%-60% Loss", "60%-80% Loss", "80%-100% Loss"), 
                        right = FALSE)
 
 
@@ -495,7 +518,7 @@ ggplot()+
 ggplot()+ 
   geom_sf(data = FinalFishnet, aes(fill = pctCoverage18Cat))+ 
      scale_fill_manual(values = palette6, 
-                    name = "2008 Percent Coverage")+ 
+                    name = "2018 Percent Coverage")+ 
   labs(title = "Tree Canopy Coverage, 2018", 
 subtitle = "2018 Tree Canopy Area / Gridcell Size") + 
   theme(plot.title = element_text(size = 30, face = "bold"), 
@@ -506,7 +529,7 @@ grid.arrange(ncol=2,
              
 ggplot()+ 
   geom_sf(data = FinalFishnet, aes(fill = AreaGainCat))+ 
-  scale_fill_manual(values = palette2,
+  scale_fill_manual(values = palette7,
                     name = "Area Gain (ft^2)")+
   labs(title= "How Much Tree Canopy was Gained in Each Gridcell \n from 2008 - 2018?")+
  theme(plot.title = element_text(size = 24, face = "bold", hjust = 0.5), 
@@ -515,7 +538,7 @@ ggplot()+
 
 ggplot()+ 
   geom_sf(data = FinalFishnet, aes(fill = AreaLossCat))+ 
-  scale_fill_manual(values = palette2,
+  scale_fill_manual(values = palette7,
                     name = "Area Loss (f^2)")+
   labs(title= "How Much Tree Canopy Was Lost in Each Gridcell \n From 2008 - 2018?")+
   theme(plot.title = element_text( size = 24, face = "bold", hjust = 0.5), 
@@ -527,7 +550,7 @@ grid.arrange(ncol=2,
              
 ggplot()+ 
   geom_sf(data = FinalFishnet, aes(fill = pctLossCat))+ 
-  scale_fill_manual(values = palette6,
+  scale_fill_manual(values = palette7,
                     name = "Percent Loss")+
   labs(title= "What was the Percent of Tree Canopy Loss in Each Grid Cell?", 
        subtitle = "Tree Canopy Lost From 2008 - 2018 / Total Tree Canopy Coverage in 2008")+
@@ -536,7 +559,7 @@ ggplot()+
              
 ggplot()+ 
   geom_sf(data = FinalFishnet, aes(fill = pctGainCat))+ 
-  scale_fill_manual(values = palette6,
+  scale_fill_manual(values = palette7,
                     name = "Percent Gain")+
   labs(title= "What was the Percent of Tree Canopy Gain in Each Grid Cell?", 
        subtitle = "Tree Canopy Gained From 2008 - 2018 / Total Tree Canopy Coverage in 2018")+
@@ -603,10 +626,10 @@ ggplot(FinalFishnet, aes(x = PctGainMinusLoss, y = AreaCoverage18))+
 # Census ACS
 census_api_key("d9ebfd04caa0138647fbacd94c657cdecbf705e9", install = FALSE, overwrite = TRUE)
 
-# Variables: Median Rent, Median HH Income, Population, Bachelor's, No Vehicle (home owner, renter), Households (owner, renter-occupied), total housing units, white, italian
+# Variables: Median Rent, Median HH Income, Population, Bachelor's, No Vehicle (home owner, renter), Households (owner, renter-occupied), total housing units, white
 
 ACS <-  
-  get_acs(geography = "tract", variables = c("B25058_001E", "B19013_001E", "B01003_001E", "B06009_005E", "B25044_003E", "B25044_010E", "B07013_002E", "B07013_003E", "B25001_001E", "B01001A_001E", "B04001_051E"), 
+  get_acs(geography = "tract", variables = c("B25058_001E", "B19013_001E", "B01003_001E", "B06009_005E", "B25044_003E", "B25044_010E", "B07013_002E", "B07013_003E", "B25001_001E", "B01001A_001E"), 
           year=2018, state=42, county=101, geometry=T) %>% 
   st_transform('ESRI:102728')
 
@@ -626,8 +649,7 @@ ACS <-
          Households_hmow = B07013_002,
          Households_hmre = B07013_003,
          housing_units = B25001_001,
-         white = B01001A_001, 
-         italian = B04001_051)
+         white = B01001A_001)
 st_drop_geometry(ACS)[1:3,]
 
 
@@ -675,17 +697,22 @@ ACS_net <-
   mutate(uniqueID = as.character(uniqueID))
 
 
+
 FinalFishnet <- 
   FinalFishnet%>%
   left_join(ACS_net)
+  
+
+
+
 ```
 
-The demographic attribute most correlated with tree canopy coverage is income.
+The demographic attribute most correlated with tree canopy coverage is income, as expected.
 ```{r Comparing Demographics to Fishnet Variables, fig.height = 18, fig.width = 13}
 
 correlation.long <-
   st_drop_geometry(FinalFishnet) %>%
-     dplyr::select(population, medHHInc, housing_units, Rent, pctBach, pctWhite, pctNoVehicle, GainMinusLoss, italian) %>%
+     dplyr::select(population, medHHInc, housing_units, Rent, pctBach, pctWhite, pctNoVehicle, GainMinusLoss) %>%
     gather(Variable, Value, -GainMinusLoss)
 
 correlation.cor <-
@@ -708,7 +735,7 @@ correlation.cor1 <-
 
 correlation.long2 <-
   st_drop_geometry(FinalFishnet) %>%
-     dplyr::select(population, medHHInc, housing_units, Rent, pctBach, pctWhite, italian, pctNoVehicle, pctGain) %>%
+     dplyr::select(population, medHHInc, housing_units, Rent, pctBach, pctWhite, pctNoVehicle, pctGain) %>%
     gather(Variable, Value, -pctGain)
 
 correlation.cor2 <-
@@ -720,7 +747,7 @@ correlation.cor2 <-
 
 correlation.long3 <-
   st_drop_geometry(FinalFishnet) %>%
-     dplyr::select(population, medHHInc, housing_units, Rent, pctBach, pctWhite, italian, pctNoVehicle, pctCoverage18) %>%
+     dplyr::select(population, medHHInc, housing_units, Rent, pctBach, pctWhite, pctNoVehicle, pctCoverage18) %>%
     gather(Variable, Value, -pctCoverage18)
 
 correlation.cor3 <-
@@ -765,7 +792,10 @@ grid.arrange(ncol=2, top=textGrob("Ishnet Variables in Comparison to Local Demog
   facet_wrap(~Variable, ncol = 2, scales = "free") +
   labs(title = "Percent Tree Canopy Coverage (2018)") +
   plotTheme()) 
-           
+  
+  
+  
+             
 ```
 
 ```{r Demographics, message=FALSE, warning=FALSE, results='hide'}
@@ -876,8 +906,8 @@ TreeCanopyLossHOLC<-
 
 ggplot() +
   geom_sf(data = Philadelphia, colour = "gray90", fill = "gray90") + 
-    geom_sf(data = Loss, colour = "red", fill = "transparent") +
-  geom_sf(data = HOLC, aes(fill = holc_grade), alpha = 0.5, colour = "gray90") +
+  geom_sf(data = HOLC, aes(fill = holc_grade), colour = "gray90") +
+  geom_sf(data = Loss, colour = "red", fill = "transparent") +
   scale_fill_manual(values = paletteHolc) +
   labs(title = "Tree Canopy Loss and Redlining", subtitle = "Philadelphia, PA") +
   mapTheme()
@@ -922,72 +952,3 @@ summary(ParcelReg)
 
 ```
 
-```{r Const_Permit, message=FALSE, warning=FALSE, results='hide', fig.height = 7, fig.width = 8, cache=TRUE}
-
-const_permits <- 
-  #st_read("C:/Users/agarw/Documents/MUSA 801/Data/const_permit.csv") %>%
- # st_read("/Users/annaduan/Desktop/Y3S2/Practicum/Data/const_permit.csv") %>%
-  st_read("C:\Users\Prince\Desktop\Tree Canopy Data\const_permit.csv")%>%
-  mutate(X = geocode_x,
-         Y = geocode_y) 
-const_permits[const_permits==""]<-NA
-const <- const_permits %>% drop_na(X,Y)
-const_spatial <- st_as_sf(const, coords = c("X","Y"), crs = 6565, agr = "constant")
-const_spatial <- const_spatial %>% st_transform('ESRI:102728')
-
-# const <- const_spatial %>% 
-#   filter(permitissuedate <= '30/06/2017 00:00')
-
-ggplot()+
-  geom_sf(data = Philadelphia) +
-  geom_sf(data = const_spatial)
-
-### Aggregate points to the neighborhood
-## add a value of 1 to each crime, sum them with aggregate
-const_net <- 
-  dplyr::select(const_spatial) %>% 
-  mutate(countConst = 1) %>% 
-  aggregate(., Neighborhood, sum) %>%
-  mutate(countConst = replace_na(countConst, 0),
-         neigh = Neighborhood$NAME)
-
-grid.arrange(ncol=2,
-             
-                ggplot() +
-                 geom_sf(data = const_net, aes(fill = countConst), color = NA) +
-                  scale_fill_viridis() +
-                  labs(title = "Count of Construction permits for the neighborhood") +
-                  mapTheme(),
-                
-                ggplot() +
-                  geom_sf(data = FinalNeighborhood, aes(fill = GoalCat), color = NA) +
-                  scale_fill_manual(values = palette5, 
-                                    name = "Percent Away From Achieving 30% Goal")+
-                  labs(title = "How Far is Each Neighborhood Away From Meeting\n Philadelphia's 30% Tree Canopy Goal in Each Neighborhood?") +
-                  theme(plot.title = element_text(hjust = 0.5, size = 8), 
-                        legend.position = "bottom", 
-                        legend.title = element_blank())+
-                  mapTheme())
-
-const_net_fish <- 
-  dplyr::select(const_spatial) %>% 
-  mutate(countConst = 1) %>% 
-  aggregate(., fishnet, sum) %>%
-  mutate(countConst = replace_na(countConst, 0),
-         uniqueID = rownames(.))
-
-grid.arrange(ncol=2,
-             
-             ggplot() +
-             geom_sf(data = const_net_fish, aes(fill = countConst), color = NA) +
-               scale_fill_viridis() +
-               labs(title = "Count of Construction permits for the fishnet") +
-               mapTheme(),
-             
-             ggplot()+ 
-               geom_sf(data = FinalFishnet, aes(fill = AreaLossCat))+ 
-               scale_fill_manual(values = palette5,
-                                 name = "Area Loss (f^2)")+
-               labs(title= "How Much Tree Canopy Was Lost in Each Gridcell \n From 2008 - 2018?")+
-               mapTheme())
-```
