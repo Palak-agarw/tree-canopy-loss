@@ -40,7 +40,7 @@ So using the information above, we will create a planning tool that allows plann
 
 [Gantt Chart](Gantt.png)
 
-```{r setup, message=FALSE, warning=FALSE, include=TRUE, results='hide'}
+```{r setup, message=FALSE, warning=FALSE, include=TRUE, results='hide', cache=TRUE}
 knitr::opts_chunk$set(warning = FALSE, message = FALSE)
 options(scipen=10000000)
 library(knitr)
@@ -185,6 +185,7 @@ The University of Vermont Spatial Analysis Lab defines each tree canopy area as 
 
 ```{r Tree Canopy 08, 18, message=FALSE, warning=FALSE, cache=TRUE, include=TRUE, results='hide', fig.height = 6, fig.width = 9}
 
+<<<<<<< HEAD
 # Where is tree canopy coverage 
 Canopy18 <- 
   TreeCanopy%>%
@@ -194,21 +195,29 @@ Canopy08 <-
   TreeCanopy%>%
   filter(CLASS_NAME != "Gain")
 
+=======
+>>>>>>> 1482beb81f0328cb835a137c6dea9d438ac1cbff
 
 library(ggplot2)
 
 grid.arrange(ncol=2,
 ggplot()+ 
-  geom_sf(data = Canopy08, fill = "black", color = NA)+ 
+  geom_sf(data =   TreeCanopy%>%
+  filter(CLASS_NAME != "Gain"), fill = "black", color = NA)+ 
   labs(title= "Tree Canopy Coverage, 2008 ")+
   theme(plot.title = element_text(hjust = 0.1, size= 12))+ mapTheme(), 
 
 ggplot()+ 
-  geom_sf(data = Canopy18, fill = "red", color = NA)+ 
+  geom_sf(data =   TreeCanopy%>%
+  filter(CLASS_NAME != "Loss"), fill = "red", color = NA)+ 
   labs(title= "Tree Canopy Coverage, 2018 ")+
   theme(plot.title = element_text(hjust = 0.1, size= 12))+
   mapTheme())
 
+<<<<<<< HEAD
+=======
+
+>>>>>>> 1482beb81f0328cb835a137c6dea9d438ac1cbff
 ```
 
 ```{r Tree Canopy Change, message=FALSE, warning=FALSE, cache=TRUE, include=TRUE, results='hide', fig.height = 8, fig.width = 9}
@@ -236,7 +245,7 @@ fishnet <-
 
 ## Exploratory Analysis
 
-```{r Where is Philadelphia achieving The 30 Percent Goal?, message=FALSE, warning=FALSE, results='hide', fig.height = 7, fig.width = 8, cache=TRUE}
+```{r The 30 Percent Goal, message=FALSE, warning=FALSE, results='hide', fig.height = 7, fig.width = 8, cache=TRUE}
 
 # Tree Loss by Neighborhood
 TreeCanopyAllN<- 
@@ -353,7 +362,7 @@ ggplot() +
 ```
 
 
-```{r Fishnet Aggregation2, message=FALSE, warning=FALSE, results='hide'}
+```{r Fishnet Aggregation2, message=FALSE, warning=FALSE, results='hide', cache=TRUE}
 
 # Make canopy loss layers
 TreeCanopyAll<- 
@@ -469,7 +478,7 @@ FinalFishnet<-
 ```
 
 
-```{r Fishnet Aggregation, message=FALSE, warning=FALSE, results='hide', fig.height = 8, fig.width = 15}
+```{r Fishnet Aggregation, message=FALSE, warning=FALSE, results='hide', fig.height = 8, fig.width = 15,  cache=TRUE}
 
 FinalFishnet$pctCoverage08Cat <- cut(FinalFishnet$pctCoverage08, 
                       breaks = c(-Inf, 5, 10, 15, 20, 25, 30, 50, Inf), 
@@ -568,7 +577,7 @@ ggplot()+
 ```
 
 
-```{r Gain Minus Loss, message=FALSE, warning=FALSE, results='hide', fig.height = 8, fig.width = 8}
+```{r Gain Minus Loss, message=FALSE, warning=FALSE, results='hide', fig.height = 8, fig.width = 8,  cache=TRUE}
 
 FinalFishnet$PctGainMinusLossCat <- cut(FinalFishnet$PctGainMinusLoss, 
                        breaks = c(-Inf, -50, -40, -30, -20, -10, 0, 10, 20, Inf), 
@@ -589,7 +598,7 @@ ggplot()+
 
 ```
 
-```{r Comparing Tree Canopy Area to Loss/Gain2, message=FALSE, warning=FALSE, fig.height = 8, fig.width = 12 }
+```{r Comparing Tree Canopy Area to Loss/Gain2, message=FALSE, warning=FALSE, fig.height = 8, fig.width = 12,  cache=TRUE}
 
 grid.arrange(ncol=2,
              
@@ -620,7 +629,7 @@ ggplot(FinalFishnet, aes(x = PctGainMinusLoss, y = AreaCoverage18))+
 
 ```
 
-```{r Comparing Tree Canopy Area to Loss/Gain, message=FALSE, warning=FALSE, fig.height = 7, fig.width = 10 }
+```{r Comparing Tree Canopy Area to Loss/Gain, message=FALSE, warning=FALSE, fig.height = 7, fig.width = 10,  cache=TRUE}
 
 
 # Census ACS
@@ -629,7 +638,11 @@ census_api_key("d9ebfd04caa0138647fbacd94c657cdecbf705e9", install = FALSE, over
 # Variables: Median Rent, Median HH Income, Population, Bachelor's, No Vehicle (home owner, renter), Households (owner, renter-occupied), total housing units, white
 
 ACS <-  
+<<<<<<< HEAD
   get_acs(geography = "tract", variables = c("B25058_001E", "B19013_001E", "B01003_001E", "B06009_005E", "B25044_003E", "B25044_010E", "B07013_002E", "B07013_003E", "B25001_001E", "B01001A_001E"), 
+=======
+  get_acs(geography = "tract", variables = c("B25058_001E", "B19013_001E", "B01003_001E", "B06009_005E", "B25044_003E", "B25044_010E", "B07013_002E", "B07013_003E", "B25001_001E", "B01001A_001E", "B04004_051E"), 
+>>>>>>> 1482beb81f0328cb835a137c6dea9d438ac1cbff
           year=2018, state=42, county=101, geometry=T) %>% 
   st_transform('ESRI:102728')
 
@@ -649,7 +662,12 @@ ACS <-
          Households_hmow = B07013_002,
          Households_hmre = B07013_003,
          housing_units = B25001_001,
+<<<<<<< HEAD
          white = B01001A_001)
+=======
+         white = B01001A_001, 
+         italian = B04004_051)
+>>>>>>> 1482beb81f0328cb835a137c6dea9d438ac1cbff
 st_drop_geometry(ACS)[1:3,]
 
 
@@ -707,8 +725,13 @@ FinalFishnet <-
 
 ```
 
+<<<<<<< HEAD
 The demographic attribute most correlated with tree canopy coverage is income, as expected.
 ```{r Comparing Demographics to Fishnet Variables, fig.height = 18, fig.width = 13}
+=======
+The demographic attribute most correlated with tree canopy coverage is income.
+```{r Comparing Demographics to Fishnet Variables, fig.height = 18, fig.width = 13,  cache=TRUE}
+>>>>>>> 1482beb81f0328cb835a137c6dea9d438ac1cbff
 
 correlation.long <-
   st_drop_geometry(FinalFishnet) %>%
@@ -879,7 +902,7 @@ grid.arrange(ncol=2, top=textGrob("Ishnet Variables in Comparison to Local Demog
 
 ```
 
-```{r HOLC, message=FALSE, warning=FALSE, results='hide'}
+```{r HOLC, message=FALSE, warning=FALSE, results='hide',  cache=TRUE}
 TreeCanopyAllHOLC <-
 TreeCanopy%>%
 st_make_valid() %>%
@@ -925,12 +948,14 @@ ggplot()+
 
 ```
 
-```{r Potential Risk Factors, fig.height = 18, fig.width = 13}
+```{r Potential Risk Factors, fig.height = 18, fig.width = 13,  cache=TRUE}
 
 # Parcels 
 
 parcels <- st_read("http://data-phl.opendata.arcgis.com/datasets/1c57dd1b3ff84449a4b0e3fb29d3cafd_0.geojson")%>%
-  st_transform('ESRI:102728')%>%
+  st_transform('ESRI:102728')
+
+parcels %>%
   mutate(ParcelArea = st_area(parcels))%>%
   st_centroid()%>%
   dplyr:: select(ParcelArea)
@@ -938,7 +963,9 @@ parcels <- st_read("http://data-phl.opendata.arcgis.com/datasets/1c57dd1b3ff8444
 
 FinalFishnet1 <- 
   FinalFishnet%>%
-  st_join(parcels)%>%
+  st_join(parcels)
+
+FinalFishnet1 %>%
   group_by(uniqueID)%>%
   summarise(avgParcelSize = mean(ParcelArea))%>%
   st_drop_geometry() 
