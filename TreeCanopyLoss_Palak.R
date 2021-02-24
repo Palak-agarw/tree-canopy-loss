@@ -16,7 +16,7 @@ library(ggplot2)
 library(entropy)
 
 root.dir = "https://raw.githubusercontent.com/urbanSpatial/Public-Policy-Analytics-Landing/master/DATA/"
-inssource("https://raw.githubusercontent.com/urbanSpatial/Public-Policy-Analytics-Landing/master/functions.r")
+source("https://raw.githubusercontent.com/urbanSpatial/Public-Policy-Analytics-Landing/master/functions.r")
 
 paletteGray <- c("gray90", "gray70", "gray50", "gray30", "gray10")
 
@@ -801,14 +801,18 @@ const_spatial <- const_spatial %>% st_transform('ESRI:102728')
 # const <- const_spatial %>%
 #   filter(permitissuedate <= '30/06/2017 00:00')
 
+const_spatial2 <-
+  const_spatial %>%
+  filter(permitdescription == 'RESIDENTIAL BUILDING PERMIT ' | permitdescription == 'COMMERCIAL BUILDING PERMIT')
+
 ggplot()+
   geom_sf(data = Philadelphia) +
-  geom_sf(data = const_spatial)
+  geom_sf(data = const_spatial2)
 
 ### Aggregate points to the neighborhood
 ## add a value of 1 to each crime, sum them with aggregate
 const_net <- 
-  dplyr::select(const_spatial) %>% 
+  dplyr::select(const_spatial2) %>% 
   mutate(countConst = 1) %>% 
   aggregate(., Neighborhood, sum) %>%
   mutate(countConst = replace_na(countConst, 0),
@@ -833,7 +837,7 @@ grid.arrange(ncol=2,
                   mapTheme())
 
 const_net_fish <- 
-  dplyr::select(const_spatial) %>% 
+  dplyr::select(const_spatial2) %>% 
   mutate(countConst = 1) %>% 
   aggregate(., fishnet, sum) %>%
   mutate(countConst = replace_na(countConst, 0),
@@ -853,3 +857,5 @@ grid.arrange(ncol=2,
                                  name = "Area Loss (f^2)")+
                labs(title= "How Much Tree Canopy Was Lost in Each Gridcell \n From 2008 - 2018?")+
                mapTheme())
+
+  
