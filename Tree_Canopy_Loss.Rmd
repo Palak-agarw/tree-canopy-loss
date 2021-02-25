@@ -8,12 +8,23 @@ output:
     theme: cosmo
     toc_float: true
     code_folding: hide
-    number_sections: TRUE
+    number_sections: FALSE
 ---
 
 
-## Introduction: The Use Case
-The aim of this project is identify risk for tree canopy loss in Philadelphia, PA. The urban tree canopy is important for many reasons including public health and recreation, and Philadelphia has a goal of achieving 30% tree canopy coverage in each neighborhood. To perform this analysis, we look at risk factors including development and neighborhood demographic attributes.
+## Introduction
+Between 2008 and 2018, Philadelphia lost more than 1000 football fields' equivalent of tree canopy. Most of this loss occurred in historically disenfranchised communities. The City of Philadelphia has set important milestones for conserve and increase the current tree canopy in the city. In this analysis, we assess neighborhoods which meet these goals, ones which are close, and ones which are far from the goals. Using this information, we identify risk factors for tree canopy loss in the city and create a planning tool which helps tree planting organizations best allocate their limited resources of money, trees, and labor.
+
+### Why does the tree canopy matter?
+Tree canopy is defined as the area of land which, viewed from a bird's eye view, is covered by trees. Trees offer important benefits to cities including mitigating the urban heat island effect, absorbing stormwater runoff, a habitat for wildlife, and aesthetic and recreational benefits. In addition, trees are a preventative public health measure that improves mental health, increases social interactions and activity, and reduce crime, violence, and stress. A 2020 study published in The Lancet found that if Philadelphia reaches 30% tree canopy in all of its neighborhoods, the city would see (403 fewer premature deaths)[https://www.fs.fed.us/nrs/pubs/jrnl/2020/nrs_2020_kondo_001.pdf] per year.
+
+### Philadelphia's Tree Canopy Goals
+**30% Tree Canopy in each neighborhood by 2025**  
+Philadelphia has set the goal of achieving 30% tree canopy coverage in all neighborhoods by 2025. Currently, the citywide average is 20%, although this is highly uneven. More affluent neighborhoods in the northwest that have many parks and large lawns have much higher tree canopy than industrial neighborhoods in south and north Philadelphia which are full of impervious surfaces. The neighborhoods which have lower canopy coverage tend to be historically disenfranchised, lower income, and predominantly communities of color. This is an environmental justice problem. Neighborhoods like Philadelphia's Hunting Park have a much lower ratio of tree canopy to impervious surfaces than the citywide average, resulting in higher temperatures during summertime heat waves and poorer air quality. 
+
+**1 acre of tree canopy within a 10 minute walk for all residents**
+13% of Philadelphia's residents are considered underserved by green space, meaning that they live more than a 10 minute walk away from at least 1 acre of green space. The city has therefore set a goal of ensuring that all residents are no more than 10 minutes away from at least 1 acre of green space by 2035. To this end, the city is prioritizing adding green space in historically disenfranchised neighborhoods and making efforts to green spaces in schools and recreation centers. 
+
 
 Our use case mainly includes these 4 important questions and explorations:   
 1. What are the risk factors for tree canopy loss?  
