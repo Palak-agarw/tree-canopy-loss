@@ -12,52 +12,53 @@ output:
 ---
 
 
-## Introduction
-Between 2008 and 2018, Philadelphia lost more than 1000 football fields' equivalent of tree canopy. Most of this loss occurred in historically disenfranchised communities. The City of Philadelphia has set important milestones for conserve and increase the current tree canopy in the city. In this analysis, we assess neighborhoods which meet these goals, ones which are close, and ones which are far from the goals. Using this information, we identify risk factors for tree canopy loss in the city and create a planning tool which helps tree planting organizations best allocate their limited resources of money, trees, and labor.
+## Introduction  
+Between 2008 and 2018, Philadelphia lost more than 1000 football fields' equivalent of tree canopy. Most of this loss occurred in historically disenfranchised communities. The City of Philadelphia has set important milestones for conserve and increase the current tree canopy in the city. In this analysis, we assess neighborhoods which meet these goals, ones which are close, and ones which are far from the goals. Using this information, we identify risk factors for tree canopy loss in the city and create a planning tool which helps tree planting organizations best allocate their limited resources of money, trees, and labor.  
 
-### Why does the tree canopy matter?
-Tree canopy is defined as the area of land which, viewed from a bird's eye view, is covered by trees. Trees offer important benefits to cities including mitigating the urban heat island effect, absorbing stormwater runoff, a habitat for wildlife, and aesthetic and recreational benefits. In addition, trees are a preventative public health measure that improves mental health, increases social interactions and activity, and reduce crime, violence, and stress. A 2020 study published in The Lancet found that if Philadelphia reaches 30% tree canopy in all of its neighborhoods, the city would see (403 fewer premature deaths)[https://www.fs.fed.us/nrs/pubs/jrnl/2020/nrs_2020_kondo_001.pdf] per year.
+### Why does the tree canopy matter?  
+Tree canopy is defined as the area of land which, viewed from a bird's eye view, is covered by trees. Trees offer important benefits to cities including mitigating the urban heat island effect, absorbing stormwater runoff, a habitat for wildlife, and aesthetic and recreational benefits. In addition, trees are a preventative public health measure that improves mental health, increases social interactions and activity, and reduce crime, violence, and stress. A 2020 study published in The Lancet found that if Philadelphia reaches 30% tree canopy in all of its neighborhoods, the city would see [403 fewer premature deaths](https://www.fs.fed.us/nrs/pubs/jrnl/2020/nrs_2020_kondo_001.pdf) per year.  
 
-### Philadelphia's Tree Canopy Goals
+### Philadelphia's Tree Canopy Goals  
 **30% Tree Canopy in each neighborhood by 2025**  
-Philadelphia has set the goal of achieving 30% tree canopy coverage in all neighborhoods by 2025. Currently, the citywide average is 20%, although this is highly uneven. More affluent neighborhoods in the northwest that have many parks and large lawns have much higher tree canopy than industrial neighborhoods in south and north Philadelphia which are full of impervious surfaces. The neighborhoods which have lower canopy coverage tend to be historically disenfranchised, lower income, and predominantly communities of color. This is an environmental justice problem. Neighborhoods like Philadelphia's Hunting Park have a much lower ratio of tree canopy to impervious surfaces than the citywide average, resulting in higher temperatures during summertime heat waves and poorer air quality. 
+Philadelphia has set the goal of achieving 30% tree canopy coverage in all neighborhoods by 2025. Currently, the citywide average is 20%, although this is highly uneven. More affluent neighborhoods in the northwest that have many parks and large lawns have much higher tree canopy than industrial neighborhoods in south and north Philadelphia which are full of impervious surfaces. The neighborhoods which have lower canopy coverage tend to be historically disenfranchised, lower income, and predominantly communities of color. This is an environmental justice problem. Neighborhoods like Philadelphia's Hunting Park have a much lower ratio of tree canopy to impervious surfaces than the citywide average, resulting in higher temperatures during summertime heat waves and poorer air quality.  
 
-**1 acre of tree canopy within a 10 minute walk for all residents**
-13% of Philadelphia's residents are considered underserved by green space, meaning that they live more than a 10 minute walk away from at least 1 acre of green space. The city has therefore set a goal of ensuring that all residents are no more than 10 minutes away from at least 1 acre of green space by 2035. To this end, the city is prioritizing adding green space in historically disenfranchised neighborhoods and making efforts to green spaces in schools and recreation centers. 
+**1 acre of tree canopy within a 10 minute walk for all residents**  
+13% of Philadelphia's residents are considered under-served by green space, meaning that they live more than a 10 minute walk away from at least 1 acre of green space. The city has therefore set a goal of ensuring that all residents are no more than 10 minutes away from at least 1 acre of green space by 2035. To this end, the city is prioritizing adding green space in historically disenfranchised neighborhoods and making efforts to green spaces in schools and recreation centers.   
 
+## The Planning Tool
+We propose ______, a web-based application which maps the current tree canopy, patterns of loss, canopy loss risk factors, and newly planted trees, as a planning tool to help Philadelphia tree planting organizations decide where to allocate their efforts. 
+* Demand side: composite layer of tree canopy (loss) and risk factor (e.g. asthma, premature mortality)
+* Supply side: approved tree organizations log where they planted trees so that organizations can collaborate on greening Philadelphia and know where interventions are most needed.  
 
-Our use case mainly includes these 4 important questions and explorations:   
-1. What are the risk factors for tree canopy loss?  
-2. Which neighborhood do not meet the 30% tree canopy coverage?   
-3. How do current patterns of tree canopy coverage and loss reflect disinvestment as a result of redlining and older planning practices?  
-4. After identifying the neighborhoods, where and how should PPR or other agencies intervene?  
+## Data and Methods
+Our analysis is guided by the following questions:   
 
-
-Planning tool :
-
-The first phase of Philadelphia2035 is the Citywide Vision, which establishes broad planning goals. It is the foundation of PCPC's current planning efforts. As a part of the vision, greening the city through the Renew program is one of the most important strategy. 
-The most basic rule for greening is Philly is that *every 10 minute walk should lead to an acre of park*. 
-
-![Sizes of Park](Park_1.JPG)
-
-As a part of that initiative, PCPC looked at different parcels and methods to reach that goal. Combining their efforts with community agencies and NGOs is a big part. 
-
-![Possible locations of intervention](Park_2.JPG)
-
-Through the process they have highlighted few areas which have a lack of green spaces and you can see the pattern of those areas and the redlined areas.
-
-![Lack of Parks](Park_3.JPG)
-
-So using the information above, we will create a planning tool that allows planners to chose specific neighborhoods and find agencies within it with which one can team to met the 30% goal. The tool will also identify possible land parcels which can be used to create new parks. 
-
-![Red Lining](Park_4.JPG)
-
-The redlined neighborhoods included sections of West Philadelphia and South Philadelphia, as well as areas near downtown. These were neighborhoods where few mortgage loans were distributed by financial and lending institutions and where the black population was significantly higher. 
+1. How does tree canopy loss vary across neighborhoods and sociodemographic contexts?
+2. What are the risk factors for tree canopy loss?    
+3. Which neighborhood do not meet the 30% tree canopy coverage?     
+4. How do current patterns of tree canopy coverage and loss reflect disinvestment as a result of redlining and older planning practices?   
+5. Where and how should Parks and Recreation and other tree planting organizations intervene?
 
 
-## Team Roles
+We use the following data:
 
-![Gantt Chart](Gantt.png)
+**Independent variable**: Tree Canopy LiDAR data consisting of canopy polygons marked as loss, gain, or no change from 2008-2018 [OpenDataPhilly](https://www.opendataphilly.org/dataset/ppr-tree-canopy)  
+
+**Neighborhood sociodemographic attributes**: 2018 [American Community Survey data](https://api.census.gov/data/2018/acs/acs5/variables.html) from the U.S. Census Bureau  
+
+**Neighborhoood level risk factors**:
+* Construction
+* Parcels
+* Streets
+* Impervious surfaces
+* 311 requests - tree based 
+* Temperature 
+* Pipelines
+* NDVI
+* Slope, aspect, soil type
+* Hydrology
+* Zoning
+* Home Prices
 
 ```{r setup, message=FALSE, warning=FALSE, include=TRUE, results='hide', cache=TRUE}
 knitr::opts_chunk$set(message = FALSE, warning = FALSE)
@@ -108,29 +109,7 @@ palette8 <- c("#2D6A4F", "#52B788", "#B7E4C7", "#ADE8F4", "#00B4D8", "#023E8A")
 
 ```
 
-## Methods
 
-#### Exploratory Analysis Questions
-1. How does tree canopy loss vary across neighborhoods and sociodemographic contexts?
-2. How is tree canopy loss affected by development?
-3. What’s the relationship between tree canopy health and built density in neighborhoods? (eg effect of urban heat island)
-
-#### Independent Variables
-* Impervious surfaces
-* Construction Permits
-* 311 requests - tree based 
-* Urban heat islands
-* Energy transmission/pipelines
-* Bike lanes
-* Distance to Parks
-* NDVI
-* Tree density
-* Soil type
-* Slope, Aspect
-* Hydrology
-* Zoning 
-* Home prices 
-* Demographics
 
 ```{r Data Wrangling, cache=TRUE, message=FALSE, warning=FALSE, include=TRUE, results='hide'}
 
@@ -1066,3 +1045,7 @@ TreeCanopyCoverage08Z<-
 
 
 ```
+
+## Team Roles
+
+![Gantt Chart](Gantt.png)
