@@ -361,7 +361,9 @@ TreeCanopyLoss <-
   
 TreeCanopyLoss<- 
   fishnet%>%
-  left_join(TreeCanopyLoss, by = 'uniqueID')
+  left_join(TreeCanopyLoss, by = 'uniqueID')%>%
+  dplyr::select('uniqueID', 'AreaLoss')%>%
+  st_drop_geometry()
 
 
 # Tree Canopy Gain 
@@ -372,15 +374,14 @@ TreeCanopyGain <-
   group_by(uniqueID)%>%
   summarise(AreaGain = sum(TreeArea))%>%
   mutate(pctGain = AreaGain / 2608225)%>%
-  st_drop_geometry()
-
-TreeCanopyGain<- 
-  TreeCanopyGain%>% 
+  st_drop_geometry()%>%
   dplyr::select(uniqueID, pctGain, AreaGain)
 
 TreeCanopyGain<- 
   fishnet%>%
-  left_join(TreeCanopyGain, by = 'uniqueID')
+  left_join(TreeCanopyGain, by = 'uniqueID')%>%
+  dplyr::select('uniqueID', 'AreaGain')%>%
+  st_drop_geometry()
 
 # Tree Canopy Coverage
 
@@ -394,7 +395,9 @@ TreeCanopyCoverage18 <-
 
 TreeCanopyCoverage18<- 
   fishnet%>%
-  left_join(TreeCanopyCoverage18)
+  left_join(TreeCanopyCoverage18)%>%
+  dplyr::select('uniqueID', 'AreaCoverage18', 'pctCoverage18')%>%
+  st_drop_geometry()
 
 TreeCanopyCoverage08 <- 
   TreeCanopyAll%>%
@@ -406,33 +409,13 @@ TreeCanopyCoverage08 <-
 
 TreeCanopyCoverage08<- 
   fishnet%>%
-  left_join(TreeCanopyCoverage08)
-
-# Loss / Coverage 
-
-TreeCanopyLoss1 <- 
-  TreeCanopyLoss%>%
-  dplyr::select('uniqueID', 'AreaLoss')%>%
-  st_drop_geometry()
-
-TreeCanopyGain1 <- 
-  TreeCanopyGain%>%
-  dplyr::select('uniqueID', 'AreaGain')%>%
-  st_drop_geometry()
-
-TreeCanopyCoverage18<-
-  TreeCanopyCoverage18%>%
-  dplyr::select('uniqueID', 'AreaCoverage18', 'pctCoverage18')%>%
-  st_drop_geometry()
-
-TreeCanopyCoverage08<-
-  TreeCanopyCoverage08%>%
+  left_join(TreeCanopyCoverage08)%>% 
   dplyr::select('uniqueID', 'AreaCoverage08', 'pctCoverage08')%>%
   st_drop_geometry()
 
 
 FinalFishnet <- 
-  left_join(TreeCanopyLoss1, TreeCanopyGain1)%>%
+  left_join(TreeCanopyLoss, TreeCanopyGain)%>%
   left_join(TreeCanopyCoverage18)%>%
   left_join(TreeCanopyCoverage08)%>%
   mutate_all(~replace(., is.na(.), 0))%>%
@@ -1023,3 +1006,52 @@ grid.arrange(ncol=2,
 
 ```
 
+```{r Zoning, message=FALSE, warning=FALSE, include=TRUE, results='hide', fig.height = 7, fig.width = 8, cache=TRUE}
+
+Zoning <- st_read("http://data.phl.opendata.arcgis.com/datasets/0bdb0b5f13774c03abf8dc2f1aa01693_0.geojson")%>% 
+  st_transform('ESRI:102728')
+  
+  Zoning$zoningArea = as.numeric(st_area(Zoning))
+
+TreeCanopy08Z<- 
+  TreeCanopy%>%
+  filter(CLASS_NAME != "Gain")%>%
+  st_union()
+
+%>%
+  st_intersection(Zoning)
+
+TreeCanopyAllZ<- 
+  TreeCanopyAllZ%>%
+  mutate(TreeArea = as.numeric(st_area(TreeCanopyAllZ)))
+
+TreeCanopyLossZ <- 
+  TreeCanopyAllZ%>%
+  filter(CLASS_NAME == "Loss")
+
+TreeCanopyLossZ%>%
+  TreeCanopyLossZ%>%
+  group_by(ZONINGGROUP)%>%
+  summarise(AreaLoss = sum(TreeArea))%>%
+  st_drop_geometry() 
+
+
+TreeCanopyLossZ<- 
+  Zoning%>%
+  left_join(TreeCanopyLossZ, by = 'OBJECTID')
+
+TreeCanopyCoverage08Z <- 
+  TreeCanopyAllZ%>%
+  filter(CLASS_NAME != "Gain")%>%
+  group_by(uniqueID)%>%
+  summarise(AreaCoverage08Z = sum(TreeArea))%>%
+  mutate(pctCoverage08 = (AreaCoverage08Z / zoningArea) * 100)%>%
+  st_drop_geometry()
+
+TreeCanopyCoverage08Z<- 
+  Zoning%>%
+  left_join(TreeCanopyCoverage08Z)
+
+
+
+```
