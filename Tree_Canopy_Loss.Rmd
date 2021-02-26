@@ -237,70 +237,6 @@ fishnet <-
 
 ```
 
-### 1. How does tree canopy loss vary across neighborhoods and sociodemographic contexts?
-Neighborhoods like Upper Roxborough, which have many trees, experienced less net change because much of their canopy remained untouched. Meanwhile, neighborhoods with less tree canopy such as Juniata Park experienced greater net change.
-
-What about income? Higher income neighborhoods in Philadelphia generally have more tree canopy.However, looking at Fairhill and Graduate Hospital, the poorest and richest neighborhoods in Philadelphia, respectively, tree canopy change is more complex. Both neighborhoods are in the Center City region, and both experience a mix of gain, loss, and no change that appears to be in small pieces.
-```{r Neighborhoods Tree Loss, message=FALSE, warning=FALSE, results='hide', fig.height = 6, fig.width = 9}
-
-#making basemap
-ll <- function(dat, proj4 = 4326){
-  st_transform(dat, proj4)
-}
-
-#Juniata Park
-JPBound <- Neighborhood %>%  dplyr::filter(NAME=="JUNIATA_PARK")
-JuniataPark <- st_intersection(st_make_valid(TreeCanopy), JPBound)
-
-ggplot() +
-  geom_sf(data = JPBound, fill = "black") +
-  geom_sf(data = JuniataPark, aes(fill = CLASS_NAME), colour = "transparent") +
-  scale_fill_manual(values = paletteJ, name = "Canopy Change") +
-  labs(title = "Juniata Park Tree Canopy Change 2008-2018", subtitle = "Philadelphia, PA") +
-    mapTheme()
-
-#Upper Roxborough
-URBound <- Neighborhood %>%  dplyr::filter(NAME=="UPPER_ROXBOROUGH")
-UpperRoxborough <- st_intersection(st_make_valid(TreeCanopy), URBound)
-
-ggplot() +
-  geom_sf(data = URBound, fill = "black") +
-  geom_sf(data = UpperRoxborough, aes(fill = CLASS_NAME), colour = "transparent") +
-  scale_fill_manual(values = paletteJ, name = "Canopy Change") +
-  labs(title = "Upper Roxborough Tree Canopy Change 2008-2018", subtitle = "Philadelphia, PA") +
-    mapTheme()
-
-#Fairhill
-FHBound <- Neighborhood %>%  dplyr::filter(NAME=="FAIRHILL")
-Fairhill <- st_intersection(st_make_valid(TreeCanopy), FHBound)
-
-base_mapFH <- get_map(location =  unname(st_bbox(ll(st_buffer(st_centroid(Fairhill),1100)))),
-                    maptype = "satellite") #get a basemap
-
-ggmap(base_mapFH, darken = c(0.3, "white")) + 
-  geom_sf(data = ll(FHBound), fill = "black", alpha = 0.3, inherit.aes = FALSE) +
-  geom_sf(data = ll(Fairhill), aes(fill = CLASS_NAME), colour = "transparent", inherit.aes = FALSE) +
-  scale_fill_manual(values = paletteJ, name = "Canopy Change") +
-  labs(title = "Fairhill Tree Canopy Change 2008-2018", subtitle = "Philadelphia, PA") +
-    mapTheme()
-
-#GRad hospital
-GHBound <- Neighborhood %>%  dplyr::filter(NAME=="GRADUATE_HOSPITAL")
-GraduateHospital <- st_intersection(st_make_valid(TreeCanopy), GHBound)
-
-base_mapGH <- get_map(location =  unname(st_bbox(ll(st_buffer(st_centroid(GraduateHospital),1100)))),
-                    maptype = "satellite") #get a basemap
-
-ggmap(base_mapGH, darken = c(0.3, "white")) + 
-  geom_sf(data = ll(GHBound), fill = "black", alpha = 0.3, inherit.aes = FALSE) +
-  geom_sf(data = ll(GraduateHospital), aes(fill = CLASS_NAME), colour = "transparent", inherit.aes = FALSE) +
-  scale_fill_manual(values = paletteJ, name = "Canopy Change") +
-  labs(title = "Graduate Hospital Tree Canopy Change 2008-2018", subtitle = "Philadelphia, PA") +
-    mapTheme()
-
-
-```
-
 
 ```{r Fishnet Aggregation, cache=TRUE, message=FALSE, warning=FALSE, include=TRUE, results='hide'}
 
@@ -396,9 +332,7 @@ FinalFishnet<-
   fishnet%>%
   left_join(FinalFishnet)%>%
   na.omit()
-```
 
-```{r Fishnet Aggregation2, message=FALSE, warning=FALSE, results='hide', fig.height = 12, fig.width = 20, cache=TRUE}
 
 FinalFishnet$pctCoverage08Cat <- cut(FinalFishnet$pctCoverage08, 
                       breaks = c(-Inf,  10,  20, 30, 50, Inf), 
@@ -431,18 +365,11 @@ FinalFishnet$pctLossCat <- cut(FinalFishnet$pctLoss,
                        right = FALSE)
 
 
+```
 
-grid.arrange(ncol=2,
-             
-ggplot()+ 
-  geom_sf(data = FinalFishnet, aes(fill = pctCoverage08Cat))+ 
-  scale_fill_manual(values = palette7, 
-                    name = "2008 Percent Coverage")+
-  labs(title = "Tree Canopy Coverage, 2008", 
-       subtitle = "2018 Tree Canopy Area / Gridcell Size")+ 
-  theme(plot.title = element_text(size = 30, face = "bold"), 
-        legend.title = element_text(size = 12), 
-        legend.text = element_text(size = 10)) + mapTheme(), 
+#### Philadelphia Tree Canopy in 2018  
+
+```{r 2018 Canopy, message=FALSE, warning=FALSE, results='hide', fig.height = 12, fig.width = 20, cache=TRUE}
 
 ggplot()+ 
   geom_sf(data = FinalFishnet, aes(fill = pctCoverage18Cat))+ 
@@ -451,9 +378,79 @@ ggplot()+
   labs(title = "Tree Canopy Coverage, 2018", 
 subtitle = "2018 Tree Canopy Area / Gridcell Size") + 
   theme(plot.title = element_text(size = 30, face = "bold"), 
-        legend.title = element_text(size = 12)) +  mapTheme()) 
+        legend.title = element_text(size = 12)) +  mapTheme()
+```
 
- 
+
+### 1. How does tree canopy loss vary across neighborhoods and sociodemographic contexts?
+Neighborhoods like Upper Roxborough, which have many trees, experienced less net change because much of their canopy remained untouched. Meanwhile, neighborhoods with less tree canopy such as Juniata Park experienced greater net change.
+
+What about income? Higher income neighborhoods in Philadelphia generally have more tree canopy.However, looking at Fairhill and Graduate Hospital, the poorest and richest neighborhoods in Philadelphia, respectively, tree canopy change is more complex. Both neighborhoods are in the Center City region, and both experience a mix of gain, loss, and no change that appears to be in small pieces.
+
+```{r Neighborhoods Tree Loss, message=FALSE, warning=FALSE, results='hide', fig.height = 6, fig.width = 9}
+
+#making basemap
+ll <- function(dat, proj4 = 4326){
+  st_transform(dat, proj4)
+}
+
+#Juniata Park
+JPBound <- Neighborhood %>%  dplyr::filter(NAME=="JUNIATA_PARK")
+JuniataPark <- st_intersection(st_make_valid(TreeCanopy), JPBound)
+
+ggplot() +
+  geom_sf(data = JPBound, fill = "black") +
+  geom_sf(data = JuniataPark, aes(fill = CLASS_NAME), colour = "transparent") +
+  scale_fill_manual(values = paletteJ, name = "Canopy Change") +
+  labs(title = "Juniata Park Tree Canopy Change 2008-2018", subtitle = "Philadelphia, PA") +
+    mapTheme()
+
+#Upper Roxborough
+URBound <- Neighborhood %>%  dplyr::filter(NAME=="UPPER_ROXBOROUGH")
+UpperRoxborough <- st_intersection(st_make_valid(TreeCanopy), URBound)
+
+ggplot() +
+  geom_sf(data = URBound, fill = "black") +
+  geom_sf(data = UpperRoxborough, aes(fill = CLASS_NAME), colour = "transparent") +
+  scale_fill_manual(values = paletteJ, name = "Canopy Change") +
+  labs(title = "Upper Roxborough Tree Canopy Change 2008-2018", subtitle = "Philadelphia, PA") +
+    mapTheme()
+
+#Fairhill
+FHBound <- Neighborhood %>%  dplyr::filter(NAME=="FAIRHILL")
+Fairhill <- st_intersection(st_make_valid(TreeCanopy), FHBound)
+
+base_mapFH <- get_map(location =  unname(st_bbox(ll(st_buffer(st_centroid(Fairhill),1100)))),
+                    maptype = "satellite") #get a basemap
+
+ggmap(base_mapFH, darken = c(0.3, "white")) + 
+  geom_sf(data = ll(FHBound), fill = "black", alpha = 0.3, inherit.aes = FALSE) +
+  geom_sf(data = ll(Fairhill), aes(fill = CLASS_NAME), colour = "transparent", inherit.aes = FALSE) +
+  scale_fill_manual(values = paletteJ, name = "Canopy Change") +
+  labs(title = "Fairhill Tree Canopy Change 2008-2018", subtitle = "Philadelphia, PA") +
+    mapTheme()
+
+#GRad hospital
+GHBound <- Neighborhood %>%  dplyr::filter(NAME=="GRADUATE_HOSPITAL")
+GraduateHospital <- st_intersection(st_make_valid(TreeCanopy), GHBound)
+
+base_mapGH <- get_map(location =  unname(st_bbox(ll(st_buffer(st_centroid(GraduateHospital),1100)))),
+                    maptype = "satellite") #get a basemap
+
+ggmap(base_mapGH, darken = c(0.3, "white")) + 
+  geom_sf(data = ll(GHBound), fill = "black", alpha = 0.3, inherit.aes = FALSE) +
+  geom_sf(data = ll(GraduateHospital), aes(fill = CLASS_NAME), colour = "transparent", inherit.aes = FALSE) +
+  scale_fill_manual(values = paletteJ, name = "Canopy Change") +
+  labs(title = "Graduate Hospital Tree Canopy Change 2008-2018", subtitle = "Philadelphia, PA") +
+    mapTheme()
+
+
+```
+
+
+
+```{r Change in tree canopy, message=FALSE, warning=FALSE, results='hide', fig.height = 12, fig.width = 20, cache=TRUE}
+
 grid.arrange(ncol=2,
              
 ggplot()+ 
