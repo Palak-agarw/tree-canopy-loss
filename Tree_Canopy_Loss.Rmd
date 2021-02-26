@@ -316,7 +316,7 @@ TreeCanopyCoverage08<-
   st_drop_geometry()
 
 
-FinalFishnet1 <- 
+FinalFishnet <- 
   left_join(TreeCanopyLoss, TreeCanopyGain)%>%
   left_join(TreeCanopyCoverage18)%>%
   left_join(TreeCanopyCoverage08)%>%
@@ -324,25 +324,14 @@ FinalFishnet1 <-
   mutate(pctLoss = round(AreaLoss/AreaCoverage08 * 100, 2), 
          pctGain = round(AreaGain/AreaCoverage18 * 100, 2))%>%
   mutate(GainMinusLoss = AreaGain - AreaLoss)%>%
-  mutate(PctGainMinusLoss = (AreaCoverage08-AreaCoverage18) / (AreaCoverage08) * 100 * (-1))%>%
+  mutate(PctGainMinusLoss = pctGain - pctLoss)%>%
   dplyr::select(pctLoss, pctGain, GainMinusLoss,
                 AreaGain, AreaLoss, AreaCoverage08, AreaCoverage18, pctCoverage08, pctCoverage18, uniqueID, PctGainMinusLoss)
 
 FinalFishnet<- 
   fishnet%>%
-  left_join(FinalFishnet1)%>%
+  left_join(FinalFishnet)%>%
   na.omit()
-<<<<<<< HEAD
-
-FinalFishnet<- 
-  FinalFishnet%>%
-   mutate(PctGainMinusLoss = (AreaCoverage08-AreaCoverage18) / (AreaCoverage08) * 100 * (-1))
-
-
-  
-```
-=======
->>>>>>> 9443187c063e3c653c69c54ad9ae535ba659c3f1
 
 
 FinalFishnet$pctCoverage08Cat <- cut(FinalFishnet$pctCoverage08, 
@@ -448,7 +437,7 @@ ggplot()+
 ```{r Gain Minus Loss, message=FALSE, warning=FALSE, results='hide', fig.height = 8, fig.width = 8, cache=TRUE}
 
 FinalFishnet$PctGainMinusLossCat <- cut(FinalFishnet$PctGainMinusLoss, 
-                       breaks = c(-Inf,  -20, -10, 0, 10, 20, Inf), 
+                       breaks = c(-Inf,  -30, -10, 0, 10, 20, Inf), 
                        labels = c("Significant Net Loss", "Moderate Net Loss", "Low Net Loss", "Low Net Gain", "Moderate Net Gain", "Significant Net Gain"), 
                        right = FALSE)
 
@@ -458,9 +447,9 @@ ggplot()+
   geom_sf(data = FinalFishnet, aes(fill = PctGainMinusLossCat))+ 
   scale_fill_manual(values = palette8,
                     name = "Percent Gain - Percent Loss")+
-  labs(title= " What is the Net Percent Change in Tree Cnaopy from 2008- 2018?", 
-       subtitle = "(2008 Tree Coverage - 2018 Tree Coverage / 2008 Tree Coverage) * 100") +
-  theme(plot.title = element_text(hjust = 0.1), 
+  labs(title= " What is the Net Percent Gain or Loss from 2008- 2018?", 
+       subtitle = "Percent Tree Canopy Gain - Percent Tree Canopy Loss") +
+  theme(plot.title = element_text(hjust = 0.3), 
         legend.title = element_text(size = 12), 
         legend.text = element_text(size = 10)) + mapTheme()
 
@@ -468,11 +457,6 @@ ggplot()+
 
 ```{r Comparing Tree Canopy Area to Loss/Gain2, message=FALSE, warning=FALSE, results='hide', fig.height = 8, fig.width = 12,  cache=TRUE}
 
-
-pctNetGraph <- 
-  FinalFishnet%>% 
-  filter(PctGainMinusLoss < 100)
-  
 grid.arrange(ncol=2,
              
 ggplot(FinalFishnet, aes(x = pctGain, y = pctCoverage18))+
@@ -492,11 +476,11 @@ ggplot(FinalFishnet, aes(x = pctLoss, y = pctCoverage18))+
   theme(plot.title = element_text(hjust = 0.3, size = 12), plot.subtitle = element_text(hjust = 0.3, size = 8))) +
   plotTheme()
 
-ggplot(pctNetGraph, aes(x = PctGainMinusLoss, y = AreaCoverage18))+
+ggplot(FinalFishnet, aes(x = PctGainMinusLoss, y = AreaCoverage18))+
   geom_point()+ 
   labs(title = "Percent Tree Canopy Gain Minus Percent Tree Canopy Loss \n vs. Percent Tree Canopy Coverage (2018)", 
        subtilte = "Aggregated by Fishnet") + 
-  xlab("Net Tree Canopy Percent Change ") + 
+  xlab("Percent of Tree Canopy Gained From 2008 - 2018 \n Minus Percent of Tree Canopy Lost From 2008 - 2018 ") + 
   ylab("Area of Tree Canopy Coverage of Fishnet Cell (2018)") + 
   theme(plot.title = element_text(hjust = 0.5, size = 15, face = "bold"), plot.subtitle = element_text(hjust = 0.5, size = 8)) +
   plotTheme()
@@ -935,6 +919,52 @@ grid.arrange(ncol=2,
 
 ```
 
+```{r Zoning, message=FALSE, warning=FALSE, include=TRUE, results='hide', fig.height = 7, fig.width = 8, cache=TRUE}
+
+  Zoning$zoningArea = as.numeric(st_area(Zoning))
+
+TreeCanopy08Z<- 
+  TreeCanopy%>%
+  filter(CLASS_NAME != "Gain")%>%
+  st_union()
+
+%>%
+  st_intersection(Zoning)
+
+TreeCanopyAllZ<- 
+  TreeCanopyAllZ%>%
+  mutate(TreeArea = as.numeric(st_area(TreeCanopyAllZ)))
+
+TreeCanopyLossZ <- 
+  TreeCanopyAllZ%>%
+  filter(CLASS_NAME == "Loss")
+
+TreeCanopyLossZ%>%
+  TreeCanopyLossZ%>%
+  group_by(ZONINGGROUP)%>%
+  summarise(AreaLoss = sum(TreeArea))%>%
+  st_drop_geometry() 
+
+
+TreeCanopyLossZ<- 
+  Zoning%>%
+  left_join(TreeCanopyLossZ, by = 'OBJECTID')
+
+TreeCanopyCoverage08Z <- 
+  TreeCanopyAllZ%>%
+  filter(CLASS_NAME != "Gain")%>%
+  group_by(uniqueID)%>%
+  summarise(AreaCoverage08Z = sum(TreeArea))%>%
+  mutate(pctCoverage08 = (AreaCoverage08Z / zoningArea) * 100)%>%
+  st_drop_geometry()
+
+TreeCanopyCoverage08Z<- 
+  Zoning%>%
+  left_join(TreeCanopyCoverage08Z)
+
+
+
+```
 
 ### 4. How do current patterns of tree canopy coverage and loss reflect disinvestment as a result of redlining and older planning practices?  
 ```{r HOLC, message=FALSE, warning=FALSE, results='hide', cache=TRUE}
