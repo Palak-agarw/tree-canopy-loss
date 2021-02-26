@@ -75,7 +75,8 @@ library(lubridate)
 library(grid)
 library(gridExtra)
 library(ggplot2)
-
+library(ggmap)
+library(jsonlite)
 library(entropy)
 
 root.dir = "https://raw.githubusercontent.com/urbanSpatial/Public-Policy-Analytics-Landing/master/DATA/"
@@ -239,7 +240,10 @@ fishnet <-
 ### 1. How does tree canopy loss vary across neighborhoods and sociodemographic contexts?
 ```{r Neighborhoods Tree Loss, message=FALSE, warning=FALSE, results='hide', fig.height = 6, fig.width = 9}
 
-library(ggplot2)
+#making basemap
+ll <- function(dat, proj4 = 4326){
+  st_transform(dat, proj4)
+}
 
 #Juniata Park
 JPBound <- Neighborhood %>%  dplyr::filter(NAME=="JUNIATA_PARK")
@@ -267,9 +271,15 @@ ggplot() +
 FHBound <- Neighborhood %>%  dplyr::filter(NAME=="FAIRHILL")
 Fairhill <- st_intersection(st_make_valid(TreeCanopy), FHBound)
 
-ggplot() +
-  geom_sf(data = FHBound, fill = "black") +
-  geom_sf(data = Fairhill, aes(fill = CLASS_NAME), colour = "transparent") +
+base_mapFH <- get_map(location =  unname(st_bbox(ll(st_buffer(st_centroid(Fairhill),11000)))),
+                    maptype = "satellite") #get a basemap
+ggmap(base_mapFH) + 
+  geom_sf(data=ll(spruceHill_crimes), inherit.aes = FALSE) + 
+  ggtitle("Recent Spruce Hill Crimes") 
+
+ggmap(base_mapFH) + 
+  geom_sf(data = ll(FHBound), fill = "black", inherit.aes = FALSE) +
+  geom_sf(data = ll(Fairhill), aes(fill = CLASS_NAME), colour = "transparent", inherit.aes = FALSE) +
   scale_fill_manual(values = paletteJ, name = "Canopy Change") +
   labs(title = "Fairhill Park Tree Canopy Change 2008-2018", subtitle = "Philadelphia, PA") +
     mapTheme()
