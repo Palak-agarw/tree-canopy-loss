@@ -374,7 +374,7 @@ TreeCanopyCoverage08<-
   st_drop_geometry()
 
 
-FinalFishnet <- 
+FinalFishnet1 <- 
   left_join(TreeCanopyLoss, TreeCanopyGain)%>%
   left_join(TreeCanopyCoverage18)%>%
   left_join(TreeCanopyCoverage08)%>%
@@ -382,14 +382,18 @@ FinalFishnet <-
   mutate(pctLoss = round(AreaLoss/AreaCoverage08 * 100, 2), 
          pctGain = round(AreaGain/AreaCoverage18 * 100, 2))%>%
   mutate(GainMinusLoss = AreaGain - AreaLoss)%>%
-  mutate(PctGainMinusLoss = (AreaCoverage08-AreaCoverage18) / (AreaCoverage08) * 100)%>%
+  mutate(PctGainMinusLoss = (AreaCoverage08-AreaCoverage18) / (AreaCoverage08) * 100 * (-1))%>%
   dplyr::select(pctLoss, pctGain, GainMinusLoss,
                 AreaGain, AreaLoss, AreaCoverage08, AreaCoverage18, pctCoverage08, pctCoverage18, uniqueID, PctGainMinusLoss)
 
 FinalFishnet<- 
   fishnet%>%
-  left_join(FinalFishnet)%>%
+  left_join(FinalFishnet1)%>%
   na.omit()
+
+FinalFishnet<- 
+  FinalFishnet%>%
+   mutate(PctGainMinusLoss = (AreaCoverage08-AreaCoverage18) / (AreaCoverage08) * 100 * (-1))
 
 
   
@@ -502,7 +506,7 @@ ggplot()+
 
 FinalFishnet$PctGainMinusLossCat <- cut(FinalFishnet$PctGainMinusLoss, 
                        breaks = c(-Inf,  -20, -10, 0, 10, 20, Inf), 
-                       labels = c("Significant Net Gain", "Moderate Net Gain", "Low Net Gain", "Low Net Loss", "Moderate Net Loss", "Significant Net Loss"), 
+                       labels = c("Significant Net Loss", "Moderate Net Loss", "Low Net Loss", "Low Net Gain", "Moderate Net Gain", "Significant Net Gain"), 
                        right = FALSE)
 
 
@@ -511,9 +515,9 @@ ggplot()+
   geom_sf(data = FinalFishnet, aes(fill = PctGainMinusLossCat))+ 
   scale_fill_manual(values = palette8,
                     name = "Percent Gain - Percent Loss")+
-  labs(title= " What is the Net Percent Gain or Loss from 2008- 2018?", 
-       subtitle = "Percent Tree Canopy Gain - Percent Tree Canopy Loss") +
-  theme(plot.title = element_text(hjust = 0.3), 
+  labs(title= " What is the Net Percent Change in Tree Cnaopy from 2008- 2018?", 
+       subtitle = "(2008 Tree Coverage - 2018 Tree Coverage / 2008 Tree Coverage) * 100") +
+  theme(plot.title = element_text(hjust = 0.1), 
         legend.title = element_text(size = 12), 
         legend.text = element_text(size = 10)) + mapTheme()
 
@@ -524,7 +528,7 @@ ggplot()+
 
 pctNetGraph <- 
   FinalFishnet%>% 
-  filter(PctGainMinusLoss > -200)
+  filter(PctGainMinusLoss < 100)
   
 grid.arrange(ncol=2,
              
@@ -549,7 +553,7 @@ ggplot(pctNetGraph, aes(x = PctGainMinusLoss, y = AreaCoverage18))+
   geom_point()+ 
   labs(title = "Percent Tree Canopy Gain Minus Percent Tree Canopy Loss \n vs. Percent Tree Canopy Coverage (2018)", 
        subtilte = "Aggregated by Fishnet") + 
-  xlab("Percent of Tree Canopy Gained From 2008 - 2018 \n Minus Percent of Tree Canopy Lost From 2008 - 2018 ") + 
+  xlab("Net Tree Canopy Percent Change ") + 
   ylab("Area of Tree Canopy Coverage of Fishnet Cell (2018)") + 
   theme(plot.title = element_text(hjust = 0.5, size = 15, face = "bold"), plot.subtitle = element_text(hjust = 0.5, size = 8)) +
   plotTheme()
