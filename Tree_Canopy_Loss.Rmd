@@ -763,7 +763,7 @@ library(grid)
 grid.arrange(ncol=2, top=textGrob("Fishnet Variables in Comparison to Local Demographics"),
              ggplot(correlation.long, aes(Value, GainMinusLoss)) +
   geom_point(size = 0.1) +
-    #scale_x_log10() + scale_y_log10()
+    scale_x_log10() + scale_y_log10() +
   geom_text(data = correlation.cor, aes(label = paste("r =", round(correlation, 2))),
             x=-Inf, y=Inf, vjust = 1.5, hjust = -.1) +
   geom_smooth(method = "lm", se = FALSE, colour = "red") +
@@ -773,7 +773,7 @@ grid.arrange(ncol=2, top=textGrob("Fishnet Variables in Comparison to Local Demo
   
   ggplot(correlation.long1, aes(Value, pctLoss)) +
   geom_point(size = 0.1) +
-    #scale_x_log10() + scale_y_log10()
+    scale_x_log10() + scale_y_log10() +
   geom_text(data = correlation.cor1, aes(label = paste("r =", round(correlation, 2))),
             x=-Inf, y=Inf, vjust = 1.5, hjust = -.1) +
   geom_smooth(method = "lm", se = FALSE, colour = "red") +
@@ -783,7 +783,7 @@ grid.arrange(ncol=2, top=textGrob("Fishnet Variables in Comparison to Local Demo
   
   ggplot(correlation.long2, aes(Value, pctGain)) +
   geom_point(size = 0.1) +
-    #scale_x_log10() + scale_y_log10()
+    scale_x_log10() + scale_y_log10() +
     geom_text(data = correlation.cor2, aes(label = paste("r =", round(correlation, 2))),
             x=-Inf, y=Inf, vjust = 1.5, hjust = -.1) +
   geom_smooth(method = "lm", se = FALSE, colour = "red") +
@@ -793,7 +793,7 @@ grid.arrange(ncol=2, top=textGrob("Fishnet Variables in Comparison to Local Demo
   
   ggplot(correlation.long3, aes(Value, pctCoverage18)) +
   geom_point(size = 0.1) +
-    #scale_x_log10() + scale_y_log10()
+    scale_x_log10() + scale_y_log10() +
   geom_text(data = correlation.cor3, aes(label = paste("r =", round(correlation, 2))),
             x=-Inf, y=Inf, vjust = 1.5, hjust = -.1) +
   geom_smooth(method = "lm", se = FALSE, colour = "red") +
