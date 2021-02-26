@@ -271,14 +271,11 @@ ggplot() +
 FHBound <- Neighborhood %>%  dplyr::filter(NAME=="FAIRHILL")
 Fairhill <- st_intersection(st_make_valid(TreeCanopy), FHBound)
 
-base_mapFH <- get_map(location =  unname(st_bbox(ll(st_buffer(st_centroid(Fairhill),11000)))),
+base_mapFH <- get_map(location =  unname(st_bbox(ll(st_buffer(st_centroid(Fairhill),1100)))),
                     maptype = "satellite") #get a basemap
-ggmap(base_mapFH) + 
-  geom_sf(data=ll(spruceHill_crimes), inherit.aes = FALSE) + 
-  ggtitle("Recent Spruce Hill Crimes") 
 
 ggmap(base_mapFH) + 
-  geom_sf(data = ll(FHBound), fill = "black", inherit.aes = FALSE) +
+  geom_sf(data = ll(FHBound), fill = "black", alpha = 0.3, inherit.aes = FALSE) +
   geom_sf(data = ll(Fairhill), aes(fill = CLASS_NAME), colour = "transparent", inherit.aes = FALSE) +
   scale_fill_manual(values = paletteJ, name = "Canopy Change") +
   labs(title = "Fairhill Park Tree Canopy Change 2008-2018", subtitle = "Philadelphia, PA") +
