@@ -295,17 +295,8 @@ ggplot() +
 
 ```
 
-```{r Tree Canopy Change, message=FALSE, warning=FALSE, results='hide', fig.height = 8, fig.width = 9, cache=TRUE}
-paletteChange <- c("dark green", 'red', 'yellow')
-ggplot()+ 
-  geom_sf(data = TreeCanopy, aes(fill = CLASS_NAME), color = NA)+ 
-  scale_fill_manual(values = palette4)+
-  labs(title= "Tree Canopy Change, 2008 - 2018")+
-  theme(legend.position = "bottom", plot.title = element_text(hjust = 0.1, size = 12)) + mapTheme()
 
-```
-
-```{r Fishnet Aggregation2, cache=TRUE, message=FALSE, warning=FALSE, include=TRUE, results='hide'}
+```{r Fishnet Aggregation, cache=TRUE, message=FALSE, warning=FALSE, include=TRUE, results='hide'}
 
 # Make canopy loss layers
 TreeCanopyAll<- 
@@ -399,11 +390,9 @@ FinalFishnet<-
   fishnet%>%
   left_join(FinalFishnet)%>%
   na.omit()
-
-
 ```
 
-```{r Fishnet Aggregation, message=FALSE, warning=FALSE, results='hide', fig.height = 12, fig.width = 20, cache=TRUE}
+```{r Fishnet Aggregation2, message=FALSE, warning=FALSE, results='hide', fig.height = 12, fig.width = 20, cache=TRUE}
 
 FinalFishnet$pctCoverage08Cat <- cut(FinalFishnet$pctCoverage08, 
                       breaks = c(-Inf,  10,  20, 30, 50, Inf), 
