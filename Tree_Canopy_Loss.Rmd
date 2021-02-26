@@ -239,23 +239,13 @@ fishnet <-
 ```
 
 ### 1. How does tree canopy loss vary across neighborhoods and sociodemographic contexts?
-```{r Tree Canopy 08, 18, message=FALSE, warning=FALSE, results='hide', fig.height = 6, fig.width = 9}
-
-TreeSample <- sample_n(TreeCanopy, 1000)
-
-ggplot() +
-  geom_sf(data = TreeSample, colour = "Black", fill = "Green") +
-  geom_sf(data = Neighborhood, colour = "Blue", fill = "Transparent") +
-  labs(title = "XXXX") +
-  mapTheme()
+```{r Neighborhood Tree Loss, message=FALSE, warning=FALSE, results='hide', fig.height = 6, fig.width = 9}
 
 library(ggplot2)
-#Not working yet
 
+#Juniata Park
 JPBound <- Neighborhood %>%  dplyr::filter(NAME=="JUNIATA_PARK")
-
-JuniataPark <- st_intersection(st_make_valid(TreeCanopy), JuniataPark)
-
+JuniataPark <- st_intersection(st_make_valid(TreeCanopy), JPBound)
 
 ggplot() +
   geom_sf(data = JPBound, fill = "black") +
@@ -263,6 +253,21 @@ ggplot() +
   scale_fill_manual(values = paletteJ) +
   labs(title = "Juniata Park Tree Canopy Change 2008-2018", subtitle = "Philadelphia, PA") +
   mapTheme()
+
+#Upper Roxborough
+URBound <- Neighborhood %>%  dplyr::filter(NAME=="UPPER_ROXBOROUGH")
+UpperRoxborough <- st_intersection(st_make_valid(TreeCanopy), URBound)
+
+ggplot() +
+  geom_sf(data = URBound, fill = "black") +
+  geom_sf(data = UpperRoxborough, aes(fill = CLASS_NAME), colour = "transparent") +
+  scale_fill_manual(values = paletteJ) +
+  labs(title = "Upper Roxborough Park Tree Canopy Change 2008-2018", subtitle = "Philadelphia, PA") +
+  mapTheme()
+
+
+
+
 ```
 
 ```{r Tree Canopy Change, message=FALSE, warning=FALSE, results='hide', fig.height = 8, fig.width = 9, cache=TRUE}
