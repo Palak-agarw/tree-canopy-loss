@@ -106,7 +106,7 @@ GoalPalette2 <- c("#95D5B2", "#52B788", "#2D6A4F", "#1B4332", "#123024", "blue")
 
 palette8 <- c("#2D6A4F", "#52B788", "#B7E4C7", "#ADE8F4", "#00B4D8", "#023E8A")
 
-paletteJ <- c("red", "yellow", "green")
+paletteJ <- c("green", "red", "yellow")
 
 ```
 
@@ -115,9 +115,9 @@ paletteJ <- c("red", "yellow", "green")
 # Tree Canopy
 TreeCanopy <-
   #st_read("C:/Users/Kyle McCarthy/Documents/Practicum/TreeCanopyChange_2008_2018.shp")%>%
-  st_read("/Users/annaduan/Desktop/Y3S2/Practicum/Data/TreeCanopyChange_2008_2018-shp/TreeCanopyChange_2008_2018.shp") %>%
+  #st_read("/Users/annaduan/Desktop/Y3S2/Practicum/Data/TreeCanopyChange_2008_2018-shp/TreeCanopyChange_2008_2018.shp") %>%
 #  st_read("C:/Users/agarw/Documents/MUSA 801/Data/TreeCanopyChange_2008_2018.shp") %>%
-#st_read("C:/Users/Prince/Desktop/Tree Canopy Data/TreeCanopyChange_2008_2018.shp") %>%
+st_read("C:/Users/Prince/Desktop/Tree Canopy Data/TreeCanopyChange_2008_2018.shp") %>%
   st_transform('ESRI:102728')
 
 TreeCanopy$SHAPE_Area <- as.numeric(st_area(TreeCanopy))
@@ -132,9 +132,9 @@ Philadelphia <- st_read("http://data.phl.opendata.arcgis.com/datasets/405ec3da94
 # Neighborhoods
 Neighborhood <-
  # st_read("C:/Users/Kyle McCarthy/Documents/Practicum/Data/Neighborhoods/Neighborhoods_Philadelphia.shp") %>%
-  st_read("/Users/annaduan/Desktop/Y3S2/Practicum/Data/Neighborhoods_Philadelphia/Neighborhoods_Philadelphia.shp")%>%
+  #st_read("/Users/annaduan/Desktop/Y3S2/Practicum/Data/Neighborhoods_Philadelphia/Neighborhoods_Philadelphia.shp")%>%
  # st_read("C:/Users/agarw/Documents/MUSA 801/Data/Neighborhoods_Philadelphia.shp") %>%
-#st_read("C:/Users/Prince/Desktop/Tree Canopy Data/Neighborhoods_Philadelphia/Neighborhoods_Philadelphia.shp") %>%
+st_read("C:/Users/Prince/Desktop/Tree Canopy Data/Neighborhoods_Philadelphia/Neighborhoods_Philadelphia.shp") %>%
   st_transform('ESRI:102728')
 
 Neighborhood <-
@@ -252,15 +252,16 @@ ggplot() +
 library(ggplot2)
 #Not working yet
 
-JuniataPark <- Neighborhood %>%  dplyr::filter(NAME=="JUNIATA_PARK")
+JPBound <- Neighborhood %>%  dplyr::filter(NAME=="JUNIATA_PARK")
 
 JuniataPark <- st_intersection(st_make_valid(TreeCanopy), JuniataPark)
 
 
 ggplot() +
-  geom_sf(data = JuniataPark, aes(colour = CLASS_NAME)) +
+  geom_sf(data = JPBound, fill = "black") +
+  geom_sf(data = JuniataPark, aes(fill = CLASS_NAME), colour = "transparent") +
   scale_fill_manual(values = paletteJ) +
-  labs(title = "Tree Canopy Change in Juniata Park") +
+  labs(title = "Juniata Park Tree Canopy Change 2008-2018", subtitle = "Philadelphia, PA") +
   mapTheme()
 ```
 
