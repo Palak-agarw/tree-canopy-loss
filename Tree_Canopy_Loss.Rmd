@@ -1008,8 +1008,8 @@ ggplot(LandUse, aes(y=Descriptio, x=pctChange))+
   geom_bar(stat='identity', fill="forest green")+ 
   labs(title = "Percent Change", 
        subtitle = "('18 Tree Canopy Coverage - '08 Tree Canopy Coverage) / ('18 Tree Canopy Coverage) * 100 ")+ 
-  xlab("Land Use Type")+ 
-  ylab("Total Net Change")+ 
+  xlab("Total Net Change")+ 
+  ylab("Land Use Type")+ 
   theme(axis.text.x = element_text(angle = 90, vjust = 0.5, hjust=1))) 
 
 ```
