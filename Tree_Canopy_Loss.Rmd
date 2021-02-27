@@ -328,13 +328,20 @@ FinalFishnet <-
   mutate(pctLoss = round(AreaLoss/AreaCoverage08 * 100, 2), 
          pctGain = round(AreaGain/AreaCoverage18 * 100, 2))%>%
   mutate(pctChange = (AreaCoverage18 - AreaCoverage08) / (AreaCoverage08) * 100)%>%
+  mutate(netChange - AreaGain - AreaLoss)%>%
   dplyr::select(pctLoss, pctGain, pctChange,
-                AreaGain, AreaLoss, AreaCoverage08, AreaCoverage18, pctCoverage08, pctCoverage18, uniqueID, pctChange)
+                AreaGain, AreaLoss, AreaCoverage08, AreaCoverage18, pctCoverage08, pctCoverage18, uniqueID, pctChange, netChange)
 
 FinalFishnet<- 
   fishnet%>%
   left_join(FinalFishnet)%>%
   na.omit()
+
+FinalFishnet <- 
+  FinalFishnet%>% 
+  mutate(pctChange = (AreaCoverage18 - AreaCoverage08) / (AreaCoverage08) * 100)%>% 
+  mutate(netChange = AreaGain - AreaLoss)
+  
 
 
 
@@ -460,6 +467,7 @@ ggplot()+
         legend.title = element_text(size = 12), 
         legend.text = element_text(size = 10)) + mapTheme()
 
+  
 ```
 
 ```{r Comparing Tree Canopy Area to Loss/Gain2, message=FALSE, warning=FALSE, results='hide', fig.height = 8, fig.width = 12,  cache=TRUE}
@@ -483,7 +491,11 @@ ggplot(FinalFishnet, aes(x = pctLoss, y = pctCoverage18))+
   theme(plot.title = element_text(hjust = 0.3, size = 12), plot.subtitle = element_text(hjust = 0.3, size = 8))) +
   plotTheme()
 
-ggplot(FinalFishnet, aes(x = pctChange, y = AreaCoverage18))+
+pctChangeGraph = 
+  FinalFishnet%>% 
+  filter(pctChange < 100)
+
+ggplot(pctChangeGraph, aes(x = pctChange, y = AreaCoverage18))+
   geom_point()+ 
   labs(title = "Percent Tree Canopy Gain Minus Percent Tree Canopy Loss \n vs. Percent Tree Canopy Coverage (2018)", 
        subtilte = "Aggregated by Fishnet") + 
@@ -994,8 +1006,8 @@ ggplot(LandUse, aes(y=Descriptio, x=netChange))+
 
 ggplot(LandUse, aes(y=Descriptio, x=pctChange))+
   geom_bar(stat='identity', fill="forest green")+ 
-  labs(title = "Percent Change Change", 
-       subtitle = "'18 Tree Canopy Coverage - '08 Tree Canopy Coverage / \n '18 Tree Canopy Coverage * 100 ")+ 
+  labs(title = "Percent Change", 
+       subtitle = "('18 Tree Canopy Coverage - '08 Tree Canopy Coverage) / ('18 Tree Canopy Coverage) * 100 ")+ 
   xlab("Land Use Type")+ 
   ylab("Total Net Change")+ 
   theme(axis.text.x = element_text(angle = 90, vjust = 0.5, hjust=1))) 
