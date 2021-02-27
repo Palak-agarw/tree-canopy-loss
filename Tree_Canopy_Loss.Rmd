@@ -79,6 +79,8 @@ library(ggmap)
 library(jsonlite)
 library(entropy)
 
+
+
 root.dir = "https://raw.githubusercontent.com/urbanSpatial/Public-Policy-Analytics-Landing/master/DATA/"
 source("https://raw.githubusercontent.com/urbanSpatial/Public-Policy-Analytics-Landing/master/functions.r")
 
@@ -108,6 +110,8 @@ GoalPalette2 <- c("#95D5B2", "#52B788", "#2D6A4F", "#1B4332", "#123024", "blue")
 palette8 <- c("#2D6A4F", "#52B788", "#B7E4C7", "#ADE8F4", "#00B4D8", "#023E8A")
 
 paletteJ <- c("green", "red", "yellow")
+
+landusepal <- c("#1B4332", "#95D5B2" )
 
 ```
 
@@ -323,15 +327,18 @@ FinalFishnet <-
   mutate_all(~replace(., is.na(.), 0))%>%
   mutate(pctLoss = round(AreaLoss/AreaCoverage08 * 100, 2), 
          pctGain = round(AreaGain/AreaCoverage18 * 100, 2))%>%
-  mutate(GainMinusLoss = AreaGain - AreaLoss)%>%
-  mutate(PctGainMinusLoss = pctGain - pctLoss)%>%
-  dplyr::select(pctLoss, pctGain, GainMinusLoss,
-                AreaGain, AreaLoss, AreaCoverage08, AreaCoverage18, pctCoverage08, pctCoverage18, uniqueID, PctGainMinusLoss)
+  mutate(pctChange = (AreaCoverage18 - AreaCoverage08) / (AreaCoverage08) * 100)%>%
+  dplyr::select(pctLoss, pctGain, pctChange,
+                AreaGain, AreaLoss, AreaCoverage08, AreaCoverage18, pctCoverage08, pctCoverage18, uniqueID, pctChange)
 
 FinalFishnet<- 
   fishnet%>%
   left_join(FinalFishnet)%>%
   na.omit()
+
+
+
+
 
 
 FinalFishnet$pctCoverage08Cat <- cut(FinalFishnet$pctCoverage08, 
@@ -436,7 +443,7 @@ ggplot()+
 
 ```{r Gain Minus Loss, message=FALSE, warning=FALSE, results='hide', fig.height = 8, fig.width = 8, cache=TRUE}
 
-FinalFishnet$PctGainMinusLossCat <- cut(FinalFishnet$PctGainMinusLoss, 
+FinalFishnet$PctChangeCat <- cut(FinalFishnet$pctChange, 
                        breaks = c(-Inf,  -30, -10, 0, 10, 20, Inf), 
                        labels = c("Significant Net Loss", "Moderate Net Loss", "Low Net Loss", "Low Net Gain", "Moderate Net Gain", "Significant Net Gain"), 
                        right = FALSE)
@@ -444,7 +451,7 @@ FinalFishnet$PctGainMinusLossCat <- cut(FinalFishnet$PctGainMinusLoss,
 
 
 ggplot()+ 
-  geom_sf(data = FinalFishnet, aes(fill = PctGainMinusLossCat))+ 
+  geom_sf(data = FinalFishnet, aes(fill = PctChangeCat))+ 
   scale_fill_manual(values = palette8,
                     name = "Percent Gain - Percent Loss")+
   labs(title= " What is the Net Percent Gain or Loss from 2008- 2018?", 
@@ -476,7 +483,7 @@ ggplot(FinalFishnet, aes(x = pctLoss, y = pctCoverage18))+
   theme(plot.title = element_text(hjust = 0.3, size = 12), plot.subtitle = element_text(hjust = 0.3, size = 8))) +
   plotTheme()
 
-ggplot(FinalFishnet, aes(x = PctGainMinusLoss, y = AreaCoverage18))+
+ggplot(FinalFishnet, aes(x = pctChange, y = AreaCoverage18))+
   geom_point()+ 
   labs(title = "Percent Tree Canopy Gain Minus Percent Tree Canopy Loss \n vs. Percent Tree Canopy Coverage (2018)", 
        subtilte = "Aggregated by Fishnet") + 
@@ -919,50 +926,79 @@ grid.arrange(ncol=2,
 
 ```
 
-```{r Zoning, message=FALSE, warning=FALSE, include=TRUE, results='hide', fig.height = 7, fig.width = 8, cache=TRUE}
 
-  Zoning$zoningArea = as.numeric(st_area(Zoning))
+```{r Const_Permit, message=FALSE, warning=FALSE, include=TRUE, results='hide', fig.height =  8, fig.width = 8 cache=TRUE}
 
-TreeCanopy08Z<- 
-  TreeCanopy%>%
-  filter(CLASS_NAME != "Gain")%>%
-  st_union()
+# Analysis completed in ArcGIS -- Processing time to long in R. 500,000 Parcels and 614,000 Tree Canopy Polygons aggregated in this analysis. I plan on writing out what the code would be for reproducability purposes. 
 
-%>%
-  st_intersection(Zoning)
+LandUse <- st_read("C:/Users/Kyle McCarthy/Documents/Practicum/Data/LandUse/LandUses.csv")%>%
+  mutate(AreaGained = as.numeric(AreaGained),
+         AreaLoss = as.numeric(AreaLoss), 
+         Coverage08 = as.numeric(Coverage08), 
+         Coverage18 = as.numeric(Coverage18))%>%
+  mutate(pctLoss = as.numeric(AreaLoss / Coverage08), 
+         pctGain = as.numeric(AreaGained/ Coverage18), 
+         pctChange = (Coverage18 - Coverage08)/ (Coverage08) * 100,
+         netChange = AreaGained - AreaLoss) 
 
-TreeCanopyAllZ<- 
-  TreeCanopyAllZ%>%
-  mutate(TreeArea = as.numeric(st_area(TreeCanopyAllZ)))
+LandUseLong<- 
+  LandUse%>%
+  mutate(AreaLoss = AreaLoss * -1)%>%
+  dplyr::select(AreaGained, AreaLoss, Descriptio)%>%
+  gather(variable, value, -c(Descriptio))%>% 
+  mutate(variable = ifelse(variable == "AreaGained", "Area Gain", "Area Loss"))
 
-TreeCanopyLossZ <- 
-  TreeCanopyAllZ%>%
-  filter(CLASS_NAME == "Loss")
+ggplot(LandUseLong, aes(fill = variable, y=Descriptio, x=value))+
+  geom_bar(stat='identity', position = "stack")+ 
+  scale_fill_manual(values = landusepal, 
+                    name = "Area Gain or Loss")+
+  labs(title = "Total Area Lossed or Gained by Land Use Type")+ 
+  xlab("        Total Area Lossed                Total Area Gained")+ 
+  ylab("Land Use Type")
+  
 
-TreeCanopyLossZ%>%
-  TreeCanopyLossZ%>%
-  group_by(ZONINGGROUP)%>%
-  summarise(AreaLoss = sum(TreeArea))%>%
-  st_drop_geometry() 
+LandUseLong<- 
+  LandUse%>%
+  mutate(pctLoss = pctLoss * -1)%>%
+  dplyr::select(pctGain, pctLoss, Descriptio)%>%
+  gather(variable, value, -c(Descriptio))%>% 
+  mutate(variable = ifelse(variable == "pctGain", "Percent Gained", "Percent Lost"))
 
+ggplot(LandUseLong, aes(fill = variable, y=Descriptio, x=value))+
+  geom_bar(stat='identity', position = "stack")+ 
+  scale_fill_manual(values = landusepal, 
+                    name = "Area Gain or Loss")+
+  labs(title = "Percent Tree Area Lost or Gained by Land Use Type")+ 
+  xlab("Percent Area Lossed                          Percent Area Gained")+ 
+  ylab("Land Use Type")
+  
+```
 
-TreeCanopyLossZ<- 
-  Zoning%>%
-  left_join(TreeCanopyLossZ, by = 'OBJECTID')
+```{r Const_Permit, message=FALSE, warning=FALSE, include=TRUE, results='hide', fig.height = 10, fig.width = 10, cache=TRUE}
 
-TreeCanopyCoverage08Z <- 
-  TreeCanopyAllZ%>%
-  filter(CLASS_NAME != "Gain")%>%
-  group_by(uniqueID)%>%
-  summarise(AreaCoverage08Z = sum(TreeArea))%>%
-  mutate(pctCoverage08 = (AreaCoverage08Z / zoningArea) * 100)%>%
-  st_drop_geometry()
+LandUseLong<- 
+  LandUse%>%
+  mutate(pctLoss = pctLoss * -1)%>%
+  dplyr::select(netChange, pctChange, Descriptio)%>%
+  gather(variable, value, -c(Descriptio))
 
-TreeCanopyCoverage08Z<- 
-  Zoning%>%
-  left_join(TreeCanopyCoverage08Z)
+grid.arrange(ncol= 1,
+             
+ggplot(LandUse, aes(y=Descriptio, x=netChange))+
+  geom_bar(stat='identity', fill="forest green")+ 
+  labs(title = "Total Net Change", 
+       subtitle = "Area Gain - Area Loss")+ 
+  xlab("Land Use Type")+ 
+  ylab("Total Net Change")+ 
+  theme(axis.text.x = element_text(angle = 90, vjust = 0.5, hjust=1)), 
 
-
+ggplot(LandUse, aes(y=Descriptio, x=pctChange))+
+  geom_bar(stat='identity', fill="forest green")+ 
+  labs(title = "Percent Change Change", 
+       subtitle = "'18 Tree Canopy Coverage - '08 Tree Canopy Coverage / \n '18 Tree Canopy Coverage * 100 ")+ 
+  xlab("Land Use Type")+ 
+  ylab("Total Net Change")+ 
+  theme(axis.text.x = element_text(angle = 90, vjust = 0.5, hjust=1))) 
 
 ```
 
