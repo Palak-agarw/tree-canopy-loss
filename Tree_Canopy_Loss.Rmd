@@ -970,7 +970,6 @@ ggmap(base_mapGH, darken = c(0.3, "white")) +
 ```{r Const_Permit3, message=FALSE, warning=FALSE, include=TRUE, results='hide', fig.height = 7, fig.width = 8, cache=TRUE}
 
 #Juniata Park
-JuniataPark <- st_intersection(st_make_valid(TreeCanopy), JPBound)
 
 const_JB <- st_intersection(const_spatial2, JPBound)
 
@@ -1039,7 +1038,9 @@ ggmap(base_mapGH, darken = c(0.3, "white")) +
 
 # Analysis completed in ArcGIS -- Processing time to long in R. 500,000 Parcels and 614,000 Tree Canopy Polygons aggregated in this analysis. I plan on writing out what the code would be for reproducability purposes. 
 
-LandUse1 <- st_read("C:/Users/Kyle McCarthy/Documents/Practicum/Data/LandUse/landu.csv")%>% 
+LandUse1 <- 
+  #st_read("C:/Users/Kyle McCarthy/Documents/Practicum/Data/LandUse/landu.csv")%>% 
+  st_read("C:/Users/agarw/Documents/MUSA 801/Data/landu.csv")%>% 
   mutate(AreaGain = as.numeric(AreaGain),
          AreaLoss = as.numeric(AreaLoss), 
          Coverage08 = as.numeric(Coverage08), 
