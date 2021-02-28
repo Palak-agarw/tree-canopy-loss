@@ -991,7 +991,8 @@ ggplot(LandUseLong, aes(fill = variable, y=Descriptio, x=value))+
                     name = "Area Gain or Loss")+
   labs(title = "Percent Tree Area Lost or Gained by Land Use Type")+ 
   xlab("Percent Area Lost                          Percent Area Gained")+ 
-  ylab("Land Use Type")
+  ylab("Land Use Type")+ 
+  theme(plot.title = element_text(hjust = 0.5))
   
 ```
 
@@ -1017,7 +1018,7 @@ ggplot(LandUse, aes(y=Descriptio, x=pctChange))+
   geom_bar(stat='identity', fill="forest green")+ 
   labs(title = "Percent Change", 
        subtitle = "('18 Tree Canopy Coverage - '08 Tree Canopy Coverage) / ('18 Tree Canopy Coverage) * 100 ")+ 
-  xlab("Total Net Change")+ 
+  xlab("Percent Net Change")+ 
   ylab("Land Use Type")+ 
   theme(axis.text.x = element_text(angle = 90, vjust = 0.5, hjust=1))) 
 
