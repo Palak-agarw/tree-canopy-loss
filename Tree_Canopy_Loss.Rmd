@@ -938,8 +938,13 @@ grid.arrange(ncol=2,
 
 ```
 
+```{r Const_Permit, message=FALSE, warning=FALSE, include=TRUE, results='hide', fig.height = 7, fig.width = 8, cache=TRUE}
 
-```{r Const_Permit, message=FALSE, warning=FALSE, include=TRUE, results='hide', fig.height =  8, fig.width = 8 cache=TRUE}
+
+
+```
+
+```{r Landuse1, message=FALSE, warning=FALSE, include=TRUE, results='hide', fig.height =  8, fig.width = 8 cache=TRUE}
 
 # Analysis completed in ArcGIS -- Processing time to long in R. 500,000 Parcels and 614,000 Tree Canopy Polygons aggregated in this analysis. I plan on writing out what the code would be for reproducability purposes. 
 
@@ -997,7 +1002,7 @@ ggplot(LandUseLong, aes(fill = variable, y=Descriptio, x=value))+
   
 ```
 
-```{r Const_Permit, message=FALSE, warning=FALSE, include=TRUE, results='hide', fig.height = 10, fig.width = 10, cache=TRUE}
+```{r Landuse2, message=FALSE, warning=FALSE, include=TRUE, results='hide', fig.height = 10, fig.width = 10, cache=TRUE}
 
 LandUseLong<- 
   LandUse%>%
