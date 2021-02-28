@@ -940,7 +940,27 @@ grid.arrange(ncol=2,
 
 ```{r Const_Permit, message=FALSE, warning=FALSE, include=TRUE, results='hide', fig.height = 7, fig.width = 8, cache=TRUE}
 
+#Filter maximum construction permits by neighborhood
 
+const_max_neigh <-
+  const_net %>%
+  filter(countConst == max(countConst))
+
+Max_neigh <- 
+  Neighborhood %>%
+  filter(NAME == const_max_neigh$neigh)
+
+Max_neigh_tree <- st_intersection(st_make_valid(TreeCanopy), Max_neigh)
+
+base_mapGH <- get_map(location =  unname(st_bbox(ll(st_buffer(st_centroid(GraduateHospital),1100)))),
+                    maptype = "satellite") #get a basemap
+
+ggmap(base_mapGH, darken = c(0.3, "white")) + 
+  geom_sf(data = ll(GHBound), fill = "black", alpha = 0.3, inherit.aes = FALSE) +
+  geom_sf(data = ll(GraduateHospital), aes(fill = CLASS_NAME), colour = "transparent", inherit.aes = FALSE) +
+  scale_fill_manual(values = paletteJ, name = "Canopy Change") +
+  labs(title = "Graduate Hospital Tree Canopy Change 2008-2018", subtitle = "Philadelphia, PA") +
+    mapTheme()
 
 ```
 
