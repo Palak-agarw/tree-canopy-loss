@@ -943,28 +943,37 @@ grid.arrange(ncol=2,
 
 # Analysis completed in ArcGIS -- Processing time to long in R. 500,000 Parcels and 614,000 Tree Canopy Polygons aggregated in this analysis. I plan on writing out what the code would be for reproducability purposes. 
 
-LandUse <- st_read("C:/Users/Kyle McCarthy/Documents/Practicum/Data/LandUse/LandUses.csv")%>%
-  mutate(AreaGained = as.numeric(AreaGained),
+LandUse1 <- st_read("C:/Users/Kyle McCarthy/Documents/Practicum/Data/LandUse/landu.csv")%>% 
+  mutate(AreaGain = as.numeric(AreaGain),
          AreaLoss = as.numeric(AreaLoss), 
          Coverage08 = as.numeric(Coverage08), 
          Coverage18 = as.numeric(Coverage18))%>%
+  replace(is.na(LandUse1), 0)
+  
+LandUse<-
+  LandUse1%>% 
+  group_by(Descriptio)%>%
+  summarise(AreaGain = sum(AreaGain), 
+            AreaLoss = sum(AreaLoss), 
+            Coverage08 = sum(Coverage08), 
+            Coverage18 = sum(Coverage18))%>%
   mutate(pctLoss = as.numeric(AreaLoss / Coverage08), 
-         pctGain = as.numeric(AreaGained/ Coverage18), 
+         pctGain = as.numeric(AreaGain/ Coverage18), 
          pctChange = (Coverage18 - Coverage08)/ (Coverage08) * 100,
-         netChange = AreaGained - AreaLoss) 
+         netChange = AreaGain - AreaLoss) 
 
 LandUseLong<- 
   LandUse%>%
   mutate(AreaLoss = AreaLoss * -1)%>%
-  dplyr::select(AreaGained, AreaLoss, Descriptio)%>%
+  dplyr::select(AreaGain, AreaLoss, Descriptio)%>%
   gather(variable, value, -c(Descriptio))%>% 
-  mutate(variable = ifelse(variable == "AreaGained", "Area Gain", "Area Loss"))
+  mutate(variable = ifelse(variable == "AreaGain", "Area Gain", "Area Loss"))
 
 ggplot(LandUseLong, aes(fill = variable, y=Descriptio, x=value))+
   geom_bar(stat='identity', position = "stack")+ 
   scale_fill_manual(values = landusepal, 
                     name = "Area Gain or Loss")+
-  labs(title = "Total Area Lossed or Gained by Land Use Type")+ 
+  labs(title = "Total Area Lost or Gained by Land Use Type")+ 
   xlab("        Total Area Lossed                Total Area Gained")+ 
   ylab("Land Use Type")
   
@@ -1013,6 +1022,43 @@ ggplot(LandUse, aes(y=Descriptio, x=pctChange))+
   theme(axis.text.x = element_text(angle = 90, vjust = 0.5, hjust=1))) 
 
 ```
+
+``````{r Exploring Residential Furrther, message=FALSE, warning=FALSE, include=TRUE, results='hide', fig.height =  7, fig.width = 7, cache=TRUE}
+
+LandUse2 <- 
+  LandUse1%>%
+  filter(Descriptio == "Residential")%>%
+  group_by(C_DIG2DESC)%>%
+  summarise(AreaGain = sum(AreaGain), 
+            AreaLoss = sum(AreaLoss), 
+            Coverage08 = sum(Coverage08), 
+            Coverage18 = sum(Coverage18))%>% 
+  mutate(pctChange = (Coverage18 - Coverage08)/ (Coverage08) * 100,
+         netChange = AreaGain - AreaLoss) 
+
+
+  grid.arrange(ncol= 1,
+             
+ggplot(LandUse2, aes(y=C_DIG2DESC, x=netChange))+
+  geom_bar(stat='identity', fill="forest green")+ 
+  labs(title = "Total Tree Canopy Net Change in Residential Land Use Parcels", 
+       subtitle = "Area Gain - Area Loss")+ 
+  ylab("Residential Land Use Type")+ 
+  xlab("Total Net Change")+ 
+  theme(axis.text.x = element_text(angle = 90, vjust = 0.5, hjust=1)), 
+
+ggplot(LandUse2, aes(y=C_DIG2DESC, x=pctChange))+
+  geom_bar(stat='identity', fill="forest green")+ 
+  labs(title = "Percent Change in Residential Land Use Parcels", 
+       subtitle = "('18 Tree Canopy Coverage - '08 Tree Canopy Coverage) / ('18 Tree Canopy Coverage) * 100 ")+ 
+  ylab("Residential Land Use Type")+ 
+  xlab("Percent Tree Canopy Change")+ 
+  theme(axis.text.x = element_text(angle = 90, vjust = 0.5, hjust=1))) 
+  
+
+
+```
+
 
 ### 4. How do current patterns of tree canopy coverage and loss reflect disinvestment as a result of redlining and older planning practices?  
 ```{r HOLC, message=FALSE, warning=FALSE, results='hide', cache=TRUE}
