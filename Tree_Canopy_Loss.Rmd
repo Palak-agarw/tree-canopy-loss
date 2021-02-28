@@ -328,7 +328,7 @@ FinalFishnet <-
   mutate(pctLoss = round(AreaLoss/AreaCoverage08 * 100, 2), 
          pctGain = round(AreaGain/AreaCoverage18 * 100, 2))%>%
   mutate(pctChange = (AreaCoverage18 - AreaCoverage08) / (AreaCoverage08) * 100)%>%
-  mutate(netChange - AreaGain - AreaLoss)%>%
+  mutate(netChange = AreaGain - AreaLoss)%>%
   dplyr::select(pctLoss, pctGain, pctChange,
                 AreaGain, AreaLoss, AreaCoverage08, AreaCoverage18, pctCoverage08, pctCoverage18, uniqueID, pctChange, netChange)
 
