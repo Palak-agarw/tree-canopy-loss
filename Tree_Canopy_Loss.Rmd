@@ -947,8 +947,8 @@ LandUse1 <- st_read("C:/Users/Kyle McCarthy/Documents/Practicum/Data/LandUse/lan
   mutate(AreaGain = as.numeric(AreaGain),
          AreaLoss = as.numeric(AreaLoss), 
          Coverage08 = as.numeric(Coverage08), 
-         Coverage18 = as.numeric(Coverage18))%>%
-  replace(is.na(LandUse1), 0)
+         Coverage18 = as.numeric(Coverage18))
+ LandUse1 <- LandUse1%>% replace(is.na(LandUse1), 0)
   
 LandUse<-
   LandUse1%>% 
@@ -990,9 +990,10 @@ ggplot(LandUseLong, aes(fill = variable, y=Descriptio, x=value))+
   scale_fill_manual(values = landusepal, 
                     name = "Area Gain or Loss")+
   labs(title = "Percent Tree Area Lost or Gained by Land Use Type")+ 
-  xlab("Percent Area Lost                          Percent Area Gained")+ 
+  xlab("Percentage of 2008 Trees Lost            Percentage of 2018 Trees Gained")+ 
   ylab("Land Use Type")+ 
-  theme(plot.title = element_text(hjust = 0.5))
+  theme(plot.title = element_text(hjust = 0.5), 
+        axis.title.x = element_text(size = 9, face = "bold"))
   
 ```
 
