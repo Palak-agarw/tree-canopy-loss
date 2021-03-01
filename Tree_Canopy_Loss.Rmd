@@ -114,6 +114,48 @@ paletteJ <- c("green", "red", "yellow")
 
 landusepal <- c("#1B4332", "#95D5B2" )
 
+paletteDiverge <- c("red", "orange", "yellow", "blue", "green")
+
+mapTheme <- function(base_size = 12) {
+  theme(
+    text = element_text( color = "black"),
+    plot.title = element_text(size = 14,colour = "black"),
+    plot.subtitle=element_text(face="italic"),
+    plot.caption=element_text(hjust=0),
+    axis.ticks = element_blank(),
+    panel.background = element_blank(), axis.title = element_blank(),
+    axis.text = element_blank(),
+    axis.title.x = element_blank(),
+    axis.title.y = element_blank(),
+    panel.grid.minor = element_blank(),
+    panel.border = element_rect(colour = "white", fill=NA, size=2)
+  )
+}
+
+
+plotTheme <- function(base_size = 12) {
+  theme(
+    text = element_text( color = "black"),
+    plot.title = element_text(size = 14,colour = "black"),
+    plot.subtitle = element_text(face="italic"),
+    plot.caption = element_text(hjust=0),
+    axis.ticks = element_blank(),
+    panel.background = element_blank(),
+    panel.grid.major = element_line("grey80", size = 0.1),
+    panel.grid.minor = element_blank(),
+    panel.border = element_rect(colour = "white", fill=NA, size=2),
+    strip.background = element_rect(fill = "grey80", color = "white"),
+    strip.text = element_text(size=12),
+    axis.title = element_text(size=12),
+    axis.text = element_text(size=10),
+    plot.background = element_blank(),
+    legend.background = element_blank(),
+    legend.title = element_text(colour = "black", face = "italic"),
+    legend.text = element_text(colour = "black", face = "italic"),
+    strip.text.x = element_text(size = 14)
+  )
+}
+
 ```
 
 ```{r Data Wrangling, cache=TRUE, message=FALSE, warning=FALSE, include=TRUE, results='hide'}
@@ -121,10 +163,11 @@ landusepal <- c("#1B4332", "#95D5B2" )
 # Tree Canopy
 TreeCanopy <-
   #st_read("C:/Users/Kyle McCarthy/Documents/Practicum/TreeCanopyChange_2008_2018.shp")%>%
-  #st_read("/Users/annaduan/Desktop/Y3S2/Practicum/Data/TreeCanopyChange_2008_2018-shp/TreeCanopyChange_2008_2018.shp") %>%
+  st_read("/Users/annaduan/Desktop/Y3S2/Practicum/Data/TreeCanopyChange_2008_2018-shp/TreeCanopyChange_2008_2018.shp") %>%
 #  st_read("C:/Users/agarw/Documents/MUSA 801/Data/TreeCanopyChange_2008_2018.shp") %>%
-st_read("C:/Users/Prince/Desktop/Tree Canopy Data/TreeCanopyChange_2008_2018.shp") %>%
-  st_transform('ESRI:102728')
+#st_read("C:/Users/Prince/Desktop/Tree Canopy Data/TreeCanopyChange_2008_2018.shp") %>%
+  st_transform('ESRI:102728') %>%
+  sample_n(15000)
 
 TreeCanopy$SHAPE_Area <- as.numeric(st_area(TreeCanopy))
 
@@ -138,9 +181,9 @@ Philadelphia <- st_read("http://data.phl.opendata.arcgis.com/datasets/405ec3da94
 # Neighborhoods
 Neighborhood <-
  # st_read("C:/Users/Kyle McCarthy/Documents/Practicum/Data/Neighborhoods/Neighborhoods_Philadelphia.shp") %>%
-  #st_read("/Users/annaduan/Desktop/Y3S2/Practicum/Data/Neighborhoods_Philadelphia/Neighborhoods_Philadelphia.shp")%>%
+st_read("/Users/annaduan/Desktop/Y3S2/Practicum/Data/Neighborhoods_Philadelphia/Neighborhoods_Philadelphia.shp")%>%
  # st_read("C:/Users/agarw/Documents/MUSA 801/Data/Neighborhoods_Philadelphia.shp") %>%
-st_read("C:/Users/Prince/Desktop/Tree Canopy Data/Neighborhoods_Philadelphia/Neighborhoods_Philadelphia.shp") %>%
+#st_read("C:/Users/Prince/Desktop/Tree Canopy Data/Neighborhoods_Philadelphia/Neighborhoods_Philadelphia.shp") %>%
   st_transform('ESRI:102728')
 
 Neighborhood <-
@@ -153,8 +196,8 @@ Neighborhood <-
  # st_read("http://data.phl.opendata.arcgis.com/datasets/957f032f9c874327a1ad800abd887d17_0.geojson") %>%
  # st_transform('ESRI:102728')
 
-HOLC <- #st_read("/Users/annaduan/Desktop/Y3S2/Practicum/Data/PAPhiladelphia1937.geojson") %>%
-  st_read("C:/Users/Prince/Desktop/Tree Canopy Data/PAPhiladelphia1937.geojson") %>%
+HOLC <- st_read("/Users/annaduan/Desktop/Y3S2/Practicum/Data/PAPhiladelphia1937.geojson") %>%
+ # st_read("C:/Users/Prince/Desktop/Tree Canopy Data/PAPhiladelphia1937.geojson") %>%
   #st_read("C:/Users/Kyle McCarthy/Documents/Practicum/Data/PAPhiladelphia1937.geojson")%>%
   st_transform('ESRI:102728')
 
@@ -213,8 +256,9 @@ ACS <-
  # st_transform('ESRI:102728')
 
 const_permits <- 
-  st_read("C:/Users/agarw/Documents/MUSA 801/Data/const_permit.csv") %>%
-  st_read("C:/Users/Prince/Desktop/Tree Canopy Data/const_permit.csv")
+  #st_read("C:/Users/agarw/Documents/MUSA 801/Data/const_permit.csv") %>%
+ # st_read("C:/Users/Prince/Desktop/Tree Canopy Data/const_permit.csv") %>%
+  st_read("/Users/annaduan/Desktop/Y3S2/Practicum/Data/const_permit.csv")
   mutate(X = geocode_x,
          Y = geocode_y) 
 const_permits[const_permits==""]<-NA
@@ -329,7 +373,7 @@ FinalFishnet <-
   mutate_all(~replace(., is.na(.), 0))%>%
   mutate(pctLoss = round(AreaLoss/AreaCoverage08 * 100, 2), 
          pctGain = round(AreaGain/AreaCoverage18 * 100, 2))%>%
-  mutate(pctChange = (AreaCoverage18 - AreaCoverage08) / (AreaCoverage08) * 100)%>%
+  mutate(pctChange = ifelse(AreaCoverage08 > 0, ((AreaCoverage18 - AreaCoverage08) / (AreaCoverage08) * 100), 0)) %>%
   mutate(netChange = AreaGain - AreaLoss)%>%
   dplyr::select(pctLoss, pctGain, pctChange,
                 AreaGain, AreaLoss, AreaCoverage08, AreaCoverage18, pctCoverage08, pctCoverage18, uniqueID, pctChange, netChange)
@@ -421,10 +465,6 @@ subtitle = "2018 Tree Canopy Area / Gridcell Size") +
 #         legend.text = element_text(size = 10)) + mapTheme()) 
 
 
-#FinalFishnet %>% 
-#  mutate(pctLoss.Cat = case_when(
-#                  pctLossCat < 0.25  ~ "Less than 1/4 Mile",
-#                  distWater >= 0.25   ~ "More than 1/4 Mile"))
 
 grid.arrange(ncol=2,
              
@@ -475,14 +515,17 @@ grid.arrange(ncol=2,
              
 ggplot(FinalFishnet, aes(x = pctGain, y = pctCoverage18))+
   geom_point()+ 
+      scale_x_log10() + scale_y_log10() +
   labs(title = "Percent Tree Canopy Gain (2008 - 2018) vs. \n Percent Tree Canopy Coverage (2018)", 
        subtitle = "Aggregated by Fishnet") + 
   xlab("Percent of Tree Canopy Gained (2008 - 2018)") + 
   ylab("Percent of Tree Canopy Coverage of Each Fishnet Cell (2018)") + 
-  theme(plot.title = element_text(hjust = 0.3, size = 12), plot.subtitle = element_text(hjust = 0.3, size = 8)), 
+  theme(plot.title = element_text(hjust = 0.3, size = 12), plot.subtitle = element_text(hjust = 0.3, size = 8)) +
+    plotTheme(), 
 
 ggplot(FinalFishnet, aes(x = pctLoss, y = pctCoverage18))+
   geom_point()+ 
+      scale_x_log10() + scale_y_log10() +
   labs(title = "Percent Tree Canopy Loss (2008 - 2018) vs. \n Percent Tree Canopy Coverage (2018) ", 
        subtitle = "Aggregated by Fishnet") + 
   xlab("Percent of Tree Canopy Lost (2008 - 2018)") + 
@@ -496,6 +539,7 @@ pctChangeGraph =
 
 ggplot(pctChangeGraph, aes(x = pctChange, y = AreaCoverage18))+
   geom_point()+ 
+      scale_x_log10() + scale_y_log10() +
   labs(title = "Percent Tree Canopy Gain Minus Percent Tree Canopy Loss \n vs. Percent Tree Canopy Coverage (2018)", 
        subtilte = "Aggregated by Fishnet") + 
   xlab("Percent of Tree Canopy Gained From 2008 - 2018 \n Minus Percent of Tree Canopy Lost From 2008 - 2018 ") + 
@@ -722,7 +766,7 @@ ggplot() +
 
 ggplot() +
   geom_sf(data = FinalNeighborhood, aes(fill = GainMinusLossCat), color = "white") +
-  scale_fill_manual(values = GainPalette, name = "Gain or Loss")+ 
+  scale_fill_manual(values = paletteDiverge, name = "Gain or Loss")+ 
   labs(title = "What is the Tree Canopy Net Gain or Loss \nin Each Neighborhood from 2008 - 2018?") +
   theme(plot.title = element_text(hjust = 0.5, size = 6))+
   mapTheme()
@@ -734,13 +778,13 @@ The demographic attribute most correlated with tree canopy coverage is income.
 
 correlation.long <-
   st_drop_geometry(FinalFishnet) %>%
-     dplyr::select(population, medHHInc, housing_units, Rent, pctBach, pctWhite, pctNoVehicle, GainMinusLoss) %>%
-    gather(Variable, Value, -GainMinusLoss)
+     dplyr::select(population, medHHInc, housing_units, Rent, pctBach, pctWhite, pctNoVehicle, netChange) %>%
+    gather(Variable, Value, -netChange)
 
 correlation.cor <-
   correlation.long %>%
     group_by(Variable) %>%
-    summarize(correlation = cor(Value, GainMinusLoss, use = "complete.obs"))
+    summarize(correlation = cor(Value, netChange, use = "complete.obs"))
 
 
 correlation.long1 <-
@@ -779,7 +823,7 @@ correlation.cor3 <-
 
 library(grid)
 grid.arrange(ncol=2, top=textGrob("Fishnet Variables in Comparison to Local Demographics"),
-             ggplot(correlation.long, aes(Value, GainMinusLoss)) +
+             ggplot(correlation.long, aes(Value, netChange)) +
   geom_point(size = 0.1) +
     scale_x_log10() + scale_y_log10() +
   geom_text(data = correlation.cor, aes(label = paste("r =", round(correlation, 2))),
