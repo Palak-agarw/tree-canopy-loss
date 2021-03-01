@@ -886,31 +886,31 @@ grid.arrange(ncol=2, top=textGrob("Fishnet Variables in Comparison to Local Demo
 #   theme(plot.title = element_text(hjust = 0.3, size = 12), plot.subtitle = element_text(hjust = 0.3, size = 8)) +
 #   plotTheme()
 
-e311Trees <- 
-  st_read('C:/Users/Kyle McCarthy/Documents/Practicum/e311.csv')
-  
-e311Trees<- 
-  e311Trees%>%
-  dplyr:: select(service_name, lat, lon)%>% 
-  filter(service_name == "Tree Dangerous" | service_name == "Street Tree")%>% 
-  mutate(lon = as.numeric(lon), 
-         lat = as.numeric(lat))%>% 
-    na.omit()%>% 
-  st_as_sf(.,coords=c("lon","lat"),crs=4326)%>% 
-  st_transform('ESRI:102728')
-   
-
-e311_net_tree <- 
-  e311Trees%>%
-  mutate(e311TreeCount = 1) %>% 
-  dplyr::select(e311TreeCount)%>%
-  aggregate(., FinalFishnet, sum) %>%
-  mutate(e311TreeCount = replace_na(e311TreeCount, 0))%>%
-  st_centroid()%>%
-  st_join(FinalFishnet, .)
-
-
-  
+# e311Trees <- 
+#   st_read('C:/Users/Kyle McCarthy/Documents/Practicum/e311.csv')
+#   
+# e311Trees<- 
+#   e311Trees%>%
+#   dplyr:: select(service_name, lat, lon)%>% 
+#   filter(service_name == "Tree Dangerous" | service_name == "Street Tree")%>% 
+#   mutate(lon = as.numeric(lon), 
+#          lat = as.numeric(lat))%>% 
+#     na.omit()%>% 
+#   st_as_sf(.,coords=c("lon","lat"),crs=4326)%>% 
+#   st_transform('ESRI:102728')
+#    
+# 
+# e311_net_tree <- 
+#   e311Trees%>%
+#   mutate(e311TreeCount = 1) %>% 
+#   dplyr::select(e311TreeCount)%>%
+#   aggregate(., FinalFishnet, sum) %>%
+#   mutate(e311TreeCount = replace_na(e311TreeCount, 0))%>%
+#   st_centroid()%>%
+#   st_join(FinalFishnet, .)
+# 
+# 
+#   
 
 
 ```
