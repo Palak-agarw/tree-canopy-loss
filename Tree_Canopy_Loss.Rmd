@@ -79,6 +79,7 @@ library(ggmap)
 library(jsonlite)
 library(entropy)
 library(tidyr)
+library(RSocrata)
 
 
 
