@@ -401,25 +401,25 @@ subtitle = "2018 Tree Canopy Area / Gridcell Size") +
 **Tree Canopy Change**  
 ```{r Change in tree canopy, message=FALSE, warning=FALSE, results='hide', fig.height = 12, fig.width = 20, cache=TRUE}
 
-grid.arrange(ncol=2,
-             
-ggplot()+ 
-  geom_sf(data = FinalFishnet, aes(fill = AreaGainCat))+ 
-  scale_fill_manual(values = palette7,
-                    name = "Area Gain (ft^2)")+
-  labs(title= "How Much Tree Canopy was Gained in Each Gridcell \n from 2008 - 2018?")+
- theme(plot.title = element_text(size = 24, face = "bold", hjust = 0.5), 
-        legend.title = element_text(size =12), 
-        legend.text = element_text(size = 10)) + mapTheme(),
-
-ggplot()+ 
-  geom_sf(data = FinalFishnet, aes(fill = AreaLossCat))+ 
-  scale_fill_manual(values = palette7,
-                    name = "Area Loss (f^2)")+
-  labs(title= "How Much Tree Canopy Was Lost in Each Gridcell \n From 2008 - 2018?")+
-  theme(plot.title = element_text( size = 24, face = "bold", hjust = 0.5), 
-        legend.title = element_text(size = 12), 
-        legend.text = element_text(size = 10)) + mapTheme()) 
+# grid.arrange(ncol=2,
+#              
+# ggplot()+ 
+#   geom_sf(data = FinalFishnet, aes(fill = AreaGainCat))+ 
+#   scale_fill_manual(values = palette7,
+#                     name = "Area Gain (ft^2)")+
+#   labs(title= "How Much Tree Canopy was Gained in Each Gridcell \n from 2008 - 2018?")+
+#  theme(plot.title = element_text(size = 24, face = "bold", hjust = 0.5), 
+#         legend.title = element_text(size =12), 
+#         legend.text = element_text(size = 10)) + mapTheme(),
+# 
+# ggplot()+ 
+#   geom_sf(data = FinalFishnet, aes(fill = AreaLossCat))+ 
+#   scale_fill_manual(values = palette7,
+#                     name = "Area Loss (f^2)")+
+#   labs(title= "How Much Tree Canopy Was Lost in Each Gridcell \n From 2008 - 2018?")+
+#   theme(plot.title = element_text( size = 24, face = "bold", hjust = 0.5), 
+#         legend.title = element_text(size = 12), 
+#         legend.text = element_text(size = 10)) + mapTheme()) 
 
 
 #FinalFishnet %>% 
@@ -477,7 +477,7 @@ grid.arrange(ncol=2,
 ggplot(FinalFishnet, aes(x = pctGain, y = pctCoverage18))+
   geom_point()+ 
   labs(title = "Percent Tree Canopy Gain (2008 - 2018) vs. \n Percent Tree Canopy Coverage (2018)", 
-       subtilte = "Aggregated by Fishnet") + 
+       subtitle = "Aggregated by Fishnet") + 
   xlab("Percent of Tree Canopy Gained (2008 - 2018)") + 
   ylab("Percent of Tree Canopy Coverage of Each Fishnet Cell (2018)") + 
   theme(plot.title = element_text(hjust = 0.3, size = 12), plot.subtitle = element_text(hjust = 0.3, size = 8)), 
@@ -485,7 +485,7 @@ ggplot(FinalFishnet, aes(x = pctGain, y = pctCoverage18))+
 ggplot(FinalFishnet, aes(x = pctLoss, y = pctCoverage18))+
   geom_point()+ 
   labs(title = "Percent Tree Canopy Loss (2008 - 2018) vs. \n Percent Tree Canopy Coverage (2018) ", 
-       subtilte = "Aggregated by Fishnet") + 
+       subtitle = "Aggregated by Fishnet") + 
   xlab("Percent of Tree Canopy Lost (2008 - 2018)") + 
   ylab("Percent of Tree Canopy Coverage of Each Fishnet Cell (2018)") + 
   theme(plot.title = element_text(hjust = 0.3, size = 12), plot.subtitle = element_text(hjust = 0.3, size = 8))) +
@@ -1040,7 +1040,8 @@ ggmap(base_mapGH, darken = c(0.3, "white")) +
 
 LandUse1 <- 
   #st_read("C:/Users/Kyle McCarthy/Documents/Practicum/Data/LandUse/landu.csv")%>% 
-  st_read("C:/Users/agarw/Documents/MUSA 801/Data/landu.csv")%>% 
+  #st_read("C:/Users/agarw/Documents/MUSA 801/Data/landu.csv")%>% 
+  st_read("/Users/annaduan/Desktop/Y3S2/Practicum/Data/landu.csv") %>%
   mutate(AreaGain = as.numeric(AreaGain),
          AreaLoss = as.numeric(AreaLoss), 
          Coverage08 = as.numeric(Coverage08), 
