@@ -209,11 +209,12 @@ ACS <-
   dplyr::select(-Households_hmow,-Households_hmre,-noVehicle_hmow,-noVehicle_hmre,-bachelor, -white)
 
 
-parcels <- st_read("http://data-phl.opendata.arcgis.com/datasets/1c57dd1b3ff84449a4b0e3fb29d3cafd_0.geojson")%>%
-  st_transform('ESRI:102728')
+#parcels <- st_read("http://data-phl.opendata.arcgis.com/datasets/1c57dd1b3ff84449a4b0e3fb29d3cafd_0.geojson")%>%
+ # st_transform('ESRI:102728')
 
 const_permits <- 
   st_read("C:/Users/agarw/Documents/MUSA 801/Data/const_permit.csv") %>%
+  st_read("C:/Users/Prince/Desktop/Tree Canopy Data/const_permit.csv")
   mutate(X = geocode_x,
          Y = geocode_y) 
 const_permits[const_permits==""]<-NA

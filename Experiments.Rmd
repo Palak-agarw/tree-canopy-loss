@@ -1,5 +1,5 @@
 ---
-title: "Untitled"
+title: "Experiments"
 author: "Anna, Palak, Kyle"
 date: "2/16/2021"
 output: html_document
@@ -51,3 +51,28 @@ ggplot(data = redline) +
   labs(title = "1937 Home Owner's Loan Corporation Redlining", subtitle = "Philadelphia, PA") +
   mapTheme()
 ```
+
+```{r air monitoring, echo=FALSE}
+airQuality <- st_read("/Users/annaduan/Downloads/Air_Monitoring_Stations.geojson")
+```
+
+```{r landuse}
+landUse <- st_read("/Users/annaduan/Desktop/Y3S2/Practicum/Data/landu.csv")
+```
+
+```{r 311}
+tree311 <- st_read("/Users/annaduan/Downloads/public_cases_fc.csv") %>%
+  filter(service_name == "Street Trees") %>%
+  dplyr::select(Y = lat, X = lon) %>%
+  filter(X != "") %>%
+      st_as_sf(coords = c("X", "Y"), crs = 4326, agr = "constant") %>%
+  st_transform('ESRI:102728')
+
+ggplot() +
+  geom_sf(data = tree311, colour = "brown", alpha = 0.5, size = 0.5) +
+  mapTheme()
+
+```
+
+
+
