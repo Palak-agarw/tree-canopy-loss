@@ -78,6 +78,7 @@ library(ggplot2)
 library(ggmap)
 library(jsonlite)
 library(entropy)
+library(tidyr)
 
 
 
@@ -208,8 +209,8 @@ ACS <-
   dplyr::select(-Households_hmow,-Households_hmre,-noVehicle_hmow,-noVehicle_hmre,-bachelor, -white)
 
 
-#parcels <- st_read("http://data-phl.opendata.arcgis.com/datasets/1c57dd1b3ff84449a4b0e3fb29d3cafd_0.geojson")%>%
-#  st_transform('ESRI:102728')
+parcels <- st_read("http://data-phl.opendata.arcgis.com/datasets/1c57dd1b3ff84449a4b0e3fb29d3cafd_0.geojson")%>%
+  st_transform('ESRI:102728')
 
 const_permits <- 
   st_read("C:/Users/agarw/Documents/MUSA 801/Data/const_permit.csv") %>%
@@ -337,14 +338,11 @@ FinalFishnet<-
   left_join(FinalFishnet)%>%
   na.omit()
 
-FinalFishnet <- 
+FinalFishnet<- 
   FinalFishnet%>% 
-  mutate(pctChange = (AreaCoverage18 - AreaCoverage08) / (AreaCoverage08) * 100)%>% 
+  mutate(pctChange = (AreaCoverage18 - AreaCoverage08) / (AreaCoverage08) * 100)%>%
   mutate(netChange = AreaGain - AreaLoss)
   
-
-
-
 
 
 
@@ -848,31 +846,45 @@ grid.arrange(ncol=2, top=textGrob("Fishnet Variables in Comparison to Local Demo
 ```
 
 ### 3. What are the risk factors for tree canopy loss?   
-```{r Potential Risk Factors, fig.height = 18, fig.width = 13, message=FALSE, warning=FALSE, include=TRUE, results='hide', cache=TRUE}
+```{r Potential Risk Factors, fig.height = 12,fig.width = 12, message=FALSE, warning=FALSE, include=TRUE, results='hide', cache=TRUE}
+# Parcels make little difference, except if you are looking at total net change (looks like a normal distribution). Im commenting it out, but feel free to play around with the data. 
 
-# Parcels 
-
-#parcels %>%
+# 
+# # Parcels 
+# parcels <- 
+# parcels %>%
 #  mutate(ParcelArea = st_area(parcels))%>%
 #  st_centroid()%>%
 #  dplyr:: select(ParcelArea)
-
-
-#FinalFishnet1 <- 
-#  FinalFishnet%>%
-#  st_join(parcels)
-
-#FinalFishnet1 %>%
-#  group_by(uniqueID)%>%
-#  summarise(avgParcelSize = mean(ParcelArea))%>%
- # st_drop_geometry() 
-
-#FinalFishnet1 <- 
-#  FinalFishnet%>% 
-#  left_join(FinalFishnet1)
-
-#ParcelReg <- lm(pctLoss ~ Rent, data = FinalFishnet1)
-#summary(ParcelReg)
+# 
+# 
+# FinalFishnet1 <- st_join(FinalFishnet, parcels)
+# 
+# FinalFishnet1<- 
+# FinalFishnet1 %>%
+#   st_drop_geometry()%>%
+#   group_by(uniqueID)%>%
+#   summarise(avgParcelSize = mean(ParcelArea))
+# 
+# 
+# FinalFishnet1 <-
+#   FinalFishnet%>%
+#   left_join(FinalFishnet1)
+# 
+# FinalFishnet1<- 
+#   FinalFishnet1%>% 
+#   mutate(pctChange = (AreaCoverage18 - AreaCoverage08) / (AreaCoverage08) * 100)%>%
+#   mutate(netChange = AreaGain - AreaLoss)%>%
+#   mutate(avgParcelSize = as.numeric(avgParcelSize))
+# 
+# ggplot(Graph, aes(y = avgParcelSize, x = pctChange))+
+#   geom_point()+ 
+#   labs(title = "Percent Tree Canopy Loss (2008 - 2018) vs. \n Percent Tree Canopy Coverage (2018) ", 
+#        subtilte = "Aggregated by Fishnet") + 
+#   xlab("Percent of Tree Canopy Lost (2008 - 2018)") + 
+#   ylab("Percent of Tree Canopy Coverage of Each Fishnet Cell (2018)") + 
+#   theme(plot.title = element_text(hjust = 0.3, size = 12), plot.subtitle = element_text(hjust = 0.3, size = 8)) +
+#   plotTheme()
 
 ```
 
@@ -1039,8 +1051,8 @@ ggmap(base_mapGH, darken = c(0.3, "white")) +
 # Analysis completed in ArcGIS -- Processing time to long in R. 500,000 Parcels and 614,000 Tree Canopy Polygons aggregated in this analysis. I plan on writing out what the code would be for reproducability purposes. 
 
 LandUse1 <- 
-  #st_read("C:/Users/Kyle McCarthy/Documents/Practicum/Data/LandUse/landu.csv")%>% 
-  st_read("C:/Users/agarw/Documents/MUSA 801/Data/landu.csv")%>% 
+  st_read("C:/Users/Kyle McCarthy/Documents/Practicum/Data/LandUse/LandUse1.shp")%>% 
+  #st_read("C:/Users/agarw/Documents/MUSA 801/Data/landu.csv")%>% 
   mutate(AreaGain = as.numeric(AreaGain),
          AreaLoss = as.numeric(AreaLoss), 
          Coverage08 = as.numeric(Coverage08), 
@@ -1049,6 +1061,7 @@ LandUse1 <-
   
 LandUse<-
   LandUse1%>% 
+  st_drop_geometry()%>% 
   group_by(Descriptio)%>%
   summarise(AreaGain = sum(AreaGain), 
             AreaLoss = sum(AreaLoss), 
@@ -1067,7 +1080,7 @@ LandUseLong<-
   mutate(variable = ifelse(variable == "AreaGain", "Area Gain", "Area Loss"))
 
 ggplot(LandUseLong, aes(fill = variable, y=Descriptio, x=value))+
-  geom_bar(stat='identity', position = "stack")+ 
+  geom_bar(stat='identity', position = "stack", width = .7)+ 
   scale_fill_manual(values = landusepal, 
                     name = "Area Gain or Loss")+
   labs(title = "Total Area Lost or Gained by Land Use Type")+ 
@@ -1083,10 +1096,10 @@ LandUseLong<-
   mutate(variable = ifelse(variable == "pctGain", "Percent Gained", "Percent Lost"))
 
 ggplot(LandUseLong, aes(fill = variable, y=Descriptio, x=value))+
-  geom_bar(stat='identity', position = "stack")+ 
+  geom_bar(stat='identity', position = "stack", width = .7)+ 
   scale_fill_manual(values = landusepal, 
                     name = "Area Gain or Loss")+
-  labs(title = "Percent Tree Area Lost or Gained by Land Use Type")+ 
+  labs(title = "Relative Percent Lost or Relative Percent Gained")+ 
   xlab("Percentage of 2008 Trees Lost            Percentage of 2018 Trees Gained")+ 
   ylab("Land Use Type")+ 
   theme(plot.title = element_text(hjust = 0.5), 
@@ -1105,7 +1118,7 @@ LandUseLong<-
 grid.arrange(ncol= 1,
              
 ggplot(LandUse, aes(y=Descriptio, x=netChange))+
-  geom_bar(stat='identity', fill="forest green")+ 
+  geom_bar(stat='identity', fill="forest green", width = .4)+ 
   labs(title = "Total Net Change", 
        subtitle = "Area Gain - Area Loss")+ 
   xlab("Land Use Type")+ 
@@ -1113,7 +1126,7 @@ ggplot(LandUse, aes(y=Descriptio, x=netChange))+
   theme(axis.text.x = element_text(angle = 90, vjust = 0.5, hjust=1)), 
 
 ggplot(LandUse, aes(y=Descriptio, x=pctChange))+
-  geom_bar(stat='identity', fill="forest green")+ 
+  geom_bar(stat='identity', fill="forest green", width = .4)+ 
   labs(title = "Percent Change", 
        subtitle = "('18 Tree Canopy Coverage - '08 Tree Canopy Coverage) / ('18 Tree Canopy Coverage) * 100 ")+ 
   xlab("Percent Net Change")+ 
@@ -1122,7 +1135,7 @@ ggplot(LandUse, aes(y=Descriptio, x=pctChange))+
 
 ```
 
-``````{r Exploring Residential Furrther, message=FALSE, warning=FALSE, include=TRUE, results='hide', fig.height =  7, fig.width = 7, cache=TRUE}
+```{r Exploring Residential Furrther, message=FALSE, warning=FALSE, include=TRUE, results='hide', fig.height =  7, fig.width = 7, cache=TRUE}
 
 LandUse2 <- 
   LandUse1%>%
@@ -1139,7 +1152,7 @@ LandUse2 <-
   grid.arrange(ncol= 1,
              
 ggplot(LandUse2, aes(y=C_DIG2DESC, x=netChange))+
-  geom_bar(stat='identity', fill="forest green")+ 
+  geom_bar(stat='identity', fill="forest green", width = 0.5)+ 
   labs(title = "Total Tree Canopy Net Change in Residential Land Use Parcels", 
        subtitle = "Area Gain - Area Loss")+ 
   ylab("Residential Land Use Type")+ 
@@ -1147,7 +1160,7 @@ ggplot(LandUse2, aes(y=C_DIG2DESC, x=netChange))+
   theme(axis.text.x = element_text(angle = 90, vjust = 0.5, hjust=1)), 
 
 ggplot(LandUse2, aes(y=C_DIG2DESC, x=pctChange))+
-  geom_bar(stat='identity', fill="forest green")+ 
+  geom_bar(stat='identity', fill="forest green", width = 0.5)+ 
   labs(title = "Percent Change in Residential Land Use Parcels", 
        subtitle = "('18 Tree Canopy Coverage - '08 Tree Canopy Coverage) / ('18 Tree Canopy Coverage) * 100 ")+ 
   ylab("Residential Land Use Type")+ 
@@ -1157,7 +1170,25 @@ ggplot(LandUse2, aes(y=C_DIG2DESC, x=pctChange))+
 
 
 ```
+```{r Land Use to Fishnet message=FALSE, warning=FALSE, include=TRUE, results='hide', fig.height =  7, fig.width = 7, cache=TRUE}
 
+LandUseAg<- 
+  LandUse1%>%
+  filter(Descriptio == "Residential" | Descriptio == "Transportation") %>% 
+  group_by(Descriptio)%>%
+  summarise()
+
+LandUseAg<- 
+  LandUseAg%>%
+  st_transform('ESRI:102728')
+  
+
+LandUseFishnet <- 
+  FinalFishnet %>%
+  st_make_valid()%>%
+  st_intersection(LandUseAg)
+
+```
 
 ### 4. How do current patterns of tree canopy coverage and loss reflect disinvestment as a result of redlining and older planning practices?  
 ```{r HOLC, message=FALSE, warning=FALSE, results='hide', cache=TRUE}
