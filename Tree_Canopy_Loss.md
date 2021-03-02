@@ -1320,6 +1320,22 @@ ggplot()+
 
 ![](Tree_Canopy_Loss_files/figure-html/HOLC-1.png)<!-- -->
 
+
+```r
+# publichealth <- 
+#   read.socrata("https://chronicdata.cdc.gov/resource/yjkw-uj5s.json") %>%
+#   filter(countyname == "Philadelphia") 
+# 
+# # Joining by GEOID to get geometry
+# phillyhealth <- 
+#   merge(x = publichealth, y = ACS, by.y = "GEOID", by.x = "tractfips", all.x = TRUE)
+# 
+# ggplot() +
+#   geom_sf(data = phillyhealth, aes(fill = casthma_crude95ci))+
+#   plotTheme()
+```
+
+
 ## Team Roles
 
 ![Gantt Chart](Gantt.png)
