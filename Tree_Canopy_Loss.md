@@ -61,7 +61,8 @@ We use the following data:
 * Zoning
 * Home Prices
 
-```{r setup, message=FALSE, warning=FALSE, include=TRUE, results='hide', cache=TRUE}
+
+```r
 knitr::opts_chunk$set(message = FALSE, warning = FALSE)
 options(scipen=10000000)
 library(knitr)
@@ -159,11 +160,10 @@ plotTheme <- function(base_size = 12) {
     strip.text.x = element_text(size = 14)
   )
 }
-
 ```
 
-```{r Data Wrangling, cache=TRUE, message=FALSE, warning=FALSE, include=TRUE, results='hide'}
 
+```r
 # Tree Canopy
 TreeCanopy <-
   st_read("C:/Users/Kyle McCarthy/Documents/Practicum/TreeCanopyChange_2008_2018.shp")%>%
@@ -279,8 +279,8 @@ const_spatial <- const_spatial %>% st_transform('ESRI:102728')
 ## Exploratory Analysis
 
 ### Creating a fishnet
-```{r Fishnet, cache=TRUE, message=FALSE, warning=FALSE, include=TRUE, results='hide'}
 
+```r
 # Make fishnet
 fishnet <- 
   st_make_grid(Philadelphia,
@@ -288,12 +288,11 @@ fishnet <-
   st_sf() %>%
   mutate(uniqueID = rownames(.))%>%
   st_transform('ESRI:102728')
-
 ```
 
 
-```{r Fishnet Aggregation, cache=TRUE, message=FALSE, warning=FALSE, include=TRUE, results='hide'}
 
+```r
 # Make canopy loss layers
 TreeCanopyAll<- 
   TreeCanopy%>%
@@ -424,8 +423,6 @@ FinalFishnet$pctLossCat <- cut(FinalFishnet$pctLoss,
                        breaks = c(-Inf,20, 40, 60, 80, Inf), 
                        labels = c("0%-20% Loss", "20%-40% Loss", "40%-60% Loss", "60%-80% Loss", "80%-100% Loss"), 
                        right = FALSE)
-
-
 ```
 
 
@@ -433,8 +430,8 @@ FinalFishnet$pctLossCat <- cut(FinalFishnet$pctLoss,
 
 **Philadelphia's 2018 Canopy**  
 In Philadelphia, the Northwest, parts of the West, and parts of the Northeast have the most tree canopy while North and South Philadelphia and Center City have very little canopy. 
-```{r 2018 Tree Canopy, message=FALSE, warning=FALSE, results='hide', fig.height = 12, fig.width = 20, cache=TRUE}
 
+```r
 ggplot()+ 
   geom_sf(data = FinalFishnet, aes(fill = pctCoverage18Cat))+ 
      scale_fill_manual(values = palette7, 
@@ -445,9 +442,11 @@ subtitle = "2018 Tree Canopy Area / Gridcell Size") +
         legend.title = element_text(size = 12)) +  mapTheme()
 ```
 
-**Tree Canopy Change**  
-```{r Change in tree canopy, message=FALSE, warning=FALSE, results='hide', fig.height = 12, fig.width = 20, cache=TRUE}
+![](Tree_Canopy_Loss_files/figure-html/2018 Tree Canopy-1.png)<!-- -->
 
+**Tree Canopy Change**  
+
+```r
 # grid.arrange(ncol=2,
 #              
 # ggplot()+ 
@@ -491,8 +490,10 @@ ggplot()+
         plot.subtitle = element_text(hjust = 0.3)) + mapTheme())  
 ```
 
-```{r Gain Minus Loss, message=FALSE, warning=FALSE, results='hide', fig.height = 8, fig.width = 8, cache=TRUE}
+![](Tree_Canopy_Loss_files/figure-html/Change in tree canopy-1.png)<!-- -->
 
+
+```r
 FinalFishnet$PctChangeCat <- cut(FinalFishnet$pctChange, 
                        breaks = c(-Inf,  -30, -10, 0, 10, 20, Inf), 
                        labels = c("Significant Net Loss", "Moderate Net Loss", "Low Net Loss", "Low Net Gain", "Moderate Net Gain", "Significant Net Gain"), 
@@ -507,8 +508,11 @@ ggplot()+
                                  name = "Area Loss (f^2)")+
                labs(title= "How Much Tree Canopy Was Lost in Each Gridcell \n From 2008 - 2018?")+
                mapTheme()
+```
 
+![](Tree_Canopy_Loss_files/figure-html/Gain Minus Loss-1.png)<!-- -->
 
+```r
 ggplot()+ 
   geom_sf(data = FinalFishnet, aes(fill = PctChangeCat))+ 
   scale_fill_manual(values = palette8,
@@ -518,12 +522,12 @@ ggplot()+
   theme(plot.title = element_text(hjust = 0.3), 
         legend.title = element_text(size = 12), 
         legend.text = element_text(size = 10)) + mapTheme()
-
-  
 ```
 
-```{r Comparing Tree Canopy Area to Loss/Gain2, message=FALSE, warning=FALSE, results='hide', fig.height = 8, fig.width = 12,  cache=TRUE}
+![](Tree_Canopy_Loss_files/figure-html/Gain Minus Loss-2.png)<!-- -->
 
+
+```r
 grid.arrange(ncol=2,
              
 ggplot(FinalFishnet, aes(x = pctGain, y = pctCoverage18))+
@@ -545,7 +549,11 @@ ggplot(FinalFishnet, aes(x = pctLoss, y = pctCoverage18))+
   ylab("Percent of Tree Canopy Coverage of Each Fishnet Cell (2018)") + 
   theme(plot.title = element_text(hjust = 0.3, size = 12), plot.subtitle = element_text(hjust = 0.3, size = 8)) +
   plotTheme()) 
+```
 
+![](Tree_Canopy_Loss_files/figure-html/Comparing Tree Canopy Area to Loss/Gain2-1.png)<!-- -->
+
+```r
 pctChangeGraph = 
   FinalFishnet%>% 
   filter(pctChange < 100)
@@ -558,11 +566,12 @@ ggplot(pctChangeGraph, aes(x = pctChange, y = pctCoverage18))+
   ylab("Percent of Tree Canopy Coverage of Each Grid Cell (2018)") + 
   theme(plot.title = element_text(hjust = 0.5, size = 15, face = "bold"), plot.subtitle = element_text(hjust = 0.5, size = 8)) +
   plotTheme()
-
-
 ```
 
-```{r Add ACS to fishnet, message=FALSE, warning=FALSE, results='hide', fig.height = 7, fig.width = 10,  cache=TRUE}
+![](Tree_Canopy_Loss_files/figure-html/Comparing Tree Canopy Area to Loss/Gain2-2.png)<!-- -->
+
+
+```r
 fishnet_centroid <- FinalFishnet%>%
   st_centroid()
 
@@ -599,7 +608,6 @@ ACS_net <-
 FinalFishnet <- 
   FinalFishnet%>%
   left_join(ACS_net)
-
 ```
 
 **A Closer Look: 4 Neighborhoods' Tree Canopy Change**
@@ -607,7 +615,8 @@ Neighborhoods like Upper Roxborough, which have many trees, experienced less net
 
 What about income? Higher income neighborhoods in Philadelphia generally have more tree canopy.However, looking at Fairhill and Graduate Hospital, the poorest and richest neighborhoods in Philadelphia, respectively, tree canopy change is more complex. Both neighborhoods are in the Center City region, and both experience a mix of gain, loss, and no change that appears to be in small pieces.
 
-```{r Neighborhood level Tree Loss, message=FALSE, warning=FALSE, results='hide', fig.height = 6, fig.width = 9}
+
+```r
 library(magrittr)
 library(dplyr)
 #making basemap
@@ -666,14 +675,12 @@ library(dplyr)
 #   scale_fill_manual(values = paletteJ, name = "Canopy Change") +
 #   labs(title = "Graduate Hospital Tree Canopy Change 2008-2018", subtitle = "Philadelphia, PA") +
 #     mapTheme()
-
-
 ```
 
 
 ### 2. Which neighborhoods do not meet the 30% tree canopy coverage?   
-```{r The 30 Percent Goal, message=FALSE, warning=FALSE, results='hide', fig.height = 7, fig.width = 8, cache=TRUE}
 
+```r
 # Tree Loss by Neighborhood
 TreeCanopyAllN<- 
   TreeCanopy%>%
@@ -765,12 +772,10 @@ FinalNeighborhood$GainMinusLossCat <- cut(FinalNeighborhood$GainMinusLoss,
                       breaks = c(-Inf, -10000000, -5000000, -2500000, 0, Inf), 
                        labels = c("Greater Than 1500000 Squared Feet lost", "1000000-1500000 Squared Feet Lost", "500000-1000000 Squared Feet Lost", "0-25000 Squared Feet Lost", "Tree Canopy Gain!"), 
                        right = FALSE)
-
-
 ```
 
-```{r Neighborhood Maps, message=FALSE, warning=FALSE, results='hide', fig.height = 7, fig.width = 8, cache=TRUE}
 
+```r
 ggplot() +
   geom_sf(data = FinalNeighborhood, aes(fill = GoalCat), color = "white") +
   scale_fill_manual(values = GoalPalette, 
@@ -780,20 +785,24 @@ ggplot() +
         legend.position = "bottom", 
         legend.title = element_blank())+
   mapTheme() 
+```
 
+![](Tree_Canopy_Loss_files/figure-html/Neighborhood Maps-1.png)<!-- -->
 
+```r
 ggplot() +
   geom_sf(data = FinalNeighborhood, aes(fill = GainMinusLossCat), color = "white") +
   scale_fill_manual(values = paletteLG, name = "Gain or Loss")+ 
   labs(title = "What is the Tree Canopy Net Gain or Loss \nin Each Neighborhood from 2008 - 2018?") +
   theme(plot.title = element_text(hjust = 0.5, size = 6))+
   mapTheme()
-
 ```
 
-The demographic attribute most correlated with tree canopy coverage is income.
-```{r Comparing Demographics to Fishnet Variables, message=FALSE, warning=FALSE, results='hide', fig.height = 18, fig.width = 13,  cache=TRUE}
+![](Tree_Canopy_Loss_files/figure-html/Neighborhood Maps-2.png)<!-- -->
 
+The demographic attribute most correlated with tree canopy coverage is income.
+
+```r
 correlation.long <-
   st_drop_geometry(FinalFishnet) %>%
      dplyr::select(population, medHHInc, housing_units, Rent, pctBach, pctWhite, pctNoVehicle, netChange) %>%
@@ -882,8 +891,10 @@ grid.arrange(ncol=2, top=textGrob("Fishnet Variables in Comparison to Local Demo
   plotTheme()) 
 ```
 
-```{r Demographic context, message=FALSE, warning=FALSE, include=TRUE, results='hide', cache=TRUE}
+![](Tree_Canopy_Loss_files/figure-html/Comparing Demographics to Fishnet Variables-1.png)<!-- -->
 
+
+```r
 # # race context
 # race_context <- ACS %>%
 #   dplyr::select(pctWhite) %>%
@@ -905,11 +916,11 @@ grid.arrange(ncol=2, top=textGrob("Fishnet Variables in Comparison to Local Demo
 #   scale_fill_viridis(option = "B", discrete = TRUE, name = "Income Context") +
 #   labs(title = "Neighborhood Income Context", subtitle = "Philadelphia, PA") +
 #   mapTheme()
-
 ```
 
 ### 3. What are the risk factors for tree canopy loss?   
-```{r Potential Risk Factors, fig.height = 12,fig.width = 12, message=FALSE, warning=FALSE, include=TRUE, results='hide', cache=TRUE}
+
+```r
 # Parcels make little difference, except if you are looking at total net change (looks like a normal distribution). Im commenting it out, but feel free to play around with the data. 
 
 # 
@@ -974,12 +985,10 @@ grid.arrange(ncol=2, top=textGrob("Fishnet Variables in Comparison to Local Demo
 # 
 # 
 #   
-
-
 ```
 
-```{r Const_Permit, message=FALSE, warning=FALSE, include=TRUE, results='hide', fig.height = 7, fig.width = 8, cache=TRUE}
 
+```r
 const_spatial2 <-
   const_spatial %>%
   filter(permitdescription == 'RESIDENTIAL BUILDING PERMIT ' | permitdescription == 'COMMERCIAL BUILDING PERMIT')
@@ -1011,12 +1020,12 @@ const_net_fish <-
                   scale_fill_viridis() +
                   labs(title = "Count of Construction permits for the neighborhood") +
                   mapTheme()
-
-
 ```
 
-```{r Const_Permit2, message=FALSE, warning=FALSE, include=TRUE, results='hide', fig.height = 7, fig.width = 8, cache=TRUE}
+![](Tree_Canopy_Loss_files/figure-html/Const_Permit-1.png)<!-- -->
 
+
+```r
 #Filter maximum construction permits by neighborhood
 
 const_max_neigh <-
@@ -1042,11 +1051,12 @@ ggmap(base_mapGH, darken = c(0.3, "white")) +
   scale_fill_manual(values = paletteJ, name = "Canopy Change") +
   labs(title = "University City Tree Canopy Change 2008-2018 with construction permits", subtitle = "Philadelphia, PA") +
     mapTheme()
-
 ```
 
-```{r Const_Permit3, message=FALSE, warning=FALSE, include=TRUE, results='hide', fig.height = 7, fig.width = 8, cache=TRUE}
+![](Tree_Canopy_Loss_files/figure-html/Const_Permit2-1.png)<!-- -->
 
+
+```r
 #Juniata Park
 # 
 # const_JB <- st_intersection(const_spatial2, JPBound)
@@ -1108,13 +1118,11 @@ ggmap(base_mapGH, darken = c(0.3, "white")) +
 #   scale_fill_manual(values = paletteJ, name = "Canopy Change") +
 #   labs(title = "Graduate Hospital Tree Canopy Change 2008-2018 with construction permits", subtitle = "Philadelphia, PA") +
 #     mapTheme()
-
 ```
 
 
-```{r land, message=FALSE, warning=FALSE, include=TRUE, results='hide', fig.height = 7, fig.width = 8, cache=TRUE}
 
-
+```r
 # Analysis completed in ArcGIS -- Processing time to long in R. 500,000 Parcels and 614,000 Tree Canopy Polygons aggregated in this analysis. I plan on writing out what the code would be for reproducability purposes. 
 
 LandUse1 <-
@@ -1154,8 +1162,11 @@ ggplot(LandUseLong, aes(fill = variable, y=Descriptio, x=value))+
   labs(title = "Total Area Lost or Gained by Land Use Type")+
   xlab("        Total Area Lossed                Total Area Gained")+
   ylab("Land Use Type")
+```
 
+![](Tree_Canopy_Loss_files/figure-html/land-1.png)<!-- -->
 
+```r
 LandUseLong<-
   LandUse%>%
   mutate(pctLoss = pctLoss * -1)%>%
@@ -1172,11 +1183,12 @@ ggplot(LandUseLong, aes(fill = variable, y=Descriptio, x=value))+
   ylab("Land Use Type")+
   theme(plot.title = element_text(hjust = 0.5),
         axis.title.x = element_text(size = 9, face = "bold"))
-  
 ```
 
-```{r Landuse2, message=FALSE, warning=FALSE, include=TRUE, results='hide', fig.height = 10, fig.width = 10, cache=TRUE}
+![](Tree_Canopy_Loss_files/figure-html/land-2.png)<!-- -->
 
+
+```r
 LandUseLong<-
   LandUse%>%
   mutate(pctLoss = pctLoss * -1)%>%
@@ -1200,12 +1212,13 @@ ggplot(LandUse, aes(y=Descriptio, x=pctChange))+
   xlab("Percent Net Change")+
   ylab("Land Use Type")+
   theme(axis.text.x = element_text(angle = 90, vjust = 0.5, hjust=1)))
-
 ```
 
+![](Tree_Canopy_Loss_files/figure-html/Landuse2-1.png)<!-- -->
 
-```{r Exploring Residential Furrther, message=FALSE, warning=FALSE, include=TRUE, results='hide', fig.height = 5, fig.width = 5, cache=TRUE}
 
+
+```r
 LandUse2 <-
   LandUse1%>%
   filter(Descriptio == "Residential")%>%
@@ -1235,12 +1248,12 @@ ggplot(LandUse2, aes(y=C_DIG2DESC, x=pctChange))+
   ylab("Residential Land Use Type")+
   xlab("Percent Tree Canopy Change")+
   theme(axis.text.x = element_text(angle = 90, vjust = 0.5, hjust=1)))
-
-
 ```
 
-```{r Land Use to Fishnet, message=FALSE, warning=FALSE, include=TRUE, results='hide', fig.height =  7, fig.width = 7, cache=TRUE}
+![](Tree_Canopy_Loss_files/figure-html/Exploring Residential Furrther-1.png)<!-- -->
 
+
+```r
 # LandUseAg<- 
 #   LandUse1%>%
 #   filter(Descriptio == "Residential" | Descriptio == "Transportation") %>% 
@@ -1256,11 +1269,11 @@ ggplot(LandUse2, aes(y=C_DIG2DESC, x=pctChange))+
 #   FinalFishnet %>%
 #   st_make_valid()%>%
 #   st_intersection(LandUseAg)
-
 ```
 
 ### 4. How do current patterns of tree canopy coverage and loss reflect disinvestment as a result of redlining and older planning practices?  
-```{r HOLC, message=FALSE, warning=FALSE, results='hide', cache=TRUE}
+
+```r
 TreeCanopyAllHOLC <-
 TreeCanopy%>%
 st_make_valid() %>%
@@ -1303,8 +1316,9 @@ ggplot()+
        y="% Loss")+
   facet_wrap(~holc_grade, nrow = 1)+
   plotTheme()
-
 ```
+
+![](Tree_Canopy_Loss_files/figure-html/HOLC-1.png)<!-- -->
 
 ## Team Roles
 
