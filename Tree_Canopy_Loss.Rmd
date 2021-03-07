@@ -80,6 +80,7 @@ library(ggmap)
 library(jsonlite)
 library(entropy)
 library(tidyr)
+library(lubridate)
 install.packages("ggmap")
 
 
@@ -166,9 +167,9 @@ plotTheme <- function(base_size = 12) {
 
 # Tree Canopy
 TreeCanopy <-
-  st_read("C:/Users/Kyle McCarthy/Documents/Practicum/TreeCanopyChange_2008_2018.shp")%>%
+  #st_read("C:/Users/Kyle McCarthy/Documents/Practicum/TreeCanopyChange_2008_2018.shp")%>%
 #  st_read("/Users/annaduan/Desktop/Y3S2/Practicum/Data/TreeCanopyChange_2008_2018-shp/TreeCanopyChange_2008_2018.shp") %>%
-#  st_read("C:/Users/agarw/Documents/MUSA 801/Data/TreeCanopyChange_2008_2018.shp") %>%
+  st_read("C:/Users/agarw/Documents/MUSA 801/Data/TreeCanopyChange_2008_2018.shp") %>%
 #st_read("C:/Users/Prince/Desktop/Tree Canopy Data/TreeCanopyChange_2008_2018.shp") %>%
   st_transform('ESRI:102728') 
 
@@ -183,9 +184,9 @@ Philadelphia <- st_read("http://data.phl.opendata.arcgis.com/datasets/405ec3da94
 
 # Neighborhoods
 Neighborhood <-
-  st_read("C:/Users/Kyle McCarthy/Documents/Practicum/Data/Neighborhoods/Neighborhoods_Philadelphia.shp") %>%
+  #st_read("C:/Users/Kyle McCarthy/Documents/Practicum/Data/Neighborhoods/Neighborhoods_Philadelphia.shp") %>%
 #st_read("/Users/annaduan/Desktop/Y3S2/Practicum/Data/Neighborhoods_Philadelphia/Neighborhoods_Philadelphia.shp")%>%
- # st_read("C:/Users/agarw/Documents/MUSA 801/Data/Neighborhoods_Philadelphia.shp") %>%
+  st_read("C:/Users/agarw/Documents/MUSA 801/Data/Neighborhoods_Philadelphia.shp") %>%
 #st_read("C:/Users/Prince/Desktop/Tree Canopy Data/Neighborhoods_Philadelphia/Neighborhoods_Philadelphia.shp") %>%
   st_transform('ESRI:102728')
 
@@ -201,7 +202,8 @@ Neighborhood <-
 
 HOLC <- #st_read("/Users/annaduan/Desktop/Y3S2/Practicum/Data/PAPhiladelphia1937.geojson") %>%
  #st_read("C:/Users/Prince/Desktop/Tree Canopy Data/PAPhiladelphia1937.geojson") %>%
-  st_read("C:/Users/Kyle McCarthy/Documents/Practicum/Data/PAPhiladelphia1937.geojson")%>%
+  #st_read("C:/Users/Kyle McCarthy/Documents/Practicum/Data/PAPhiladelphia1937.geojson")%>%
+  st_read("C:/Users/agarw/Documents/MUSA 801/Data/PAPhiladelphia1937.geojson")%>%
   st_transform('ESRI:102728')
 
 HOLC <-
@@ -259,9 +261,9 @@ ACS <-
 #  st_transform('ESRI:102728')
 
 const_permits <- 
-  #st_read("C:/Users/agarw/Documents/MUSA 801/Data/const_permit.csv") %>%
+  st_read("C:/Users/agarw/Documents/MUSA 801/Data/const_permit.csv") %>%
   #st_read("C:/Users/Prince/Desktop/Tree Canopy Data/const_permit.csv") %>%
-  st_read("C:/Users/Kyle McCarthy/Documents/Practicum/permits.csv")%>%
+  #st_read("C:/Users/Kyle McCarthy/Documents/Practicum/permits.csv")%>%
  # st_read("/Users/annaduan/Desktop/Y3S2/Practicum/Data/const_permit.csv")%>%
   mutate(X = geocode_x,
          Y = geocode_y) 
@@ -271,6 +273,12 @@ const_spatial <- st_as_sf(const, coords = c("X","Y"), crs = 6565, agr = "constan
 const_spatial <- const_spatial %>% st_transform('ESRI:102728')
 # const <- const_spatial %>%
 #   filter(permitissuedate <= '30/06/2017 00:00')
+
+const_spatial$permit_issue <- mdy_hm(const$permitissuedate)
+const_spatial$year <- year(const_spatial$permit_issue)
+
+const <- const_spatial %>%
+   filter(year <= "2017")
 
 #Zoning <- st_read("http://data.phl.opendata.arcgis.com/datasets/0bdb0b5f13774c03abf8dc2f1aa01693_0.geojson")%>% 
 #  st_transform('ESRI:102728')
@@ -616,56 +624,56 @@ library(dplyr)
  }
 
 #Juniata Park
-# JPBound <- Neighborhood %>%  
-#   dplyr::filter(NAME=="JUNIATA_PARK")
-# 
-# JuniataPark <- st_intersection(st_make_valid(TreeCanopy), JPBound)
-# 
-# ggplot() +
-#   geom_sf(data = JPBound, fill = "black") +
-#   geom_sf(data = JuniataPark, aes(fill = CLASS_NAME), colour = "transparent") +
-#   scale_fill_manual(values = paletteJ, name = "Canopy Change") +
-#   labs(title = "Juniata Park Tree Canopy Change 2008-2018", subtitle = "Philadelphia, PA") +
-#     mapTheme()
-# 
-# #Upper Roxborough
-# URBound <- Neighborhood %>%  dplyr::filter(NAME=="UPPER_ROXBOROUGH")
-# UpperRoxborough <- st_intersection(st_make_valid(TreeCanopy), URBound)
-# 
-# ggplot() +
-#   geom_sf(data = URBound, fill = "black") +
-#   geom_sf(data = UpperRoxborough, aes(fill = CLASS_NAME), colour = "transparent") +
-#   scale_fill_manual(values = paletteJ, name = "Canopy Change") +
-#   labs(title = "Upper Roxborough Tree Canopy Change 2008-2018", subtitle = "Philadelphia, PA") +
-#     mapTheme()
+ JPBound <- Neighborhood %>%  
+   dplyr::filter(NAME=="JUNIATA_PARK")
+ 
+ JuniataPark <- st_intersection(st_make_valid(TreeCanopy), JPBound)
+ 
+ ggplot() +
+   geom_sf(data = JPBound, fill = "black") +
+   geom_sf(data = JuniataPark, aes(fill = CLASS_NAME), colour = "transparent") +
+   scale_fill_manual(values = paletteJ, name = "Canopy Change") +
+   labs(title = "Juniata Park Tree Canopy Change 2008-2018", subtitle = "Philadelphia, PA") +
+     mapTheme()
+ 
+#Upper Roxborough
+ URBound <- Neighborhood %>%  dplyr::filter(NAME=="UPPER_ROXBOROUGH")
+ UpperRoxborough <- st_intersection(st_make_valid(TreeCanopy), URBound)
+ 
+  ggplot() +
+   geom_sf(data = URBound, fill = "black") +
+   geom_sf(data = UpperRoxborough, aes(fill = CLASS_NAME), colour = "transparent") +
+   scale_fill_manual(values = paletteJ, name = "Canopy Change") +
+   labs(title = "Upper Roxborough Tree Canopy Change 2008-2018", subtitle = "Philadelphia, PA") +
+     mapTheme()
 
 #Fairhill
-# FHBound <- Neighborhood %>%  dplyr::filter(NAME=="FAIRHILL")
-# Fairhill <- st_intersection(st_make_valid(TreeCanopy), FHBound)
-# 
-# base_mapFH <- get_map(location =  unname(st_bbox(ll(st_buffer(st_centroid(Fairhill),1100)))),
-#                     maptype = "satellite") #get a basemap
-# 
-# ggmap(base_mapFH, darken = c(0.3, "white")) + 
-#   geom_sf(data = ll(FHBound), fill = "black", alpha = 0.3, inherit.aes = FALSE) +
-#   geom_sf(data = ll(Fairhill), aes(fill = CLASS_NAME), colour = "transparent", inherit.aes = FALSE) +
-#   scale_fill_manual(values = paletteJ, name = "Canopy Change") +
-#   labs(title = "Fairhill Tree Canopy Change 2008-2018", subtitle = "Philadelphia, PA") +
-#     mapTheme()
-# 
-# #GRad hospital
-# GHBound <- Neighborhood %>%  dplyr::filter(NAME=="GRADUATE_HOSPITAL")
-# GraduateHospital <- st_intersection(st_make_valid(TreeCanopy), GHBound)
-# 
-# base_mapGH <- get_map(location =  unname(st_bbox(ll(st_buffer(st_centroid(GraduateHospital),1100)))),
-#                     maptype = "satellite") #get a basemap
-# 
-# ggmap(base_mapGH, darken = c(0.3, "white")) + 
-#   geom_sf(data = ll(GHBound), fill = "black", alpha = 0.3, inherit.aes = FALSE) +
-#   geom_sf(data = ll(GraduateHospital), aes(fill = CLASS_NAME), colour = "transparent", inherit.aes = FALSE) +
-#   scale_fill_manual(values = paletteJ, name = "Canopy Change") +
-#   labs(title = "Graduate Hospital Tree Canopy Change 2008-2018", subtitle = "Philadelphia, PA") +
-#     mapTheme()
+ FHBound <- Neighborhood %>%  dplyr::filter(NAME=="FAIRHILL")
+ Fairhill <- st_intersection(st_make_valid(TreeCanopy), FHBound)
+ 
+ base_mapFH <- get_map(location =  unname(st_bbox(ll(st_buffer(st_centroid(Fairhill),1100)))),
+                     maptype = "satellite") #get a basemap
+ 
+ ggmap(base_mapFH, darken = c(0.3, "white")) + 
+   geom_sf(data = ll(FHBound), fill = "black", alpha = 0.3, inherit.aes = FALSE) +
+   geom_sf(data = ll(Fairhill), aes(fill = CLASS_NAME), colour = "transparent", inherit.aes = FALSE) +
+   scale_fill_manual(values = paletteJ, name = "Canopy Change") +
+   labs(title = "Fairhill Tree Canopy Change 2008-2018", subtitle = "Philadelphia, PA") +
+     mapTheme()
+ 
+ #GRad hospital
+ GHBound <- Neighborhood %>%  dplyr::filter(NAME=="GRADUATE_HOSPITAL")
+ GraduateHospital <- st_intersection(st_make_valid(TreeCanopy), GHBound)
+ 
+ base_mapGH <- get_map(location =  unname(st_bbox(ll(st_buffer(st_centroid(GraduateHospital),1100)))),
+                     maptype = "satellite") #get a basemap
+ 
+ ggmap(base_mapGH, darken = c(0.3, "white")) + 
+   geom_sf(data = ll(GHBound), fill = "black", alpha = 0.3, inherit.aes = FALSE) +
+   geom_sf(data = ll(GraduateHospital), aes(fill = CLASS_NAME), colour = "transparent", inherit.aes = FALSE) +
+   scale_fill_manual(values = paletteJ, name = "Canopy Change") +
+   labs(title = "Graduate Hospital Tree Canopy Change 2008-2018", subtitle = "Philadelphia, PA") +
+     mapTheme()
 
 
 ```
@@ -980,9 +988,9 @@ grid.arrange(ncol=2, top=textGrob("Fishnet Variables in Comparison to Local Demo
 
 ```{r Const_Permit, message=FALSE, warning=FALSE, include=TRUE, results='hide', fig.height = 7, fig.width = 8, cache=TRUE}
 
-const_spatial2 <-
-  const_spatial %>%
-  filter(permitdescription == 'RESIDENTIAL BUILDING PERMIT ' | permitdescription == 'COMMERCIAL BUILDING PERMIT')
+#const_spatial2 <-
+  #const_spatial %>%
+  #filter(permitdescription == 'RESIDENTIAL BUILDING PERMIT ' | permitdescription == 'COMMERCIAL BUILDING PERMIT')
 
 # ggplot()+
 #   geom_sf(data = Philadelphia) +
@@ -991,7 +999,7 @@ const_spatial2 <-
 ### Aggregate points to the neighborhood
 ## add a value of 1 to each crime, sum them with aggregate
 const_net <- 
-  dplyr::select(const_spatial2) %>% 
+  dplyr::select(const_spatial) %>% 
   mutate(countConst = 1) %>% 
   aggregate(., Neighborhood, sum) %>%
   mutate(countConst = replace_na(countConst, 0),
@@ -1000,7 +1008,7 @@ const_net <-
              
 
 const_net_fish <- 
-  dplyr::select(const_spatial2) %>% 
+  dplyr::select(const_spatial) %>% 
   mutate(countConst = 1) %>% 
   aggregate(., fishnet, sum) %>%
   mutate(countConst = replace_na(countConst, 0),
@@ -1026,53 +1034,60 @@ const_max_neigh <-
 Max_neigh <- Neighborhood %>%
   filter(NAME == const_max_neigh$neigh)
 
-const_neigh <- st_intersection(const_spatial2, Max_neigh)
+const_neigh <- st_intersection(const_spatial, Max_neigh)
   
 
 
-Max_neigh_tree <- st_intersection(st_make_valid(TreeCanopy), Max_neigh)
+Max_neigh_tree <- st_intersection(st_make_valid(TreeCanopy), Max_neigh) %>%
+  filter(CLASS_NAME == 'Loss')
 
 base_mapGH <- get_map(location =  unname(st_bbox(ll(st_buffer(st_centroid(Max_neigh_tree),1100)))),
                     maptype = "satellite") #get a basemap
 
 ggmap(base_mapGH, darken = c(0.3, "white")) + 
   geom_sf(data = ll(Max_neigh), fill = "black", alpha = 0.3, inherit.aes = FALSE) +
-  geom_sf(data = ll(Max_neigh_tree), aes(fill = CLASS_NAME), colour = "transparent", inherit.aes = FALSE) +
-  geom_sf(data = ll(const_neigh), inherit.aes = FALSE) +
+  geom_sf(data = ll(Max_neigh_tree), aes(colour = CLASS_NAME), colour = "red", inherit.aes = FALSE) +
+  geom_sf(data = ll(const_neigh), size = 0.1, inherit.aes = FALSE) +
   scale_fill_manual(values = paletteJ, name = "Canopy Change") +
-  labs(title = "University City Tree Canopy Change 2008-2018 with construction permits", subtitle = "Philadelphia, PA") +
+  labs(title = "Pont Breeze Tree Canopy Change 2008-2018 with construction permits", subtitle = "Philadelphia, PA") +
     mapTheme()
 
 ```
 
 ```{r Const_Permit3, message=FALSE, warning=FALSE, include=TRUE, results='hide', fig.height = 7, fig.width = 8, cache=TRUE}
 
-Juniata Park
+#Juniata Park
  
- const_JB <- st_intersection(const_spatial2, JPBound)
+ const_JB <- st_intersection(const_spatial, JPBound)
+
+JuniataPark <- JuniataPark %>%
+  filter(CLASS_NAME == 'Loss')
  
  base_mapGH <- get_map(location =  unname(st_bbox(ll(st_buffer(st_centroid(JuniataPark),1100)))),
                      maptype = "satellite") #get a basemap
  
  ggmap(base_mapGH, darken = c(0.3, "white")) + 
    geom_sf(data = ll(JPBound), fill = "black", alpha = 0.3, inherit.aes = FALSE) +
-   geom_sf(data = ll(JuniataPark), aes(fill = CLASS_NAME), colour = "transparent", inherit.aes = FALSE) +
-   geom_sf(data = ll(const_JB), inherit.aes = FALSE) +
+   geom_sf(data = ll(JuniataPark), aes(colour = CLASS_NAME), colour = "red", inherit.aes = FALSE) +
+   geom_sf(data = ll(const_JB), size = 0.1, inherit.aes = FALSE) +
    scale_fill_manual(values = paletteJ, name = "Canopy Change") +
    labs(title = "Juniata Park Tree Canopy Change 2008-2018 with construction permits", subtitle = "Philadelphia, PA") +
      mapTheme()
  
 #Upper Roxborough
  
- const_UR <- st_intersection(const_spatial2, URBound)
+ const_UR <- st_intersection(const_spatial, URBound)
+ 
+ UpperRoxborough <- UpperRoxborough %>%
+   filter(CLASS_NAME == 'Loss')
  
  base_mapGH <- get_map(location =  unname(st_bbox(ll(st_buffer(st_centroid(UpperRoxborough),1100)))),
                      maptype = "satellite") #get a basemap
  
  ggmap(base_mapGH, darken = c(0.3, "white")) + 
    geom_sf(data = ll(URBound), fill = "black", alpha = 0.3, inherit.aes = FALSE) +
-   geom_sf(data = ll(UpperRoxborough), aes(fill = CLASS_NAME), colour = "transparent", inherit.aes = FALSE) +
-   geom_sf(data = ll(const_UR), inherit.aes = FALSE) +
+   geom_sf(data = ll(UpperRoxborough), aes(colour = CLASS_NAME), colour = "red", inherit.aes = FALSE) +
+   geom_sf(data = ll(const_UR), size = 0.1, inherit.aes = FALSE) +
    scale_fill_manual(values = paletteJ, name = "Canopy Change") +
    labs(title = "Upper Roxborough Tree Canopy Change 2008-2018 with construction permits", subtitle = "Philadelphia, PA") +
      mapTheme()
@@ -1080,15 +1095,18 @@ Juniata Park
  
 #Fairhill
  
- const_FH <- st_intersection(const_spatial2, Fairhill)
+ const_FH <- st_intersection(const_spatial, Fairhill)
+ 
+ Fairhill <- Fairhill %>%
+   filter(CLASS_NAME == 'Loss')
  
  base_mapGH <- get_map(location =  unname(st_bbox(ll(st_buffer(st_centroid(Fairhill),1100)))),
                      maptype = "satellite") #get a basemap
  
  ggmap(base_mapGH, darken = c(0.3, "white")) + 
    geom_sf(data = ll(FHBound), fill = "black", alpha = 0.3, inherit.aes = FALSE) +
-   geom_sf(data = ll(Fairhill), aes(fill = CLASS_NAME), colour = "transparent", inherit.aes = FALSE) +
-   geom_sf(data = ll(const_FH), inherit.aes = FALSE) +
+   geom_sf(data = ll(Fairhill), aes(colour = CLASS_NAME), colour = "red", inherit.aes = FALSE) +
+   geom_sf(data = ll(const_FH), size = 0.1, inherit.aes = FALSE) +
    scale_fill_manual(values = paletteJ, name = "Canopy Change") +
    labs(title = "FairHill Tree Canopy Change 2008-2018 with construction permits", subtitle = "Philadelphia, PA") +
      mapTheme()
@@ -1096,15 +1114,18 @@ Juniata Park
  
  #GRad hospital
  
- const_GH <- st_intersection(const_spatial2, GraduateHospital)
+ const_GH <- st_intersection(const_spatial, GraduateHospital)
+ 
+ GraduateHospital <- GraduateHospital %>%
+   filter(CLASS_NAME == 'Loss')
  
  base_mapGH <- get_map(location =  unname(st_bbox(ll(st_buffer(st_centroid(GraduateHospital),1100)))),
                      maptype = "satellite") #get a basemap
  
  ggmap(base_mapGH, darken = c(0.3, "white")) + 
    geom_sf(data = ll(GHBound), fill = "black", alpha = 0.3, inherit.aes = FALSE) +
-   geom_sf(data = ll(GraduateHospital), aes(fill = CLASS_NAME), colour = "transparent", inherit.aes = FALSE) +
-   geom_sf(data = ll(const_GH), inherit.aes = FALSE) +
+   geom_sf(data = ll(GraduateHospital), aes(colour = CLASS_NAME), colour = "red", inherit.aes = FALSE) +
+   geom_sf(data = ll(const_GH), size = 0.1, inherit.aes = FALSE) +
    scale_fill_manual(values = paletteJ, name = "Canopy Change") +
    labs(title = "Graduate Hospital Tree Canopy Change 2008-2018 with construction permits", subtitle = "Philadelphia, PA") +
      mapTheme()
@@ -1118,8 +1139,8 @@ Juniata Park
 # Analysis completed in ArcGIS -- Processing time to long in R. 500,000 Parcels and 614,000 Tree Canopy Polygons aggregated in this analysis. I plan on writing out what the code would be for reproducability purposes. 
 
 LandUse1 <-
-  st_read("C:/Users/Kyle McCarthy/Documents/Practicum/Data/LandUse/landu.csv")%>%
-  #st_read("C:/Users/agarw/Documents/MUSA 801/Data/landu.csv")%>%
+  #st_read("C:/Users/Kyle McCarthy/Documents/Practicum/Data/LandUse/landu.csv")%>%
+  st_read("C:/Users/agarw/Documents/MUSA 801/Data/landu.csv")%>%
  # st_read("/Users/annaduan/Desktop/Y3S2/Practicum/Data/landu.csv") %>%
   #st_read("C:/Users/Prince/Desktop/Tree Canopy Data/landu.csv") %>%
   mutate(AreaGain = as.numeric(AreaGain),
