@@ -81,7 +81,7 @@ library(jsonlite)
 library(entropy)
 library(tidyr)
 library(lubridate)
-install.packages("ggmap")
+library(FNN) 
 
 
 
@@ -167,9 +167,9 @@ plotTheme <- function(base_size = 12) {
 
 # Tree Canopy
 TreeCanopy <-
-  #st_read("C:/Users/Kyle McCarthy/Documents/Practicum/TreeCanopyChange_2008_2018.shp")%>%
+  st_read("C:/Users/Kyle McCarthy/Documents/Practicum/TreeCanopyChange_2008_2018.shp")%>%
 #  st_read("/Users/annaduan/Desktop/Y3S2/Practicum/Data/TreeCanopyChange_2008_2018-shp/TreeCanopyChange_2008_2018.shp") %>%
-  st_read("C:/Users/agarw/Documents/MUSA 801/Data/TreeCanopyChange_2008_2018.shp") %>%
+  #st_read("C:/Users/agarw/Documents/MUSA 801/Data/TreeCanopyChange_2008_2018.shp") %>%
 #st_read("C:/Users/Prince/Desktop/Tree Canopy Data/TreeCanopyChange_2008_2018.shp") %>%
   st_transform('ESRI:102728') 
 
@@ -184,9 +184,9 @@ Philadelphia <- st_read("http://data.phl.opendata.arcgis.com/datasets/405ec3da94
 
 # Neighborhoods
 Neighborhood <-
-  #st_read("C:/Users/Kyle McCarthy/Documents/Practicum/Data/Neighborhoods/Neighborhoods_Philadelphia.shp") %>%
+  st_read("C:/Users/Kyle McCarthy/Documents/Practicum/Data/Neighborhoods/Neighborhoods_Philadelphia.shp") %>%
 #st_read("/Users/annaduan/Desktop/Y3S2/Practicum/Data/Neighborhoods_Philadelphia/Neighborhoods_Philadelphia.shp")%>%
-  st_read("C:/Users/agarw/Documents/MUSA 801/Data/Neighborhoods_Philadelphia.shp") %>%
+  #st_read("C:/Users/agarw/Documents/MUSA 801/Data/Neighborhoods_Philadelphia.shp") %>%
 #st_read("C:/Users/Prince/Desktop/Tree Canopy Data/Neighborhoods_Philadelphia/Neighborhoods_Philadelphia.shp") %>%
   st_transform('ESRI:102728')
 
@@ -202,8 +202,8 @@ Neighborhood <-
 
 HOLC <- #st_read("/Users/annaduan/Desktop/Y3S2/Practicum/Data/PAPhiladelphia1937.geojson") %>%
  #st_read("C:/Users/Prince/Desktop/Tree Canopy Data/PAPhiladelphia1937.geojson") %>%
-  #st_read("C:/Users/Kyle McCarthy/Documents/Practicum/Data/PAPhiladelphia1937.geojson")%>%
-  st_read("C:/Users/agarw/Documents/MUSA 801/Data/PAPhiladelphia1937.geojson")%>%
+  st_read("C:/Users/Kyle McCarthy/Documents/Practicum/Data/PAPhiladelphia1937.geojson")%>%
+  #st_read("C:/Users/agarw/Documents/MUSA 801/Data/PAPhiladelphia1937.geojson")%>%
   st_transform('ESRI:102728')
 
 HOLC <-
@@ -261,9 +261,9 @@ ACS <-
 #  st_transform('ESRI:102728')
 
 const_permits <- 
-  st_read("C:/Users/agarw/Documents/MUSA 801/Data/const_permit.csv") %>%
+  #st_read("C:/Users/agarw/Documents/MUSA 801/Data/const_permit.csv") %>%
   #st_read("C:/Users/Prince/Desktop/Tree Canopy Data/const_permit.csv") %>%
-  #st_read("C:/Users/Kyle McCarthy/Documents/Practicum/permits.csv")%>%
+  st_read("C:/Users/Kyle McCarthy/Documents/Practicum/permits.csv")%>%
  # st_read("/Users/annaduan/Desktop/Y3S2/Practicum/Data/const_permit.csv")%>%
   mutate(X = geocode_x,
          Y = geocode_y) 
@@ -1349,6 +1349,85 @@ ggplot()+
 ```
 
 
+```{r Nearest Neighbor, message=FALSE, warning=FALSE, results='hide', fig.height =  8, fig.width =8,cache=TRUE}
+
+function(measureFrom,measureTo,k) {
+  measureFrom_Matrix <-
+    as.matrix(measureFrom)
+  measureTo_Matrix <-
+    as.matrix(measureTo)
+  nn <-   
+    get.knnx(measureTo, measureFrom, k)$nn.dist
+  output <-
+    as.data.frame(nn) %>%
+    rownames_to_column(var = "thisPoint") %>%
+    gather(points, point_distance, V1:ncol(.)) %>%
+    arrange(as.numeric(thisPoint)) %>%
+    group_by(thisPoint) %>%
+    summarize(pointDistance = mean(point_distance)) %>%
+    arrange(as.numeric(thisPoint)) %>% 
+    dplyr::select(-thisPoint) %>%
+    pull()
+  
+  return(output)  
+}
+
+st_c <- st_coordinates
+
+# Construction nearest neighbor
+constfilter <- 
+  const%>% filter(permitdescription == "NEW CONSTRUCTION PERMIT")
+  
+
+
+TreeCanopyCentroids <- 
+  TreeCanopy%>% 
+  mutate(Construction_nn1 = nn_function(st_c(st_centroid(.)), st_c(const), 1))
+
+
+TreeCanopyCentroids1<- 
+  TreeCanopyCentroids%>%
+  st_drop_geometry()%>%
+  group_by(CLASS_NAME)%>%
+  summarise(avg_nnConst = mean(Construction_nn1))
+
+ggplot(TreeCanopyCentroids1, aes(y=avg_nnConst, x=CLASS_NAME))+
+  geom_bar(stat='identity', fill="forest green", width = 0.4)+
+  labs(title = "Total Tree Canopy Net Change in Residential Land Use Parcels",
+       subtitle = "Area Gain - Area Loss")+
+  ylab("Residential Land Use Type")+
+  xlab("Total Net Change")+
+  theme(axis.text.x = element_text(angle = 90, vjust = 0.5, hjust=1))
+
+TreeCanopyCentroids <- st_join(FinalFishnet, TreeCanopyCentroids)
+
+TreeCanopyCentroids<- 
+  TreeCanopyCentroids%>% 
+  group_by(uniqueID)%>%
+  summarise(avg_nnConst = mean(Construction_nn1))
+
+TreeCanopyCentroids<-
+   TreeCanopyCentroids%>% 
+  st_drop_geometry()%>%
+  left_join(FinalFishnet, .)
+
+TreeCanopyCentroids2 <- 
+  TreeCanopyCentroids%>% 
+  filter(pctChange < 100)
+
+ggplot(TreeCanopyCentroids2, aes(x = netChange , y = avg_nnConst))+
+  geom_point()+ 
+  labs(title = "Percent Change vs Construction nn1", 
+       subtilte = "Aggregated by Fishnet") + 
+  xlab("Percent Change ") + 
+  ylab("Construction nn1") + 
+  theme(plot.title = element_text(hjust = 0.5, size = 15, face = "bold"), plot.subtitle = element_text(hjust = 0.5, size = 8)) +
+  plotTheme()
+
+
+  
+
+```
 ## Team Roles
 
 ![Gantt Chart](Gantt.png)
