@@ -1415,7 +1415,7 @@ TreeCanopyCentroids2 <-
   TreeCanopyCentroids%>% 
   filter(pctChange < 100)
 
-ggplot(TreeCanopyCentroids2, aes(x = netChange , y = avg_nnConst))+
+ggplot(TreeCanopyCentroids2, aes(x = pctLoss , y = avg_nnConst))+
   geom_point()+ 
   labs(title = "Percent Change vs Construction nn1", 
        subtilte = "Aggregated by Fishnet") + 
