@@ -257,8 +257,8 @@ ACS <-
   dplyr::select(-Households_hmow,-Households_hmre,-noVehicle_hmow,-noVehicle_hmre,-bachelor, -white)
 
 
-#parcels <- st_read("http://data-phl.opendata.arcgis.com/datasets/1c57dd1b3ff84449a4b0e3fb29d3cafd_0.geojson")%>%
-#  st_transform('ESRI:102728')
+parcels <- st_read("http://data-phl.opendata.arcgis.com/datasets/1c57dd1b3ff84449a4b0e3fb29d3cafd_0.geojson")%>%
+ st_transform('ESRI:102728')
 
 const_permits <- 
   #st_read("C:/Users/agarw/Documents/MUSA 801/Data/const_permit.csv") %>%
@@ -920,68 +920,72 @@ grid.arrange(ncol=2, top=textGrob("Fishnet Variables in Comparison to Local Demo
 ```{r Potential Risk Factors, fig.height = 12,fig.width = 12, message=FALSE, warning=FALSE, include=TRUE, results='hide', cache=TRUE}
 # Parcels make little difference, except if you are looking at total net change (looks like a normal distribution). Im commenting it out, but feel free to play around with the data. 
 
-# 
-# # Parcels 
-# parcels <- 
-# parcels %>%
-#  mutate(ParcelArea = st_area(parcels))%>%
-#  st_centroid()%>%
-#  dplyr:: select(ParcelArea)
-# 
-# 
-# FinalFishnet1 <- st_join(FinalFishnet, parcels)
-# 
-# FinalFishnet1<- 
-# FinalFishnet1 %>%
-#   st_drop_geometry()%>%
-#   group_by(uniqueID)%>%
-#   summarise(avgParcelSize = mean(ParcelArea))
-# 
-# 
-# FinalFishnet1 <-
-#   FinalFishnet%>%
-#   left_join(FinalFishnet1)
-# 
-# FinalFishnet1<- 
-#   FinalFishnet1%>% 
-#   mutate(pctChange = (AreaCoverage18 - AreaCoverage08) / (AreaCoverage08) * 100)%>%
-#   mutate(netChange = AreaGain - AreaLoss)%>%
-#   mutate(avgParcelSize = as.numeric(avgParcelSize))
-# 
-# ggplot(Graph, aes(y = avgParcelSize, x = pctChange))+
-#   geom_point()+ 
-#   labs(title = "Percent Tree Canopy Loss (2008 - 2018) vs. \n Percent Tree Canopy Coverage (2018) ", 
-#        subtilte = "Aggregated by Fishnet") + 
-#   xlab("Percent of Tree Canopy Lost (2008 - 2018)") + 
-#   ylab("Percent of Tree Canopy Coverage of Each Fishnet Cell (2018)") + 
-#   theme(plot.title = element_text(hjust = 0.3, size = 12), plot.subtitle = element_text(hjust = 0.3, size = 8)) +
-#   plotTheme()
+#
+# # Parcels
+parcels <-
+  parcels%>%
+ st_centroid()%>%
+  dplyr::select(Shape__Area)
 
-# e311Trees <- 
-#   st_read('C:/Users/Kyle McCarthy/Documents/Practicum/e311.csv')
-#   
-# e311Trees<- 
-#   e311Trees%>%
-#   dplyr:: select(service_name, lat, lon)%>% 
-#   filter(service_name == "Tree Dangerous" | service_name == "Street Tree")%>% 
-#   mutate(lon = as.numeric(lon), 
-#          lat = as.numeric(lat))%>% 
-#     na.omit()%>% 
-#   st_as_sf(.,coords=c("lon","lat"),crs=4326)%>% 
-#   st_transform('ESRI:102728')
-#    
-# 
-# e311_net_tree <- 
-#   e311Trees%>%
-#   mutate(e311TreeCount = 1) %>% 
-#   dplyr::select(e311TreeCount)%>%
-#   aggregate(., FinalFishnet, sum) %>%
-#   mutate(e311TreeCount = replace_na(e311TreeCount, 0))%>%
-#   st_centroid()%>%
-#   st_join(FinalFishnet, .)
-# 
-# 
-#   
+
+FinalFishnet1 <- st_join(FinalFishnet, parcels)
+
+FinalFishnet<-
+FinalFishnet1 %>%
+  st_drop_geometry()%>%
+  group_by(uniqueID)%>%
+  summarise(avgParcelSize = mean(Shape__Area))%>%
+  left_join(FinalFishnet1, .)%>%
+  mutate(LogAvgParcelSize = log10(avgParcelSize), 
+         LogPctLoss = log10(pctLoss))
+
+ggplot(FinalFishnet, aes(y = LogPctLoss, x = LogAvgParcelSize))+
+  geom_point()+
+  labs(title = "Percent Tree Canopy Loss (2008 - 2018) vs. \n Percent Tree Canopy Coverage (2018) ",
+       subtilte = "Aggregated by Fishnet") +
+  xlab("Percent of Tree Canopy Lost (2008 - 2018)") +
+  ylab("Percent of Tree Canopy Coverage of Each Fishnet Cell (2018)") +
+  theme(plot.title = element_text(hjust = 0.3, size = 12), plot.subtitle = element_text(hjust = 0.3, size = 8)) +
+  plotTheme()
+
+```
+
+```{r E911 Trees, fig.height = 12,fig.width = 12, message=FALSE, warning=FALSE, include=TRUE, results='hide', cache=TRUE}
+
+e311Trees <-
+  st_read('C:/Users/Kyle McCarthy/Documents/Practicum/e311.csv')
+
+e311Trees<-
+  e311Trees%>%
+  dplyr:: select(service_name, lat, lon)%>%
+  mutate(lon = as.numeric(lon),
+         lat = as.numeric(lat))%>%
+    na.omit()%>%
+  st_as_sf(.,coords=c("lon","lat"),crs=4326)%>%
+  st_transform('ESRI:102728')
+
+
+e311_net_tree <-
+  e311Trees%>%
+  mutate(e311TreeCount = 1) %>%
+  dplyr::select(e311TreeCount)%>%
+  aggregate(., FinalFishnet, sum) %>%
+  mutate(e311TreeCount = replace_na(e311TreeCount, 0))%>%
+  st_centroid()%>%
+  st_join(FinalFishnet, .)%>% 
+  mutate(Loge311TreeCount = log10(e311TreeCount), 
+         LogPctLoss = log10(pctLoss))%>% 
+  filter(Loge311TreeCount != Inf & Loge311TreeCount != -Inf & LogPctLoss != Inf & LogPctLoss != -Inf)
+
+ggplot(e311_net_tree, aes(y = LogPctLoss, x = Loge311TreeCount))+
+  geom_point()+
+  labs(title = "Percent Tree Canopy Loss (2008 - 2018) vs. \n Percent Tree Canopy Coverage (2018) ",
+       subtilte = "Aggregated by Fishnet") +
+  xlab("Percent of Tree Canopy Lost (2008 - 2018)") +
+  ylab("Percent of Tree Canopy Coverage of Each Fishnet Cell (2018)") +
+  theme(plot.title = element_text(hjust = 0.3, size = 12), plot.subtitle = element_text(hjust = 0.3, size = 8)) +
+  plotTheme()
+
 
 
 ```
@@ -1129,6 +1133,9 @@ JuniataPark <- JuniataPark %>%
    scale_fill_manual(values = paletteJ, name = "Canopy Change") +
    labs(title = "Graduate Hospital Tree Canopy Change 2008-2018 with construction permits", subtitle = "Philadelphia, PA") +
      mapTheme()
+ 
+ 
+ 
 
 ```
 
