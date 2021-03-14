@@ -1344,7 +1344,9 @@ library(RSocrata)
 # Joining by GEOID to get geometry
  phillyhealth <- 
    merge(x = publichealth, y = ACS, by.y = "GEOID", by.x = "tractfips", all.x = TRUE)%>%
-   st_as_sf()
+   st_as_sf()%>%
+   mutate(tractarea = st_area(geometry)) %>%
+   mutate(tractarea = as.numeric(tractarea))
 
  
  ggplot() +
@@ -1361,8 +1363,7 @@ library(RSocrata)
 treecanopy_census<- 
   treecanopy_census%>%
   mutate(TreeArea = st_area(treecanopy_census))%>%
-  mutate(TreeArea = as.numeric(TreeArea)) %>%
-  mutate(tractarea = st_area(geometry))
+  mutate(TreeArea = as.numeric(TreeArea))
 
  ggplot() +
    geom_sf(data = treecanopy_census, aes(fill = casthma_crudeprev))+
@@ -1374,7 +1375,7 @@ treecanopy_census<-
 TreeCanopyLoss_census <- 
   treecanopy_census%>%
   filter(CLASS_NAME == "Loss")%>%
-  group_by(tractfips,casthma_crudeprev,tractarea)%>%
+  group_by(tractfips,tractarea, casthma_crudeprev)%>%
   summarise(AreaLoss = sum(TreeArea))%>%
   mutate(pctLoss = AreaLoss/tractarea)%>%
   st_drop_geometry()
