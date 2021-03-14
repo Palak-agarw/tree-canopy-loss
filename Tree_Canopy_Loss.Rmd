@@ -1361,7 +1361,8 @@ library(RSocrata)
 treecanopy_census<- 
   treecanopy_census%>%
   mutate(TreeArea = st_area(treecanopy_census))%>%
-  mutate(TreeArea = as.numeric(TreeArea))
+  mutate(TreeArea = as.numeric(TreeArea)) %>%
+  mutate(tractarea = st_area(geometry))
 
  ggplot() +
    geom_sf(data = treecanopy_census, aes(fill = casthma_crudeprev))+
@@ -1373,9 +1374,9 @@ treecanopy_census<-
 TreeCanopyLoss_census <- 
   treecanopy_census%>%
   filter(CLASS_NAME == "Loss")%>%
-  group_by(tractfips, SHAPE_Area)%>%
+  group_by(tractfips,casthma_crudeprev,tractarea)%>%
   summarise(AreaLoss = sum(TreeArea))%>%
-  mutate(pctLoss = AreaLoss / SHAPE_Area )%>%
+  mutate(pctLoss = AreaLoss/tractarea)%>%
   st_drop_geometry()
   
 ```
@@ -1410,7 +1411,6 @@ st_c <- st_coordinates
 constfilter <- 
   const%>% filter(permitdescription == "NEW CONSTRUCTION PERMIT")
   
-
 
 TreeCanopyCentroids <- 
   TreeCanopy%>% 
