@@ -1375,11 +1375,73 @@ treecanopy_census<-
 TreeCanopyLoss_census <- 
   treecanopy_census%>%
   filter(CLASS_NAME == "Loss")%>%
-  group_by(tractfips,tractarea, casthma_crudeprev)%>%
+  group_by(tractfips,tractarea)%>%
   summarise(AreaLoss = sum(TreeArea))%>%
-  mutate(pctLoss = AreaLoss/tractarea)%>%
+  mutate(pctLoss = AreaLoss/tractarea) %>%
   st_drop_geometry()
+
+TreeCanopyGain_census <- 
+  treecanopy_census%>%
+  filter(CLASS_NAME == "Gain")%>%
+  group_by(tractfips,tractarea)%>%
+  summarise(AreaLoss = sum(TreeArea))%>%
+  mutate(pctGain = AreaLoss/tractarea) %>%
+  st_drop_geometry()
+
+TreeCanopyNoC_census <- 
+  treecanopy_census%>%
+  filter(CLASS_NAME == "No Change")%>%
+  group_by(tractfips,tractarea)%>%
+  summarise(AreaLoss = sum(TreeArea))%>%
+  mutate(pctNoC = AreaLoss/tractarea) %>%
+  st_drop_geometry()
+
+phillyhealth <-
+  merge(x = TreeCanopyLoss_census, y = phillyhealth, by = "tractfips", all = TRUE)
+
+phillyhealth <-
+  merge(x = TreeCanopyGain_census, y = phillyhealth, by = "tractfips", all = TRUE)
   
+phillyhealth <-
+  merge(x = TreeCanopyNoC_census, y = phillyhealth, by = "tractfips", all = TRUE) 
+
+phillyhealth <- phillyhealth %>%
+  dplyr::select(tractfips,casthma_crudeprev,AreaLoss.x,pctGain,pctLoss,geometry)%>%
+  mutate(LogPctLoss = log10(pctLoss),
+         LogPctGain = log10(pctGain))
+
+
+correlation.long4 <-
+  phillyhealth%>%
+     dplyr::select(casthma_crudeprev, pctLoss) %>%
+    gather(Variable, Value, -pctLoss) %>%
+  mutate(Value = as.numeric(Value))
+
+correlation.cor4 <-
+  correlation.long4 %>%
+    group_by(Variable) %>%
+    summarize(correlation = cor(Value, pctLoss, use = "complete.obs"))
+
+  ggplot(correlation.long4, aes(Value, pctLoss)) +
+  geom_point(size = 0.1) +
+    scale_x_log10() + scale_y_log10() +
+  geom_text(data = correlation.cor4, aes(label = paste("r =", round(correlation, 2))),
+            x=-Inf, y=Inf, vjust = 1.5, hjust = -.1) +
+  geom_smooth(method = "lm", se = FALSE, colour = "red") +
+  facet_wrap(~Variable, ncol = 2, scales = "free") +
+  labs(title = "Percent Tree Canopy Coverage (2018)") +
+  plotTheme()
+
+
+ggplot(phillyhealth, aes(y = pctLoss, x = casthma_crudeprev))+
+  geom_point()+
+  labs(title = "Percent Tree Canopy Loss (2008 - 2018) vs. \n Percent Tree Canopy Coverage (2018) ",
+       subtilte = "Aggregated by Fishnet") +
+  xlab("Percent of Tree Canopy Lost (2008 - 2018)") +
+  ylab("Percent of Tree Canopy Coverage of Each Fishnet Cell (2018)") +
+  theme(plot.title = element_text(hjust = 0.3, size = 12), plot.subtitle = element_text(hjust = 0.3, size = 8)) +
+  plotTheme()
+
 ```
 
 
