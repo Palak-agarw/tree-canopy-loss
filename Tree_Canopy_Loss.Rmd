@@ -1370,12 +1370,12 @@ treecanopy_census<-
  
 # Tree Canopy Loss
 
-TreeCanopyLoss <- 
-  TreeCanopyAll%>%
+TreeCanopyLoss_census <- 
+  treecanopy_census%>%
   filter(CLASS_NAME == "Loss")%>%
-  group_by(uniqueID)%>%
+  group_by(tractfips, SHAPE_Area)%>%
   summarise(AreaLoss = sum(TreeArea))%>%
-  mutate(pctLoss = AreaLoss / 2608225)%>%
+  mutate(pctLoss = AreaLoss / SHAPE_Area )%>%
   st_drop_geometry()
   
 ```
