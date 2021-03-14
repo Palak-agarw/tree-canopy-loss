@@ -1406,14 +1406,16 @@ phillyhealth <-
   merge(x = TreeCanopyNoC_census, y = phillyhealth, by = "tractfips", all = TRUE) 
 
 phillyhealth <- phillyhealth %>%
-  dplyr::select(tractfips,casthma_crudeprev,AreaLoss.x,pctGain,pctLoss,geometry)%>%
+  dplyr::select(tractfips,casthma_crudeprev,AreaLoss.x,pctGain,pctLoss,geometry,stroke_crudeprev,phlth_crudeprev,
+                obesity_crudeprev,mhlth_crudeprev,lpa_crudeprev)%>%
   mutate(LogPctLoss = log10(pctLoss),
          LogPctGain = log10(pctGain))
 
 
 correlation.long4 <-
   phillyhealth%>%
-     dplyr::select(casthma_crudeprev, pctLoss) %>%
+     dplyr::select(casthma_crudeprev, phlth_crudeprev,stroke_crudeprev,
+                obesity_crudeprev,mhlth_crudeprev,lpa_crudeprev, pctLoss) %>%
     gather(Variable, Value, -pctLoss) %>%
   mutate(Value = as.numeric(Value))
 
