@@ -167,9 +167,9 @@ plotTheme <- function(base_size = 12) {
 
 # Tree Canopy
 TreeCanopy <-
-  #st_read("C:/Users/Kyle McCarthy/Documents/Practicum/TreeCanopyChange_2008_2018.shp")%>%
+  st_read("C:/Users/Kyle McCarthy/Documents/Practicum/TreeCanopyChange_2008_2018.shp")%>%
 #  st_read("/Users/annaduan/Desktop/Y3S2/Practicum/Data/TreeCanopyChange_2008_2018-shp/TreeCanopyChange_2008_2018.shp") %>%
-  st_read("C:/Users/agarw/Documents/MUSA 801/Data/TreeCanopyChange_2008_2018.shp") %>%
+ # st_read("C:/Users/agarw/Documents/MUSA 801/Data/TreeCanopyChange_2008_2018.shp") %>%
 #st_read("C:/Users/Prince/Desktop/Tree Canopy Data/TreeCanopyChange_2008_2018.shp") %>%
   st_transform('ESRI:102728') 
 
@@ -184,9 +184,9 @@ Philadelphia <- st_read("http://data.phl.opendata.arcgis.com/datasets/405ec3da94
 
 # Neighborhoods
 Neighborhood <-
-  #st_read("C:/Users/Kyle McCarthy/Documents/Practicum/Data/Neighborhoods/Neighborhoods_Philadelphia.shp") %>%
+  st_read("C:/Users/Kyle McCarthy/Documents/Practicum/Data/Neighborhoods/Neighborhoods_Philadelphia.shp") %>%
 #st_read("/Users/annaduan/Desktop/Y3S2/Practicum/Data/Neighborhoods_Philadelphia/Neighborhoods_Philadelphia.shp")%>%
-  st_read("C:/Users/agarw/Documents/MUSA 801/Data/Neighborhoods_Philadelphia.shp") %>%
+  #st_read("C:/Users/agarw/Documents/MUSA 801/Data/Neighborhoods_Philadelphia.shp") %>%
 #st_read("C:/Users/Prince/Desktop/Tree Canopy Data/Neighborhoods_Philadelphia/Neighborhoods_Philadelphia.shp") %>%
   st_transform('ESRI:102728')
 
@@ -202,8 +202,8 @@ Neighborhood <-
 
 HOLC <- #st_read("/Users/annaduan/Desktop/Y3S2/Practicum/Data/PAPhiladelphia1937.geojson") %>%
  #st_read("C:/Users/Prince/Desktop/Tree Canopy Data/PAPhiladelphia1937.geojson") %>%
-  #st_read("C:/Users/Kyle McCarthy/Documents/Practicum/Data/PAPhiladelphia1937.geojson")%>%
-  st_read("C:/Users/agarw/Documents/MUSA 801/Data/PAPhiladelphia1937.geojson")%>%
+  st_read("C:/Users/Kyle McCarthy/Documents/Practicum/Data/PAPhiladelphia1937.geojson")%>%
+  #st_read("C:/Users/agarw/Documents/MUSA 801/Data/PAPhiladelphia1937.geojson")%>%
   st_transform('ESRI:102728')
 
 HOLC <-
@@ -261,9 +261,9 @@ parcels <- st_read("http://data-phl.opendata.arcgis.com/datasets/1c57dd1b3ff8444
  st_transform('ESRI:102728')
 
 const_permits <- 
-  st_read("C:/Users/agarw/Documents/MUSA 801/Data/const_permit.csv") %>%
+  #st_read("C:/Users/agarw/Documents/MUSA 801/Data/const_permit.csv") %>%
   #st_read("C:/Users/Prince/Desktop/Tree Canopy Data/const_permit.csv") %>%
-  #st_read("C:/Users/Kyle McCarthy/Documents/Practicum/permits.csv")%>%
+  st_read("C:/Users/Kyle McCarthy/Documents/Practicum/permits.csv")%>%
  # st_read("/Users/annaduan/Desktop/Y3S2/Practicum/Data/const_permit.csv")%>%
   mutate(X = geocode_x,
          Y = geocode_y) 
@@ -441,7 +441,7 @@ FinalFishnet$pctLossCat <- cut(FinalFishnet$pctLoss,
 
 **Philadelphia's 2018 Canopy**  
 In Philadelphia, the Northwest, parts of the West, and parts of the Northeast have the most tree canopy while North and South Philadelphia and Center City have very little canopy. 
-```{r 2018 Tree Canopy, message=FALSE, warning=FALSE, results='hide', fig.height = 12, fig.width = 20, cache=TRUE}
+```{r 2018 Canopy, cache=TRUE, message=FALSE, warning=FALSE, include=TRUE, results='hide'}
 
 ggplot()+ 
   geom_sf(data = FinalFishnet, aes(fill = pctCoverage18Cat))+ 
@@ -451,6 +451,7 @@ ggplot()+
 subtitle = "2018 Tree Canopy Area / Gridcell Size") + 
   theme(plot.title = element_text(size = 30, face = "bold"), 
         legend.title = element_text(size = 12)) +  mapTheme()
+
 ```
 
 **Tree Canopy Change**  
@@ -615,9 +616,9 @@ Neighborhoods like Upper Roxborough, which have many trees, experienced less net
 
 What about income? Higher income neighborhoods in Philadelphia generally have more tree canopy.However, looking at Fairhill and Graduate Hospital, the poorest and richest neighborhoods in Philadelphia, respectively, tree canopy change is more complex. Both neighborhoods are in the Center City region, and both experience a mix of gain, loss, and no change that appears to be in small pieces.
 
-```{r Neighborhood level Tree Loss, message=FALSE, warning=FALSE, results='hide', fig.height = 6, fig.width = 9}
+```{r Neighborhood level Tree Loss, message=FALSE, warning=FALSE, results='hide', fig.height = 6, fig.width = 9, cache = TRUE}
 library(magrittr)
-library(dplyr)
+
 #making basemap
  ll <- function(dat, proj4 = 4326){
    st_transform(dat, proj4)
@@ -951,78 +952,78 @@ ggplot(FinalFishnet, aes(y = LogPctLoss, x = LogAvgParcelSize))+
 ```
 
 ```{r E911 Trees, fig.height = 12,fig.width = 12, message=FALSE, warning=FALSE, include=TRUE, results='hide', cache=TRUE}
-
-e311Trees <-
-  st_read('C:/Users/Kyle McCarthy/Documents/Practicum/e311.csv')
-
-e311Trees<-
-  e311Trees%>%
-  dplyr:: select(service_name, lat, lon)%>%
-  mutate(lon = as.numeric(lon),
-         lat = as.numeric(lat))%>%
-    na.omit()%>%
-  st_as_sf(.,coords=c("lon","lat"),crs=4326)%>%
-  st_transform('ESRI:102728')
-
-
-e311_net_tree <-
-  e311Trees%>%
-  mutate(e311TreeCount = 1) %>%
-  dplyr::select(e311TreeCount)%>%
-  aggregate(., FinalFishnet, sum) %>%
-  mutate(e311TreeCount = replace_na(e311TreeCount, 0))%>%
-  st_centroid()%>%
-  st_join(FinalFishnet, .)%>% 
-  mutate(Loge311TreeCount = log10(e311TreeCount), 
-         LogPctLoss = log10(pctLoss))%>% 
-  filter(Loge311TreeCount != Inf & Loge311TreeCount != -Inf & LogPctLoss != Inf & LogPctLoss != -Inf)
-
-ggplot(e311_net_tree, aes(y = LogPctLoss, x = Loge311TreeCount))+
-  geom_point()+
-  labs(title = "Percent Tree Canopy Loss (2008 - 2018) vs. \n Percent Tree Canopy Coverage (2018) ",
-       subtilte = "Aggregated by Fishnet") +
-  xlab("Percent of Tree Canopy Lost (2008 - 2018)") +
-  ylab("Percent of Tree Canopy Coverage of Each Fishnet Cell (2018)") +
-  theme(plot.title = element_text(hjust = 0.3, size = 12), plot.subtitle = element_text(hjust = 0.3, size = 8)) +
-  plotTheme()
-
-
-
-```
-
-```{r Const_Permit, message=FALSE, warning=FALSE, include=TRUE, results='hide', fig.height = 7, fig.width = 8, cache=TRUE}
-
-#const_spatial2 <-
-  #const_spatial %>%
-  #filter(permitdescription == 'RESIDENTIAL BUILDING PERMIT ' | permitdescription == 'COMMERCIAL BUILDING PERMIT')
-
-# ggplot()+
-#   geom_sf(data = Philadelphia) +
-#   geom_sf(data = const_spatial2)
-
-### Aggregate points to the neighborhood
-## add a value of 1 to each crime, sum them with aggregate
-const_net <- 
-  dplyr::select(const_spatial) %>% 
-  mutate(countConst = 1) %>% 
-  aggregate(., Neighborhood, sum) %>%
-  mutate(countConst = replace_na(countConst, 0),
-         neigh = Neighborhood$NAME)
-
-             
-
-const_net_fish <- 
-  dplyr::select(const_spatial) %>% 
-  mutate(countConst = 1) %>% 
-  aggregate(., fishnet, sum) %>%
-  mutate(countConst = replace_na(countConst, 0),
-         uniqueID = rownames(.))
-             
-             ggplot() +
-                  geom_sf(data = const_net, aes(fill = countConst), color = NA) +
-                  scale_fill_viridis() +
-                  labs(title = "Count of Construction permits for the neighborhood") +
-                  mapTheme()
+# 
+# e311Trees <-
+#   st_read('C:/Users/Kyle McCarthy/Documents/Practicum/e311.csv')
+# 
+# e311Trees<-
+#   e311Trees%>%
+#   dplyr:: select(service_name, lat, lon)%>%
+#   mutate(lon = as.numeric(lon),
+#          lat = as.numeric(lat))%>%
+#     na.omit()%>%
+#   st_as_sf(.,coords=c("lon","lat"),crs=4326)%>%
+#   st_transform('ESRI:102728')
+# 
+# 
+# e311_net_tree <-
+#   e311Trees%>%
+#   mutate(e311TreeCount = 1) %>%
+#   dplyr::select(e311TreeCount)%>%
+#   aggregate(., FinalFishnet, sum) %>%
+#   mutate(e311TreeCount = replace_na(e311TreeCount, 0))%>%
+#   st_centroid()%>%
+#   st_join(FinalFishnet, .)%>% 
+#   mutate(Loge311TreeCount = log10(e311TreeCount), 
+#          LogPctLoss = log10(pctLoss))%>% 
+#   filter(Loge311TreeCount != Inf & Loge311TreeCount != -Inf & LogPctLoss != Inf & LogPctLoss != -Inf)
+# 
+# ggplot(e311_net_tree, aes(y = LogPctLoss, x = Loge311TreeCount))+
+#   geom_point()+
+#   labs(title = "Percent Tree Canopy Loss (2008 - 2018) vs. \n Percent Tree Canopy Coverage (2018) ",
+#        subtilte = "Aggregated by Fishnet") +
+#   xlab("Percent of Tree Canopy Lost (2008 - 2018)") +
+#   ylab("Percent of Tree Canopy Coverage of Each Fishnet Cell (2018)") +
+#   theme(plot.title = element_text(hjust = 0.3, size = 12), plot.subtitle = element_text(hjust = 0.3, size = 8)) +
+#   plotTheme()
+# 
+# 
+# 
+# ```
+# 
+# ```{r Const_Permit, message=FALSE, warning=FALSE, include=TRUE, results='hide', fig.height = 7, fig.width = 8, cache=TRUE}
+# 
+# #const_spatial2 <-
+#   #const_spatial %>%
+#   #filter(permitdescription == 'RESIDENTIAL BUILDING PERMIT ' | permitdescription == 'COMMERCIAL BUILDING PERMIT')
+# 
+# # ggplot()+
+# #   geom_sf(data = Philadelphia) +
+# #   geom_sf(data = const_spatial2)
+# 
+# ### Aggregate points to the neighborhood
+# ## add a value of 1 to each crime, sum them with aggregate
+# const_net <- 
+#   dplyr::select(const_spatial) %>% 
+#   mutate(countConst = 1) %>% 
+#   aggregate(., Neighborhood, sum) %>%
+#   mutate(countConst = replace_na(countConst, 0),
+#          neigh = Neighborhood$NAME)
+# 
+#              
+# 
+# const_net_fish <- 
+#   dplyr::select(const_spatial) %>% 
+#   mutate(countConst = 1) %>% 
+#   aggregate(., fishnet, sum) %>%
+#   mutate(countConst = replace_na(countConst, 0),
+#          uniqueID = rownames(.))
+#              
+#              ggplot() +
+#                   geom_sf(data = const_net, aes(fill = countConst), color = NA) +
+#                   scale_fill_viridis() +
+#                   labs(title = "Count of Construction permits for the neighborhood") +
+#                   mapTheme()
 
 
 ```
