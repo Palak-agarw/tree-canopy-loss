@@ -297,6 +297,7 @@ fishnet <-
   mutate(uniqueID = rownames(.))%>%
   st_transform('ESRI:102728')
 
+
 ```
 
 
@@ -936,7 +937,7 @@ FinalFishnet1 %>%
   st_drop_geometry()%>%
   group_by(uniqueID)%>%
   summarise(avgParcelSize = mean(Shape__Area))%>%
-  left_join(FinalFishnet1, .)%>%
+  left_join(FinalFishnet, .)%>%
   mutate(LogAvgParcelSize = log10(avgParcelSize), 
          LogPctLoss = log10(pctLoss))
 
@@ -952,44 +953,44 @@ ggplot(FinalFishnet, aes(y = LogPctLoss, x = LogAvgParcelSize))+
 ```
 
 ```{r E911 Trees, fig.height = 12,fig.width = 12, message=FALSE, warning=FALSE, include=TRUE, results='hide', cache=TRUE}
+
+e311Trees <-
+  st_read('C:/Users/Kyle McCarthy/Documents/Practicum/e311.csv')
+
+e311Trees<-
+  e311Trees%>%
+  dplyr:: select(service_name, lat, lon)%>%
+  mutate(lon = as.numeric(lon),
+         lat = as.numeric(lat))%>%
+    na.omit()%>%
+  st_as_sf(.,coords=c("lon","lat"),crs=4326)%>%
+  st_transform('ESRI:102728')
+
+
+e311_net_tree <-
+  e311Trees%>%
+  mutate(e311TreeCount = 1) %>%
+  dplyr::select(e311TreeCount)%>%
+  aggregate(., FinalFishnet, sum) %>%
+  mutate(e311TreeCount = replace_na(e311TreeCount, 0))%>%
+  st_centroid()%>%
+  st_join(FinalFishnet, .)%>%
+  mutate(Loge311TreeCount = log10(e311TreeCount),
+         LogPctLoss = log10(pctLoss))%>%
+  filter(Loge311TreeCount != Inf & Loge311TreeCount != -Inf & LogPctLoss != Inf & LogPctLoss != -Inf)
+
+ggplot(e311_net_tree, aes(y = LogPctLoss, x = Loge311TreeCount))+
+  geom_point()+
+  labs(title = "Percent Tree Canopy Loss (2008 - 2018) vs. \n Percent Tree Canopy Coverage (2018) ",
+       subtilte = "Aggregated by Fishnet") +
+  xlab("Percent of Tree Canopy Lost (2008 - 2018)") +
+  ylab("Percent of Tree Canopy Coverage of Each Fishnet Cell (2018)") +
+  theme(plot.title = element_text(hjust = 0.3, size = 12), plot.subtitle = element_text(hjust = 0.3, size = 8)) +
+  plotTheme()
+
 # 
-# e311Trees <-
-#   st_read('C:/Users/Kyle McCarthy/Documents/Practicum/e311.csv')
 # 
-# e311Trees<-
-#   e311Trees%>%
-#   dplyr:: select(service_name, lat, lon)%>%
-#   mutate(lon = as.numeric(lon),
-#          lat = as.numeric(lat))%>%
-#     na.omit()%>%
-#   st_as_sf(.,coords=c("lon","lat"),crs=4326)%>%
-#   st_transform('ESRI:102728')
-# 
-# 
-# e311_net_tree <-
-#   e311Trees%>%
-#   mutate(e311TreeCount = 1) %>%
-#   dplyr::select(e311TreeCount)%>%
-#   aggregate(., FinalFishnet, sum) %>%
-#   mutate(e311TreeCount = replace_na(e311TreeCount, 0))%>%
-#   st_centroid()%>%
-#   st_join(FinalFishnet, .)%>% 
-#   mutate(Loge311TreeCount = log10(e311TreeCount), 
-#          LogPctLoss = log10(pctLoss))%>% 
-#   filter(Loge311TreeCount != Inf & Loge311TreeCount != -Inf & LogPctLoss != Inf & LogPctLoss != -Inf)
-# 
-# ggplot(e311_net_tree, aes(y = LogPctLoss, x = Loge311TreeCount))+
-#   geom_point()+
-#   labs(title = "Percent Tree Canopy Loss (2008 - 2018) vs. \n Percent Tree Canopy Coverage (2018) ",
-#        subtilte = "Aggregated by Fishnet") +
-#   xlab("Percent of Tree Canopy Lost (2008 - 2018)") +
-#   ylab("Percent of Tree Canopy Coverage of Each Fishnet Cell (2018)") +
-#   theme(plot.title = element_text(hjust = 0.3, size = 12), plot.subtitle = element_text(hjust = 0.3, size = 8)) +
-#   plotTheme()
-# 
-# 
-# 
-# ```
+```
 # 
 # ```{r Const_Permit, message=FALSE, warning=FALSE, include=TRUE, results='hide', fig.height = 7, fig.width = 8, cache=TRUE}
 # 
@@ -1229,6 +1230,7 @@ ggplot(LandUse, aes(y=Descriptio, x=pctChange))+
   xlab("Percent Net Change")+
   ylab("Land Use Type")+
   theme(axis.text.x = element_text(angle = 90, vjust = 0.5, hjust=1)))
+  
 
 ```
 
@@ -1270,6 +1272,8 @@ ggplot(LandUse2, aes(y=C_DIG2DESC, x=pctChange))+
 
 ```{r Land Use to Fishnet, message=FALSE, warning=FALSE, include=TRUE, results='hide', fig.height =  7, fig.width = 7, cache=TRUE}
 
+# Code to Intersect land use with fishnet. Intersection took about 3 hours with the below code. Completed in arcGIS instead. 
+
 # LandUseAg<- 
 #   LandUse1%>%
 #   filter(Descriptio == "Residential" | Descriptio == "Transportation") %>% 
@@ -1285,6 +1289,68 @@ ggplot(LandUse2, aes(y=C_DIG2DESC, x=pctChange))+
 #   FinalFishnet %>%
 #   st_make_valid()%>%
 #   st_intersection(LandUseAg)
+
+
+# st_write(fishnet, "C:/Users/Kyle McCarthy/Documents/Practicum/Data/Fishnet_LU_Intersect/fishnet.shp")
+
+LandUseFishnet <- st_read("C:/Users/Kyle McCarthy/Documents/Practicum/Data/Fishnet_LU_Intersect/fishnet_LUS_Intersect_dissolve.shp ")
+
+LandUseFishnet_ResTrans<- 
+LandUseFishnet%>% 
+filter(Descriptio == "Residential" | Descriptio == "Transportation")%>% 
+dplyr::select(uniqueID, Descriptio)%>% 
+mutate(Area = as.numeric(st_area(.)))%>% 
+st_drop_geometry()%>%
+group_by(uniqueID)%>% 
+summarise(Area = sum(Area))%>%
+mutate(pctTransRes = Area / 2608225)%>% 
+dplyr::select(pctTransRes, uniqueID)
+
+LandUseFishnet_Trans<- 
+LandUseFishnet%>% 
+filter(Descriptio == "Transportation")%>% 
+dplyr::select(uniqueID, Descriptio)%>% 
+mutate(Area = as.numeric(st_area(.)))%>% 
+st_drop_geometry()%>%
+group_by(uniqueID)%>% 
+summarise(Area = sum(Area))%>%
+mutate(pctTrans = Area / 2608225)%>% 
+dplyr::select(pctTrans, uniqueID)
+
+LandUseFishnet_Res<- 
+LandUseFishnet%>% 
+filter(Descriptio == "Residential")%>% 
+dplyr::select(uniqueID, Descriptio)%>% 
+mutate(Area = as.numeric(st_area(.)))%>% 
+st_drop_geometry()%>%
+group_by(uniqueID)%>% 
+summarise(Area = sum(Area))%>%
+mutate(pctRes = Area / 2608225)%>% 
+dplyr::select(pctRes, uniqueID)
+
+FinalFishnet3<- 
+left_join(LandUseFishnet_ResTrans, LandUseFishnet_Res)%>% 
+left_join(., LandUseFishnet_Trans)%>% 
+mutate_all(~replace(., is.na(.), 0))%>%
+left_join(FinalFishnet, .)%>% 
+mutate(LogPctRes = log10(pctRes), 
+LogPctResTrans = log10(pctTransRes))%>% 
+filter(LogPctRes != -Inf)
+
+
+c <-lm(LogPctLoss ~ LogPctRes, data = FinalFishnet3)
+summary(c) # .26 Coorelation
+
+ggplot(FinalFishnet3, aes(y = LogPctLoss , x = pctRes))+
+  geom_point()+ 
+  labs(title = "Percent Change vs Construction nn1", 
+       subtilte = "Aggregated by Fishnet") + 
+  xlab("Average Percent Change ") + 
+  ylab("Log Percent Loss") + 
+  theme(plot.title = element_text(hjust = 0.5, size = 15, face = "bold"), plot.subtitle = element_text(hjust = 0.5, size = 8)) +
+  plotTheme()
+
+
 
 ```
 
@@ -1504,26 +1570,20 @@ TreeCanopyCentroids<-
   group_by(uniqueID)%>%
   summarise(avg_nnConst = mean(Construction_nn1))
 
-TreeCanopyCentroids<-
+FinalFishnet<-
    TreeCanopyCentroids%>% 
   st_drop_geometry()%>%
   left_join(FinalFishnet, .)
 
-TreeCanopyCentroids2 <- 
-  TreeCanopyCentroids%>% 
-  filter(pctChange < 100)
 
-ggplot(TreeCanopyCentroids2, aes(x = pctLoss , y = avg_nnConst))+
+ggplot(FinalFishnet, aes(y = LogPctLoss , x = avg_nnConst))+
   geom_point()+ 
   labs(title = "Percent Change vs Construction nn1", 
        subtilte = "Aggregated by Fishnet") + 
-  xlab("Percent Change ") + 
-  ylab("Construction nn1") + 
+  xlab("Average Percent Change ") + 
+  ylab("Log Percent Loss") + 
   theme(plot.title = element_text(hjust = 0.5, size = 15, face = "bold"), plot.subtitle = element_text(hjust = 0.5, size = 8)) +
   plotTheme()
-
-
-  
 
 ```
 ## Team Roles
