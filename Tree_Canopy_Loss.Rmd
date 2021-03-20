@@ -1610,31 +1610,31 @@ ggplot(FinalFishnet, aes(y = LogPctLoss , x = avg_nnConst))+
 
 # parks 
 
-parks <- st_read('http://data.phl.opendata.arcgis.com/datasets/9059a7546b6a4d658bef9ce9c84e4b03_0.geojson') %>% 
+poles <- st_read('http://data.phl.opendata.arcgis.com/datasets/9059a7546b6a4d658bef9ce9c84e4b03_0.geojson') %>% 
 st_transform('ESRI:102728')%>% 
 st_centroid()
 
-parks_nn1 <- 
+poles_nn1 <- 
   TreeCanopy%>% 
-  mutate(Parks_nn1 = nn_function(st_c(st_centroid(.)), st_c(parks), 10))
+  mutate(Parks_nn1 = nn_function(st_c(st_centroid(.)), st_c(poles), 10))
   
-TreeCanopyCentroids <- st_join(FinalFishnet, parks_nn1)
+TreeCanopyCentroids <- st_join(FinalFishnet, poles_nn1)
 
 TreeCanopyCentroids1<- 
   TreeCanopyCentroids%>% 
   st_drop_geometry()%>%
   group_by(uniqueID)%>%
-  summarise(avg_nnPark = mean(Parks_nn1))
+  summarise(avg_nnPole = mean(Poles_nn1))
 
 FinalFishnet3<-
    TreeCanopyCentroids1%>% 
   left_join(FinalFishnet, .)%>% 
-  mutate(LogPark = log10(avg_nnPark))
+  mutate(LogPole = log10(avg_nnPole))
   
-distMarineInletLinereg <-lm(LogPctLoss ~ LogPark, data = FinalFishnet3)
+distMarineInletLinereg <-lm(LogPctLoss ~ LogPole, data = FinalFishnet3)
 summary(distMarineInletLinereg)
 
-ggplot(FinalFishnet3, aes(y = LogPctLoss , x = LogPark))+
+ggplot(FinalFishnet3, aes(y = LogPctLoss , x = LogPole))+
   geom_point()+
   labs(title = "Percent Change vs Construction nn1",
        subtilte = "Aggregated by Fishnet") +
