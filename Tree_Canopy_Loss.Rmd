@@ -167,9 +167,9 @@ plotTheme <- function(base_size = 12) {
 
 # Tree Canopy
 TreeCanopy <-
-  st_read("C:/Users/Kyle McCarthy/Documents/Practicum/TreeCanopyChange_2008_2018.shp")%>%
+  #st_read("C:/Users/Kyle McCarthy/Documents/Practicum/TreeCanopyChange_2008_2018.shp")%>%
 #  st_read("/Users/annaduan/Desktop/Y3S2/Practicum/Data/TreeCanopyChange_2008_2018-shp/TreeCanopyChange_2008_2018.shp") %>%
- # st_read("C:/Users/agarw/Documents/MUSA 801/Data/TreeCanopyChange_2008_2018.shp") %>%
+ st_read("C:/Users/agarw/Documents/MUSA 801/Data/TreeCanopyChange_2008_2018.shp") %>%
 #st_read("C:/Users/Prince/Desktop/Tree Canopy Data/TreeCanopyChange_2008_2018.shp") %>%
   st_transform('ESRI:102728') 
 
@@ -184,9 +184,9 @@ Philadelphia <- st_read("http://data.phl.opendata.arcgis.com/datasets/405ec3da94
 
 # Neighborhoods
 Neighborhood <-
-  st_read("C:/Users/Kyle McCarthy/Documents/Practicum/Data/Neighborhoods/Neighborhoods_Philadelphia.shp") %>%
+ # st_read("C:/Users/Kyle McCarthy/Documents/Practicum/Data/Neighborhoods/Neighborhoods_Philadelphia.shp") %>%
 #st_read("/Users/annaduan/Desktop/Y3S2/Practicum/Data/Neighborhoods_Philadelphia/Neighborhoods_Philadelphia.shp")%>%
-  #st_read("C:/Users/agarw/Documents/MUSA 801/Data/Neighborhoods_Philadelphia.shp") %>%
+  st_read("C:/Users/agarw/Documents/MUSA 801/Data/Neighborhoods_Philadelphia.shp") %>%
 #st_read("C:/Users/Prince/Desktop/Tree Canopy Data/Neighborhoods_Philadelphia/Neighborhoods_Philadelphia.shp") %>%
   st_transform('ESRI:102728')
 
@@ -202,8 +202,8 @@ Neighborhood <-
 
 HOLC <- #st_read("/Users/annaduan/Desktop/Y3S2/Practicum/Data/PAPhiladelphia1937.geojson") %>%
  #st_read("C:/Users/Prince/Desktop/Tree Canopy Data/PAPhiladelphia1937.geojson") %>%
-  st_read("C:/Users/Kyle McCarthy/Documents/Practicum/Data/PAPhiladelphia1937.geojson")%>%
-  #st_read("C:/Users/agarw/Documents/MUSA 801/Data/PAPhiladelphia1937.geojson")%>%
+  #st_read("C:/Users/Kyle McCarthy/Documents/Practicum/Data/PAPhiladelphia1937.geojson")%>%
+  st_read("C:/Users/agarw/Documents/MUSA 801/Data/PAPhiladelphia1937.geojson")%>%
   st_transform('ESRI:102728')
 
 HOLC <-
@@ -261,9 +261,9 @@ parcels <- st_read("http://data-phl.opendata.arcgis.com/datasets/1c57dd1b3ff8444
  st_transform('ESRI:102728')
 
 const_permits <- 
-  #st_read("C:/Users/agarw/Documents/MUSA 801/Data/const_permit.csv") %>%
+  st_read("C:/Users/agarw/Documents/MUSA 801/Data/const_permit.csv") %>%
   #st_read("C:/Users/Prince/Desktop/Tree Canopy Data/const_permit.csv") %>%
-  st_read("C:/Users/Kyle McCarthy/Documents/Practicum/permits.csv")%>%
+  #st_read("C:/Users/Kyle McCarthy/Documents/Practicum/permits.csv")%>%
  # st_read("/Users/annaduan/Desktop/Y3S2/Practicum/Data/const_permit.csv")%>%
   mutate(X = geocode_x,
          Y = geocode_y) 
@@ -955,7 +955,8 @@ ggplot(FinalFishnet, aes(y = LogPctLoss, x = LogAvgParcelSize))+
 ```{r E911 Trees, fig.height = 12,fig.width = 12, message=FALSE, warning=FALSE, include=TRUE, results='hide', cache=TRUE}
 
 e311Trees <-
-  st_read('C:/Users/Kyle McCarthy/Documents/Practicum/e311.csv')
+  #st_read('C:/Users/Kyle McCarthy/Documents/Practicum/e311.csv')%>%
+  st_read('C:/Users/agarw/Documents/MUSA 801/Data/e311.csv')
 
 e311Trees<-
   e311Trees%>%
@@ -1429,7 +1430,14 @@ library(RSocrata)
 treecanopy_census<- 
   treecanopy_census%>%
   mutate(TreeArea = st_area(treecanopy_census))%>%
-  mutate(TreeArea = as.numeric(TreeArea))
+  mutate(TreeArea = as.numeric(TreeArea)) %>%
+  select(tractfips, TreeArea) 
+
+Treecanopy_census <-
+  treecanopy_census %>%
+  group_by(tractfips)%>%
+  summarise(Area = sum(TreeArea))%>%
+  st_drop_geometry()
 
 # ggplot() +
 #   geom_sf(data = treecanopy_census, aes(fill = casthma_crudeprev))+
@@ -1462,14 +1470,8 @@ TreeCanopyNoC_census <-
   mutate(pctNoC = AreaLoss/tractarea) %>%
   st_drop_geometry()
 
-TreeCanopyArea_census <- 
-  treecanopy_census%>%
-  group_by(tractfips,tractarea)%>%
-  mutate(Area = sum(TreeArea))%>%
-  st_drop_geometry()
-
 phillyhealth <-
-  merge(x = TreeCanopyArea_census, y = phillyhealth, by = "tractfips", all = TRUE)
+  merge(x = Treecanopy_census, y = phillyhealth, by = "tractfips", all = TRUE)
 
 phillyhealth <-
   merge(x = TreeCanopyLoss_census, y = phillyhealth, by = "tractfips", all = TRUE)
@@ -1481,25 +1483,25 @@ phillyhealth <-
   merge(x = TreeCanopyNoC_census, y = phillyhealth, by = "tractfips", all = TRUE) 
 
 phillyhealth <- phillyhealth %>%
-  dplyr::select(tractfips,casthma_crudeprev,AreaLoss.x,pctGain,pctLoss,geometry,stroke_crudeprev,phlth_crudeprev,
-                obesity_crudeprev,mhlth_crudeprev,lpa_crudeprev, TreeArea)%>%
-  mutate(LogPctLoss = log10(pctLoss),
-         LogPctGain = log10(pctGain))
+  dplyr::select(tractfips,casthma_crudeprev.x,,pctGain.y,pctLoss.y,geometry,stroke_crudeprev.x,phlth_crudeprev.x,
+                obesity_crudeprev.x,mhlth_crudeprev.x,lpa_crudeprev.x, TreeArea)%>%
+  mutate(LogPctLoss = log10(pctLoss.y),
+         LogPctGain = log10(pctGain.y))
 
 
 correlation.long4 <-
   phillyhealth%>%
-     dplyr::select(casthma_crudeprev, phlth_crudeprev,stroke_crudeprev,
-                obesity_crudeprev,mhlth_crudeprev,lpa_crudeprev, pctLoss) %>%
-    gather(Variable, Value, -pctLoss) %>%
+     dplyr::select(casthma_crudeprev.x, phlth_crudeprev.x,stroke_crudeprev.x,
+                obesity_crudeprev.x,mhlth_crudeprev.x,lpa_crudeprev.x, pctLoss.y) %>%
+    gather(Variable, Value, -pctLoss.y) %>%
   mutate(Value = as.numeric(Value))
 
 correlation.cor4 <-
   correlation.long4 %>%
     group_by(Variable) %>%
-    summarize(correlation = cor(Value, pctLoss, use = "complete.obs"))
+    summarize(correlation = cor(Value, pctLoss.y, use = "complete.obs"))
 
-  ggplot(correlation.long4, aes(Value, pctLoss)) +
+ggplot(correlation.long4, aes(Value, pctLoss.y)) +
   geom_point(size = 0.1) +
     scale_x_log10() + scale_y_log10() +
   geom_text(data = correlation.cor4, aes(label = paste("r =", round(correlation, 2))),
@@ -1509,10 +1511,10 @@ correlation.cor4 <-
   labs(title = "Percent Tree Canopy Coverage (2018)") +
   plotTheme()
   
-  correlation.long5 <-
+correlation.long5 <-
   phillyhealth%>%
-     dplyr::select(casthma_crudeprev, phlth_crudeprev,
-                obesity_crudeprev,mhlth_crudeprev,lpa_crudeprev, TreeArea) %>%
+     dplyr::select(casthma_crudeprev.x, phlth_crudeprev.x,
+                obesity_crudeprev.x,mhlth_crudeprev.x,lpa_crudeprev.x, TreeArea) %>%
     gather(Variable, Value, -TreeArea) %>%
   mutate(Value = as.numeric(Value))
 
@@ -1521,7 +1523,7 @@ correlation.cor5 <-
     group_by(Variable) %>%
     summarize(correlation = cor(Value, TreeArea, use = "complete.obs"))
 
-  ggplot(correlation.long5, aes(Value, TreeArea)) +
+ggplot(correlation.long5, aes(Value, TreeArea)) +
   geom_point(size = 0.1) +
     scale_x_log10() + scale_y_log10() +
   geom_text(data = correlation.cor5, aes(label = paste("r =", round(correlation, 2))),
