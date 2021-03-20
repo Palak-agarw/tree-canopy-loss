@@ -1336,7 +1336,7 @@ summarise(Area = sum(Area))%>%
 mutate(pctRes = Area / 2608225)%>% 
 dplyr::select(pctRes, uniqueID)
 
-FinalFishnet3<- 
+FinalFishnet<- 
 left_join(LandUseFishnet_ResTrans, LandUseFishnet_Res)%>% 
 left_join(., LandUseFishnet_Trans)%>% 
 mutate_all(~replace(., is.na(.), 0))%>%
@@ -1348,16 +1348,6 @@ filter(LogPctRes != -Inf)
 
 c <-lm(LogPctLoss ~ LogPctRes, data = FinalFishnet3)
 summary(c) # .26 Coorelation
-
-ggplot(FinalFishnet3, aes(y = LogPctLoss , x = pctRes))+
-  geom_point()+ 
-  labs(title = "Percent Change vs Construction nn1", 
-       subtilte = "Aggregated by Fishnet") + 
-  xlab("Average Percent Change ") + 
-  ylab("Log Percent Loss") + 
-  theme(plot.title = element_text(hjust = 0.5, size = 15, face = "bold"), plot.subtitle = element_text(hjust = 0.5, size = 8)) +
-  plotTheme()
-
 
 
 ```
@@ -1624,6 +1614,84 @@ ggplot(FinalFishnet, aes(y = LogPctLoss , x = avg_nnConst))+
   ylab("Log Percent Loss") + 
   theme(plot.title = element_text(hjust = 0.5, size = 15, face = "bold"), plot.subtitle = element_text(hjust = 0.5, size = 8)) +
   plotTheme()
+
+```
+
+
+```{r Imperviousness, message=FALSE, warning=FALSE, results='hide', fig.height =  8, fig.width =8,cache=TRUE}
+
+# Intersection performed in ArcGIS to conserve time 
+ 
+# imperviousness <- st_read("C:/Users/Kyle McCarthy/Documents/CPLN 675/Midterm/Impervious_Surfaces_2004.shp")%>% 
+# st_transform('ESRI:102728')%>% 
+# st_make_valid()%>%
+# st_intersection(fishnet) 
+
+
+#imperviousness <- st_read("C:/Users/Kyle McCarthy/Documents/Practicum/Data/impervious_intersect.shp")%>%
+#imperviousness <-
+#imperviousness%>%
+#st_transform('ESRI:102728')%>%
+#mutate(Area = as.numeric(st_area(.)))%>%
+#st_drop_geometry()%>%
+#group_by(uniqueID)%>%
+#summarise(ImperviousArea = sum(Area))%>%
+#mutate(pctImpervious = ImperviousArea / 2608225 )%>%
+#left_join(FinalFishnet, .)
+
+#ggplot(imperviousness, aes(y = LogPctLoss , x = ImperviousArea))+
+ # geom_point()+
+#  labs(title = "Percent Change vs Construction nn1",
+ #      subtilte = "Aggregated by Fishnet") +
+#  xlab("Average Percent Change ") +
+#  ylab("Log Percent Loss") +
+#  theme(plot.title = element_text(hjust = 0.5, size = 15, face = "bold"), plot.subtitle = element_text(hjust = 0.5, size = 8)) +
+#  plotTheme()
+
+# parks 
+
+poles <- st_read('http://data.phl.opendata.arcgis.com/datasets/9059a7546b6a4d658bef9ce9c84e4b03_0.geojson') %>% 
+st_transform('ESRI:102728')%>% 
+st_centroid()
+
+poles_nn1 <- 
+  TreeCanopy%>% 
+  mutate(Parks_nn1 = nn_function(st_c(st_centroid(.)), st_c(poles), 10))
+  
+TreeCanopyCentroids <- st_join(FinalFishnet, poles_nn1)
+
+TreeCanopyCentroids1<- 
+  TreeCanopyCentroids%>% 
+  st_drop_geometry()%>%
+  group_by(uniqueID)%>%
+  summarise(avg_nnPole = mean(Poles_nn1))
+
+FinalFishnet3<-
+   TreeCanopyCentroids1%>% 
+  left_join(FinalFishnet, .)%>% 
+  mutate(LogPole = log10(avg_nnPole))
+  
+distMarineInletLinereg <-lm(LogPctLoss ~ LogPole, data = FinalFishnet3)
+summary(distMarineInletLinereg)
+
+ggplot(FinalFishnet3, aes(y = LogPctLoss , x = LogPole))+
+  geom_point()+
+  labs(title = "Percent Change vs Construction nn1",
+       subtilte = "Aggregated by Fishnet") +
+  xlab("Average Percent Change ") +
+  ylab("Log Percent Loss") +
+  theme(plot.title = element_text(hjust = 0.5, size = 15, face = "bold"), plot.subtitle = element_text(hjust = 0.5, size = 8)) +
+  plotTheme()
+  
+
+```
+
+
+
+
+
+
+
 
 ```
 ## Team Roles
