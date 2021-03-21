@@ -82,22 +82,7 @@ library(entropy)
 library(tidyr)
 library(lubridate)
 library(FNN) 
-library(rjson)
-library(spdep)
-library(caret)
-library(ckanr)
-library(ggcorrplot)
-library(jtools)  
-library(rlist)
-library(osmdata)
-library(geosphere)
-library(fastDummies)
-library(stargazer)
-library(pscl)
-library(pROC)
-library(plotROC)
-library(RANN)
-library(riem)
+
 
 
 root.dir = "https://raw.githubusercontent.com/urbanSpatial/Public-Policy-Analytics-Landing/master/DATA/"
@@ -182,9 +167,9 @@ plotTheme <- function(base_size = 12) {
 
 # Tree Canopy
 TreeCanopy <-
-  #st_read("C:/Users/Kyle McCarthy/Documents/Practicum/TreeCanopyChange_2008_2018.shp")%>%
+  st_read("C:/Users/Kyle McCarthy/Documents/Practicum/TreeCanopyChange_2008_2018.shp")%>%
 #  st_read("/Users/annaduan/Desktop/Y3S2/Practicum/Data/TreeCanopyChange_2008_2018-shp/TreeCanopyChange_2008_2018.shp") %>%
- st_read("C:/Users/agarw/Documents/MUSA 801/Data/TreeCanopyChange_2008_2018.shp") %>%
+ # st_read("C:/Users/agarw/Documents/MUSA 801/Data/TreeCanopyChange_2008_2018.shp") %>%
 #st_read("C:/Users/Prince/Desktop/Tree Canopy Data/TreeCanopyChange_2008_2018.shp") %>%
   st_transform('ESRI:102728') 
 
@@ -199,9 +184,9 @@ Philadelphia <- st_read("http://data.phl.opendata.arcgis.com/datasets/405ec3da94
 
 # Neighborhoods
 Neighborhood <-
- # st_read("C:/Users/Kyle McCarthy/Documents/Practicum/Data/Neighborhoods/Neighborhoods_Philadelphia.shp") %>%
+  st_read("C:/Users/Kyle McCarthy/Documents/Practicum/Data/Neighborhoods/Neighborhoods_Philadelphia.shp") %>%
 #st_read("/Users/annaduan/Desktop/Y3S2/Practicum/Data/Neighborhoods_Philadelphia/Neighborhoods_Philadelphia.shp")%>%
-  st_read("C:/Users/agarw/Documents/MUSA 801/Data/Neighborhoods_Philadelphia.shp") %>%
+  #st_read("C:/Users/agarw/Documents/MUSA 801/Data/Neighborhoods_Philadelphia.shp") %>%
 #st_read("C:/Users/Prince/Desktop/Tree Canopy Data/Neighborhoods_Philadelphia/Neighborhoods_Philadelphia.shp") %>%
   st_transform('ESRI:102728')
 
@@ -217,8 +202,8 @@ Neighborhood <-
 
 HOLC <- #st_read("/Users/annaduan/Desktop/Y3S2/Practicum/Data/PAPhiladelphia1937.geojson") %>%
  #st_read("C:/Users/Prince/Desktop/Tree Canopy Data/PAPhiladelphia1937.geojson") %>%
-  #st_read("C:/Users/Kyle McCarthy/Documents/Practicum/Data/PAPhiladelphia1937.geojson")%>%
-  st_read("C:/Users/agarw/Documents/MUSA 801/Data/PAPhiladelphia1937.geojson")%>%
+  st_read("C:/Users/Kyle McCarthy/Documents/Practicum/Data/PAPhiladelphia1937.geojson")%>%
+  #st_read("C:/Users/agarw/Documents/MUSA 801/Data/PAPhiladelphia1937.geojson")%>%
   st_transform('ESRI:102728')
 
 HOLC <-
@@ -276,9 +261,9 @@ parcels <- st_read("http://data-phl.opendata.arcgis.com/datasets/1c57dd1b3ff8444
  st_transform('ESRI:102728')
 
 const_permits <- 
-  st_read("C:/Users/agarw/Documents/MUSA 801/Data/const_permit.csv") %>%
+  #st_read("C:/Users/agarw/Documents/MUSA 801/Data/const_permit.csv") %>%
   #st_read("C:/Users/Prince/Desktop/Tree Canopy Data/const_permit.csv") %>%
-  #st_read("C:/Users/Kyle McCarthy/Documents/Practicum/permits.csv")%>%
+  st_read("C:/Users/Kyle McCarthy/Documents/Practicum/permits.csv")%>%
  # st_read("/Users/annaduan/Desktop/Y3S2/Practicum/Data/const_permit.csv")%>%
   mutate(X = geocode_x,
          Y = geocode_y) 
@@ -414,7 +399,9 @@ FinalFishnet<-
 FinalFishnet<- 
   FinalFishnet%>% 
   mutate(pctChange = (AreaCoverage18 - AreaCoverage08) / (AreaCoverage08) * 100)%>%
-  mutate(netChange = AreaGain - AreaLoss)
+  mutate(netChange = AreaGain - AreaLoss, 
+         LogPctLoss = log10(pctLoss), 
+         LogPctGain = log10(pctGain))
   
 
 
@@ -970,8 +957,7 @@ ggplot(FinalFishnet, aes(y = LogPctLoss, x = LogAvgParcelSize))+
 ```{r E911 Trees, fig.height = 12,fig.width = 12, message=FALSE, warning=FALSE, include=TRUE, results='hide', cache=TRUE}
 
 e311Trees <-
-  #st_read('C:/Users/Kyle McCarthy/Documents/Practicum/e311.csv')%>%
-  st_read('C:/Users/agarw/Documents/MUSA 801/Data/e311.csv')
+  st_read('C:/Users/Kyle McCarthy/Documents/Practicum/e311.csv')
 
 e311Trees<-
   e311Trees%>%
@@ -1008,9 +994,8 @@ ggplot(e311_net_tree, aes(y = LogPctLoss, x = Loge311TreeCount))+
 # 
 ```
 # 
-
-```{r Const_Permit, message=FALSE, warning=FALSE, include=TRUE, results='hide', fig.height = 7, fig.width = 8, cache=TRUE}
- 
+# ```{r Const_Permit, message=FALSE, warning=FALSE, include=TRUE, results='hide', fig.height = 7, fig.width = 8, cache=TRUE}
+# 
 # #const_spatial2 <-
 #   #const_spatial %>%
 #   #filter(permitdescription == 'RESIDENTIAL BUILDING PERMIT ' | permitdescription == 'COMMERCIAL BUILDING PERMIT')
@@ -1019,41 +1004,29 @@ ggplot(e311_net_tree, aes(y = LogPctLoss, x = Loge311TreeCount))+
 # #   geom_sf(data = Philadelphia) +
 # #   geom_sf(data = const_spatial2)
 # 
-### Aggregate points to the neighborhood
-## add a value of 1 to each crime, sum them with aggregate
-const_net <- 
- dplyr::select(const_spatial) %>% 
- mutate(countConst = 1) %>% 
- aggregate(., Neighborhood, sum) %>%
- mutate(countConst = replace_na(countConst, 0),
-        neigh = Neighborhood$NAME)
- 
-              
-const_net_fish <- 
- dplyr::select(const_spatial) %>% 
- mutate(countConst = 1) %>% 
- aggregate(., fishnet, sum) %>%
- mutate(countConst = replace_na(countConst, 0),
-        uniqueID = rownames(.))
-
-
-FinalFishnet6<-
-  const_net_fish%>%
-  st_drop_geometry()%>%
-  left_join(FinalFishnet, .) %>%
-  select(uniqueID, countConst)
-              
-ggplot() +
- geom_sf(data = const_net, aes(fill = countConst), color = NA) +
- scale_fill_viridis() +
- labs(title = "Count of Construction permits for the neighborhood") +
- mapTheme()
-
-ggplot() +
- geom_sf(data = const_net_fish, aes(fill = countConst), color = NA) +
- scale_fill_viridis() +
- labs(title = "Count of Construction permits for the fishnet") +
- mapTheme()
+# ### Aggregate points to the neighborhood
+# ## add a value of 1 to each crime, sum them with aggregate
+# const_net <- 
+#   dplyr::select(const_spatial) %>% 
+#   mutate(countConst = 1) %>% 
+#   aggregate(., Neighborhood, sum) %>%
+#   mutate(countConst = replace_na(countConst, 0),
+#          neigh = Neighborhood$NAME)
+# 
+#              
+# 
+# const_net_fish <- 
+#   dplyr::select(const_spatial) %>% 
+#   mutate(countConst = 1) %>% 
+#   aggregate(., fishnet, sum) %>%
+#   mutate(countConst = replace_na(countConst, 0),
+#          uniqueID = rownames(.))
+#              
+#              ggplot() +
+#                   geom_sf(data = const_net, aes(fill = countConst), color = NA) +
+#                   scale_fill_viridis() +
+#                   labs(title = "Count of Construction permits for the neighborhood") +
+#                   mapTheme()
 
 
 ```
@@ -1322,9 +1295,7 @@ ggplot(LandUse2, aes(y=C_DIG2DESC, x=pctChange))+
 
 # st_write(fishnet, "C:/Users/Kyle McCarthy/Documents/Practicum/Data/Fishnet_LU_Intersect/fishnet.shp")
 
-LandUseFishnet <- 
-  #st_read("C:/Users/Kyle McCarthy/Documents/Practicum/Data/Fishnet_LU_Intersect/fishnet_LUS_Intersect_dissolve.shp ") %>%
-  st_read("C:/Users/agarw/Documents/MUSA 801/Data/fishnet_LUS_Intersect_dissolve.shp")
+LandUseFishnet <- st_read("C:/Users/Kyle McCarthy/Documents/Practicum/Data/Fishnet_LU_Intersect/fishnet_LUS_Intersect_dissolve.shp ")
 
 LandUseFishnet_ResTrans<- 
 LandUseFishnet%>% 
@@ -1377,7 +1348,6 @@ summary(c) # .26 Coorelation
 
 ### 4. How do current patterns of tree canopy coverage and loss reflect disinvestment as a result of redlining and older planning practices?  
 ```{r HOLC, message=FALSE, warning=FALSE, results='hide', cache=TRUE}
-
 TreeCanopyAllHOLC <-
 TreeCanopy%>%
 st_make_valid() %>%
@@ -1421,16 +1391,6 @@ ggplot()+
   facet_wrap(~holc_grade, nrow = 1)+
   plotTheme()
 
-
-## Adding HOLC grade to Fishnet
-FinalFishnet4 <- 
-  HOLC %>%
-  st_make_valid() %>%
-  st_intersection(FinalFishnet)%>%
-  select(uniqueID, holc_grade)%>%
-  distinct(., uniqueID, .keep_all = TRUE)%>%
-  st_drop_geometry()
-
 ```
 
 ```{r Public_health, message=FALSE, warning=FALSE, results='hide', cache=TRUE}
@@ -1448,9 +1408,9 @@ library(RSocrata)
    mutate(tractarea = as.numeric(tractarea))
 
  
-# ggplot() +
-#   geom_sf(data = phillyhealth, aes(fill = casthma_crudeprev))+
-#   plotTheme()
+ ggplot() +
+   geom_sf(data = phillyhealth, aes(fill = casthma_crudeprev))+
+   plotTheme()
  
  # find area of tree canopy in census tracts
   
@@ -1462,18 +1422,11 @@ library(RSocrata)
 treecanopy_census<- 
   treecanopy_census%>%
   mutate(TreeArea = st_area(treecanopy_census))%>%
-  mutate(TreeArea = as.numeric(TreeArea)) %>%
-  select(tractfips, TreeArea) 
+  mutate(TreeArea = as.numeric(TreeArea))
 
-Treecanopy_census <-
-  treecanopy_census %>%
-  group_by(tractfips)%>%
-  summarise(Area = sum(TreeArea))%>%
-  st_drop_geometry()
-
-# ggplot() +
-#   geom_sf(data = treecanopy_census, aes(fill = casthma_crudeprev))+
-#   plotTheme()
+ ggplot() +
+   geom_sf(data = treecanopy_census, aes(fill = casthma_crudeprev))+
+   plotTheme()
  
  
 # Tree Canopy Loss
@@ -1503,9 +1456,6 @@ TreeCanopyNoC_census <-
   st_drop_geometry()
 
 phillyhealth <-
-  merge(x = Treecanopy_census, y = phillyhealth, by = "tractfips", all = TRUE)
-
-phillyhealth <-
   merge(x = TreeCanopyLoss_census, y = phillyhealth, by = "tractfips", all = TRUE)
 
 phillyhealth <-
@@ -1515,8 +1465,8 @@ phillyhealth <-
   merge(x = TreeCanopyNoC_census, y = phillyhealth, by = "tractfips", all = TRUE) 
 
 phillyhealth <- phillyhealth %>%
-  dplyr::select(tractfips,casthma_crudeprev,,pctGain,pctLoss,geometry,stroke_crudeprev,phlth_crudeprev,
-                obesity_crudeprev,mhlth_crudeprev,lpa_crudeprev, Area)%>%
+  dplyr::select(tractfips,casthma_crudeprev,AreaLoss.x,pctGain,pctLoss,geometry,stroke_crudeprev,phlth_crudeprev,
+                obesity_crudeprev,mhlth_crudeprev,lpa_crudeprev)%>%
   mutate(LogPctLoss = log10(pctLoss),
          LogPctGain = log10(pctGain))
 
@@ -1533,7 +1483,7 @@ correlation.cor4 <-
     group_by(Variable) %>%
     summarize(correlation = cor(Value, pctLoss, use = "complete.obs"))
 
-ggplot(correlation.long4, aes(Value, pctLoss)) +
+  ggplot(correlation.long4, aes(Value, pctLoss)) +
   geom_point(size = 0.1) +
     scale_x_log10() + scale_y_log10() +
   geom_text(data = correlation.cor4, aes(label = paste("r =", round(correlation, 2))),
@@ -1541,28 +1491,6 @@ ggplot(correlation.long4, aes(Value, pctLoss)) +
   geom_smooth(method = "lm", se = FALSE, colour = "red") +
   facet_wrap(~Variable, ncol = 2, scales = "free") +
   labs(title = "Percent Tree Canopy Coverage (2018)") +
-  plotTheme()
-  
-correlation.long5 <-
-  phillyhealth%>%
-     dplyr::select(casthma_crudeprev, phlth_crudeprev,
-                obesity_crudeprev,mhlth_crudeprev,lpa_crudeprev, Area) %>%
-    gather(Variable, Value, -Area) %>%
-  mutate(Value = as.numeric(Value))
-
-correlation.cor5 <-
-  correlation.long5 %>%
-    group_by(Variable) %>%
-    summarize(correlation = cor(Value, Area, use = "complete.obs"))
-
-ggplot(correlation.long5, aes(Value, Area)) +
-  geom_point(size = 0.1) +
-    scale_x_log10() + scale_y_log10() +
-  geom_text(data = correlation.cor5, aes(label = paste("r =", round(correlation, 2))),
-            x=-Inf, y=Inf, vjust = 1.5, hjust = -.1) +
-  geom_smooth(method = "lm", se = FALSE, colour = "red") +
-  facet_wrap(~Variable, ncol = 2, scales = "free") +
-  labs(title = "Tree Canopy Coverage (2018)") +
   plotTheme()
 
 
@@ -1652,7 +1580,7 @@ ggplot(FinalFishnet, aes(y = LogPctLoss , x = avg_nnConst))+
 ```
 
 
-```{r Imperviousness, fig.height=8, fig.width=8, message=FALSE, warning=FALSE, cache=TRUE, results='hide'}
+```{r Imperviousness, message=FALSE, warning=FALSE, results='hide', fig.height =  8, fig.width =8,cache=TRUE}
 
 # Intersection performed in ArcGIS to conserve time 
  
@@ -1690,7 +1618,7 @@ st_centroid()
 
 poles_nn1 <- 
   TreeCanopy%>% 
-  mutate(poles_nn = nn_function(st_c(st_centroid(.)), st_c(poles), 10))
+  mutate(Parks_nn1 = nn_function(st_c(st_centroid(.)), st_c(poles), 10))
   
 TreeCanopyCentroids <- st_join(FinalFishnet, poles_nn1)
 
@@ -1698,17 +1626,22 @@ TreeCanopyCentroids1<-
   TreeCanopyCentroids%>% 
   st_drop_geometry()%>%
   group_by(uniqueID)%>%
-  summarise(avg_nnPole = mean(poles_nn))
+  summarise(avg_nnPole = mean(Poles_nn1))
 
-FinalFishnet5<-
-  TreeCanopyCentroids1%>% 
+FinalFishnet3<-
+   TreeCanopyCentroids1%>% 
   left_join(FinalFishnet, .)%>% 
-  mutate(LogPole = log10(avg_nnPole))
+  mutate(LogPole = log10(avg_nnPole), 
+  LogPctGain = log10(pctGain))
   
-#distMarineInletLinereg <-lm(LogPctLoss ~ LogPole, data = FinalFishnet3)
-#summary(distMarineInletLinereg)
+  FinalFishnet3<-
+  FinalFishnet3%>% 
+  mutate(LogPctGain = log10(pctGain))
+  
+a <-lm(LogPctLoss ~ LogPctGain, data = FinalFishnet3)
+summary(a)
 
-ggplot(FinalFishnet3, aes(y = LogPctLoss , x = LogPole))+
+ggplot(FinalFishnet3, aes(y = LogPctLoss , x = LogPctGain))+
   geom_point()+
   labs(title = "Percent Change vs Construction nn1",
        subtilte = "Aggregated by Fishnet") +
@@ -1721,12 +1654,8 @@ ggplot(FinalFishnet3, aes(y = LogPctLoss , x = LogPole))+
 ```
 
 
-```{r model, message=FALSE, warning=FALSE}
 
-## Creating the dependent variable
-
-FinalFishnet5$Variable <- ifelse((FinalFishnet5$pctChange > 0),1, 0)
-
+<<<<<<< HEAD
 FinalFishnet5 <-
   FinalFishnet5 %>%
   mutate(LogPctLoss = log(pctLoss),
@@ -1776,6 +1705,8 @@ testProbs <- data.frame(Outcome = as.factor(Final.test$Variable),
                         Probs = predict(finalModel, Final.test, type= "response"))
 
 ```
+=======
+>>>>>>> edd467ac532978ebf57707160364cdd74c1a9e1c
 
 
 
