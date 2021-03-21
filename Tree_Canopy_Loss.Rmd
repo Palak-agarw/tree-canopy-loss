@@ -1037,10 +1037,11 @@ const_net_fish <-
         uniqueID = rownames(.))
 
 
-FinalFishnet3<-
+FinalFishnet6<-
   const_net_fish%>%
   st_drop_geometry()%>%
-  left_join(FinalFishnet, .)
+  left_join(FinalFishnet, .) %>%
+  select(uniqueID, countConst)
               
 ggplot() +
  geom_sf(data = const_net, aes(fill = countConst), color = NA) +
@@ -1420,6 +1421,16 @@ ggplot()+
   facet_wrap(~holc_grade, nrow = 1)+
   plotTheme()
 
+
+## Adding HOLC grade to Fishnet
+FinalFishnet4 <- 
+  HOLC %>%
+  st_make_valid() %>%
+  st_intersection(FinalFishnet)%>%
+  select(uniqueID, holc_grade)%>%
+  distinct(., uniqueID, .keep_all = TRUE)%>%
+  st_drop_geometry()
+
 ```
 
 ```{r Public_health, message=FALSE, warning=FALSE, results='hide', cache=TRUE}
@@ -1689,9 +1700,9 @@ TreeCanopyCentroids1<-
   group_by(uniqueID)%>%
   summarise(avg_nnPole = mean(poles_nn))
 
-FinalFishnet3<-
+FinalFishnet5<-
   TreeCanopyCentroids1%>% 
-  left_join(FinalFishnet3, .)%>% 
+  left_join(FinalFishnet, .)%>% 
   mutate(LogPole = log10(avg_nnPole))
   
 #distMarineInletLinereg <-lm(LogPctLoss ~ LogPole, data = FinalFishnet3)
@@ -1714,38 +1725,44 @@ ggplot(FinalFishnet3, aes(y = LogPctLoss , x = LogPole))+
 
 ## Creating the dependent variable
 
-FinalFishnet3$Variable <- ifelse((FinalFishnet3$pctChange > 0),1, 0)
+FinalFishnet5$Variable <- ifelse((FinalFishnet5$pctChange > 0),1, 0)
 
-FinalFishnet3 <-
-  FinalFishnet3 %>%
+FinalFishnet5 <-
+  FinalFishnet5 %>%
   mutate(LogPctLoss = log(pctLoss),
          LogPctGain = log(pctGain),
          LogPctChange = log(pctChange))
 
+FinalFishnet5$LogAvgParcelSize <- ifelse(is.na(FinalFishnet5$LogAvgParcelSize),0, FinalFishnet5$LogAvgParcelSize)
+FinalFishnet5$LogPctChange <- ifelse(is.na(FinalFishnet5$LogPctChange),0, FinalFishnet5$LogPctChange)
+
+FinalFishnet5<-
+  FinalFishnet6%>%
+  st_drop_geometry()%>%
+  left_join(FinalFishnet5, .)
+
+FinalFishnet5$countConst <- ifelse(is.na(FinalFishnet5$countConst),0, FinalFishnet5$countConst)
+
+#FinalFishnet5<-
+ # FinalFishnet4%>%
+  #left_join(FinalFishnet5, .)
+  
 
 # LOGISTIC MODEL
 set.seed(1214)
-trainIndex <- createDataPartition(FinalFishnet3,
-                                  y = FinalFishnet3$
-                                  p = .60, 
+trainIndex <- createDataPartition(
+                                  y = FinalFishnet5$Variable,
+                                  p = 0.60, 
                                   list = FALSE)
 
-finalTrain <- FinalFishnet3[ trainIndex,] %>% st_drop_geometry()
-finalTest  <- FinalFishnet3[-trainIndex,] %>% st_drop_geometry()
-
-inTrain <- caret::createDataPartition(
-            y = FinalFishnet3$Variable,
-            p = .60, list = FALSE)
-
-# split data into training and test, before comma is row, after comma is column
-Final.training <- FinalFishnet3[inTrain,] %>% st_drop_geometry()
-Final.test     <- FinalFishnet3[-inTrain,] %>% st_drop_geometry()
+finalTrain <- FinalFishnet5[ trainIndex,] %>% st_drop_geometry()
+finalTest  <- FinalFishnet5[-trainIndex,] %>% st_drop_geometry()
 
 # MODEL
-finalModel <- glm(Final.training$Variable ~ .,
-                    data=Final.training %>% 
+finalModel <- glm(finalTrain$Variable ~ .,
+                    data=finalTrain %>% 
                       dplyr::select(countConst, avg_nnConst,LogPole, LogAvgParcelSize,
-                                    LogPole,LogPctGain,LogPctChange),
+                                    LogPctGain,LogPctChange, LogPctLoss),
                     family="binomial" (link="logit"))
 
 summary(finalModel)
