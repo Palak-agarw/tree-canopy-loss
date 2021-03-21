@@ -1769,7 +1769,7 @@ summary(finalModel)
 
 ## Adding Coefficients
 x <- finalModel$coefficients
-#exp(x)
+
 
 ## Prediction
 testProbs <- data.frame(Outcome = as.factor(Final.test$Variable),
