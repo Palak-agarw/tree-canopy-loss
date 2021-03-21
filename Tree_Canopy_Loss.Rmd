@@ -1666,7 +1666,7 @@ TreeCanopyCentroids1<-
   TreeCanopyCentroids%>% 
   st_drop_geometry()%>%
   group_by(uniqueID)%>%
-  summarise(avg_nnPole = mean(Poles_nn1))
+  summarise(avg_nnPole = mean(poles_nn1))
 
 FinalFishnet3<-
    TreeCanopyCentroids1%>% 
@@ -1689,7 +1689,33 @@ ggplot(FinalFishnet3, aes(y = LogPctLoss , x = LogPole))+
 ```
 
 
+```{r model, message=FALSE, warning=FALSE}
+# LOGISTIC MODEL
+set.seed(1214)
+trainIndex <- createDataPartition(fishnet_clipped$Fire1418, p = .65, 
+                                 y = paste(fishnet_clipped$COVER_MAJ),
+                                  list = FALSE,
+                                  times = 1)
 
+fireTrain <- fishnet_clipped[ trainIndex,] %>% st_drop_geometry()
+fireTest  <- fishnet_clipped[-trainIndex,] %>% st_drop_geometry()
+
+# MODEL
+fireModel <- glm(Fire1418 ~ .,
+                    data=fireTrain %>% 
+                      dplyr::select(-ID,-Fire19,-weather_ID, -WUI_MAJ, -WUI.nn, 
+                                    -MeanMaxTemp,-FIRE, -CoverCat, -ElevationBi,
+                                    -Fire.nn, -SlopeCat, -MeanPrecip1418, -Max_Temp19, 
+                                    -Mean_Temp19, -Mean_Precipitation19, 
+                                    -Mean_Humidity19, -Mean_Wind_Speed19, -Fire1013, -Shrub.nn),
+                    family="binomial" (link="logit"))
+
+summary(fireModel)
+
+## Adding Coefficients
+x <- fireModel$coefficients
+#exp(x)
+```
 
 
 
