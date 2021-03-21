@@ -1483,25 +1483,25 @@ phillyhealth <-
   merge(x = TreeCanopyNoC_census, y = phillyhealth, by = "tractfips", all = TRUE) 
 
 phillyhealth <- phillyhealth %>%
-  dplyr::select(tractfips,casthma_crudeprev.x,,pctGain.y,pctLoss.y,geometry,stroke_crudeprev.x,phlth_crudeprev.x,
-                obesity_crudeprev.x,mhlth_crudeprev.x,lpa_crudeprev.x, TreeArea)%>%
-  mutate(LogPctLoss = log10(pctLoss.y),
-         LogPctGain = log10(pctGain.y))
+  dplyr::select(tractfips,casthma_crudeprev,,pctGain,pctLoss,geometry,stroke_crudeprev,phlth_crudeprev,
+                obesity_crudeprev,mhlth_crudeprev,lpa_crudeprev, Area)%>%
+  mutate(LogPctLoss = log10(pctLoss),
+         LogPctGain = log10(pctGain))
 
 
 correlation.long4 <-
   phillyhealth%>%
-     dplyr::select(casthma_crudeprev.x, phlth_crudeprev.x,stroke_crudeprev.x,
-                obesity_crudeprev.x,mhlth_crudeprev.x,lpa_crudeprev.x, pctLoss.y) %>%
-    gather(Variable, Value, -pctLoss.y) %>%
+     dplyr::select(casthma_crudeprev, phlth_crudeprev,stroke_crudeprev,
+                obesity_crudeprev,mhlth_crudeprev,lpa_crudeprev, pctLoss) %>%
+    gather(Variable, Value, -pctLoss) %>%
   mutate(Value = as.numeric(Value))
 
 correlation.cor4 <-
   correlation.long4 %>%
     group_by(Variable) %>%
-    summarize(correlation = cor(Value, pctLoss.y, use = "complete.obs"))
+    summarize(correlation = cor(Value, pctLoss, use = "complete.obs"))
 
-ggplot(correlation.long4, aes(Value, pctLoss.y)) +
+ggplot(correlation.long4, aes(Value, pctLoss)) +
   geom_point(size = 0.1) +
     scale_x_log10() + scale_y_log10() +
   geom_text(data = correlation.cor4, aes(label = paste("r =", round(correlation, 2))),
@@ -1513,17 +1513,17 @@ ggplot(correlation.long4, aes(Value, pctLoss.y)) +
   
 correlation.long5 <-
   phillyhealth%>%
-     dplyr::select(casthma_crudeprev.x, phlth_crudeprev.x,
-                obesity_crudeprev.x,mhlth_crudeprev.x,lpa_crudeprev.x, TreeArea) %>%
-    gather(Variable, Value, -TreeArea) %>%
+     dplyr::select(casthma_crudeprev, phlth_crudeprev,
+                obesity_crudeprev,mhlth_crudeprev,lpa_crudeprev, Area) %>%
+    gather(Variable, Value, -Area) %>%
   mutate(Value = as.numeric(Value))
 
 correlation.cor5 <-
   correlation.long5 %>%
     group_by(Variable) %>%
-    summarize(correlation = cor(Value, TreeArea, use = "complete.obs"))
+    summarize(correlation = cor(Value, Area, use = "complete.obs"))
 
-ggplot(correlation.long5, aes(Value, TreeArea)) +
+ggplot(correlation.long5, aes(Value, Area)) +
   geom_point(size = 0.1) +
     scale_x_log10() + scale_y_log10() +
   geom_text(data = correlation.cor5, aes(label = paste("r =", round(correlation, 2))),
