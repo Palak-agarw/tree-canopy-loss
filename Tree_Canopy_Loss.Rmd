@@ -82,7 +82,22 @@ library(entropy)
 library(tidyr)
 library(lubridate)
 library(FNN) 
-
+library(rjson)
+library(spdep)
+library(caret)
+library(ckanr)
+library(ggcorrplot)
+library(jtools)  
+library(rlist)
+library(osmdata)
+library(geosphere)
+library(fastDummies)
+library(stargazer)
+library(pscl)
+library(pROC)
+library(plotROC)
+library(RANN)
+library(riem)
 
 
 root.dir = "https://raw.githubusercontent.com/urbanSpatial/Public-Policy-Analytics-Landing/master/DATA/"
@@ -1020,6 +1035,12 @@ const_net_fish <-
  aggregate(., fishnet, sum) %>%
  mutate(countConst = replace_na(countConst, 0),
         uniqueID = rownames(.))
+
+
+FinalFishnet3<-
+  const_net_fish%>%
+  st_drop_geometry()%>%
+  left_join(FinalFishnet, .)
               
 ggplot() +
  geom_sf(data = const_net, aes(fill = countConst), color = NA) +
@@ -1620,7 +1641,7 @@ ggplot(FinalFishnet, aes(y = LogPctLoss , x = avg_nnConst))+
 ```
 
 
-```{r Imperviousness, message=FALSE, warning=FALSE, results='hide', fig.height =  8, fig.width =8,cache=TRUE}
+```{r Imperviousness, fig.height=8, fig.width=8, message=FALSE, warning=FALSE, cache=TRUE, results='hide'}
 
 # Intersection performed in ArcGIS to conserve time 
  
@@ -1658,7 +1679,7 @@ st_centroid()
 
 poles_nn1 <- 
   TreeCanopy%>% 
-  mutate(Parks_nn1 = nn_function(st_c(st_centroid(.)), st_c(poles), 10))
+  mutate(poles_nn = nn_function(st_c(st_centroid(.)), st_c(poles), 10))
   
 TreeCanopyCentroids <- st_join(FinalFishnet, poles_nn1)
 
@@ -1666,15 +1687,15 @@ TreeCanopyCentroids1<-
   TreeCanopyCentroids%>% 
   st_drop_geometry()%>%
   group_by(uniqueID)%>%
-  summarise(avg_nnPole = mean(poles_nn1))
+  summarise(avg_nnPole = mean(poles_nn))
 
 FinalFishnet3<-
-   TreeCanopyCentroids1%>% 
-  left_join(FinalFishnet, .)%>% 
+  TreeCanopyCentroids1%>% 
+  left_join(FinalFishnet3, .)%>% 
   mutate(LogPole = log10(avg_nnPole))
   
-distMarineInletLinereg <-lm(LogPctLoss ~ LogPole, data = FinalFishnet3)
-summary(distMarineInletLinereg)
+#distMarineInletLinereg <-lm(LogPctLoss ~ LogPole, data = FinalFishnet3)
+#summary(distMarineInletLinereg)
 
 ggplot(FinalFishnet3, aes(y = LogPctLoss , x = LogPole))+
   geom_point()+
@@ -1690,31 +1711,53 @@ ggplot(FinalFishnet3, aes(y = LogPctLoss , x = LogPole))+
 
 
 ```{r model, message=FALSE, warning=FALSE}
+
+## Creating the dependent variable
+
+FinalFishnet3$Variable <- ifelse((FinalFishnet3$pctChange > 0),1, 0)
+
+FinalFishnet3 <-
+  FinalFishnet3 %>%
+  mutate(LogPctLoss = log(pctLoss),
+         LogPctGain = log(pctGain),
+         LogPctChange = log(pctChange))
+
+
 # LOGISTIC MODEL
 set.seed(1214)
-trainIndex <- createDataPartition(fishnet_clipped$Fire1418, p = .65, 
-                                 y = paste(fishnet_clipped$COVER_MAJ),
-                                  list = FALSE,
-                                  times = 1)
+trainIndex <- createDataPartition(FinalFishnet3,
+                                  y = FinalFishnet3$
+                                  p = .60, 
+                                  list = FALSE)
 
-fireTrain <- fishnet_clipped[ trainIndex,] %>% st_drop_geometry()
-fireTest  <- fishnet_clipped[-trainIndex,] %>% st_drop_geometry()
+finalTrain <- FinalFishnet3[ trainIndex,] %>% st_drop_geometry()
+finalTest  <- FinalFishnet3[-trainIndex,] %>% st_drop_geometry()
+
+inTrain <- caret::createDataPartition(
+            y = FinalFishnet3$Variable,
+            p = .60, list = FALSE)
+
+# split data into training and test, before comma is row, after comma is column
+Final.training <- FinalFishnet3[inTrain,] %>% st_drop_geometry()
+Final.test     <- FinalFishnet3[-inTrain,] %>% st_drop_geometry()
 
 # MODEL
-fireModel <- glm(Fire1418 ~ .,
-                    data=fireTrain %>% 
-                      dplyr::select(-ID,-Fire19,-weather_ID, -WUI_MAJ, -WUI.nn, 
-                                    -MeanMaxTemp,-FIRE, -CoverCat, -ElevationBi,
-                                    -Fire.nn, -SlopeCat, -MeanPrecip1418, -Max_Temp19, 
-                                    -Mean_Temp19, -Mean_Precipitation19, 
-                                    -Mean_Humidity19, -Mean_Wind_Speed19, -Fire1013, -Shrub.nn),
+finalModel <- glm(Final.training$Variable ~ .,
+                    data=Final.training %>% 
+                      dplyr::select(countConst, avg_nnConst,LogPole, LogAvgParcelSize,
+                                    LogPole,LogPctGain,LogPctChange),
                     family="binomial" (link="logit"))
 
-summary(fireModel)
+summary(finalModel)
 
 ## Adding Coefficients
-x <- fireModel$coefficients
+x <- finalModel$coefficients
 #exp(x)
+
+## Prediction
+testProbs <- data.frame(Outcome = as.factor(Final.test$Variable),
+                        Probs = predict(finalModel, Final.test, type= "response"))
+
 ```
 
 
