@@ -399,7 +399,9 @@ FinalFishnet<-
 FinalFishnet<- 
   FinalFishnet%>% 
   mutate(pctChange = (AreaCoverage18 - AreaCoverage08) / (AreaCoverage08) * 100)%>%
-  mutate(netChange = AreaGain - AreaLoss)
+  mutate(netChange = AreaGain - AreaLoss, 
+         LogPctLoss = log10(pctLoss), 
+         LogPctGain = log10(pctGain))
   
 
 
@@ -1629,12 +1631,17 @@ TreeCanopyCentroids1<-
 FinalFishnet3<-
    TreeCanopyCentroids1%>% 
   left_join(FinalFishnet, .)%>% 
-  mutate(LogPole = log10(avg_nnPole))
+  mutate(LogPole = log10(avg_nnPole), 
+  LogPctGain = log10(pctGain))
   
-distMarineInletLinereg <-lm(LogPctLoss ~ LogPole, data = FinalFishnet3)
-summary(distMarineInletLinereg)
+  FinalFishnet3<-
+  FinalFishnet3%>% 
+  mutate(LogPctGain = log10(pctGain))
+  
+a <-lm(LogPctLoss ~ LogPctGain, data = FinalFishnet3)
+summary(a)
 
-ggplot(FinalFishnet3, aes(y = LogPctLoss , x = LogPole))+
+ggplot(FinalFishnet3, aes(y = LogPctLoss , x = LogPctGain))+
   geom_point()+
   labs(title = "Percent Change vs Construction nn1",
        subtilte = "Aggregated by Fishnet") +
