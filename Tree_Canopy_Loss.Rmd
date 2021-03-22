@@ -1302,7 +1302,9 @@ ggplot(LandUse2, aes(y=C_DIG2DESC, x=pctChange))+
 
 # st_write(fishnet, "C:/Users/Kyle McCarthy/Documents/Practicum/Data/Fishnet_LU_Intersect/fishnet.shp")
 
-LandUseFishnet <- st_read("C:/Users/Kyle McCarthy/Documents/Practicum/Data/Fishnet_LU_Intersect/fishnet_LUS_Intersect_dissolve.shp ")
+LandUseFishnet <- 
+  #st_read("C:/Users/Kyle McCarthy/Documents/Practicum/Data/Fishnet_LU_Intersect/fishnet_LUS_Intersect_dissolve.shp") %>%
+  st_read("C:/Users/agarw/Documents/MUSA 801/Data/fishnet_LUS_Intersect_dissolve.shp")
 
 LandUseFishnet_ResTrans<- 
 LandUseFishnet%>% 
@@ -1673,6 +1675,9 @@ FinalFishnet5 <-
 
 FinalFishnet5$LogAvgParcelSize <- ifelse(is.na(FinalFishnet5$LogAvgParcelSize),0, FinalFishnet5$LogAvgParcelSize)
 FinalFishnet5$LogPctChange <- ifelse(is.na(FinalFishnet5$LogPctChange),0, FinalFishnet5$LogPctChange)
+FinalFishnet5$LogPctLoss <- ifelse(is.infinite(FinalFishnet5$LogPctLoss),0, FinalFishnet5$LogPctLoss)
+FinalFishnet5$LogPctGain <- ifelse(is.infinite(FinalFishnet5$LogPctGain),0, FinalFishnet5$LogPctGain)
+FinalFishnet5$LogPctChange <- ifelse(is.infinite(FinalFishnet5$LogPctChange),0, FinalFishnet5$LogPctChange)
 
 FinalFishnet5<-
   FinalFishnet6%>%
@@ -1691,7 +1696,7 @@ FinalFishnet5$Variable <- ifelse(is.na(FinalFishnet5$netChange > 0), 1, 0)
 # LOGISTIC MODEL
 set.seed(1214)
 trainIndex <- createDataPartition(
-                                  y = FinalFishnet5$Variable,
+                                  y = FinalFishnet5$pctCoverage18,
                                   p = 0.60, 
                                   list = FALSE)
 
