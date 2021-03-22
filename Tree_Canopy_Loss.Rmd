@@ -994,7 +994,7 @@ ggplot(e311_net_tree, aes(y = LogPctLoss, x = Loge311TreeCount))+
 # 
 ```
 # 
-# ```{r Const_Permit, message=FALSE, warning=FALSE, include=TRUE, results='hide', fig.height = 7, fig.width = 8, cache=TRUE}
+```{r Const_Permit, message=FALSE, warning=FALSE, include=TRUE, results='hide', fig.height = 7, fig.width = 8, cache=TRUE}
 # 
 # #const_spatial2 <-
 #   #const_spatial %>%
@@ -1655,7 +1655,9 @@ ggplot(FinalFishnet3, aes(y = LogPctLoss , x = LogPctGain))+
 
 
 
-<<<<<<< HEAD
+```{r model, message=FALSE, warning=FALSE}
+
+
 FinalFishnet5 <-
   FinalFishnet5 %>%
   mutate(LogPctLoss = log(pctLoss),
@@ -1671,6 +1673,8 @@ FinalFishnet5<-
   left_join(FinalFishnet5, .)
 
 FinalFishnet5$countConst <- ifelse(is.na(FinalFishnet5$countConst),0, FinalFishnet5$countConst)
+
+FinalFishnet5$Variable <- ifelse(is.na(FinalFishnet5$netChange > 0), 1, 0)
 
 #FinalFishnet5<-
  # FinalFishnet4%>%
@@ -1705,9 +1709,6 @@ testProbs <- data.frame(Outcome = as.factor(Final.test$Variable),
                         Probs = predict(finalModel, Final.test, type= "response"))
 
 ```
-=======
->>>>>>> edd467ac532978ebf57707160364cdd74c1a9e1c
-
 
 
 
