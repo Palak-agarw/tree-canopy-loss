@@ -1664,7 +1664,7 @@ ggplot(FinalFishnet3, aes(y = LogPctLoss , x = LogPctGain))+
 
 
 
-```{r model, message=FALSE, warning=FALSE}
+```{r Logit-model, message=FALSE, warning=FALSE}
 
 
 FinalFishnet5 <-
@@ -1735,8 +1735,78 @@ ggplot(testProbs, aes(d = as.numeric(testProbs$Outcome), m = Probs)) +
 
 ```
 
+```{r Poisson-model, message=FALSE, warning=FALSE}
+
+reg.vars <- c("countConst", "avg_nnConst","LogPole", "LogAvgParcelSize",
+              "LogPctGain","LogPctChange", "LogPctLoss")
 
 
+crossValidate <- function(dataset, id, dependentVariable, indVariables) {
+  
+  allPredictions <- data.frame()
+  cvID_list <- unique(dataset[[id]])
+  
+  for (i in cvID_list) {
+    
+    thisFold <- i
+    cat("This hold out fold is", thisFold, "\n")
+    
+    fold.train <- filter(dataset, dataset[[id]] != thisFold) %>% as.data.frame() %>% 
+      dplyr::select(id, geometry, indVariables, dependentVariable)
+    fold.test  <- filter(dataset, dataset[[id]] == thisFold) %>% as.data.frame() %>% 
+      dplyr::select(id, geometry, indVariables, dependentVariable)
+    
+    regression <-
+      glm(Variable ~ ., family = "poisson", 
+          data = fold.train %>% 
+            dplyr::select(-geometry, -id))
+    
+    thisPrediction <- 
+      mutate(fold.test, Prediction = predict(regression, fold.test, type = "response"))
+    
+    allPredictions <-
+      rbind(allPredictions, thisPrediction)
+    
+  }
+  return(st_sf(allPredictions))
+}
+
+reg.cv <- crossValidate(
+  dataset = FinalFishnet5,
+  id = "uniqueID",
+  dependentVariable = "Variable",
+  indVariables = reg.vars) %>%
+  dplyr::select(uniqueID = uniqueID, Variable, Prediction, geometry)
+
+
+reg.summary <- 
+  rbind(
+    mutate(reg.cv,           Error = Prediction - Variable,
+           Regression = "Random k-fold CV: Just Risk Factors")) %>%
+  st_sf() 
+
+reg.summary %>%
+  ggplot() +
+  geom_sf(aes(fill = Prediction)) +
+  scale_fill_viridis() +
+  labs(title = "Prediction tree loss by Regression") +
+  mapTheme() + theme(legend.position="bottom")
+
+error_by_reg_and_fold <- 
+  reg.summary %>%
+  group_by(Regression, uniqueID) %>% 
+  summarize(Mean_Error = mean(Prediction - Variable, na.rm = T),
+            MAE = mean(abs(Mean_Error), na.rm = T),
+            SD_MAE = mean(abs(Mean_Error), na.rm = T)) %>%
+  ungroup()
+
+error_by_reg_and_fold %>%
+  ggplot(aes(MAE)) + 
+  geom_histogram(bins = 30, colour="black", fill = "#FDE725FF") +
+  facet_wrap(~Regression) +  
+  geom_vline(xintercept = 0) + scale_x_continuous(breaks = seq(0, 8, by = 1)) + 
+  labs(title="Distribution of MAE", subtitle = "k-fold cross validation",
+       x="Mean Absolute Error", y="Variable") 
 
 ```
 ## Team Roles
