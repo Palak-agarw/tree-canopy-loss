@@ -995,38 +995,45 @@ ggplot(e311_net_tree, aes(y = LogPctLoss, x = Loge311TreeCount))+
 ```
 # 
 ```{r Const_Permit, message=FALSE, warning=FALSE, include=TRUE, results='hide', fig.height = 7, fig.width = 8, cache=TRUE}
+ 
+const_spatial2 <-
+  const_spatial %>%
+  filter(permitdescription == 'RESIDENTIAL BUILDING PERMIT ' | permitdescription == 'COMMERCIAL BUILDING PERMIT')
+
+ggplot()+
+ geom_sf(data = Philadelphia) +
+ geom_sf(data = const_spatial2)
 # 
-# #const_spatial2 <-
-#   #const_spatial %>%
-#   #filter(permitdescription == 'RESIDENTIAL BUILDING PERMIT ' | permitdescription == 'COMMERCIAL BUILDING PERMIT')
-# 
-# # ggplot()+
-# #   geom_sf(data = Philadelphia) +
-# #   geom_sf(data = const_spatial2)
-# 
-# ### Aggregate points to the neighborhood
-# ## add a value of 1 to each crime, sum them with aggregate
-# const_net <- 
-#   dplyr::select(const_spatial) %>% 
-#   mutate(countConst = 1) %>% 
-#   aggregate(., Neighborhood, sum) %>%
-#   mutate(countConst = replace_na(countConst, 0),
-#          neigh = Neighborhood$NAME)
+### Aggregate points to the neighborhood
+## add a value of 1 to each crime, sum them with aggregate
+const_net <- 
+   dplyr::select(const_spatial) %>% 
+   mutate(countConst = 1) %>% 
+   aggregate(., Neighborhood, sum) %>%
+   mutate(countConst = replace_na(countConst, 0),
+          neigh = Neighborhood$NAME)
 # 
 #              
 # 
-# const_net_fish <- 
-#   dplyr::select(const_spatial) %>% 
-#   mutate(countConst = 1) %>% 
-#   aggregate(., fishnet, sum) %>%
-#   mutate(countConst = replace_na(countConst, 0),
-#          uniqueID = rownames(.))
+const_net_fish <- 
+   dplyr::select(const_spatial) %>% 
+   mutate(countConst = 1) %>% 
+   aggregate(., fishnet, sum) %>%
+   mutate(countConst = replace_na(countConst, 0),
+          uniqueID = rownames(.))
 #              
-#              ggplot() +
-#                   geom_sf(data = const_net, aes(fill = countConst), color = NA) +
-#                   scale_fill_viridis() +
-#                   labs(title = "Count of Construction permits for the neighborhood") +
-#                   mapTheme()
+ggplot() +
+   geom_sf(data = const_net, aes(fill = countConst), color = NA) +
+   scale_fill_viridis() +
+   labs(title = "Count of Construction permits for the neighborhood") +
+   mapTheme()
+
+FinalFishnet6 <-
+   dplyr::select(const_spatial) %>% 
+   mutate(countConst = 1) %>% 
+   aggregate(., FinalFishnet, sum) %>%
+   mutate(countConst = replace_na(countConst, 0),
+          uniqueID = rownames(.))
 
 
 ```
