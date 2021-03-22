@@ -1686,7 +1686,7 @@ FinalFishnet5<-
 
 FinalFishnet5$countConst <- ifelse(is.na(FinalFishnet5$countConst),0, FinalFishnet5$countConst)
 
-FinalFishnet5$Variable <- ifelse(is.na(FinalFishnet5$netChange > 0), 1, 0)
+FinalFishnet5$Variable <- ifelse((FinalFishnet5$netChange > 0), 1, 0)
 
 #FinalFishnet5<-
  # FinalFishnet4%>%
@@ -1715,10 +1715,23 @@ summary(finalModel)
 ## Adding Coefficients
 x <- finalModel$coefficients
 
+### Fit metrics
+pR2(finalModel)
 
 ## Prediction
 testProbs <- data.frame(Outcome = as.factor(finalTest$Variable),
                         Probs = predict(finalModel, finalTest, type= "response"))
+
+# ROC Curve
+## This us a goodness of fit measure, 1 would be a perfect fit, .5 is a coin toss
+auc(testProbs$Outcome, testProbs$Probs)
+
+ggplot(testProbs, aes(d = as.numeric(testProbs$Outcome), m = Probs)) +
+  geom_roc(n.cuts = 50, labels = FALSE, colour = "#FE9900") +
+  style_roc(theme = theme_grey) +
+  geom_abline(slope = 1, intercept = 0, size = 1.5, color = 'grey') +
+  labs(title = "ROC Curve - Model with Feature Engineering")
+
 
 ```
 
