@@ -1717,8 +1717,8 @@ x <- finalModel$coefficients
 
 
 ## Prediction
-testProbs <- data.frame(Outcome = as.factor(Final.test$Variable),
-                        Probs = predict(finalModel, Final.test, type= "response"))
+testProbs <- data.frame(Outcome = as.factor(finalTest$Variable),
+                        Probs = predict(finalModel, finalTest, type= "response"))
 
 ```
 
