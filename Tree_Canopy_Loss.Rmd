@@ -1706,8 +1706,8 @@ finalTest  <- FinalFishnet5[-trainIndex,] %>% st_drop_geometry()
 # MODEL
 finalModel <- glm(finalTrain$Variable ~ .,
                     data=finalTrain %>% 
-                      dplyr::select(countConst, avg_nnConst,LogPole, LogAvgParcelSize,
-                                    LogPctGain,LogPctChange, LogPctLoss),
+                      dplyr::select(countConst, avg_nnConst,LogPole, LogAvgParcelSize),
+                                    #LogPctGain,LogPctChange, LogPctLoss),
                     family="binomial" (link="logit"))
 
 summary(finalModel)
