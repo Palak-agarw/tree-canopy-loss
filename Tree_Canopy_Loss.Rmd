@@ -74,7 +74,6 @@ library(viridis)
 library(mapview)
 library(lubridate)
 library(grid)
-library(gridExtra)
 library(ggplot2)
 library(ggmap)
 library(jsonlite)
@@ -167,8 +166,8 @@ plotTheme <- function(base_size = 12) {
 
 # Tree Canopy
 TreeCanopy <-
-  st_read("C:/Users/Kyle McCarthy/Documents/Practicum/TreeCanopyChange_2008_2018.shp")%>%
-#  st_read("/Users/annaduan/Desktop/Y3S2/Practicum/Data/TreeCanopyChange_2008_2018-shp/TreeCanopyChange_2008_2018.shp") %>%
+ # st_read("C:/Users/Kyle McCarthy/Documents/Practicum/TreeCanopyChange_2008_2018.shp")%>%
+  st_read("/Users/annaduan/Desktop/Y3S2/Practicum/Data/TreeCanopyChange_2008_2018-shp/TreeCanopyChange_2008_2018.shp") %>%
  # st_read("C:/Users/agarw/Documents/MUSA 801/Data/TreeCanopyChange_2008_2018.shp") %>%
 #st_read("C:/Users/Prince/Desktop/Tree Canopy Data/TreeCanopyChange_2008_2018.shp") %>%
   st_transform('ESRI:102728') 
@@ -184,8 +183,8 @@ Philadelphia <- st_read("http://data.phl.opendata.arcgis.com/datasets/405ec3da94
 
 # Neighborhoods
 Neighborhood <-
-  st_read("C:/Users/Kyle McCarthy/Documents/Practicum/Data/Neighborhoods/Neighborhoods_Philadelphia.shp") %>%
-#st_read("/Users/annaduan/Desktop/Y3S2/Practicum/Data/Neighborhoods_Philadelphia/Neighborhoods_Philadelphia.shp")%>%
+ # st_read("C:/Users/Kyle McCarthy/Documents/Practicum/Data/Neighborhoods/Neighborhoods_Philadelphia.shp") %>%
+st_read("/Users/annaduan/Desktop/Y3S2/Practicum/Data/Neighborhoods_Philadelphia/Neighborhoods_Philadelphia.shp")%>%
   #st_read("C:/Users/agarw/Documents/MUSA 801/Data/Neighborhoods_Philadelphia.shp") %>%
 #st_read("C:/Users/Prince/Desktop/Tree Canopy Data/Neighborhoods_Philadelphia/Neighborhoods_Philadelphia.shp") %>%
   st_transform('ESRI:102728')
@@ -200,9 +199,9 @@ Neighborhood <-
  # st_read("http://data.phl.opendata.arcgis.com/datasets/957f032f9c874327a1ad800abd887d17_0.geojson") %>%
  # st_transform('ESRI:102728')
 
-HOLC <- #st_read("/Users/annaduan/Desktop/Y3S2/Practicum/Data/PAPhiladelphia1937.geojson") %>%
+HOLC <- st_read("/Users/annaduan/Desktop/Y3S2/Practicum/Data/PAPhiladelphia1937.geojson") %>%
  #st_read("C:/Users/Prince/Desktop/Tree Canopy Data/PAPhiladelphia1937.geojson") %>%
-  st_read("C:/Users/Kyle McCarthy/Documents/Practicum/Data/PAPhiladelphia1937.geojson")%>%
+ # st_read("C:/Users/Kyle McCarthy/Documents/Practicum/Data/PAPhiladelphia1937.geojson")%>%
   #st_read("C:/Users/agarw/Documents/MUSA 801/Data/PAPhiladelphia1937.geojson")%>%
   st_transform('ESRI:102728')
 
@@ -263,8 +262,8 @@ parcels <- st_read("http://data-phl.opendata.arcgis.com/datasets/1c57dd1b3ff8444
 const_permits <- 
   #st_read("C:/Users/agarw/Documents/MUSA 801/Data/const_permit.csv") %>%
   #st_read("C:/Users/Prince/Desktop/Tree Canopy Data/const_permit.csv") %>%
-  st_read("C:/Users/Kyle McCarthy/Documents/Practicum/permits.csv")%>%
- # st_read("/Users/annaduan/Desktop/Y3S2/Practicum/Data/const_permit.csv")%>%
+  #st_read("C:/Users/Kyle McCarthy/Documents/Practicum/permits.csv")%>%
+   st_read("/Users/annaduan/Desktop/Y3S2/Practicum/Data/const_permit.csv")%>%
   mutate(X = geocode_x,
          Y = geocode_y) 
 const_permits[const_permits==""]<-NA
@@ -405,7 +404,6 @@ FinalFishnet<-
   
 
 
-
 FinalFishnet$pctCoverage08Cat <- cut(FinalFishnet$pctCoverage08, 
                       breaks = c(-Inf,  10,  20, 30, 50, Inf), 
                        labels = c("Very Little Tree Canopy", "Some Tree Canopy", "Moderate Tree Canopy", "Significant Tree Canopy (Met Goal)", "Extremely High Tree Canopy (Met Goal)"), 
@@ -435,8 +433,6 @@ FinalFishnet$pctLossCat <- cut(FinalFishnet$pctLoss,
                        breaks = c(-Inf,20, 40, 60, 80, Inf), 
                        labels = c("0%-20% Loss", "20%-40% Loss", "40%-60% Loss", "60%-80% Loss", "80%-100% Loss"), 
                        right = FALSE)
-
-
 ```
 
 
@@ -447,7 +443,7 @@ In Philadelphia, the Northwest, parts of the West, and parts of the Northeast ha
 ```{r 2018 Canopy, cache=TRUE, message=FALSE, warning=FALSE, include=TRUE, results='hide'}
 
 ggplot()+ 
-  geom_sf(data = FinalFishnet, aes(fill = pctCoverage18Cat))+ 
+  geom_sf(data = FinalFishnet, colour = "transparent", aes(fill = pctCoverage18Cat))+ 
      scale_fill_manual(values = palette7, 
                     name = "2018 Percent Coverage")+ 
   labs(title = "Tree Canopy Coverage, 2018", 
@@ -479,28 +475,30 @@ subtitle = "2018 Tree Canopy Area / Gridcell Size") +
 #   theme(plot.title = element_text( size = 24, face = "bold", hjust = 0.5), 
 #         legend.title = element_text(size = 12), 
 #         legend.text = element_text(size = 10)) + mapTheme()) 
+library(gridExtra)
+library(grid)
 
 
 
-grid.arrange(ncol=2,
-             
-ggplot()+ 
-  geom_sf(data = FinalFishnet, aes(fill = pctLossCat))+ 
-  scale_fill_manual(values = palette7,
-                    name = "Percent Loss")+
+v <- ggplot()+ 
+  geom_sf(data = FinalFishnet, aes(fill = pctLoss))+
+ # scale_fill_manual(values = palette7,name = "Percent Loss")+
   labs(title= "What was the Percent of Tree Canopy Loss in Each Grid Cell?", 
        subtitle = "Tree Canopy Lost From 2008 - 2018 / Total Tree Canopy Coverage in 2008")+
   theme(plot.title = element_text(hjust = 0.3), 
-        plot.subtitle = element_text(hjust = 0.3)) + mapTheme(),
-             
-ggplot()+ 
-  geom_sf(data = FinalFishnet, aes(fill = pctGainCat))+ 
-  scale_fill_manual(values = palette7,
-                    name = "Percent Gain")+
+        plot.subtitle = element_text(hjust = 0.3)) + mapTheme()
+
+z <- ggplot()+ 
+  geom_sf(data = FinalFishnet, aes(fill = pctGain))+ 
+ # scale_fill_manual(values = palette7,name = "Percent Gain")+
   labs(title= "What was the Percent of Tree Canopy Gain in Each Grid Cell?", 
        subtitle = "Tree Canopy Gained From 2008 - 2018 / Total Tree Canopy Coverage in 2018")+
   theme(plot.title = element_text(hjust = 0.3), 
-        plot.subtitle = element_text(hjust = 0.3)) + mapTheme())  
+        plot.subtitle = element_text(hjust = 0.3)) + mapTheme()  
+
+grid.arrange(ncol=2,
+v + scale_fill_distiller(palette = "YlOrRd", direction = 1),
+z + scale_fill_distiller(palette = "YlGr", direction = 1))
 ```
 
 ```{r Gain Minus Loss, message=FALSE, warning=FALSE, results='hide', fig.height = 8, fig.width = 8, cache=TRUE}
@@ -512,25 +510,24 @@ FinalFishnet$PctChangeCat <- cut(FinalFishnet$pctChange,
 
 
 
-
-ggplot()+ 
-               geom_sf(data = FinalFishnet, aes(fill = PctChangeCat))+ 
-               scale_fill_manual(values = palette5,
-                                 name = "Area Loss (f^2)")+
+a <- ggplot()+ 
+               geom_sf(data = FinalFishnet, aes(fill = PctChange))+ 
+              # scale_fill_manual(values = palette5, name = "Area Loss (f^2)")+
                labs(title= "How Much Tree Canopy Was Lost in Each Gridcell \n From 2008 - 2018?")+
                mapTheme()
 
 
-ggplot()+ 
-  geom_sf(data = FinalFishnet, aes(fill = PctChangeCat))+ 
-  scale_fill_manual(values = palette8,
-                    name = "Percent Change")+
+b <- ggplot()+ 
+  geom_sf(data = FinalFishnet, aes(fill = PctChange))+ 
+ # scale_fill_manual(values = palette8,name = "Percent Change")+
   labs(title= " What is the Net Percent Gain or Loss from 2008- 2018?", 
        subtitle = "Percent Tree Canopy Gain - Percent Tree Canopy Loss") +
   theme(plot.title = element_text(hjust = 0.3), 
         legend.title = element_text(size = 12), 
         legend.text = element_text(size = 10)) + mapTheme()
 
+a + scale_fill_distiller(palette= "YlOrRd", direction = 1)
+b + scale_fill_distiller(palette = "RdYlGn", direction = 1)
   
 ```
 
@@ -565,7 +562,7 @@ pctChangeGraph =
 ggplot(pctChangeGraph, aes(x = pctChange, y = pctCoverage18))+
   geom_point()+ 
   labs(title = "Percent Change \n vs. Percent Tree Canopy Coverage (2018)", 
-       subtilte = "Aggregated by Fishnet") + 
+       subtitle = "Aggregated by Fishnet") + 
   xlab("Percent Change in Tree Canopy from 2008-2018 ") + 
   ylab("Percent of Tree Canopy Coverage of Each Grid Cell (2018)") + 
   theme(plot.title = element_text(hjust = 0.5, size = 15, face = "bold"), plot.subtitle = element_text(hjust = 0.5, size = 8)) +
@@ -946,7 +943,7 @@ FinalFishnet1 %>%
 ggplot(FinalFishnet, aes(y = LogPctLoss, x = LogAvgParcelSize))+
   geom_point()+
   labs(title = "Percent Tree Canopy Loss (2008 - 2018) vs. \n Percent Tree Canopy Coverage (2018) ",
-       subtilte = "Aggregated by Fishnet") +
+       subtitle = "Aggregated by Fishnet") +
   xlab("Percent of Tree Canopy Lost (2008 - 2018)") +
   ylab("Percent of Tree Canopy Coverage of Each Fishnet Cell (2018)") +
   theme(plot.title = element_text(hjust = 0.3, size = 12), plot.subtitle = element_text(hjust = 0.3, size = 8)) +
