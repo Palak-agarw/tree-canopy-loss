@@ -510,19 +510,17 @@ FinalFishnet$PctChangeCat <- cut(FinalFishnet$pctChange,
 
 
 b <- ggplot()+ 
-  geom_sf(data = FinalFishnet, aes(fill = PctChangeCat))+ 
+  geom_sf(data = FinalFishnet, colour = "black", aes(fill = PctChangeCat))+ 
  # scale_fill_manual(values = palette8,name = "Percent Change")+
   labs(title= " What is the Net Percent Gain or Loss from 2008- 2018?", 
        subtitle = "Percent Tree Canopy Gain - Percent Tree Canopy Loss") +
-  mapTheme() 
-
   theme(plot.title = element_text(hjust = 0.3), 
         legend.title = element_text(size = 12), 
         legend.text = element_text(size = 10)) + mapTheme()
 
   
 
-b + scale_fill_brewer(palette = "PiYG", direction = 1, aesthetics = c("colour", "fill"))
+b + scale_fill_brewer(palette = "PiYG", direction = 1, aesthetics = c("colour", "fill"), guide = guide_legend(reverse = TRUE))
   
 ```
 
@@ -531,39 +529,37 @@ b + scale_fill_brewer(palette = "PiYG", direction = 1, aesthetics = c("colour", 
 grid.arrange(ncol=2,
              
 ggplot(FinalFishnet, aes(x = pctGain, y = pctCoverage18))+
-  geom_point()+ 
+  geom_point(colour = "dark green", alpha = 0.3, size = 2)+ 
       scale_x_log10() + scale_y_log10() +
   labs(title = "Percent Tree Canopy Gain (2008 - 2018) vs. \n Percent Tree Canopy Coverage (2018)", 
-       subtitle = "Aggregated by Fishnet") + 
+       subtitle = "1 dot = 1 fishnet cell") + 
   xlab("Percent of Tree Canopy Gained (2008 - 2018)") + 
   ylab("Percent of Tree Canopy Coverage of Each Fishnet Cell (2018)") + 
   theme(plot.title = element_text(hjust = 0.3, size = 12), plot.subtitle = element_text(hjust = 0.3, size = 8)) +
     plotTheme(), 
 
 ggplot(FinalFishnet, aes(x = pctLoss, y = pctCoverage18))+
-  geom_point()+ 
+  geom_point(colour = "dark green", alpha = 0.3, size = 2)+ 
       scale_x_log10() + scale_y_log10() +
   labs(title = "Percent Tree Canopy Loss (2008 - 2018) vs. \n Percent Tree Canopy Coverage (2018) ", 
-       subtitle = "Aggregated by Fishnet") + 
+       subtitle = "1 dot = 1 fishnet cell") + 
   xlab("Percent of Tree Canopy Lost (2008 - 2018)") + 
   ylab("Percent of Tree Canopy Coverage of Each Fishnet Cell (2018)") + 
   theme(plot.title = element_text(hjust = 0.3, size = 12), plot.subtitle = element_text(hjust = 0.3, size = 8)) +
   plotTheme()) 
 
-pctChangeGraph = 
+pctChangeGraph <- 
   FinalFishnet%>% 
   filter(pctChange < 100)
 
 ggplot(pctChangeGraph, aes(x = pctChange, y = pctCoverage18))+
-  geom_point()+ 
-  labs(title = "Percent Change \n vs. Percent Tree Canopy Coverage (2018)", 
-       subtitle = "Aggregated by Fishnet") + 
+  geom_point(colour = "dark green", alpha = 0.3, size = 2)+ 
+  labs(title = "Percent Change \n vs. Percent Tree Canopy (2018)", 
+       subtitle = "1 dot = 1 fishnet cell") + 
   xlab("Percent Change in Tree Canopy from 2008-2018 ") + 
   ylab("Percent of Tree Canopy Coverage of Each Grid Cell (2018)") + 
   theme(plot.title = element_text(hjust = 0.5, size = 15, face = "bold"), plot.subtitle = element_text(hjust = 0.5, size = 8)) +
   plotTheme()
-
-
 ```
 
 ```{r Add ACS to fishnet, message=FALSE, warning=FALSE, results='hide', fig.height = 7, fig.width = 10,  cache=TRUE}
@@ -774,6 +770,31 @@ FinalNeighborhood$GainMinusLossCat <- cut(FinalNeighborhood$GainMinusLoss,
 ```
 
 ```{r Neighborhood Maps, message=FALSE, warning=FALSE, results='hide', fig.height = 7, fig.width = 8, cache=TRUE}
+
+
+o <- ggplot() +
+  geom_sf(data = FinalNeighborhood, aes(fill = GoalCat), color = "white") +
+  scale_fill_manual(values = GoalPalette, 
+                    name = "Percent Away From Achieving 30% Goal")+
+  labs(title = "How Far is Each Neighborhood Away From Meeting\n Philadelphia's 30% Tree Canopy Goal in Each Neighborhood?") +
+  theme(plot.title = element_text(hjust = 0.5, size = 8), 
+        legend.position = "bottom", 
+        legend.title = element_blank())+
+  mapTheme() 
+
+
+p <- ggplot() +
+  geom_sf(data = FinalNeighborhood, aes(fill = GainMinusLossCat), color = "white") +
+  scale_fill_manual(values = paletteLG, name = "Gain or Loss")+ 
+  labs(title = "What is the Tree Canopy Net Gain or Loss \nin Each Neighborhood from 2008 - 2018?") +
+  theme(plot.title = element_text(hjust = 0.5, size = 6))+
+  mapTheme()
+
+o + scale_fill_discrete(palette = "PiYG", direction = 1, aesthetics = c("colour", "fill"), guide = guide_legend(reverse = TRUE))
+
+p + scale_fill_discrete(palette = "PiYG", direction = 1, aesthetics = c("colour", "fill"), guide = guide_legend(reverse = TRUE))
+
+#Test above
 
 ggplot() +
   geom_sf(data = FinalNeighborhood, aes(fill = GoalCat), color = "white") +
