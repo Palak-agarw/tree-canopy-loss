@@ -871,7 +871,7 @@ grid.arrange(ncol=2, top=textGrob("Fishnet Variables in Comparison to Local Demo
     scale_x_log10() + scale_y_log10() +
   geom_text(data = correlation.cor, aes(label = paste("r =", round(correlation, 2))),
             x=-Inf, y=Inf, vjust = 1.5, hjust = -.1) +
-  geom_smooth(method = "lm", se = FALSE, colour = "purple") +
+  geom_smooth(method = "lm", se = FALSE, colour = "black") +
   facet_wrap(~Variable, ncol = 2, scales = "free") +
   labs(title = "Percent Tree Canopy Gained (2008 -2018) \n Minus Percent Tree Canopy Lost (2008 - 2018)") +
   plotTheme(), 
@@ -881,7 +881,7 @@ grid.arrange(ncol=2, top=textGrob("Fishnet Variables in Comparison to Local Demo
     scale_x_log10() + scale_y_log10() +
   geom_text(data = correlation.cor1, aes(label = paste("r =", round(correlation, 2))),
             x=-Inf, y=Inf, vjust = 1.5, hjust = -.1) +
-  geom_smooth(method = "lm", se = FALSE, colour = "purple") +
+  geom_smooth(method = "lm", se = FALSE, colour = "black") +
   facet_wrap(~Variable, ncol = 2, scales = "free") +
   labs(title = "Percent Tree Canopy Lost From 2008 - 2018 ") +
   plotTheme(), 
@@ -891,7 +891,7 @@ grid.arrange(ncol=2, top=textGrob("Fishnet Variables in Comparison to Local Demo
     scale_x_log10() + scale_y_log10() +
     geom_text(data = correlation.cor2, aes(label = paste("r =", round(correlation, 2))),
             x=-Inf, y=Inf, vjust = 1.5, hjust = -.1) +
-  geom_smooth(method = "lm", se = FALSE, colour = "purple") +
+  geom_smooth(method = "lm", se = FALSE, colour = "black") +
   facet_wrap(~Variable, ncol = 2, scales = "free") +
   labs(title = "Percent Tree Canopy Gained From 2008 - 2018 ") +
   plotTheme(), 
@@ -901,9 +901,9 @@ grid.arrange(ncol=2, top=textGrob("Fishnet Variables in Comparison to Local Demo
     scale_x_log10() + scale_y_log10() +
   geom_text(data = correlation.cor3, aes(label = paste("r =", round(correlation, 2))),
             x=-Inf, y=Inf, vjust = 1.5, hjust = -.1) +
-  geom_smooth(method = "lm", se = FALSE, colour = "purple") +
+  geom_smooth(method = "lm", se = FALSE, colour = "black") +
   facet_wrap(~Variable, ncol = 2, scales = "free") +
-  labs(title = "Percent Tree Canopy Coverage (2018)") +
+  labs(title = "Percent Tree Canopy Coverage (2018)") + 
   plotTheme()) 
 ```
 
@@ -970,7 +970,8 @@ ggplot(FinalFishnet, aes(y = LogPctLoss, x = LogAvgParcelSize))+
 ```{r E911 Trees, fig.height = 12,fig.width = 12, message=FALSE, warning=FALSE, include=TRUE, results='hide', cache=TRUE}
 
 e311Trees <-
-  st_read('C:/Users/Kyle McCarthy/Documents/Practicum/e311.csv')
+ # st_read('C:/Users/Kyle McCarthy/Documents/Practicum/e311.csv')
+st_read("/Users/annaduan/Desktop/Y3S2/Practicum/Data/streettree311.csv")
 
 e311Trees<-
   e311Trees%>%
@@ -1002,11 +1003,6 @@ ggplot(e311_net_tree, aes(y = LogPctLoss, x = Loge311TreeCount))+
   ylab("Percent of Tree Canopy Coverage of Each Fishnet Cell (2018)") +
   theme(plot.title = element_text(hjust = 0.3, size = 12), plot.subtitle = element_text(hjust = 0.3, size = 8)) +
   plotTheme()
-
-
-
-# 
-# 
 ```
 # 
 ```{r Const_Permit, message=FALSE, warning=FALSE, include=TRUE, results='hide', fig.height = 7, fig.width = 8, cache=TRUE}
@@ -1027,6 +1023,7 @@ const_net <-
    aggregate(., Neighborhood, sum) %>%
    mutate(countConst = replace_na(countConst, 0),
           neigh = Neighborhood$NAME)
+
 # 
 #              
 # 
@@ -1037,13 +1034,17 @@ const_net_fish <-
    mutate(countConst = replace_na(countConst, 0),
           uniqueID = rownames(.))
 #              
-k <- ggplot() +
-   geom_sf(data = const_net, aes(fill = countConst), color = NA) +
-   scale_fill_viridis() +
-   labs(title = "Count of Construction permits for the neighborhood") +
+const_net$countConstCat <- cut(const_net$countConst, 
+                      breaks = c(-Inf,  1302,  3002, 5400, Inf), 
+                       labels = c("Least permits", "Some permits", "Moderate permits", "Most permits"), 
+                       right = FALSE)
+
+ggplot() +
+   geom_sf(data = const_net, aes(fill = as.factor(countConstCat)), color = NA) + scale_fill_brewer(palette = "YlOrRd", direction = 1, aesthetics = c("colour", "fill"), guide = guide_legend(reverse = TRUE), name = "Permit Count") +
+   #scale_fill_viridis() +
+   labs(title = "Construction Permits by Neighborhood, 2020", subtitle = "Philadelphia, PA") +
    mapTheme()
 
-k + scale_fill_brewer(palette = "YlOrBr", direction = 1, aesthetics = c("colour", "fill"), guide = guide_legend(reverse = TRUE))
 
 
 FinalFishnet6 <-
@@ -1176,8 +1177,8 @@ JuniataPark <- JuniataPark %>%
 
 LandUse1 <-
   #st_read("C:/Users/Kyle McCarthy/Documents/Practicum/Data/LandUse/landu.csv")%>%
-  st_read("C:/Users/agarw/Documents/MUSA 801/Data/landu.csv")%>%
- # st_read("/Users/annaduan/Desktop/Y3S2/Practicum/Data/landu.csv") %>%
+  #st_read("C:/Users/agarw/Documents/MUSA 801/Data/landu.csv")%>%
+  st_read("/Users/annaduan/Desktop/Y3S2/Practicum/Data/landu.csv") %>%
   #st_read("C:/Users/Prince/Desktop/Tree Canopy Data/landu.csv") %>%
   mutate(AreaGain = as.numeric(AreaGain),
          AreaLoss = as.numeric(AreaLoss),
@@ -1209,7 +1210,8 @@ ggplot(LandUseLong, aes(fill = variable, y=Descriptio, x=value))+
  scale_fill_manual(values = landusepal, name = "Area Gain or Loss")+
   labs(title = "Total Area Lost or Gained by Land Use Type")+
   xlab("        Total Area Lossed                Total Area Gained")+
-  ylab("Land Use Type")
+  ylab("Land Use Type") +
+  plotTheme()
 
 
 LandUseLong<-
@@ -1227,7 +1229,8 @@ ggplot(LandUseLong, aes(fill = variable, y=Descriptio, x=value))+
   xlab("Percentage of 2008 Trees Lost            Percentage of 2018 Trees Gained")+
   ylab("Land Use Type")+
   theme(plot.title = element_text(hjust = 0.5),
-        axis.title.x = element_text(size = 9, face = "bold"))
+        axis.title.x = element_text(size = 9, face = "bold")) +
+  plotTheme()
   
 ```
 
@@ -1324,8 +1327,9 @@ ggplot(LandUse2, aes(y=C_DIG2DESC, x=pctChange))+
 # st_write(fishnet, "C:/Users/Kyle McCarthy/Documents/Practicum/Data/Fishnet_LU_Intersect/fishnet.shp")
 
 LandUseFishnet <- 
-  #st_read("C:/Users/Kyle McCarthy/Documents/Practicum/Data/Fishnet_LU_Intersect/fishnet_LUS_Intersect_dissolve.shp") %>%
-  st_read("C:/Users/agarw/Documents/MUSA 801/Data/fishnet_LUS_Intersect_dissolve.shp")
+  #st_read("C:/Users/Kyle McCarthy/Documents/Practicum/Data/Fishnet_LU_Intersect/fishnet_LUS_Intersect_dissolve.shp")  
+  st_read("C:/Users/agarw/Documents/MUSA 801/Data/fishnet_LUS_Intersect_dissolve.shp") 
+st_read("")
 
 LandUseFishnet_ResTrans<- 
 LandUseFishnet%>% 
