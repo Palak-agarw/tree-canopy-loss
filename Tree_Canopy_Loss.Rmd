@@ -179,7 +179,8 @@ Loss <- TreeCanopy %>%
 
 # Philadelphia Base Map
 Philadelphia <- st_read("http://data.phl.opendata.arcgis.com/datasets/405ec3da942d4e20869d4e1449a2be48_0.geojson")%>%
-  st_transform('ESRI:102728')
+  st_transform('ESRI:102728') %>%
+  st_make_valid()
 
 # Neighborhoods
 Neighborhood <-
@@ -279,8 +280,29 @@ const_spatial$year <- year(const_spatial$permit_issue)
 const <- const_spatial %>%
    filter(year <= "2017")
 
-#Zoning <- st_read("http://data.phl.opendata.arcgis.com/datasets/0bdb0b5f13774c03abf8dc2f1aa01693_0.geojson")%>% 
-#  st_transform('ESRI:102728')
+
+LandUseFishnet <- 
+  #st_read("C:/Users/Kyle McCarthy/Documents/Practicum/Data/Fishnet_LU_Intersect/fishnet_LUS_Intersect_dissolve.shp")  %>%
+ # st_read("C:/Users/agarw/Documents/MUSA 801/Data/fishnet_LUS_Intersect_dissolve.shp") %>%
+st_read("/Users/annaduan/Desktop/Y3S2/Practicum/Data/fishnet_LUS_Intersect_dissolve.geojson") %>%
+   st_transform('ESRI:102728')
+
+# Impervious <-
+#   st_read("/Users/annaduan/Desktop/Y3S2/Practicum/Data/Impervious\ Surfaces/Impervious_Surfaces_2004.shp") %>%
+#    st_transform('ESRI:102728')
+  
+Hydrology <-
+  st_read("/Users/annaduan/Desktop/Y3S2/Practicum/Data/Hydrographic_Features_Arc.geojson") %>%
+    st_transform('ESRI:102728')
+  
+Hydrology <- st_make_valid(Philadelphia) %>%
+  st_intersection(st_make_valid(Hydrology))
+
+Parks <- 
+  st_read("/Users/annaduan/Desktop/Y3S2/Practicum/Data/Parks") %>%
+    st_transform('ESRI:102728') %>%
+  st_union()
+
 ```
 
 ## Exploratory Analysis
@@ -1326,10 +1348,7 @@ ggplot(LandUse2, aes(y=C_DIG2DESC, x=pctChange))+
 
 # st_write(fishnet, "C:/Users/Kyle McCarthy/Documents/Practicum/Data/Fishnet_LU_Intersect/fishnet.shp")
 
-LandUseFishnet <- 
-  #st_read("C:/Users/Kyle McCarthy/Documents/Practicum/Data/Fishnet_LU_Intersect/fishnet_LUS_Intersect_dissolve.shp")  
-  st_read("C:/Users/agarw/Documents/MUSA 801/Data/fishnet_LUS_Intersect_dissolve.shp") 
-st_read("")
+
 
 LandUseFishnet_ResTrans<- 
 LandUseFishnet%>% 
