@@ -295,13 +295,14 @@ Hydrology <-
   st_read("/Users/annaduan/Desktop/Y3S2/Practicum/Data/Hydrographic_Features_Arc.geojson") %>%
     st_transform('ESRI:102728')
   
-Hydrology <- st_make_valid(Philadelphia) %>%
-  st_intersection(st_make_valid(Hydrology))
+Hydrology <-
+  st_intersection(st_make_valid(Philadelphia), st_make_valid(Hydrology))
+
+
 
 Parks <- 
   st_read("/Users/annaduan/Desktop/Y3S2/Practicum/Data/Parks") %>%
-    st_transform('ESRI:102728') %>%
-  st_union()
+    st_transform('ESRI:102728')
 
 ```
 
@@ -317,8 +318,6 @@ fishnet <-
   st_sf() %>%
   mutate(uniqueID = rownames(.))%>%
   st_transform('ESRI:102728')
-
-
 ```
 
 
@@ -988,6 +987,33 @@ ggplot(FinalFishnet, aes(y = LogPctLoss, x = LogAvgParcelSize))+
   plotTheme()
 
 ```
+
+```{r hydrology,fig.height = 12,fig.width = 12, message=FALSE, warning=FALSE, include=TRUE, results='hide', cache=TRUE}
+
+Hydrology <- Hydrology %>%
+   select(geometry)
+
+hydrology_net <-
+  Hydrology%>%
+  mutate(byWater = 1) %>%
+  aggregate(., FinalFishnet, sum) %>%
+  mutate(byWater = replace_na(byWater, 0))%>%
+  st_centroid()%>%
+  st_join(FinalFishnet, .)%>%
+  mutate(LogPctLoss = log10(pctLoss))%>%
+  filter(LogPctLoss != Inf & LogPctLoss != -Inf)
+
+ggplot(hydrology_net, aes(y = LogPctLoss, x = byWater))+
+  geom_point()+
+  labs(title = "Percent Tree Canopy Loss (2008 - 2018) vs. \n Nearby Water Sources (2018) ",
+       subtilte = "Aggregated by Fishnet") +
+  xlab("Amount of nearby water sources") +
+  ylab("Log Percent of Tree Canopy Loss in Each Fishnet Cell (2018)") +
+  theme(plot.title = element_text(hjust = 0.3, size = 12), plot.subtitle = element_text(hjust = 0.3, size = 8)) +
+  plotTheme()
+
+```
+
 
 ```{r E911 Trees, fig.height = 12,fig.width = 12, message=FALSE, warning=FALSE, include=TRUE, results='hide', cache=TRUE}
 
