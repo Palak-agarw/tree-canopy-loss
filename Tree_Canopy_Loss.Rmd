@@ -299,10 +299,21 @@ Hydrology <-
   st_intersection(st_make_valid(Philadelphia), st_make_valid(Hydrology))
 
 
+ 
+ Parks <- 
+   st_read("/Users/annaduan/Desktop/Y3S2/Practicum/Data/Parks") %>%
+     st_transform('ESRI:102728') %>%
+   st_make_valid() %>%
+   select(geometry)
 
-Parks <- 
-  st_read("/Users/annaduan/Desktop/Y3S2/Practicum/Data/Parks") %>%
-    st_transform('ESRI:102728')
+Conservation <- st_read("/Users/annaduan/Desktop/Y3S2/Practicum/Data/Conservation/ConservationEasements202103.shp") %>%
+   st_transform('ESRI:102728') %>%
+  st_intersection(st_make_valid(Philadelphia), st_make_valid(Conservation)) %>%
+  st_make_valid() %>%
+   select(geometry)
+
+ConservationNParks <- rbind(Parks, Conservation)
+
 
 ```
 
@@ -318,6 +329,9 @@ fishnet <-
   st_sf() %>%
   mutate(uniqueID = rownames(.))%>%
   st_transform('ESRI:102728')
+
+fishnet <-
+  st_difference(fishnet, ConservationNParks)
 ```
 
 
@@ -1052,7 +1066,8 @@ ggplot(e311_net_tree, aes(y = LogPctLoss, x = Loge311TreeCount))+
   theme(plot.title = element_text(hjust = 0.3, size = 12), plot.subtitle = element_text(hjust = 0.3, size = 8)) +
   plotTheme()
 ```
-# 
+
+
 ```{r Const_Permit, message=FALSE, warning=FALSE, include=TRUE, results='hide', fig.height = 7, fig.width = 8, cache=TRUE}
  
 const_spatial2 <-
