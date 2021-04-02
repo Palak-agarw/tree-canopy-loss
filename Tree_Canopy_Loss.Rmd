@@ -332,6 +332,10 @@ fishnet <-
 
 fishnet <-
   st_difference(fishnet, ConservationNParks)
+
+ggplot() +
+  geom_sf(data = fishnet) +
+  mapTheme()
 ```
 
 
