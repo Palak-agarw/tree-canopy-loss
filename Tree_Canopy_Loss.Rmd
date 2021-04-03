@@ -81,6 +81,8 @@ library(entropy)
 library(tidyr)
 library(lubridate)
 library(FNN) 
+library(gridExtra) 
+library(caret) 
 
 
 
@@ -292,7 +294,7 @@ LandUseFishnet <-
 #    st_transform('ESRI:102728')
   
 Hydrology <-
-  st_read("/Users/annaduan/Desktop/Y3S2/Practicum/Data/Hydrographic_Features_Arc.geojson") %>%
+  st_read("https://opendata.arcgis.com/datasets/a31f7d7469404e919517e038fc133a8e_0.geojson")%>%
     st_transform('ESRI:102728')
   
 Hydrology <-
@@ -316,7 +318,6 @@ Conservation <- #st_read("/Users/annaduan/Desktop/Y3S2/Practicum/Data/Conservati
 
 ConservationNParks <- rbind(Parks, Conservation)
 
-st_write(Philadelphia, "C:/Users/Kyle McCarthy/Documents/Practicum/Data/Conservation/philly.shp")
 
 # philadelphia_revised <- st_read("C:/Users/Kyle McCarthy/Documents/Practicum/Data/Conservation/philly_revised.shp")
 
@@ -1032,7 +1033,7 @@ FinalFishnet1 %>%
          LogPctLoss = log10(pctLoss))
 
 ggplot(FinalFishnet, aes(y = LogPctLoss, x = LogAvgParcelSize))+
-  geom_point(colour = "dark green", size = .5)+
+  geom_point(colour = "dark green", size = .8)+
   labs(title = "Percent Tree Canopy Loss (2008 - 2018) vs. \n Percent Tree Canopy Coverage (2018) ",
        subtitle = "Aggregated by Fishnet") +
   xlab("Percent of Tree Canopy Lost (2008 - 2018)") +
@@ -1072,8 +1073,8 @@ ggplot(hydrology_net, aes(y = LogPctLoss, x = byWater))+
 ```{r E911 Trees, fig.height = 12,fig.width = 12, message=FALSE, warning=FALSE, include=TRUE, results='hide', cache=TRUE}
 
 e311Trees <-
- # st_read('C:/Users/Kyle McCarthy/Documents/Practicum/e311.csv')
-st_read("/Users/annaduan/Desktop/Y3S2/Practicum/Data/streettree311.csv")
+  st_read('C:/Users/Kyle McCarthy/Documents/Practicum/e311.csv')
+#st_read("/Users/annaduan/Desktop/Y3S2/Practicum/Data/streettree311.csv")
 
 e311Trees<-
   e311Trees%>%
@@ -1085,19 +1086,21 @@ e311Trees<-
   st_transform('ESRI:102728')
 
 
-e311_net_tree <-
+FinalFishnet <-
   e311Trees%>%
-  mutate(e311TreeCount = 1) %>%
-  dplyr::select(e311TreeCount)%>%
-  aggregate(., FinalFishnet, sum) %>%
-  mutate(e311TreeCount = replace_na(e311TreeCount, 0))%>%
-  st_centroid()%>%
-  st_join(FinalFishnet, .)%>%
-  mutate(Loge311TreeCount = log10(e311TreeCount),
+  mutate(e311Count = 1) %>%
+  dplyr::select(e311Count)%>%
+  st_join(FinalFishnet)%>% 
+  st_drop_geometry()%>% 
+  group_by(uniqueID)%>% 
+  summarise(e311Count = sum(e311Count))%>% 
+  mutate(e311Count = replace_na(e311Count, 0))%>%
+  left_join(FinalFishnet, .)%>%
+  mutate(Loge311Count = log10(e311Count),
          LogPctLoss = log10(pctLoss))%>%
-  filter(Loge311TreeCount != Inf & Loge311TreeCount != -Inf & LogPctLoss != Inf & LogPctLoss != -Inf)
+  filter(Loge311Count != Inf & Loge311Count != -Inf & LogPctLoss != Inf & LogPctLoss != -Inf)
 
-ggplot(e311_net_tree, aes(y = LogPctLoss, x = Loge311TreeCount))+
+ggplot(e311_net, aes(y = LogPctLoss, x = Loge311Count))+
   geom_point()+
   labs(title = "Percent Tree Canopy Loss (2008 - 2018) vs. \n Percent Tree Canopy Coverage (2018) ",
        subtilte = "Aggregated by Fishnet") +
@@ -1338,6 +1341,7 @@ ggplot(LandUseLong, aes(fill = variable, y=Descriptio, x=value))+
 ```
 
 ```{r Landuse2, message=FALSE, warning=FALSE, include=TRUE, results='hide', fig.height = 10, fig.width = 10, cache=TRUE}
+
 
 LandUseLong<-
   LandUse%>%
@@ -1687,17 +1691,16 @@ ggplot(TreeCanopyCentroids1, aes(y=avg_nnConst, x=CLASS_NAME))+
   xlab("Total Net Change")+
   theme(axis.text.x = element_text(angle = 90, vjust = 0.5, hjust=1))
 
-TreeCanopyCentroids <- st_join(FinalFishnet, TreeCanopyCentroids)
-
-TreeCanopyCentroids<- 
-  TreeCanopyCentroids%>% 
+FinalFishnet2 <- st_join(FinalFishnet, TreeCanopyCentroids)%>%
+  st_drop_geometry()%>%
   group_by(uniqueID)%>%
   summarise(avg_nnConst = mean(Construction_nn1))
 
-FinalFishnet<-
-   TreeCanopyCentroids%>% 
+FinalFishnet2 <- FinalFishnet2%>% 
   st_drop_geometry()%>%
   left_join(FinalFishnet, .)
+
+FinalFishnet <- FinalFishnet2
 
 
 ggplot(FinalFishnet, aes(y = LogPctLoss , x = avg_nnConst))+
@@ -1750,7 +1753,7 @@ st_centroid()
 
 poles_nn1 <- 
   TreeCanopy%>% 
-  mutate(Parks_nn1 = nn_function(st_c(st_centroid(.)), st_c(poles), 10))
+  mutate(Poles_nn1 = nn_function(st_c(st_centroid(.)), st_c(poles), 10))
   
 TreeCanopyCentroids <- st_join(FinalFishnet, poles_nn1)
 
@@ -1770,10 +1773,8 @@ FinalFishnet3<-
   FinalFishnet3%>% 
   mutate(LogPctGain = log10(pctGain))
   
-a <-lm(LogPctLoss ~ LogPctGain, data = FinalFishnet3)
-summary(a)
 
-ggplot(FinalFishnet3, aes(y = LogPctLoss , x = LogPctGain))+
+ggplot(FinalFishnet3, aes(y = LogPctLoss , x = LogPole))+
   geom_point()+
   labs(title = "Percent Change vs Construction nn1",
        subtilte = "Aggregated by Fishnet") +
@@ -1791,7 +1792,7 @@ ggplot(FinalFishnet3, aes(y = LogPctLoss , x = LogPctGain))+
 
 
 FinalFishnet5 <-
-  FinalFishnet5 %>%
+  FinalFishnet3 %>%
   mutate(LogPctLoss = log(pctLoss),
          LogPctGain = log(pctGain),
          LogPctChange = log(pctChange))
@@ -1802,10 +1803,7 @@ FinalFishnet5$LogPctLoss <- ifelse(is.infinite(FinalFishnet5$LogPctLoss),0, Fina
 FinalFishnet5$LogPctGain <- ifelse(is.infinite(FinalFishnet5$LogPctGain),0, FinalFishnet5$LogPctGain)
 FinalFishnet5$LogPctChange <- ifelse(is.infinite(FinalFishnet5$LogPctChange),0, FinalFishnet5$LogPctChange)
 
-FinalFishnet5<-
-  FinalFishnet6%>%
-  st_drop_geometry()%>%
-  left_join(FinalFishnet5, .)
+
 
 FinalFishnet5$countConst <- ifelse(is.na(FinalFishnet5$countConst),0, FinalFishnet5$countConst)
 
@@ -1819,7 +1817,7 @@ FinalFishnet5$Variable <- ifelse((FinalFishnet5$netChange > 0), 1, 0)
 # LOGISTIC MODEL
 set.seed(1214)
 trainIndex <- createDataPartition(
-                                  y = FinalFishnet5$pctCoverage18,
+                                  y = FinalFishnet5$LogPctLoss,
                                   p = 0.60, 
                                   list = FALSE)
 
@@ -1829,7 +1827,7 @@ finalTest  <- FinalFishnet5[-trainIndex,] %>% st_drop_geometry()
 # MODEL
 finalModel <- glm(finalTrain$Variable ~ .,
                     data=finalTrain %>% 
-                      dplyr::select(countConst, avg_nnConst,LogPole, LogAvgParcelSize),
+                     dplyr::select(pctCoverage18, LogAvgParcelSize,Loge311Count, LogPctRes, avg_nnConst,avg_nnPole),
                                     #LogPctGain,LogPctChange, LogPctLoss),
                     family="binomial" (link="logit"))
 
@@ -1935,3 +1933,136 @@ error_by_reg_and_fold %>%
 ## Team Roles
 
 ![Gantt Chart](Gantt.png)
+```{r Confusion Model, message=FALSE, warning=FALSE, fig.height = 6, fig.width = 6}  
+
+FinalFishnet6 <- 
+  FinalFishnet5 %>% 
+  dplyr::select(pctCoverage18, LogAvgParcelSize,Loge311Count, LogPctRes, avg_nnConst,avg_nnPole, LogPctLoss, pctLoss)
+
+FinalFishnet6 <- 
+  FinalFishnet6%>% 
+  mutate(pctLossObs = ifelse(pctLoss > 25, 1, 0))%>% 
+  dplyr::select(-pctLoss, -LogPctLoss)
+
+set.seed(346)
+trainIndex <- createDataPartition(FinalFishnet6$pctLossObs, p = .70,
+                                  list = FALSE,
+                                  times = 1)
+preserveTrain <- FinalFishnet6[ -trainIndex,]
+preserveTest  <- FinalFishnet6[-trainIndex,]
+
+
+preserveModel <- glm(pctLossObs ~ ., 
+                    family="binomial"(link="logit"), data = preserveTrain %>%
+                                                            as.data.frame() %>%
+                                                            dplyr::select(-geometry))
+summary(preserveModel)
+
+
+
+classProbs <- predict(preserveModel, preserveTest, type="response")
+
+hist(classProbs)
+
+testProbs <- data.frame(obs = as.numeric(preserveTest$pctLossObs),
+                        pred = classProbs)
+
+ggplot(testProbs, aes(x = pred, fill=as.factor(obs))) + geom_density() +
+  facet_grid(obs ~ .) + xlab("Probability") + geom_vline(xintercept = .5) +
+  scale_fill_manual(values = c("dodgerblue4", "darkgreen"),
+                      labels = c("Low Percent Loss","Moderate-High Percent Loss"),
+                      name = "")
+
+testProbs$predClass  = ifelse(testProbs$pred > 0.5 , 1,0)
+
+confusion <- caret::confusionMatrix(reference = as.factor(testProbs$obs), 
+                       data = as.factor(testProbs$predClass), 
+                       positive = "1")
+
+
+draw_confusion_matrix <- function(cm) {
+
+  layout(matrix(c(1,1,2)))
+  par(mar=c(2,2,2,2))
+  plot(c(100, 345), c(300, 450), type = "n", xlab="", ylab="", xaxt='n', yaxt='n')
+  title('CONFUSION MATRIX', cex.main=2)
+
+  # create the matrix 
+  rect(150, 430, 240, 370, col='#3F97D0')
+  text(195, 435, 'Low Loss', cex=1.2)
+  rect(250, 430, 340, 370, col='#F7AD50')
+  text(295, 435, 'Moderate - High Loss', cex=1.2)
+  text(125, 370, 'Predicted', cex=1.3, srt=90, font=2)
+  text(245, 450, 'Actual', cex=1.3, font=2)
+  rect(150, 305, 240, 365, col='#F7AD50')
+  rect(250, 305, 340, 365, col='#3F97D0')
+  text(140, 400, 'Low Loss', cex=1.2, srt=90)
+  text(140, 335, 'Moderate - High Loss', cex=1.2, srt=90)
+
+  # add in the cm results 
+  res <- as.numeric(cm$table)
+  text(195, 400, res[1], cex=1.6, font=2, col='white')
+  text(195, 335, res[2], cex=1.6, font=2, col='white')
+  text(295, 400, res[3], cex=1.6, font=2, col='white')
+  text(295, 335, res[4], cex=1.6, font=2, col='white')
+
+  # add in the specifics 
+  plot(c(100, 0), c(100, 0), type = "n", xlab="", ylab="", main = "DETAILS", xaxt='n', yaxt='n')
+  text(10, 85, names(cm$byClass[1]), cex=1.2, font=2)
+  text(10, 70, round(as.numeric(cm$byClass[1]), 3), cex=1.2)
+  text(30, 85, names(cm$byClass[2]), cex=1.2, font=2)
+  text(30, 70, round(as.numeric(cm$byClass[2]), 3), cex=1.2)
+  text(50, 85, names(cm$byClass[5]), cex=1.2, font=2)
+  text(50, 70, round(as.numeric(cm$byClass[5]), 3), cex=1.2)
+  text(70, 85, names(cm$byClass[6]), cex=1.2, font=2)
+  text(70, 70, round(as.numeric(cm$byClass[6]), 3), cex=1.2)
+  text(90, 85, names(cm$byClass[7]), cex=1.2, font=2)
+  text(90, 70, round(as.numeric(cm$byClass[7]), 3), cex=1.2)
+
+  # add in the accuracy information 
+  text(30, 35, names(cm$overall[1]), cex=1.5, font=2)
+  text(30, 20, round(as.numeric(cm$overall[1]), 3), cex=1.4)
+  text(70, 35, names(cm$overall[2]), cex=1.5, font=2)
+  text(70, 20, round(as.numeric(cm$overall[2]), 3), cex=1.4)
+}  
+
+draw_confusion_matrix(confusion) 
+
+
+ggplot(testProbs, aes(d = obs, m = pred)) + 
+  geom_roc(n.cuts = 50, labels = FALSE) + 
+  style_roc(theme = theme_grey) +
+  geom_abline(slope = 1, intercept = 0, size = 1.5, color = 'grey')
+
+
+preserveTest$uniqueID <- seq.int(nrow(preserveTest))
+testProbs1 <- testProbs
+testProbs$uniqueID <- seq.int(nrow(preserveTest))
+
+try <- left_join(preserveTest, testProbs)
+
+try <- 
+  try%>% 
+  mutate(result = "0")%>% 
+  mutate(result = ifelse(obs == 0 & predClass == 0, "True Negative", result))%>% 
+  mutate(result = ifelse(obs == 1 & predClass == 1, "True Positive", result))%>% 
+  mutate(result = ifelse(obs == 0 & predClass == 1, "False Positive", result))%>% 
+  mutate(result = ifelse(obs == 1 & predClass == 0, "False Negative", result))
+
+
+palette3 <- c("#FFA866",  "#F17007", "#43C4DB", "#004CFF")
+
+ggplot() + 
+  geom_sf(data = fishnet, fill = "white")+ 
+  geom_sf(data = try, aes(fill = result))+ 
+  labs(title = "Mapped Correlation Matrix")+
+  scale_fill_manual(values = palette3, name = "My name", 
+                  guide = guide_legend(reverse = TRUE))+ 
+  theme(legend.position = "bottom", 
+        legend.title = element_blank(), 
+        plot.title = element_text(hjust = 0.5))+
+  mapTheme()
+
+
+
+```
