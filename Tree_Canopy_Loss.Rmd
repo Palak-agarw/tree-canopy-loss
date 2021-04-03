@@ -166,8 +166,8 @@ plotTheme <- function(base_size = 12) {
 
 # Tree Canopy
 TreeCanopy <-
- # st_read("C:/Users/Kyle McCarthy/Documents/Practicum/TreeCanopyChange_2008_2018.shp")%>%
-  st_read("/Users/annaduan/Desktop/Y3S2/Practicum/Data/TreeCanopyChange_2008_2018-shp/TreeCanopyChange_2008_2018.shp") %>%
+ st_read("C:/Users/Kyle McCarthy/Documents/Practicum/TreeCanopyChange_2008_2018.shp")%>%
+  #st_read("/Users/annaduan/Desktop/Y3S2/Practicum/Data/TreeCanopyChange_2008_2018-shp/TreeCanopyChange_2008_2018.shp") %>%
  # st_read("C:/Users/agarw/Documents/MUSA 801/Data/TreeCanopyChange_2008_2018.shp") %>%
 #st_read("C:/Users/Prince/Desktop/Tree Canopy Data/TreeCanopyChange_2008_2018.shp") %>%
   st_transform('ESRI:102728') 
@@ -184,8 +184,8 @@ Philadelphia <- st_read("http://data.phl.opendata.arcgis.com/datasets/405ec3da94
 
 # Neighborhoods
 Neighborhood <-
- # st_read("C:/Users/Kyle McCarthy/Documents/Practicum/Data/Neighborhoods/Neighborhoods_Philadelphia.shp") %>%
-st_read("/Users/annaduan/Desktop/Y3S2/Practicum/Data/Neighborhoods_Philadelphia/Neighborhoods_Philadelphia.shp")%>%
+ st_read("C:/Users/Kyle McCarthy/Documents/Practicum/Data/Neighborhoods/Neighborhoods_Philadelphia.shp") %>%
+#st_read("/Users/annaduan/Desktop/Y3S2/Practicum/Data/Neighborhoods_Philadelphia/Neighborhoods_Philadelphia.shp")%>%
   #st_read("C:/Users/agarw/Documents/MUSA 801/Data/Neighborhoods_Philadelphia.shp") %>%
 #st_read("C:/Users/Prince/Desktop/Tree Canopy Data/Neighborhoods_Philadelphia/Neighborhoods_Philadelphia.shp") %>%
   st_transform('ESRI:102728')
@@ -200,9 +200,9 @@ Neighborhood <-
  # st_read("http://data.phl.opendata.arcgis.com/datasets/957f032f9c874327a1ad800abd887d17_0.geojson") %>%
  # st_transform('ESRI:102728')
 
-HOLC <- st_read("/Users/annaduan/Desktop/Y3S2/Practicum/Data/PAPhiladelphia1937.geojson") %>%
+HOLC <-# st_read("/Users/annaduan/Desktop/Y3S2/Practicum/Data/PAPhiladelphia1937.geojson") %>%
  #st_read("C:/Users/Prince/Desktop/Tree Canopy Data/PAPhiladelphia1937.geojson") %>%
- # st_read("C:/Users/Kyle McCarthy/Documents/Practicum/Data/PAPhiladelphia1937.geojson")%>%
+  st_read("C:/Users/Kyle McCarthy/Documents/Practicum/Data/PAPhiladelphia1937.geojson")%>%
   #st_read("C:/Users/agarw/Documents/MUSA 801/Data/PAPhiladelphia1937.geojson")%>%
   st_transform('ESRI:102728')
 
@@ -263,8 +263,8 @@ parcels <- st_read("http://data-phl.opendata.arcgis.com/datasets/1c57dd1b3ff8444
 const_permits <- 
   #st_read("C:/Users/agarw/Documents/MUSA 801/Data/const_permit.csv") %>%
   #st_read("C:/Users/Prince/Desktop/Tree Canopy Data/const_permit.csv") %>%
-  #st_read("C:/Users/Kyle McCarthy/Documents/Practicum/permits.csv")%>%
-   st_read("/Users/annaduan/Desktop/Y3S2/Practicum/Data/const_permit.csv")%>%
+  st_read("C:/Users/Kyle McCarthy/Documents/Practicum/permits.csv")%>%
+   #st_read("/Users/annaduan/Desktop/Y3S2/Practicum/Data/const_permit.csv")%>%
   mutate(X = geocode_x,
          Y = geocode_y) 
 const_permits[const_permits==""]<-NA
@@ -282,9 +282,9 @@ const <- const_spatial %>%
 
 
 LandUseFishnet <- 
-  #st_read("C:/Users/Kyle McCarthy/Documents/Practicum/Data/Fishnet_LU_Intersect/fishnet_LUS_Intersect_dissolve.shp")  %>%
+  st_read("C:/Users/Kyle McCarthy/Documents/Practicum/Data/Fishnet_LU_Intersect/fishnet_LUS_Intersect_dissolve.shp")  %>%
  # st_read("C:/Users/agarw/Documents/MUSA 801/Data/fishnet_LUS_Intersect_dissolve.shp") %>%
-st_read("/Users/annaduan/Desktop/Y3S2/Practicum/Data/fishnet_LUS_Intersect_dissolve.geojson") %>%
+#st_read("/Users/annaduan/Desktop/Y3S2/Practicum/Data/fishnet_LUS_Intersect_dissolve.geojson") %>%
    st_transform('ESRI:102728')
 
 # Impervious <-
@@ -301,12 +301,14 @@ Hydrology <-
 
  
  Parks <- 
-   st_read("/Users/annaduan/Desktop/Y3S2/Practicum/Data/Parks") %>%
+  # st_read("/Users/annaduan/Desktop/Y3S2/Practicum/Data/Parks") %>%
+   st_read("C:/Users/Kyle McCarthy/Documents/Practicum/Data/Parks/Philadelphia_PPR_Park_Boundaries2016.shp ")%>%
      st_transform('ESRI:102728') %>%
    st_make_valid() %>%
    select(geometry)
 
-Conservation <- st_read("/Users/annaduan/Desktop/Y3S2/Practicum/Data/Conservation/ConservationEasements202103.shp") %>%
+Conservation <- #st_read("/Users/annaduan/Desktop/Y3S2/Practicum/Data/Conservation/ConservationEasements202103.shp") %>%
+  st_read("C:/Users/Kyle McCarthy/Documents/Practicum/Data/Conservation/ConservationEasements202103.shp")%>%
    st_transform('ESRI:102728') %>%
   st_intersection(st_make_valid(Philadelphia), st_make_valid(Conservation)) %>%
   st_make_valid() %>%
@@ -314,6 +316,9 @@ Conservation <- st_read("/Users/annaduan/Desktop/Y3S2/Practicum/Data/Conservatio
 
 ConservationNParks <- rbind(Parks, Conservation)
 
+st_write(Philadelphia, "C:/Users/Kyle McCarthy/Documents/Practicum/Data/Conservation/philly.shp")
+
+philadelphia_revised <- st_read("C:/Users/Kyle McCarthy/Documents/Practicum/Data/Conservation/philly_revised.shp")
 
 ```
 
@@ -322,22 +327,53 @@ ConservationNParks <- rbind(Parks, Conservation)
 ### Creating a fishnet
 ```{r Fishnet, cache=TRUE, message=FALSE, warning=FALSE, include=TRUE, results='hide'}
 
+
 # Make fishnet
-fishnet <- 
+# fishnet <- 
+#   st_make_grid(philadelphia_revised,
+#                cellsize = 800) %>%
+#   st_sf() %>%
+#   mutate(uniqueID = rownames(.))%>%
+#   st_transform('ESRI:102728')
+# 
+# 
+# ggplot() +
+#   geom_sf(data = fishnet) +
+#   mapTheme()
+# 
+# ggplot() +
+#   geom_sf(data = philadelphia_revised) +
+#   mapTheme()
+```
+
+```{r Fishnet 2, cache=TRUE, message=FALSE, warning=FALSE, include=TRUE, results='hide'}
+
+fishnet2 <- 
   st_make_grid(Philadelphia,
                cellsize = 1615) %>%
   st_sf() %>%
   mutate(uniqueID = rownames(.))%>%
   st_transform('ESRI:102728')
 
-fishnet <-
-  st_difference(fishnet, ConservationNParks)
+FishnetIntersect <- st_intersection(fishnet2, ConservationNParks )%>% 
+  mutate(Area = as.numeric(st_area(.)))%>%
+  st_drop_geometry()%>%
+  group_by(uniqueID)%>%
+  summarise(ConservationArea = sum(Area))%>% 
+  left_join(fishnet2, .)%>%
+  mutate_all(funs(replace_na(.,0)))%>% 
+  mutate(ConservationPct = ConservationArea /2608225 * 100)%>% 
+  filter(ConservationPct <= 20)
 
 ggplot() +
-  geom_sf(data = fishnet) +
+  geom_sf(data = FishnetIntersect) +
   mapTheme()
-```
 
+fishnet <- FishnetIntersect
+  
+
+
+```
 
 ```{r Fishnet Aggregation, cache=TRUE, message=FALSE, warning=FALSE, include=TRUE, results='hide'}
 
@@ -907,7 +943,7 @@ library(grid)
 grid.arrange(ncol=2, top=textGrob("Fishnet Variables in Comparison to Local Demographics"),
              ggplot(correlation.long, aes(Value, netChange)) +
   geom_point(colour = "dark green", alpha = 0.3, size = .5) +
-    scale_x_log10() + scale_y_log10() +
+   scale_y_log10() +
   geom_text(data = correlation.cor, aes(label = paste("r =", round(correlation, 2))),
             x=-Inf, y=Inf, vjust = 1.5, hjust = -.1) +
   geom_smooth(method = "lm", se = FALSE, colour = "black") +
@@ -917,7 +953,7 @@ grid.arrange(ncol=2, top=textGrob("Fishnet Variables in Comparison to Local Demo
   
   ggplot(correlation.long1, aes(Value, pctLoss)) +
   geom_point(colour = "dark green", alpha = 0.3, size = .5) +
-    scale_x_log10() + scale_y_log10() +
+  scale_y_log10() +
   geom_text(data = correlation.cor1, aes(label = paste("r =", round(correlation, 2))),
             x=-Inf, y=Inf, vjust = 1.5, hjust = -.1) +
   geom_smooth(method = "lm", se = FALSE, colour = "black") +
@@ -927,7 +963,7 @@ grid.arrange(ncol=2, top=textGrob("Fishnet Variables in Comparison to Local Demo
   
   ggplot(correlation.long2, aes(Value, pctGain)) +
   geom_point(colour = "dark green", alpha = 0.3, size = .5) +
-    scale_x_log10() + scale_y_log10() +
+  scale_y_log10() +
     geom_text(data = correlation.cor2, aes(label = paste("r =", round(correlation, 2))),
             x=-Inf, y=Inf, vjust = 1.5, hjust = -.1) +
   geom_smooth(method = "lm", se = FALSE, colour = "black") +
@@ -937,7 +973,7 @@ grid.arrange(ncol=2, top=textGrob("Fishnet Variables in Comparison to Local Demo
   
   ggplot(correlation.long3, aes(Value, pctCoverage18)) +
   geom_point(colour = "dark green", alpha = 0.3, size = .5) +
-    scale_x_log10() + scale_y_log10() +
+  scale_y_log10() +
   geom_text(data = correlation.cor3, aes(label = paste("r =", round(correlation, 2))),
             x=-Inf, y=Inf, vjust = 1.5, hjust = -.1) +
   geom_smooth(method = "lm", se = FALSE, colour = "black") +
@@ -996,7 +1032,7 @@ FinalFishnet1 %>%
          LogPctLoss = log10(pctLoss))
 
 ggplot(FinalFishnet, aes(y = LogPctLoss, x = LogAvgParcelSize))+
-  geom_point(colour = "dark green", alpha = 0.3, size = .5)+
+  geom_point(colour = "dark green", size = .5)+
   labs(title = "Percent Tree Canopy Loss (2008 - 2018) vs. \n Percent Tree Canopy Coverage (2018) ",
        subtitle = "Aggregated by Fishnet") +
   xlab("Percent of Tree Canopy Lost (2008 - 2018)") +
@@ -1243,9 +1279,9 @@ JuniataPark <- JuniataPark %>%
 # Analysis completed in ArcGIS -- Processing time to long in R. 500,000 Parcels and 614,000 Tree Canopy Polygons aggregated in this analysis. I plan on writing out what the code would be for reproducability purposes. 
 
 LandUse1 <-
-  #st_read("C:/Users/Kyle McCarthy/Documents/Practicum/Data/LandUse/landu.csv")%>%
+  st_read("C:/Users/Kyle McCarthy/Documents/Practicum/Data/LandUse/landu.csv")%>%
   #st_read("C:/Users/agarw/Documents/MUSA 801/Data/landu.csv")%>%
-  st_read("/Users/annaduan/Desktop/Y3S2/Practicum/Data/landu.csv") %>%
+  #st_read("/Users/annaduan/Desktop/Y3S2/Practicum/Data/landu.csv") %>%
   #st_read("C:/Users/Prince/Desktop/Tree Canopy Data/landu.csv") %>%
   mutate(AreaGain = as.numeric(AreaGain),
          AreaLoss = as.numeric(AreaLoss),
@@ -1438,8 +1474,6 @@ LogPctResTrans = log10(pctTransRes))%>%
 filter(LogPctRes != -Inf)
 
 
-c <-lm(LogPctLoss ~ LogPctRes, data = FinalFishnet3)
-summary(c) # .26 Coorelation
 
 
 ```
