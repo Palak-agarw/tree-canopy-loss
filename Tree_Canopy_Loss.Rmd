@@ -318,7 +318,7 @@ ConservationNParks <- rbind(Parks, Conservation)
 
 st_write(Philadelphia, "C:/Users/Kyle McCarthy/Documents/Practicum/Data/Conservation/philly.shp")
 
-philadelphia_revised <- st_read("C:/Users/Kyle McCarthy/Documents/Practicum/Data/Conservation/philly_revised.shp")
+# philadelphia_revised <- st_read("C:/Users/Kyle McCarthy/Documents/Practicum/Data/Conservation/philly_revised.shp")
 
 ```
 
