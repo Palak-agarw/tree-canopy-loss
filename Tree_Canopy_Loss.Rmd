@@ -83,7 +83,9 @@ library(lubridate)
 library(FNN) 
 library(gridExtra) 
 library(caret) 
-
+library(pROC)
+library(plotROC)
+library(RANN)
 
 
 root.dir = "https://raw.githubusercontent.com/urbanSpatial/Public-Policy-Analytics-Landing/master/DATA/"
@@ -168,9 +170,9 @@ plotTheme <- function(base_size = 12) {
 
 # Tree Canopy
 TreeCanopy <-
- st_read("C:/Users/Kyle McCarthy/Documents/Practicum/TreeCanopyChange_2008_2018.shp")%>%
+ #st_read("C:/Users/Kyle McCarthy/Documents/Practicum/TreeCanopyChange_2008_2018.shp")%>%
   #st_read("/Users/annaduan/Desktop/Y3S2/Practicum/Data/TreeCanopyChange_2008_2018-shp/TreeCanopyChange_2008_2018.shp") %>%
- # st_read("C:/Users/agarw/Documents/MUSA 801/Data/TreeCanopyChange_2008_2018.shp") %>%
+  st_read("C:/Users/agarw/Documents/MUSA 801/Data/TreeCanopyChange_2008_2018.shp") %>%
 #st_read("C:/Users/Prince/Desktop/Tree Canopy Data/TreeCanopyChange_2008_2018.shp") %>%
   st_transform('ESRI:102728') 
 
@@ -186,9 +188,9 @@ Philadelphia <- st_read("http://data.phl.opendata.arcgis.com/datasets/405ec3da94
 
 # Neighborhoods
 Neighborhood <-
- st_read("C:/Users/Kyle McCarthy/Documents/Practicum/Data/Neighborhoods/Neighborhoods_Philadelphia.shp") %>%
+ #st_read("C:/Users/Kyle McCarthy/Documents/Practicum/Data/Neighborhoods/Neighborhoods_Philadelphia.shp") %>%
 #st_read("/Users/annaduan/Desktop/Y3S2/Practicum/Data/Neighborhoods_Philadelphia/Neighborhoods_Philadelphia.shp")%>%
-  #st_read("C:/Users/agarw/Documents/MUSA 801/Data/Neighborhoods_Philadelphia.shp") %>%
+  st_read("C:/Users/agarw/Documents/MUSA 801/Data/Neighborhoods_Philadelphia.shp") %>%
 #st_read("C:/Users/Prince/Desktop/Tree Canopy Data/Neighborhoods_Philadelphia/Neighborhoods_Philadelphia.shp") %>%
   st_transform('ESRI:102728')
 
@@ -204,8 +206,8 @@ Neighborhood <-
 
 HOLC <-# st_read("/Users/annaduan/Desktop/Y3S2/Practicum/Data/PAPhiladelphia1937.geojson") %>%
  #st_read("C:/Users/Prince/Desktop/Tree Canopy Data/PAPhiladelphia1937.geojson") %>%
-  st_read("C:/Users/Kyle McCarthy/Documents/Practicum/Data/PAPhiladelphia1937.geojson")%>%
-  #st_read("C:/Users/agarw/Documents/MUSA 801/Data/PAPhiladelphia1937.geojson")%>%
+  #st_read("C:/Users/Kyle McCarthy/Documents/Practicum/Data/PAPhiladelphia1937.geojson")%>%
+  st_read("C:/Users/agarw/Documents/MUSA 801/Data/PAPhiladelphia1937.geojson")%>%
   st_transform('ESRI:102728')
 
 HOLC <-
@@ -263,9 +265,9 @@ parcels <- st_read("http://data-phl.opendata.arcgis.com/datasets/1c57dd1b3ff8444
  st_transform('ESRI:102728')
 
 const_permits <- 
-  #st_read("C:/Users/agarw/Documents/MUSA 801/Data/const_permit.csv") %>%
+  st_read("C:/Users/agarw/Documents/MUSA 801/Data/const_permit.csv") %>%
   #st_read("C:/Users/Prince/Desktop/Tree Canopy Data/const_permit.csv") %>%
-  st_read("C:/Users/Kyle McCarthy/Documents/Practicum/permits.csv")%>%
+  #st_read("C:/Users/Kyle McCarthy/Documents/Practicum/permits.csv")%>%
    #st_read("/Users/annaduan/Desktop/Y3S2/Practicum/Data/const_permit.csv")%>%
   mutate(X = geocode_x,
          Y = geocode_y) 
@@ -284,8 +286,8 @@ const <- const_spatial %>%
 
 
 LandUseFishnet <- 
-  st_read("C:/Users/Kyle McCarthy/Documents/Practicum/Data/Fishnet_LU_Intersect/fishnet_LUS_Intersect_dissolve.shp")  %>%
- # st_read("C:/Users/agarw/Documents/MUSA 801/Data/fishnet_LUS_Intersect_dissolve.shp") %>%
+  #st_read("C:/Users/Kyle McCarthy/Documents/Practicum/Data/Fishnet_LU_Intersect/fishnet_LUS_Intersect_dissolve.shp")  %>%
+   st_read("C:/Users/agarw/Documents/MUSA 801/Data/fishnet_LUS_Intersect_dissolve.geojson") %>%
 #st_read("/Users/annaduan/Desktop/Y3S2/Practicum/Data/fishnet_LUS_Intersect_dissolve.geojson") %>%
    st_transform('ESRI:102728')
 
@@ -304,13 +306,16 @@ Hydrology <-
  
  Parks <- 
   # st_read("/Users/annaduan/Desktop/Y3S2/Practicum/Data/Parks") %>%
-   st_read("C:/Users/Kyle McCarthy/Documents/Practicum/Data/Parks/Philadelphia_PPR_Park_Boundaries2016.shp ")%>%
+   #st_read("C:/Users/Kyle McCarthy/Documents/Practicum/Data/Parks/Philadelphia_PPR_Park_Boundaries2016.shp ")%>%
+   st_read("C:/Users/agarw/Documents/MUSA 801/Data/Philadelphia_PPR_Park_Boundaries2016.shp") %>%
      st_transform('ESRI:102728') %>%
    st_make_valid() %>%
    select(geometry)
 
-Conservation <- #st_read("/Users/annaduan/Desktop/Y3S2/Practicum/Data/Conservation/ConservationEasements202103.shp") %>%
-  st_read("C:/Users/Kyle McCarthy/Documents/Practicum/Data/Conservation/ConservationEasements202103.shp")%>%
+Conservation <- 
+  #st_read("/Users/annaduan/Desktop/Y3S2/Practicum/Data/Conservation/ConservationEasements202103.shp") %>%
+  #st_read("C:/Users/Kyle McCarthy/Documents/Practicum/Data/Conservation/ConservationEasements202103.shp")%>%
+  st_read("C:/Users/agarw/Documents/MUSA 801/Data/ConservationEasements202103.shp") %>%
    st_transform('ESRI:102728') %>%
   st_intersection(st_make_valid(Philadelphia), st_make_valid(Conservation)) %>%
   st_make_valid() %>%
@@ -363,7 +368,7 @@ FishnetIntersect <- st_intersection(fishnet2, ConservationNParks )%>%
   summarise(ConservationArea = sum(Area))%>% 
   left_join(fishnet2, .)%>%
   mutate_all(funs(replace_na(.,0)))%>% 
-  mutate(ConservationPct = ConservationArea /2608225 * 100)%>% 
+  mutate(ConservationPct = ConservationArea /2608225 * 100) %>%
   filter(ConservationPct <= 20)
 
 ggplot() +
@@ -1073,8 +1078,9 @@ ggplot(hydrology_net, aes(y = LogPctLoss, x = byWater))+
 ```{r E911 Trees, fig.height = 12,fig.width = 12, message=FALSE, warning=FALSE, include=TRUE, results='hide', cache=TRUE}
 
 e311Trees <-
-  st_read('C:/Users/Kyle McCarthy/Documents/Practicum/e311.csv')
-#st_read("/Users/annaduan/Desktop/Y3S2/Practicum/Data/streettree311.csv")
+  #st_read('C:/Users/Kyle McCarthy/Documents/Practicum/e311.csv') %>%
+#st_read("/Users/annaduan/Desktop/Y3S2/Practicum/Data/streettree311.csv") %>%
+  st_read('C:/Users/agarw/Documents/MUSA 801/Data/e311.csv')
 
 e311Trees<-
   e311Trees%>%
@@ -1100,7 +1106,7 @@ FinalFishnet <-
          LogPctLoss = log10(pctLoss))%>%
   filter(Loge311Count != Inf & Loge311Count != -Inf & LogPctLoss != Inf & LogPctLoss != -Inf)
 
-ggplot(e311_net, aes(y = LogPctLoss, x = Loge311Count))+
+ggplot(FinalFishnet, aes(y = LogPctLoss, x = Loge311Count))+
   geom_point()+
   labs(title = "Percent Tree Canopy Loss (2008 - 2018) vs. \n Percent Tree Canopy Coverage (2018) ",
        subtilte = "Aggregated by Fishnet") +
@@ -1282,8 +1288,8 @@ JuniataPark <- JuniataPark %>%
 # Analysis completed in ArcGIS -- Processing time to long in R. 500,000 Parcels and 614,000 Tree Canopy Polygons aggregated in this analysis. I plan on writing out what the code would be for reproducability purposes. 
 
 LandUse1 <-
-  st_read("C:/Users/Kyle McCarthy/Documents/Practicum/Data/LandUse/landu.csv")%>%
-  #st_read("C:/Users/agarw/Documents/MUSA 801/Data/landu.csv")%>%
+  #st_read("C:/Users/Kyle McCarthy/Documents/Practicum/Data/LandUse/landu.csv")%>%
+  st_read("C:/Users/agarw/Documents/MUSA 801/Data/landu.csv")%>%
   #st_read("/Users/annaduan/Desktop/Y3S2/Practicum/Data/landu.csv") %>%
   #st_read("C:/Users/Prince/Desktop/Tree Canopy Data/landu.csv") %>%
   mutate(AreaGain = as.numeric(AreaGain),
@@ -1697,7 +1703,6 @@ FinalFishnet2 <- st_join(FinalFishnet, TreeCanopyCentroids)%>%
   summarise(avg_nnConst = mean(Construction_nn1))
 
 FinalFishnet2 <- FinalFishnet2%>% 
-  st_drop_geometry()%>%
   left_join(FinalFishnet, .)
 
 FinalFishnet <- FinalFishnet2
@@ -1792,7 +1797,7 @@ ggplot(FinalFishnet3, aes(y = LogPctLoss , x = LogPole))+
 
 
 FinalFishnet5 <-
-  FinalFishnet3 %>%
+  FinalFishnet2 %>%
   mutate(LogPctLoss = log(pctLoss),
          LogPctGain = log(pctGain),
          LogPctChange = log(pctChange))
@@ -1803,15 +1808,14 @@ FinalFishnet5$LogPctLoss <- ifelse(is.infinite(FinalFishnet5$LogPctLoss),0, Fina
 FinalFishnet5$LogPctGain <- ifelse(is.infinite(FinalFishnet5$LogPctGain),0, FinalFishnet5$LogPctGain)
 FinalFishnet5$LogPctChange <- ifelse(is.infinite(FinalFishnet5$LogPctChange),0, FinalFishnet5$LogPctChange)
 
-
+FinalFishnet5<-
+  FinalFishnet6%>%
+  st_drop_geometry() %>%
+  left_join(FinalFishnet5, .)
 
 FinalFishnet5$countConst <- ifelse(is.na(FinalFishnet5$countConst),0, FinalFishnet5$countConst)
 
 FinalFishnet5$Variable <- ifelse((FinalFishnet5$netChange > 0), 1, 0)
-
-#FinalFishnet5<-
- # FinalFishnet4%>%
-  #left_join(FinalFishnet5, .)
   
 
 # LOGISTIC MODEL
@@ -1827,8 +1831,9 @@ finalTest  <- FinalFishnet5[-trainIndex,] %>% st_drop_geometry()
 # MODEL
 finalModel <- glm(finalTrain$Variable ~ .,
                     data=finalTrain %>% 
-                     dplyr::select(pctCoverage18, LogAvgParcelSize,Loge311Count, LogPctRes, avg_nnConst,avg_nnPole),
-                                    #LogPctGain,LogPctChange, LogPctLoss),
+                     dplyr::select(pctCoverage18, LogAvgParcelSize,Loge311Count, LogPctRes, avg_nnConst,avg_nnPole,
+                                    countConst, pctWhite, pctBach, e311Count, Loge311Count, pctTransRes, pctRes,
+                                    pctTrans, LogPctRes, LogPctResTrans, population, italian, medHHInc),
                     family="binomial" (link="logit"))
 
 summary(finalModel)
@@ -1856,80 +1861,7 @@ ggplot(testProbs, aes(d = as.numeric(testProbs$Outcome), m = Probs)) +
 
 ```
 
-```{r Poisson-model, message=FALSE, warning=FALSE}
 
-reg.vars <- c("countConst", "avg_nnConst","LogPole", "LogAvgParcelSize",
-              "LogPctGain","LogPctChange", "LogPctLoss")
-
-
-crossValidate <- function(dataset, id, dependentVariable, indVariables) {
-  
-  allPredictions <- data.frame()
-  cvID_list <- unique(dataset[[id]])
-  
-  for (i in cvID_list) {
-    
-    thisFold <- i
-    cat("This hold out fold is", thisFold, "\n")
-    
-    fold.train <- filter(dataset, dataset[[id]] != thisFold) %>% as.data.frame() %>% 
-      dplyr::select(id, geometry, indVariables, dependentVariable)
-    fold.test  <- filter(dataset, dataset[[id]] == thisFold) %>% as.data.frame() %>% 
-      dplyr::select(id, geometry, indVariables, dependentVariable)
-    
-    regression <-
-      glm(Variable ~ ., family = "poisson", 
-          data = fold.train %>% 
-            dplyr::select(-geometry, -id))
-    
-    thisPrediction <- 
-      mutate(fold.test, Prediction = predict(regression, fold.test, type = "response"))
-    
-    allPredictions <-
-      rbind(allPredictions, thisPrediction)
-    
-  }
-  return(st_sf(allPredictions))
-}
-
-reg.cv <- crossValidate(
-  dataset = FinalFishnet5,
-  id = "uniqueID",
-  dependentVariable = "Variable",
-  indVariables = reg.vars) %>%
-  dplyr::select(uniqueID = uniqueID, Variable, Prediction, geometry)
-
-
-reg.summary <- 
-  rbind(
-    mutate(reg.cv,           Error = Prediction - Variable,
-           Regression = "Random k-fold CV: Just Risk Factors")) %>%
-  st_sf() 
-
-reg.summary %>%
-  ggplot() +
-  geom_sf(aes(fill = Prediction)) +
-  scale_fill_viridis() +
-  labs(title = "Prediction tree loss by Regression") +
-  mapTheme() + theme(legend.position="bottom")
-
-error_by_reg_and_fold <- 
-  reg.summary %>%
-  group_by(Regression, uniqueID) %>% 
-  summarize(Mean_Error = mean(Prediction - Variable, na.rm = T),
-            MAE = mean(abs(Mean_Error), na.rm = T),
-            SD_MAE = mean(abs(Mean_Error), na.rm = T)) %>%
-  ungroup()
-
-error_by_reg_and_fold %>%
-  ggplot(aes(MAE)) + 
-  geom_histogram(bins = 30, colour="black", fill = "#FDE725FF") +
-  facet_wrap(~Regression) +  
-  geom_vline(xintercept = 0) + scale_x_continuous(breaks = seq(0, 8, by = 1)) + 
-  labs(title="Distribution of MAE", subtitle = "k-fold cross validation",
-       x="Mean Absolute Error", y="Variable") 
-
-```
 ## Team Roles
 
 ![Gantt Chart](Gantt.png)
