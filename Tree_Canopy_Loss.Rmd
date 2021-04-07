@@ -1531,10 +1531,6 @@ ggplot()+
 holc_net <- st_intersection(fishnet_centroid, HOLC) %>%
   dplyr::select(uniqueID, holc_grade)
   
-FinalFishnet2 <- 
-  FinalFishnet2 %>%
-  st_drop_geometry() %>%
-  left_join(FinalFishnet, .)
 
 FinalFishnet <-
    holc_net %>%
@@ -1838,7 +1834,7 @@ FinalFishnet5 <-
   FinalFishnet5 %>%
   dplyr::select(pctCoverage18, LogAvgParcelSize,Loge311Count, LogPctRes, avg_nnConst,avg_nnPole,
                                     countConst, pctWhite, pctBach, e311Count, Loge311Count, pctTransRes, pctRes,
-                                    pctTrans, LogPctResTrans, population, italian, medHHInc, Variable, pctCoverage08Cat)
+                                    pctTrans, LogPctResTrans, population, italian, medHHInc, Variable, pctCoverage08Cat, holc_grade)
 
 # FinalFishnet5 <-
 #   FinalFishnet5%>%
@@ -1870,7 +1866,7 @@ FinalFishnet5 <-
 # LOGISTIC MODEL
 set.seed(1214)
 trainIndex <- createDataPartition(
-                                  y = FinalFishnet5$pctCoverage08Cat,
+                                  y = FinalFishnet5$holc_grade,
                                   p = 0.60, 
                                   list = FALSE)
 
@@ -1882,7 +1878,7 @@ finalModel <- glm(finalTrain$Variable ~ .,
                     data=finalTrain %>% 
                      dplyr::select(pctCoverage18, LogAvgParcelSize, avg_nnConst,avg_nnPole,
                                     countConst, pctWhite, pctBach, e311Count, Loge311Count, pctTransRes, pctRes,
-                                    pctTrans,  italian, medHHInc, LogPctRes, Loge311Count),#, LogPctResTrans, population
+                                    pctTrans,  italian, medHHInc, LogPctRes, Loge311Count, holc_grade),#, LogPctResTrans, population
                     family="binomial" (link="logit"))
 
 summary(finalModel)
