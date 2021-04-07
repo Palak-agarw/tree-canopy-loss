@@ -473,8 +473,7 @@ FinalFishnet <-
 
 FinalFishnet<- 
   fishnet%>%
-  left_join(FinalFishnet)%>%
-  na.omit()
+  left_join(FinalFishnet)
 
 FinalFishnet<- 
   FinalFishnet%>% 
@@ -655,7 +654,6 @@ FinalFishnet1 <- fishnet_centroid %>%
   st_drop_geometry() %>%
   left_join(FinalFishnet,.,by="uniqueID") %>%
   dplyr::select(GEOID) %>%
-  na.omit() %>%
   mutate(uniqueID = as.numeric(rownames(.)))
 
 # Make fishnet with ACS variables
@@ -1103,8 +1101,7 @@ FinalFishnet <-
   mutate(e311Count = replace_na(e311Count, 0))%>%
   left_join(FinalFishnet, .)%>%
   mutate(Loge311Count = log10(e311Count),
-         LogPctLoss = log10(pctLoss))%>%
-  filter(Loge311Count != Inf & Loge311Count != -Inf & LogPctLoss != Inf & LogPctLoss != -Inf)
+         LogPctLoss = log10(pctLoss))
 
 ggplot(FinalFishnet, aes(y = LogPctLoss, x = Loge311Count))+
   geom_point()+
@@ -1774,7 +1771,7 @@ FinalFishnet3<-
   mutate(LogPole = log10(avg_nnPole), 
   LogPctGain = log10(pctGain))
   
-  FinalFishnet3<-
+FinalFishnet3<-
   FinalFishnet3%>% 
   mutate(LogPctGain = log10(pctGain))
   
@@ -1797,7 +1794,7 @@ ggplot(FinalFishnet3, aes(y = LogPctLoss , x = LogPole))+
 
 
 FinalFishnet5 <-
-  FinalFishnet2 %>%
+  FinalFishnet3 %>%
   mutate(LogPctLoss = log(pctLoss),
          LogPctGain = log(pctGain),
          LogPctChange = log(pctChange))
@@ -1842,7 +1839,7 @@ summary(finalModel)
 x <- finalModel$coefficients
 
 ### Fit metrics
-pR2(finalModel)
+#pR2(finalModel)
 
 ## Prediction
 testProbs <- data.frame(Outcome = as.factor(finalTest$Variable),
