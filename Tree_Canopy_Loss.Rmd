@@ -1156,12 +1156,11 @@ ggplot() +
 
 
 
-FinalFishnet6 <-
-   dplyr::select(const_spatial) %>% 
-   mutate(countConst = 1) %>% 
-   aggregate(., FinalFishnet, sum) %>%
-   mutate(countConst = replace_na(countConst, 0),
-          uniqueID = rownames(.))
+FinalFishnet <-
+   const_net_fish %>%
+   st_drop_geometry() %>%
+   left_join(FinalFishnet, .)%>%
+   mutate(countConst = replace_na(countConst, 0))
 
 
 ```
@@ -1477,8 +1476,7 @@ left_join(., LandUseFishnet_Trans)%>%
 mutate_all(~replace(., is.na(.), 0))%>%
 left_join(FinalFishnet, .)%>% 
 mutate(LogPctRes = log10(pctRes), 
-LogPctResTrans = log10(pctTransRes))%>% 
-filter(LogPctRes != -Inf)
+LogPctResTrans = log10(pctTransRes))
 
 
 
@@ -1677,7 +1675,8 @@ constfilter <-
 
 TreeCanopyCentroids <- 
   TreeCanopy%>% 
-  mutate(Construction_nn1 = nn_function(st_c(st_centroid(.)), st_c(const), 1))
+  mutate(Construction_nn1 = nn_function(st_c(st_centroid(.)), st_c(const), 1)) %>%
+  dplyr::select(Construction_nn1, geometry, CLASS_NAME)
 
 
 TreeCanopyCentroids1<- 
@@ -1694,7 +1693,8 @@ ggplot(TreeCanopyCentroids1, aes(y=avg_nnConst, x=CLASS_NAME))+
   xlab("Total Net Change")+
   theme(axis.text.x = element_text(angle = 90, vjust = 0.5, hjust=1))
 
-FinalFishnet2 <- st_join(FinalFishnet, TreeCanopyCentroids)%>%
+FinalFishnet2 <- 
+  st_join(FinalFishnet, TreeCanopyCentroids)%>%
   st_drop_geometry()%>%
   group_by(uniqueID)%>%
   summarise(avg_nnConst = mean(Construction_nn1))
@@ -1765,18 +1765,14 @@ TreeCanopyCentroids1<-
   group_by(uniqueID)%>%
   summarise(avg_nnPole = mean(Poles_nn1))
 
-FinalFishnet3<-
-   TreeCanopyCentroids1%>% 
+FinalFishnet<-
+  TreeCanopyCentroids1%>% 
   left_join(FinalFishnet, .)%>% 
   mutate(LogPole = log10(avg_nnPole), 
   LogPctGain = log10(pctGain))
   
-FinalFishnet3<-
-  FinalFishnet3%>% 
-  mutate(LogPctGain = log10(pctGain))
-  
 
-ggplot(FinalFishnet3, aes(y = LogPctLoss , x = LogPole))+
+ggplot(FinalFishnet, aes(y = LogPctLoss , x = LogPole))+
   geom_point()+
   labs(title = "Percent Change vs Construction nn1",
        subtilte = "Aggregated by Fishnet") +
@@ -1794,7 +1790,7 @@ ggplot(FinalFishnet3, aes(y = LogPctLoss , x = LogPole))+
 
 
 FinalFishnet5 <-
-  FinalFishnet3 %>%
+  FinalFishnet %>%
   mutate(LogPctLoss = log(pctLoss),
          LogPctGain = log(pctGain),
          LogPctChange = log(pctChange))
@@ -1804,14 +1800,7 @@ FinalFishnet5$LogPctChange <- ifelse(is.na(FinalFishnet5$LogPctChange),0, FinalF
 FinalFishnet5$LogPctLoss <- ifelse(is.infinite(FinalFishnet5$LogPctLoss),0, FinalFishnet5$LogPctLoss)
 FinalFishnet5$LogPctGain <- ifelse(is.infinite(FinalFishnet5$LogPctGain),0, FinalFishnet5$LogPctGain)
 FinalFishnet5$LogPctChange <- ifelse(is.infinite(FinalFishnet5$LogPctChange),0, FinalFishnet5$LogPctChange)
-
-FinalFishnet5<-
-  FinalFishnet6%>%
-  st_drop_geometry() %>%
-  left_join(FinalFishnet5, .)
-
 FinalFishnet5$countConst <- ifelse(is.na(FinalFishnet5$countConst),0, FinalFishnet5$countConst)
-
 FinalFishnet5$Variable <- ifelse((FinalFishnet5$netChange > 0), 1, 0)
   
 
