@@ -1528,6 +1528,21 @@ ggplot()+
   facet_wrap(~holc_grade, nrow = 1)+
   plotTheme()
 
+holc_net <- st_intersection(fishnet_centroid, HOLC) %>%
+  dplyr::select(uniqueID, holc_grade)
+  
+FinalFishnet2 <- 
+  FinalFishnet2 %>%
+  st_drop_geometry() %>%
+  left_join(FinalFishnet, .)
+
+FinalFishnet <-
+   holc_net %>%
+   st_drop_geometry() %>%
+   left_join(FinalFishnet, .)%>%
+   mutate(holc_grade = replace_na(holc_grade, 0))
+  
+
 ```
 
 ```{r Public_health, message=FALSE, warning=FALSE, results='hide', cache=TRUE}
@@ -1545,9 +1560,9 @@ library(RSocrata)
    mutate(tractarea = as.numeric(tractarea))
 
  
- ggplot() +
-   geom_sf(data = phillyhealth, aes(fill = casthma_crudeprev))+
-   plotTheme()
+ # ggplot() +
+ #   geom_sf(data = phillyhealth, aes(fill = casthma_crudeprev))+
+ #   plotTheme()
  
  # find area of tree canopy in census tracts
   
@@ -1561,10 +1576,10 @@ treecanopy_census<-
   mutate(TreeArea = st_area(treecanopy_census))%>%
   mutate(TreeArea = as.numeric(TreeArea))
 
- ggplot() +
-   geom_sf(data = treecanopy_census, aes(fill = casthma_crudeprev))+
-   plotTheme()
- 
+ # ggplot() +
+ #   geom_sf(data = treecanopy_census, aes(fill = casthma_crudeprev))+
+ #   plotTheme()
+ # 
  
 # Tree Canopy Loss
 
