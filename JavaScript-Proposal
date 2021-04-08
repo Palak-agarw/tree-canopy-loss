@@ -1,3 +1,11 @@
+echo "# a" >> README.md
+git init
+git add README.md
+git commit -m "first commit"
+git branch -M main
+git remote add origin git@github.com:kylepmccarthy/a.git
+git push -u origin main
+
 ```
 # Final Project Proposal ---- Kyle and Palak 
 
