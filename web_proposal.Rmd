@@ -28,7 +28,7 @@ The data we will be working with include the Philadelphia tree canopy loss datas
 
 We think we are going to use the sidebar design. However, we may like anotehr bar at the bottom of the screen to display statstics about the associated model and any statstics related to the fishnet gridcell the user is viewing 
 
-![Wireframe](wireframe.png)
+![Wireframe](wireframe.PNG)
 
 ## Missing Pieces 
 
