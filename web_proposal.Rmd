@@ -17,18 +17,18 @@ Our Project is to explore the relationship for tree canopy loss and construction
 
 The data we will be working with include the Philadelphia tree canopy loss dataset, along with our model results. It is possibly that we may want to utilize the neighborhood dataset as well. The tree canopy loss dataset is unfortunately very large and may pose a difficuly ( 600,000 polygons). We plan on converting these to centroids. Vector tiles are an option as well, but these polygons are already so small that we may be able to get the same point accross converting to points. If this is stil too large, we may considering converting this file into an image and then overlaying it. If you think this dataset will be too large, we are happy to chat!
 
-##Technologies Used
+## Technologies Used
 
 - bootstrap : for design 
 - leaflet : displaying data ; may use functionalities such as allowing the user to zoom in on a zip code. 
--Ajax: calling data, different scenarios 
+- Ajax: calling data, different scenarios 
 - JQUERRY : Would like to display statistics on screen about associated statistics with each fishnet gridcell
 
 ## Design 
 
 We think we are going to use the sidebar design. However, we may like anotehr bar at the bottom of the screen to display statstics about the associated model and any statstics related to the fishnet gridcell the user is viewing 
 
-![Wireframe](C:/Users/Kyle McCarthy/Documents/Practicum/wireframe.png)
+![Wireframe](wireframe.png)
 
 ## Missing Pieces 
 
