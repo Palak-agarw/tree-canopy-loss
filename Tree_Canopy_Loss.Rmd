@@ -473,8 +473,7 @@ FinalFishnet <-
 
 FinalFishnet<- 
   fishnet%>%
-  left_join(FinalFishnet)%>%
-  na.omit()
+  left_join(FinalFishnet)
 
 FinalFishnet<- 
   FinalFishnet%>% 
@@ -655,7 +654,6 @@ FinalFishnet1 <- fishnet_centroid %>%
   st_drop_geometry() %>%
   left_join(FinalFishnet,.,by="uniqueID") %>%
   dplyr::select(GEOID) %>%
-  na.omit() %>%
   mutate(uniqueID = as.numeric(rownames(.)))
 
 # Make fishnet with ACS variables
@@ -1103,8 +1101,7 @@ FinalFishnet <-
   mutate(e311Count = replace_na(e311Count, 0))%>%
   left_join(FinalFishnet, .)%>%
   mutate(Loge311Count = log10(e311Count),
-         LogPctLoss = log10(pctLoss))%>%
-  filter(Loge311Count != Inf & Loge311Count != -Inf & LogPctLoss != Inf & LogPctLoss != -Inf)
+         LogPctLoss = log10(pctLoss))
 
 ggplot(FinalFishnet, aes(y = LogPctLoss, x = Loge311Count))+
   geom_point()+
@@ -1159,12 +1156,11 @@ ggplot() +
 
 
 
-FinalFishnet6 <-
-   dplyr::select(const_spatial) %>% 
-   mutate(countConst = 1) %>% 
-   aggregate(., FinalFishnet, sum) %>%
-   mutate(countConst = replace_na(countConst, 0),
-          uniqueID = rownames(.))
+FinalFishnet <-
+   const_net_fish %>%
+   st_drop_geometry() %>%
+   left_join(FinalFishnet, .)%>%
+   mutate(countConst = replace_na(countConst, 0))
 
 
 ```
@@ -1480,8 +1476,7 @@ left_join(., LandUseFishnet_Trans)%>%
 mutate_all(~replace(., is.na(.), 0))%>%
 left_join(FinalFishnet, .)%>% 
 mutate(LogPctRes = log10(pctRes), 
-LogPctResTrans = log10(pctTransRes))%>% 
-filter(LogPctRes != -Inf)
+LogPctResTrans = log10(pctTransRes))
 
 
 
@@ -1533,6 +1528,17 @@ ggplot()+
   facet_wrap(~holc_grade, nrow = 1)+
   plotTheme()
 
+holc_net <- st_intersection(fishnet_centroid, HOLC) %>%
+  dplyr::select(uniqueID, holc_grade)
+  
+
+FinalFishnet <-
+   holc_net %>%
+   st_drop_geometry() %>%
+   left_join(FinalFishnet, .)%>%
+   mutate(holc_grade = replace_na(holc_grade, 0))
+  
+
 ```
 
 ```{r Public_health, message=FALSE, warning=FALSE, results='hide', cache=TRUE}
@@ -1550,9 +1556,9 @@ library(RSocrata)
    mutate(tractarea = as.numeric(tractarea))
 
  
- ggplot() +
-   geom_sf(data = phillyhealth, aes(fill = casthma_crudeprev))+
-   plotTheme()
+ # ggplot() +
+ #   geom_sf(data = phillyhealth, aes(fill = casthma_crudeprev))+
+ #   plotTheme()
  
  # find area of tree canopy in census tracts
   
@@ -1566,10 +1572,10 @@ treecanopy_census<-
   mutate(TreeArea = st_area(treecanopy_census))%>%
   mutate(TreeArea = as.numeric(TreeArea))
 
- ggplot() +
-   geom_sf(data = treecanopy_census, aes(fill = casthma_crudeprev))+
-   plotTheme()
- 
+ # ggplot() +
+ #   geom_sf(data = treecanopy_census, aes(fill = casthma_crudeprev))+
+ #   plotTheme()
+ # 
  
 # Tree Canopy Loss
 
@@ -1680,7 +1686,8 @@ constfilter <-
 
 TreeCanopyCentroids <- 
   TreeCanopy%>% 
-  mutate(Construction_nn1 = nn_function(st_c(st_centroid(.)), st_c(const), 1))
+  mutate(Construction_nn1 = nn_function(st_c(st_centroid(.)), st_c(const), 1)) %>%
+  dplyr::select(Construction_nn1, geometry, CLASS_NAME)
 
 
 TreeCanopyCentroids1<- 
@@ -1697,7 +1704,8 @@ ggplot(TreeCanopyCentroids1, aes(y=avg_nnConst, x=CLASS_NAME))+
   xlab("Total Net Change")+
   theme(axis.text.x = element_text(angle = 90, vjust = 0.5, hjust=1))
 
-FinalFishnet2 <- st_join(FinalFishnet, TreeCanopyCentroids)%>%
+FinalFishnet2 <- 
+  st_join(FinalFishnet, TreeCanopyCentroids)%>%
   st_drop_geometry()%>%
   group_by(uniqueID)%>%
   summarise(avg_nnConst = mean(Construction_nn1))
@@ -1768,18 +1776,14 @@ TreeCanopyCentroids1<-
   group_by(uniqueID)%>%
   summarise(avg_nnPole = mean(Poles_nn1))
 
-FinalFishnet3<-
-   TreeCanopyCentroids1%>% 
+FinalFishnet<-
+  TreeCanopyCentroids1%>% 
   left_join(FinalFishnet, .)%>% 
   mutate(LogPole = log10(avg_nnPole), 
   LogPctGain = log10(pctGain))
   
-  FinalFishnet3<-
-  FinalFishnet3%>% 
-  mutate(LogPctGain = log10(pctGain))
-  
 
-ggplot(FinalFishnet3, aes(y = LogPctLoss , x = LogPole))+
+ggplot(FinalFishnet, aes(y = LogPctLoss , x = LogPole))+
   geom_point()+
   labs(title = "Percent Change vs Construction nn1",
        subtilte = "Aggregated by Fishnet") +
@@ -1797,31 +1801,72 @@ ggplot(FinalFishnet3, aes(y = LogPctLoss , x = LogPole))+
 
 
 FinalFishnet5 <-
-  FinalFishnet2 %>%
+  FinalFishnet %>%
   mutate(LogPctLoss = log(pctLoss),
          LogPctGain = log(pctGain),
          LogPctChange = log(pctChange))
 
+FinalFishnet5$avg_nnConst <- ifelse(is.na(FinalFishnet5$avg_nnConst),0, FinalFishnet5$avg_nnConst)
+FinalFishnet5$avg_nnPole <- ifelse(is.na(FinalFishnet5$avg_nnPole),0, FinalFishnet5$avg_nnPole)
+FinalFishnet5$pctWhite <- ifelse(is.na(FinalFishnet5$pctWhite),0, FinalFishnet5$pctWhite)
+FinalFishnet5$pctBach <- ifelse(is.na(FinalFishnet5$pctBach),0, FinalFishnet5$pctBach)
+FinalFishnet5$population <- ifelse(is.na(FinalFishnet5$population),0, FinalFishnet5$population)
+FinalFishnet5$italian <- ifelse(is.na(FinalFishnet5$italian),0, FinalFishnet5$italian)
+FinalFishnet5$medHHInc <- ifelse(is.na(FinalFishnet5$medHHInc),0, FinalFishnet5$medHHInc)
+FinalFishnet5$e311Count <- ifelse(is.na(FinalFishnet5$e311Count),0, FinalFishnet5$e311Count)
+FinalFishnet5$pctTransRes <- ifelse(is.na(FinalFishnet5$pctTransRes),0, FinalFishnet5$pctTransRes)
+FinalFishnet5$pctRes <- ifelse(is.na(FinalFishnet5$pctRes),0, FinalFishnet5$pctRes)
+FinalFishnet5$pctTrans <- ifelse(is.na(FinalFishnet5$pctTrans),0, FinalFishnet5$pctTrans)
 FinalFishnet5$LogAvgParcelSize <- ifelse(is.na(FinalFishnet5$LogAvgParcelSize),0, FinalFishnet5$LogAvgParcelSize)
 FinalFishnet5$LogPctChange <- ifelse(is.na(FinalFishnet5$LogPctChange),0, FinalFishnet5$LogPctChange)
+FinalFishnet5$Loge311Count <- ifelse(is.na(FinalFishnet5$Loge311Count),0, FinalFishnet5$Loge311Count)
+FinalFishnet5$LogPctRes <- ifelse(is.na(FinalFishnet5$LogPctRes),0, FinalFishnet5$LogPctRes)
+FinalFishnet5$LogPctRes <- ifelse(is.infinite(FinalFishnet5$LogPctRes),0, FinalFishnet5$LogPctRes)
+FinalFishnet5$LogPctResTrans <- ifelse(is.infinite(FinalFishnet5$LogPctResTrans),0, FinalFishnet5$LogPctResTrans)
+FinalFishnet5$LogPctResTrans <- ifelse(is.na(FinalFishnet5$LogPctResTrans),0, FinalFishnet5$LogPctResTrans)
 FinalFishnet5$LogPctLoss <- ifelse(is.infinite(FinalFishnet5$LogPctLoss),0, FinalFishnet5$LogPctLoss)
 FinalFishnet5$LogPctGain <- ifelse(is.infinite(FinalFishnet5$LogPctGain),0, FinalFishnet5$LogPctGain)
 FinalFishnet5$LogPctChange <- ifelse(is.infinite(FinalFishnet5$LogPctChange),0, FinalFishnet5$LogPctChange)
-
-FinalFishnet5<-
-  FinalFishnet6%>%
-  st_drop_geometry() %>%
-  left_join(FinalFishnet5, .)
-
 FinalFishnet5$countConst <- ifelse(is.na(FinalFishnet5$countConst),0, FinalFishnet5$countConst)
-
 FinalFishnet5$Variable <- ifelse((FinalFishnet5$netChange > 0), 1, 0)
   
+FinalFishnet5 <-
+  FinalFishnet5 %>%
+  dplyr::select(pctCoverage18, LogAvgParcelSize,Loge311Count, LogPctRes, avg_nnConst,avg_nnPole,
+                                    countConst, pctWhite, pctBach, e311Count, Loge311Count, pctTransRes, pctRes,
+                                    pctTrans, LogPctResTrans, population, italian, medHHInc, Variable, pctCoverage08Cat, holc_grade)
+
+# FinalFishnet5 <-
+#   FinalFishnet5%>%
+#   mutate(pctCoverage18 = ifelse(pctCoverage18 > 25, 1, 0))
+# 
+# FinalFishnet5 <-
+#   FinalFishnet5%>%
+#   mutate(pctWhite = ifelse(pctWhite > 66.67, 1, 0))
+# 
+# FinalFishnet5 <-
+#   FinalFishnet5%>%
+#   mutate(pctBach = ifelse(pctBach > 66.67, 1, 0))
+# 
+# FinalFishnet5 <-
+#   FinalFishnet5%>%
+#   mutate(pctRes = ifelse(pctRes > 66.67, 1, 0))
+# 
+# FinalFishnet5 <-
+#   FinalFishnet5%>%
+#   mutate(pctTransRes = ifelse(pctTransRes > 50, 1, 0))
+# 
+# FinalFishnet5 <-
+#   FinalFishnet5%>%
+#   mutate(pctTrans = ifelse(pctTrans > 66.67, 1, 0))
+
+
+
 
 # LOGISTIC MODEL
 set.seed(1214)
 trainIndex <- createDataPartition(
-                                  y = FinalFishnet5$LogPctLoss,
+                                  y = FinalFishnet5$holc_grade,
                                   p = 0.60, 
                                   list = FALSE)
 
@@ -1831,9 +1876,9 @@ finalTest  <- FinalFishnet5[-trainIndex,] %>% st_drop_geometry()
 # MODEL
 finalModel <- glm(finalTrain$Variable ~ .,
                     data=finalTrain %>% 
-                     dplyr::select(pctCoverage18, LogAvgParcelSize,Loge311Count, LogPctRes, avg_nnConst,avg_nnPole,
-                                    countConst, pctWhite, pctBach, e311Count, Loge311Count, pctTransRes, pctRes,
-                                    pctTrans, LogPctRes, LogPctResTrans, population, italian, medHHInc),
+                     dplyr::select(pctCoverage18, LogAvgParcelSize, avg_nnConst,avg_nnPole,
+                                    countConst, pctWhite, pctBach, Loge311Count, pctRes,
+                                    pctTrans,  italian, medHHInc, LogPctRes, holc_grade),#, LogPctResTrans, population, e311Count, pctTransRes
                     family="binomial" (link="logit"))
 
 summary(finalModel)
@@ -1842,7 +1887,7 @@ summary(finalModel)
 x <- finalModel$coefficients
 
 ### Fit metrics
-pR2(finalModel)
+#pR2(finalModel)
 
 ## Prediction
 testProbs <- data.frame(Outcome = as.factor(finalTest$Variable),
@@ -1857,6 +1902,89 @@ ggplot(testProbs, aes(d = as.numeric(testProbs$Outcome), m = Probs)) +
   style_roc(theme = theme_grey) +
   geom_abline(slope = 1, intercept = 0, size = 1.5, color = 'grey') +
   labs(title = "ROC Curve - Model with Feature Engineering")
+
+
+## optimizing threshold
+
+iterateThresholds <- function(data, observedClass, predictedProbs, group) {
+#This function takes as its inputs, a data frame with an observed binomial class (1 or 0); a vector of predicted probabilities; and optionally a group indicator like race. It returns accuracy plus counts and rates of confusion matrix outcomes. It's a bit verbose because of the if (missing(group)). I don't know another way to make an optional parameter.
+  observedClass <- enquo(observedClass)
+  predictedProbs <- enquo(predictedProbs)
+  group <- enquo(group)
+  x = .01
+  all_prediction <- data.frame()
+  
+  if (missing(group)) {
+  
+    while (x <= 1) {
+    this_prediction <- data.frame()
+    
+    this_prediction <-
+      data %>%
+      mutate(predclass = ifelse(!!predictedProbs > x, 1,0)) %>%
+      count(predclass, !!observedClass) %>%
+      summarize(Count_TN = sum(n[predclass==0 & !!observedClass==0]),
+                Count_TP = sum(n[predclass==1 & !!observedClass==1]),
+                Count_FN = sum(n[predclass==0 & !!observedClass==1]),
+                Count_FP = sum(n[predclass==1 & !!observedClass==0]),
+                Rate_TP = Count_TP / (Count_TP + Count_FN),
+                Rate_FP = Count_FP / (Count_FP + Count_TN),
+                Rate_FN = Count_FN / (Count_FN + Count_TP),
+                Rate_TN = Count_TN / (Count_TN + Count_FP),
+                Accuracy = (Count_TP + Count_TN) / 
+                           (Count_TP + Count_TN + Count_FN + Count_FP)) %>%
+      mutate(Threshold = round(x,2))
+    
+    all_prediction <- rbind(all_prediction,this_prediction)
+    x <- x + .01
+  }
+  return(all_prediction)
+  }
+  else if (!missing(group)) { 
+   while (x <= 1) {
+    this_prediction <- data.frame()
+    
+    this_prediction <-
+      data %>%
+      mutate(predclass = ifelse(!!predictedProbs > x, 1,0)) %>%
+      group_by(!!group) %>%
+      count(predclass, !!observedClass) %>%
+      summarize(Count_TN = sum(n[predclass==0 & !!observedClass==0]),
+                Count_TP = sum(n[predclass==1 & !!observedClass==1]),
+                Count_FN = sum(n[predclass==0 & !!observedClass==1]),
+                Count_FP = sum(n[predclass==1 & !!observedClass==0]),
+                Rate_TP = Count_TP / (Count_TP + Count_FN),
+                Rate_FP = Count_FP / (Count_FP + Count_TN),
+                Rate_FN = Count_FN / (Count_FN + Count_TP),
+                Rate_TN = Count_TN / (Count_TN + Count_FP),
+                Accuracy = (Count_TP + Count_TN) / 
+                           (Count_TP + Count_TN + Count_FN + Count_FP)) %>%
+      mutate(Threshold = round(x,2))
+    
+    all_prediction <- rbind(all_prediction,this_prediction)
+    x <- x + .01
+  }
+  return(all_prediction)
+  }
+}
+
+whichThreshold <- 
+  iterateThresholds(
+     data=testProbs, observedClass = Outcome, predictedProbs = Probs)
+
+whichThreshold <- 
+  whichThreshold %>%
+    dplyr::select(starts_with("Rate"), Threshold) %>%
+    gather(Variable, Rate, Rate_TN,Rate_TP,Rate_FN,Rate_FP) 
+
+whichThreshold %>%
+  ggplot(.,aes(Threshold,Rate,colour = Variable)) +
+  geom_point() +
+  #scale_colour_manual(values = palette5[c(5, 1:3)]) +    
+  labs(title = "Confusion Metric Rates at Different Thresholds",
+       y = "Count") +
+  plotTheme() +
+  guides(colour=guide_legend(title = "Confusion Metric")) 
 
 
 ```
@@ -1898,6 +2026,11 @@ hist(classProbs)
 
 testProbs <- data.frame(obs = as.numeric(preserveTest$pctLossObs),
                         pred = classProbs)
+
+ggplot(testProbs, aes(d = obs, m = pred)) + 
+  geom_roc(n.cuts = 50, labels = FALSE) + 
+  style_roc(theme = theme_grey) +
+  geom_abline(slope = 1, intercept = 0, size = 1.5, color = 'grey')
 
 ggplot(testProbs, aes(x = pred, fill=as.factor(obs))) + geom_density() +
   facet_grid(obs ~ .) + xlab("Probability") + geom_vline(xintercept = .5) +
@@ -1959,12 +2092,6 @@ draw_confusion_matrix <- function(cm) {
 }  
 
 draw_confusion_matrix(confusion) 
-
-
-ggplot(testProbs, aes(d = obs, m = pred)) + 
-  geom_roc(n.cuts = 50, labels = FALSE) + 
-  style_roc(theme = theme_grey) +
-  geom_abline(slope = 1, intercept = 0, size = 1.5, color = 'grey')
 
 
 preserveTest$uniqueID <- seq.int(nrow(preserveTest))
