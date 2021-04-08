@@ -1,26 +1,66 @@
+# Final Project Proposal
 
-# Final Project Proposal ---- Kyle and Palak 
+Your assignment this week is to write a proposal for your final project.
+In proposing your final, try to address each of the following areas.
+Please produce at least a paragraph which addresses the topics below
 
-## Project/ Question:
+## Problem / Question
 
-Our Project is to explore the relationship for tree canopy loss and construction through a web application. Throughout the MUSA practicum, we have created a model to predict regions of Philadelphia most vulnerable to tree canopy loss. A significant predictor in our model relates to the number of construction permits between 2008 and 2018 in a fixed spatial area (A grid cell). Our proposal is to create a scenario based web application that displays our model results if construction were to continue at business as usual, if construction were to increase, or if construction were to decrease. By clicking on each of the options, user can view each scenario. We would also like to give the user the options to overlay the past tree canopy loss from 2008 and 2018
+Applications are ultimately just tools. What problem or question does
+your application attempt to resolve or grapple with? How does your
+application speak to this problem/question?
 
-## Data 
+## The data
 
-The data we will be working with include the Philadelphia tree canopy loss dataset, along with our model results. It is possibly that we may want to utilize the neighborhood dataset as well. The tree canopy loss dataset is unfortunately very large and may pose a difficuly ( 600,000 polygons). We plan on converting these to centroids. Vector tiles are an option as well, but these polygons are already so small that we may be able to get the same point accross converting to points. If this is stil too large, we may considering converting this file into an image and then overlaying it. If you think this dataset will be too large, we are happy to chat!
+Geospatial applications are all about working with data. What datasets
+would you plan/like to use? If the data you'll be working with isn't
+already stored in a way that you can use, how will you be storing your data?
+If your data is too large to be conveniently used on the frontend, how will
+you work around it? A backend? Vector tiles? Chat with me ASAP if this is
+something you need help with!
 
-##Technologies Used
+## Technologies used
 
-- bootstrap : for design 
-- leaflet : displaying data ; may use functionalities such as allowing the user to zoom in on a zip code. 
--Ajax: calling data, different scenarios 
-- JQUERRY : Would like to display statistics on screen about associated statistics with each fishnet gridcell 
+Which technologies covered in class (or discovered on your own!) do you
+plan to use? How do you anticipate using each of these technologies?
 
-## Design 
+Review the APIs/online examples of leaflet, turf, jQuery, underscore (or
+any library not explicitly covered in class) for functions/uses which
+you'd like to explore. Briefly describe how you might use them.
 
-We think we are going to use the sidebar design. However, we may like anotehr bar at the bottom of the screen to display statstics about the associated model and any statstics related to the fishnet gridcell the user is viewing 
+## Design spec
 
-## Missing Pieces 
+#### User experience
 
-I would ike to explor Mapbox more and compare leaflet to determine which mapping software we should use. I would also like to explore more design oriented technology --- maybe go more in depth with bootstrap for this proejct. Although I am not sure how it would be relevant to the project at the moment, I might also like to display a histogram or a graph on the side. Possibly representing the tree loss in each neighborhood under each construction scenario. 
+At a high level, how do you expect people to use your application?
+- Who are the users?
+- What do they gain from your application' use?
+- Are there any website/application examples in the wild to which you can compare your final?
 
+#### Layouts and visual design
+
+So far, we've built all our applications with a side bar for
+representing non-map content and navigation. This is not the only
+successful design. Extra content could be displayed in a top bar,
+through modals, through side bars on both sides, and any combination of
+these as well as a number not mentioned. Try to describe your
+application's visual layout. Conceptually (no need for extensive CSS
+here), what will this design require?
+
+## Anticipated difficulties
+
+Thinking about weaknesses can be useful. What do you anticipate being
+most difficult about this project? How will you attempt to cope with
+these difficulties? For example, asynchronous behavior (ajax, events)
+are hard to use and think about. Global variables are a strategy for
+coping with that difficulty by breaking data out of the asynchronous
+context.
+
+## Missing pieces
+
+We've only managed to scratch the surface of the available technologies
+by which you could construct an application. What use-cases haven't we covered
+that you think would be useful? What technologies not covered seem exciting to
+you (you don't necessarily have to fully understand what they're for,
+this is a chance for you to get help interpreting a technology's
+purpose/usage).
