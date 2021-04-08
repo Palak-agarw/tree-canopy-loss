@@ -1877,8 +1877,8 @@ finalTest  <- FinalFishnet5[-trainIndex,] %>% st_drop_geometry()
 finalModel <- glm(finalTrain$Variable ~ .,
                     data=finalTrain %>% 
                      dplyr::select(pctCoverage18, LogAvgParcelSize, avg_nnConst,avg_nnPole,
-                                    countConst, pctWhite, pctBach, e311Count, Loge311Count, pctTransRes, pctRes,
-                                    pctTrans,  italian, medHHInc, LogPctRes, Loge311Count, holc_grade),#, LogPctResTrans, population
+                                    countConst, pctWhite, pctBach, Loge311Count, pctRes,
+                                    pctTrans,  italian, medHHInc, LogPctRes, holc_grade),#, LogPctResTrans, population, e311Count, pctTransRes
                     family="binomial" (link="logit"))
 
 summary(finalModel)
