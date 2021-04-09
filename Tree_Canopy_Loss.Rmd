@@ -172,8 +172,8 @@ plotTheme <- function(base_size = 12) {
 TreeCanopy <-
  #st_read("C:/Users/Kyle McCarthy/Documents/Practicum/TreeCanopyChange_2008_2018.shp")%>%
   #st_read("/Users/annaduan/Desktop/Y3S2/Practicum/Data/TreeCanopyChange_2008_2018-shp/TreeCanopyChange_2008_2018.shp") %>%
-  st_read("C:/Users/agarw/Documents/MUSA 801/Data/TreeCanopyChange_2008_2018.shp") %>%
-#st_read("C:/Users/Prince/Desktop/Tree Canopy Data/TreeCanopyChange_2008_2018.shp") %>%
+  #st_read("C:/Users/agarw/Documents/MUSA 801/Data/TreeCanopyChange_2008_2018.shp") %>%
+st_read("C:/Users/Prince/Desktop/Tree Canopy Data/TreeCanopyChange_2008_2018.shp") %>%
   st_transform('ESRI:102728') 
 
 TreeCanopy$SHAPE_Area <- as.numeric(st_area(TreeCanopy))
@@ -190,8 +190,8 @@ Philadelphia <- st_read("http://data.phl.opendata.arcgis.com/datasets/405ec3da94
 Neighborhood <-
  #st_read("C:/Users/Kyle McCarthy/Documents/Practicum/Data/Neighborhoods/Neighborhoods_Philadelphia.shp") %>%
 #st_read("/Users/annaduan/Desktop/Y3S2/Practicum/Data/Neighborhoods_Philadelphia/Neighborhoods_Philadelphia.shp")%>%
-  st_read("C:/Users/agarw/Documents/MUSA 801/Data/Neighborhoods_Philadelphia.shp") %>%
-#st_read("C:/Users/Prince/Desktop/Tree Canopy Data/Neighborhoods_Philadelphia/Neighborhoods_Philadelphia.shp") %>%
+ # st_read("C:/Users/agarw/Documents/MUSA 801/Data/Neighborhoods_Philadelphia.shp") %>%
+st_read("C:/Users/Prince/Desktop/Tree Canopy Data/Neighborhoods_Philadelphia/Neighborhoods_Philadelphia.shp") %>%
   st_transform('ESRI:102728')
 
 Neighborhood <-
@@ -205,9 +205,9 @@ Neighborhood <-
  # st_transform('ESRI:102728')
 
 HOLC <-# st_read("/Users/annaduan/Desktop/Y3S2/Practicum/Data/PAPhiladelphia1937.geojson") %>%
- #st_read("C:/Users/Prince/Desktop/Tree Canopy Data/PAPhiladelphia1937.geojson") %>%
+ st_read("C:/Users/Prince/Desktop/Tree Canopy Data/PAPhiladelphia1937.geojson") %>%
   #st_read("C:/Users/Kyle McCarthy/Documents/Practicum/Data/PAPhiladelphia1937.geojson")%>%
-  st_read("C:/Users/agarw/Documents/MUSA 801/Data/PAPhiladelphia1937.geojson")%>%
+  #st_read("C:/Users/agarw/Documents/MUSA 801/Data/PAPhiladelphia1937.geojson")%>%
   st_transform('ESRI:102728')
 
 HOLC <-
@@ -265,8 +265,8 @@ parcels <- st_read("http://data-phl.opendata.arcgis.com/datasets/1c57dd1b3ff8444
  st_transform('ESRI:102728')
 
 const_permits <- 
-  st_read("C:/Users/agarw/Documents/MUSA 801/Data/const_permit.csv") %>%
-  #st_read("C:/Users/Prince/Desktop/Tree Canopy Data/const_permit.csv") %>%
+ # st_read("C:/Users/agarw/Documents/MUSA 801/Data/const_permit.csv") %>%
+  st_read("C:/Users/Prince/Desktop/Tree Canopy Data/const_permit.csv") %>%
   #st_read("C:/Users/Kyle McCarthy/Documents/Practicum/permits.csv")%>%
    #st_read("/Users/annaduan/Desktop/Y3S2/Practicum/Data/const_permit.csv")%>%
   mutate(X = geocode_x,
@@ -287,14 +287,12 @@ const <- const_spatial %>%
 
 LandUseFishnet <- 
   #st_read("C:/Users/Kyle McCarthy/Documents/Practicum/Data/Fishnet_LU_Intersect/fishnet_LUS_Intersect_dissolve.shp")  %>%
-   st_read("C:/Users/agarw/Documents/MUSA 801/Data/fishnet_LUS_Intersect_dissolve.geojson") %>%
+  # st_read("C:/Users/agarw/Documents/MUSA 801/Data/fishnet_LUS_Intersect_dissolve.geojson") %>%
 #st_read("/Users/annaduan/Desktop/Y3S2/Practicum/Data/fishnet_LUS_Intersect_dissolve.geojson") %>%
+  st_read("C:/Users/Prince/Desktop/Tree Canopy Data/fishnet_LUS_Intersect_dissolve.geojson") %>%
    st_transform('ESRI:102728')
 
-# Impervious <-
-#   st_read("/Users/annaduan/Desktop/Y3S2/Practicum/Data/Impervious\ Surfaces/Impervious_Surfaces_2004.shp") %>%
-#    st_transform('ESRI:102728')
-  
+
 Hydrology <-
   st_read("https://opendata.arcgis.com/datasets/a31f7d7469404e919517e038fc133a8e_0.geojson")%>%
     st_transform('ESRI:102728')
@@ -302,12 +300,12 @@ Hydrology <-
 Hydrology <-
   st_intersection(st_make_valid(Philadelphia), st_make_valid(Hydrology))
 
-
  
  Parks <- 
   # st_read("/Users/annaduan/Desktop/Y3S2/Practicum/Data/Parks") %>%
    #st_read("C:/Users/Kyle McCarthy/Documents/Practicum/Data/Parks/Philadelphia_PPR_Park_Boundaries2016.shp ")%>%
-   st_read("C:/Users/agarw/Documents/MUSA 801/Data/Philadelphia_PPR_Park_Boundaries2016.shp") %>%
+ #  st_read("C:/Users/agarw/Documents/MUSA 801/Data/Philadelphia_PPR_Park_Boundaries2016.shp") %>%
+   st_read("C:/Users/Prince/Desktop/Tree Canopy Data/Philadelphia_PPR_Park_Boundaries2016.shp") %>%
      st_transform('ESRI:102728') %>%
    st_make_valid() %>%
    select(geometry)
@@ -315,7 +313,9 @@ Hydrology <-
 Conservation <- 
   #st_read("/Users/annaduan/Desktop/Y3S2/Practicum/Data/Conservation/ConservationEasements202103.shp") %>%
   #st_read("C:/Users/Kyle McCarthy/Documents/Practicum/Data/Conservation/ConservationEasements202103.shp")%>%
-  st_read("C:/Users/agarw/Documents/MUSA 801/Data/ConservationEasements202103.shp") %>%
+ # st_read("C:/Users/agarw/Documents/MUSA 801/Data/ConservationEasements202103.shp") %>%
+     st_read("C:/Users/Prince/Desktop/Tree Canopy Data/ConservationEasements202103.shp") %>%
+  st_read()
    st_transform('ESRI:102728') %>%
   st_intersection(st_make_valid(Philadelphia), st_make_valid(Conservation)) %>%
   st_make_valid() %>%
@@ -1076,9 +1076,11 @@ ggplot(hydrology_net, aes(y = LogPctLoss, x = byWater))+
 ```{r E911 Trees, fig.height = 12,fig.width = 12, message=FALSE, warning=FALSE, include=TRUE, results='hide', cache=TRUE}
 
 e311Trees <-
-  #st_read('C:/Users/Kyle McCarthy/Documents/Practicum/e311.csv') %>%
-#st_read("/Users/annaduan/Desktop/Y3S2/Practicum/Data/streettree311.csv") %>%
-  st_read('C:/Users/agarw/Documents/MUSA 801/Data/e311.csv')
+  #st_read('C:/Users/Kyle McCarthy/Documents/Practicum/e311.csv') 
+#st_read("/Users/annaduan/Desktop/Y3S2/Practicum/Data/streettree311.csv")
+ # st_read('C:/Users/agarw/Documents/MUSA 801/Data/e311.csv')
+st_read("C:/Users/Prince/Desktop/Tree Canopy Data/e311.csv") %>%
+
 
 e311Trees<-
   e311Trees%>%
