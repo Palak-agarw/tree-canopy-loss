@@ -1048,17 +1048,31 @@ ggplot(FinalFishnet, aes(y = LogPctLoss, x = LogAvgParcelSize))+
 ```{r hydrology,fig.height = 12,fig.width = 12, message=FALSE, warning=FALSE, include=TRUE, results='hide', cache=TRUE}
 
 Hydrology <- Hydrology %>%
-   select(geometry)
+   select(geometry) 
 
-hydrology_net <-
-  Hydrology%>%
-  mutate(byWater = 1) %>%
-  aggregate(., FinalFishnet, sum) %>%
-  mutate(byWater = replace_na(byWater, 0))%>%
-  st_centroid()%>%
-  st_join(FinalFishnet, .)%>%
-  mutate(LogPctLoss = log10(pctLoss))%>%
-  filter(LogPctLoss != Inf & LogPctLoss != -Inf)
+HydrologyNet <- st_buffer(Hydrology, 100) %>%
+st_intersection(FinalFishnet, Hydrology) %>%
+mutate(Area = as.numeric(st_area(.))) %>%
+st_drop_geometry() %>%
+group_by(uniqueID) %>%
+summarise(HydrologyArea = sum(Area)) %>%
+left_join(FinalFishnet, .) %>%
+mutateall(funs(replace_na(.,0)))%>%
+mutate(HydrologyPct = HydrologyArea /2608225 * 100) 
+
+ggplot() +
+  geom_sf(data = HydrologyNet, colour = "blue") +
+  mapTheme()
+# 
+# hydrology_net <-
+#   Hydrology%>%
+#   mutate(byWater = 1) %>%
+#   aggregate(., FinalFishnet, sum) %>%
+#   mutate(byWater = replace_na(byWater, 0))%>%
+#   st_centroid()%>%
+#   st_join(FinalFishnet, .)%>%
+#   mutate(LogPctLoss = log10(pctLoss))%>%
+#   filter(LogPctLoss != Inf & LogPctLoss != -Inf)
 
 ggplot(hydrology_net, aes(y = LogPctLoss, x = byWater))+
   geom_point()+
