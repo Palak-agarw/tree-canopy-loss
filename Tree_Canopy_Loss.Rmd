@@ -1057,24 +1057,15 @@ st_drop_geometry() %>%
 group_by(uniqueID) %>%
 summarise(HydrologyArea = sum(Area)) %>%
 left_join(FinalFishnet, .) %>%
-mutateall(funs(replace_na(.,0)))%>%
+mutate_all(funs(replace_na(.,0)))%>%
 mutate(HydrologyPct = HydrologyArea /2608225 * 100) 
 
 ggplot() +
-  geom_sf(data = HydrologyNet, colour = "blue") +
+  geom_sf(data = HydrologyNet, aes(fill = HydrologyArea)) +
   mapTheme()
-# 
-# hydrology_net <-
-#   Hydrology%>%
-#   mutate(byWater = 1) %>%
-#   aggregate(., FinalFishnet, sum) %>%
-#   mutate(byWater = replace_na(byWater, 0))%>%
-#   st_centroid()%>%
-#   st_join(FinalFishnet, .)%>%
-#   mutate(LogPctLoss = log10(pctLoss))%>%
-#   filter(LogPctLoss != Inf & LogPctLoss != -Inf)
 
-ggplot(hydrology_net, aes(y = LogPctLoss, x = byWater))+
+
+ggplot(HydrologyNet, aes(y = LogPctLoss, x = HydrologyPct))+
   geom_point()+
   labs(title = "Percent Tree Canopy Loss (2008 - 2018) vs. \n Nearby Water Sources (2018) ",
        subtilte = "Aggregated by Fishnet") +
@@ -1084,7 +1075,7 @@ ggplot(hydrology_net, aes(y = LogPctLoss, x = byWater))+
   plotTheme()
 
 FinalFishnet <-
-   hydrology_net %>%
+   HydrologyNet %>%
    st_drop_geometry() %>%
    left_join(FinalFishnet, .)
 ```
@@ -1094,9 +1085,9 @@ FinalFishnet <-
 
 e311Trees <-
   #st_read('C:/Users/Kyle McCarthy/Documents/Practicum/e311.csv') 
-#st_read("/Users/annaduan/Desktop/Y3S2/Practicum/Data/streettree311.csv")
+st_read("/Users/annaduan/Desktop/Y3S2/Practicum/Data/streettree311.csv")
  # st_read('C:/Users/agarw/Documents/MUSA 801/Data/e311.csv')
-st_read("C:/Users/Prince/Desktop/Tree Canopy Data/e311.csv") %>%
+#st_read("C:/Users/Prince/Desktop/Tree Canopy Data/e311.csv") %>%
 
 
 e311Trees<-
@@ -1304,8 +1295,8 @@ JuniataPark <- JuniataPark %>%
 LandUse1 <-
   #st_read("C:/Users/Kyle McCarthy/Documents/Practicum/Data/LandUse/landu.csv")%>%
   #st_read("C:/Users/agarw/Documents/MUSA 801/Data/landu.csv")%>%
-  #st_read("/Users/annaduan/Desktop/Y3S2/Practicum/Data/landu.csv") %>%
-  st_read("C:/Users/Prince/Desktop/Tree Canopy Data/landu.csv") %>%
+  st_read("/Users/annaduan/Desktop/Y3S2/Practicum/Data/landu.csv") %>%
+  #st_read("C:/Users/Prince/Desktop/Tree Canopy Data/landu.csv") %>%
   mutate(AreaGain = as.numeric(AreaGain),
          AreaLoss = as.numeric(AreaLoss),
          Coverage08 = as.numeric(Coverage08),
