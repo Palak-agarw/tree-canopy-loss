@@ -2021,6 +2021,13 @@ testProbs2 <- data.frame(Outcome = as.factor(finalTest$Variable),
 ## This us a goodness of fit measure, 1 would be a perfect fit, .5 is a coin toss
 auc(testProbs2$Outcome, testProbs2$Probs)
 
+ggplot(testProbs2, aes(d = as.numeric(testProbs2$Outcome), m = Probs)) +
+  geom_roc(n.cuts = 50, labels = FALSE, colour = "#FE9900") +
+  style_roc(theme = theme_grey) +
+  geom_abline(slope = 1, intercept = 0, size = 1.5, color = 'grey') +
+  labs(title = "ROC Curve - Model with Feature Engineering")
+
+
 
 ```
 
