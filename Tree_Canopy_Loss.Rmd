@@ -2009,9 +2009,9 @@ rf <- randomForest(
                                     pctTrans,  italian, medHHInc, LogPctRes, holc_grade, HydrologyPct)
 )
 
-pred = data.frame(predict(rf, newdata=finalTest))
+#pred2 = data.frame(predict(rf, newdata=finalTest))
 
-cm = table(finalTest$Variable, pred)
+#cm = table(finalTest$Variable, pred2)
 
 ## Prediction
 testProbs2 <- data.frame(Outcome = as.factor(finalTest$Variable),
