@@ -171,8 +171,8 @@ plotTheme <- function(base_size = 12) {
 # Tree Canopy
 TreeCanopy <-
  #st_read("C:/Users/Kyle McCarthy/Documents/Practicum/TreeCanopyChange_2008_2018.shp")%>%
-  st_read("/Users/annaduan/Desktop/Y3S2/Practicum/Data/TreeCanopyChange_2008_2018-shp/TreeCanopyChange_2008_2018.shp") %>%
-  #st_read("C:/Users/agarw/Documents/MUSA 801/Data/TreeCanopyChange_2008_2018.shp") %>%
+  #st_read("/Users/annaduan/Desktop/Y3S2/Practicum/Data/TreeCanopyChange_2008_2018-shp/TreeCanopyChange_2008_2018.shp") %>%
+  st_read("C:/Users/agarw/Documents/MUSA 801/Data/TreeCanopyChange_2008_2018.shp") %>%
 #st_read("C:/Users/Prince/Desktop/Tree Canopy Data/TreeCanopyChange_2008_2018.shp") %>%
   st_transform('ESRI:102728') 
 
@@ -189,8 +189,8 @@ Philadelphia <- st_read("http://data.phl.opendata.arcgis.com/datasets/405ec3da94
 # Neighborhoods
 Neighborhood <-
  #st_read("C:/Users/Kyle McCarthy/Documents/Practicum/Data/Neighborhoods/Neighborhoods_Philadelphia.shp") %>%
-st_read("/Users/annaduan/Desktop/Y3S2/Practicum/Data/Neighborhoods_Philadelphia/Neighborhoods_Philadelphia.shp")%>%
- # st_read("C:/Users/agarw/Documents/MUSA 801/Data/Neighborhoods_Philadelphia.shp") %>%
+ #st_read("/Users/annaduan/Desktop/Y3S2/Practicum/Data/Neighborhoods_Philadelphia/Neighborhoods_Philadelphia.shp")%>%
+  st_read("C:/Users/agarw/Documents/MUSA 801/Data/Neighborhoods_Philadelphia.shp") %>%
 #st_read("C:/Users/Prince/Desktop/Tree Canopy Data/Neighborhoods_Philadelphia/Neighborhoods_Philadelphia.shp") %>%
   st_transform('ESRI:102728')
 
@@ -204,10 +204,11 @@ Neighborhood <-
  # st_read("http://data.phl.opendata.arcgis.com/datasets/957f032f9c874327a1ad800abd887d17_0.geojson") %>%
  # st_transform('ESRI:102728')
 
-HOLC <- st_read("/Users/annaduan/Desktop/Y3S2/Practicum/Data/PAPhiladelphia1937.geojson") %>%
+HOLC <- 
+  #st_read("/Users/annaduan/Desktop/Y3S2/Practicum/Data/PAPhiladelphia1937.geojson") %>%
 # st_read("C:/Users/Prince/Desktop/Tree Canopy Data/PAPhiladelphia1937.geojson") %>%
   #st_read("C:/Users/Kyle McCarthy/Documents/Practicum/Data/PAPhiladelphia1937.geojson")%>%
-  #st_read("C:/Users/agarw/Documents/MUSA 801/Data/PAPhiladelphia1937.geojson")%>%
+  st_read("C:/Users/agarw/Documents/MUSA 801/Data/PAPhiladelphia1937.geojson")%>%
   st_transform('ESRI:102728')
 
 HOLC <-
@@ -265,10 +266,10 @@ parcels <- st_read("http://data-phl.opendata.arcgis.com/datasets/1c57dd1b3ff8444
  st_transform('ESRI:102728')
 
 const_permits <- 
- # st_read("C:/Users/agarw/Documents/MUSA 801/Data/const_permit.csv") %>%
+   st_read("C:/Users/agarw/Documents/MUSA 801/Data/const_permit.csv") %>%
  # st_read("C:/Users/Prince/Desktop/Tree Canopy Data/const_permit.csv") %>%
   #st_read("C:/Users/Kyle McCarthy/Documents/Practicum/permits.csv")%>%
-   st_read("/Users/annaduan/Desktop/Y3S2/Practicum/Data/const_permit.csv")%>%
+   #st_read("/Users/annaduan/Desktop/Y3S2/Practicum/Data/const_permit.csv")%>%
   mutate(X = geocode_x,
          Y = geocode_y) 
 const_permits[const_permits==""]<-NA
@@ -287,8 +288,8 @@ const <- const_spatial %>%
 
 LandUseFishnet <- 
   #st_read("C:/Users/Kyle McCarthy/Documents/Practicum/Data/Fishnet_LU_Intersect/fishnet_LUS_Intersect_dissolve.shp")  %>%
-  # st_read("C:/Users/agarw/Documents/MUSA 801/Data/fishnet_LUS_Intersect_dissolve.geojson") %>%
-st_read("/Users/annaduan/Desktop/Y3S2/Practicum/Data/fishnet_LUS_Intersect_dissolve.geojson") %>%
+   st_read("C:/Users/agarw/Documents/MUSA 801/Data/fishnet_LUS_Intersect_dissolve.geojson") %>%
+#st_read("/Users/annaduan/Desktop/Y3S2/Practicum/Data/fishnet_LUS_Intersect_dissolve.geojson") %>%
 #  st_read("C:/Users/Prince/Desktop/Tree Canopy Data/fishnet_LUS_Intersect_dissolve.geojson") %>%
    st_transform('ESRI:102728')
 
@@ -302,18 +303,18 @@ Hydrology <-
 
  
  Parks <- 
-   st_read("/Users/annaduan/Desktop/Y3S2/Practicum/Data/Parks") %>%
+   #st_read("/Users/annaduan/Desktop/Y3S2/Practicum/Data/Parks") %>%
    #st_read("C:/Users/Kyle McCarthy/Documents/Practicum/Data/Parks/Philadelphia_PPR_Park_Boundaries2016.shp ")%>%
- #  st_read("C:/Users/agarw/Documents/MUSA 801/Data/Philadelphia_PPR_Park_Boundaries2016.shp") %>%
+   st_read("C:/Users/agarw/Documents/MUSA 801/Data/Philadelphia_PPR_Park_Boundaries2016.shp") %>%
    #st_read("C:/Users/Prince/Desktop/Tree Canopy Data/Philadelphia_PPR_Park_Boundaries2016.shp") %>%
      st_transform('ESRI:102728') %>%
    st_make_valid() %>%
    select(geometry)
 
 Conservation <- 
-  st_read("/Users/annaduan/Desktop/Y3S2/Practicum/Data/Conservation/ConservationEasements202103.shp") %>%
+  #st_read("/Users/annaduan/Desktop/Y3S2/Practicum/Data/Conservation/ConservationEasements202103.shp") %>%
   #st_read("C:/Users/Kyle McCarthy/Documents/Practicum/Data/Conservation/ConservationEasements202103.shp")%>%
- # st_read("C:/Users/agarw/Documents/MUSA 801/Data/ConservationEasements202103.shp") %>%
+   st_read("C:/Users/agarw/Documents/MUSA 801/Data/ConservationEasements202103.shp") %>%
    #  st_read("C:/Users/Prince/Desktop/Tree Canopy Data/ConservationEasements202103.shp") %>%
    st_transform('ESRI:102728') %>%
   st_intersection(st_make_valid(Philadelphia), st_make_valid(Conservation)) %>%
@@ -1085,8 +1086,8 @@ FinalFishnet <-
 
 e311Trees <-
   #st_read('C:/Users/Kyle McCarthy/Documents/Practicum/e311.csv') 
-st_read("/Users/annaduan/Desktop/Y3S2/Practicum/Data/streettree311.csv")
- # st_read('C:/Users/agarw/Documents/MUSA 801/Data/e311.csv')
+  #st_read("/Users/annaduan/Desktop/Y3S2/Practicum/Data/streettree311.csv")
+  st_read('C:/Users/agarw/Documents/MUSA 801/Data/e311.csv')
 #st_read("C:/Users/Prince/Desktop/Tree Canopy Data/e311.csv") %>%
 
 
@@ -1294,8 +1295,8 @@ JuniataPark <- JuniataPark %>%
 
 LandUse1 <-
   #st_read("C:/Users/Kyle McCarthy/Documents/Practicum/Data/LandUse/landu.csv")%>%
-  #st_read("C:/Users/agarw/Documents/MUSA 801/Data/landu.csv")%>%
-  st_read("/Users/annaduan/Desktop/Y3S2/Practicum/Data/landu.csv") %>%
+  st_read("C:/Users/agarw/Documents/MUSA 801/Data/landu.csv")%>%
+  #st_read("/Users/annaduan/Desktop/Y3S2/Practicum/Data/landu.csv") %>%
   #st_read("C:/Users/Prince/Desktop/Tree Canopy Data/landu.csv") %>%
   mutate(AreaGain = as.numeric(AreaGain),
          AreaLoss = as.numeric(AreaLoss),
@@ -1640,7 +1641,7 @@ correlation.cor4 <-
     group_by(Variable) %>%
     summarize(correlation = cor(Value, pctLoss, use = "complete.obs"))
 
-  ggplot(correlation.long4, aes(Value, pctLoss)) +
+ggplot(correlation.long4, aes(Value, pctLoss)) +
   geom_point(size = 0.1) +
     scale_x_log10() + scale_y_log10() +
   geom_text(data = correlation.cor4, aes(label = paste("r =", round(correlation, 2))),
@@ -1808,6 +1809,8 @@ ggplot(FinalFishnet, aes(y = LogPctLoss , x = LogPole))+
 
 ```{r Logit-model, message=FALSE, warning=FALSE}
 
+library(randomForest)
+
 
 FinalFishnet5 <-
   FinalFishnet %>%
@@ -1838,11 +1841,12 @@ FinalFishnet5$LogPctGain <- ifelse(is.infinite(FinalFishnet5$LogPctGain),0, Fina
 FinalFishnet5$LogPctChange <- ifelse(is.infinite(FinalFishnet5$LogPctChange),0, FinalFishnet5$LogPctChange)
 FinalFishnet5$countConst <- ifelse(is.na(FinalFishnet5$countConst),0, FinalFishnet5$countConst)
 FinalFishnet5$Variable <- ifelse((FinalFishnet5$netChange > 0), 1, 0)
+FinalFishnet5$HydrologyPct <- ifelse(is.na(FinalFishnet5$HydrologyPct),0, FinalFishnet5$HydrologyPct)
   
 FinalFishnet5 <-
   FinalFishnet5 %>%
   dplyr::select(pctCoverage18, LogAvgParcelSize,Loge311Count, LogPctRes, avg_nnConst,avg_nnPole,
-                                    countConst, pctWhite, pctBach, e311Count, Loge311Count, pctTransRes, pctRes,
+                                    countConst, pctWhite, pctBach, e311Count, Loge311Count, pctTransRes, pctRes, HydrologyPct,
                                     pctTrans, LogPctResTrans, population, italian, medHHInc, Variable, pctCoverage08Cat, holc_grade)
 
 # FinalFishnet5 <-
@@ -1887,7 +1891,7 @@ finalModel <- glm(finalTrain$Variable ~ .,
                     data=finalTrain %>% 
                      dplyr::select(pctCoverage18, LogAvgParcelSize, avg_nnConst,avg_nnPole,
                                     countConst, pctWhite, pctBach, Loge311Count, pctRes,
-                                    pctTrans,  italian, medHHInc, LogPctRes, holc_grade),#, LogPctResTrans, population, e311Count, pctTransRes
+                                    pctTrans,  italian, medHHInc, LogPctRes, holc_grade, HydrologyPct),#, LogPctResTrans, population, e311Count, pctTransRes
                     family="binomial" (link="logit"))
 
 summary(finalModel)
@@ -1994,6 +1998,28 @@ whichThreshold %>%
        y = "Count") +
   plotTheme() +
   guides(colour=guide_legend(title = "Confusion Metric")) 
+
+
+
+rf <- randomForest(
+  finalTrain$Variable ~ .,
+  data=finalTrain %>% 
+                     dplyr::select(pctCoverage18, LogAvgParcelSize, avg_nnConst,avg_nnPole,
+                                    countConst, pctWhite, pctBach, Loge311Count, pctRes,
+                                    pctTrans,  italian, medHHInc, LogPctRes, holc_grade, HydrologyPct)
+)
+
+pred = data.frame(predict(rf, newdata=finalTest))
+
+cm = table(finalTest$Variable, pred)
+
+## Prediction
+testProbs2 <- data.frame(Outcome = as.factor(finalTest$Variable),
+                        Probs = predict(rf, finalTest, type= "response"))
+
+# ROC Curve
+## This us a goodness of fit measure, 1 would be a perfect fit, .5 is a coin toss
+auc(testProbs2$Outcome, testProbs2$Probs)
 
 
 ```
