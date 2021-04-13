@@ -18,3 +18,13 @@ mapview
 lubridate
 gridExtra
 entropy
+ggmap
+jsonlite
+FNN
+lattice
+caret
+pROC
+plotROC
+RANN
+magrittr
+RSocrata
