@@ -63,6 +63,7 @@ We use the following data:
 
 
 ```r
+#Reload
 knitr::opts_chunk$set(message = FALSE, warning = FALSE)
 options(scipen=10000000)
 library(knitr)
@@ -75,14 +76,18 @@ library(viridis)
 library(mapview)
 library(lubridate)
 library(grid)
-library(gridExtra)
 library(ggplot2)
 library(ggmap)
 library(jsonlite)
 library(entropy)
 library(tidyr)
-install.packages("ggmap")
-
+library(lubridate)
+library(FNN) 
+library(gridExtra) 
+library(caret) 
+library(pROC)
+library(plotROC)
+library(RANN)
 
 
 root.dir = "https://raw.githubusercontent.com/urbanSpatial/Public-Policy-Analytics-Landing/master/DATA/"
@@ -117,7 +122,7 @@ paletteJ <- c("green", "red", "yellow")
 
 paletteLG <- c("#1B4332","#2D6A4F", "#52B788","#D8F3DC", "blue")
 
-landusepal <- c("#1B4332", "#95D5B2" )
+landusepal <- c("green", "dark green" )
 
 paletteDiverge <- c("red", "orange", "yellow", "blue", "green")
 
@@ -166,9 +171,9 @@ plotTheme <- function(base_size = 12) {
 ```r
 # Tree Canopy
 TreeCanopy <-
-  st_read("C:/Users/Kyle McCarthy/Documents/Practicum/TreeCanopyChange_2008_2018.shp")%>%
-#  st_read("/Users/annaduan/Desktop/Y3S2/Practicum/Data/TreeCanopyChange_2008_2018-shp/TreeCanopyChange_2008_2018.shp") %>%
-#  st_read("C:/Users/agarw/Documents/MUSA 801/Data/TreeCanopyChange_2008_2018.shp") %>%
+ #st_read("C:/Users/Kyle McCarthy/Documents/Practicum/TreeCanopyChange_2008_2018.shp")%>%
+  #st_read("/Users/annaduan/Desktop/Y3S2/Practicum/Data/TreeCanopyChange_2008_2018-shp/TreeCanopyChange_2008_2018.shp") %>%
+  st_read("C:/Users/agarw/Documents/MUSA 801/Data/TreeCanopyChange_2008_2018.shp") %>%
 #st_read("C:/Users/Prince/Desktop/Tree Canopy Data/TreeCanopyChange_2008_2018.shp") %>%
   st_transform('ESRI:102728') 
 
@@ -179,13 +184,14 @@ Loss <- TreeCanopy %>%
 
 # Philadelphia Base Map
 Philadelphia <- st_read("http://data.phl.opendata.arcgis.com/datasets/405ec3da942d4e20869d4e1449a2be48_0.geojson")%>%
-  st_transform('ESRI:102728')
+  st_transform('ESRI:102728') %>%
+  st_make_valid()
 
 # Neighborhoods
 Neighborhood <-
-  st_read("C:/Users/Kyle McCarthy/Documents/Practicum/Data/Neighborhoods/Neighborhoods_Philadelphia.shp") %>%
-#st_read("/Users/annaduan/Desktop/Y3S2/Practicum/Data/Neighborhoods_Philadelphia/Neighborhoods_Philadelphia.shp")%>%
- # st_read("C:/Users/agarw/Documents/MUSA 801/Data/Neighborhoods_Philadelphia.shp") %>%
+ #st_read("C:/Users/Kyle McCarthy/Documents/Practicum/Data/Neighborhoods/Neighborhoods_Philadelphia.shp") %>%
+ #st_read("/Users/annaduan/Desktop/Y3S2/Practicum/Data/Neighborhoods_Philadelphia/Neighborhoods_Philadelphia.shp")%>%
+  st_read("C:/Users/agarw/Documents/MUSA 801/Data/Neighborhoods_Philadelphia.shp") %>%
 #st_read("C:/Users/Prince/Desktop/Tree Canopy Data/Neighborhoods_Philadelphia/Neighborhoods_Philadelphia.shp") %>%
   st_transform('ESRI:102728')
 
@@ -199,9 +205,11 @@ Neighborhood <-
  # st_read("http://data.phl.opendata.arcgis.com/datasets/957f032f9c874327a1ad800abd887d17_0.geojson") %>%
  # st_transform('ESRI:102728')
 
-HOLC <- #st_read("/Users/annaduan/Desktop/Y3S2/Practicum/Data/PAPhiladelphia1937.geojson") %>%
- #st_read("C:/Users/Prince/Desktop/Tree Canopy Data/PAPhiladelphia1937.geojson") %>%
-  st_read("C:/Users/Kyle McCarthy/Documents/Practicum/Data/PAPhiladelphia1937.geojson")%>%
+HOLC <- 
+  #st_read("/Users/annaduan/Desktop/Y3S2/Practicum/Data/PAPhiladelphia1937.geojson") %>%
+# st_read("C:/Users/Prince/Desktop/Tree Canopy Data/PAPhiladelphia1937.geojson") %>%
+  #st_read("C:/Users/Kyle McCarthy/Documents/Practicum/Data/PAPhiladelphia1937.geojson")%>%
+  st_read("C:/Users/agarw/Documents/MUSA 801/Data/PAPhiladelphia1937.geojson")%>%
   st_transform('ESRI:102728')
 
 HOLC <-
@@ -255,14 +263,14 @@ ACS <-
   dplyr::select(-Households_hmow,-Households_hmre,-noVehicle_hmow,-noVehicle_hmre,-bachelor, -white)
 
 
-#parcels <- st_read("http://data-phl.opendata.arcgis.com/datasets/1c57dd1b3ff84449a4b0e3fb29d3cafd_0.geojson")%>%
-#  st_transform('ESRI:102728')
+parcels <- st_read("http://data-phl.opendata.arcgis.com/datasets/1c57dd1b3ff84449a4b0e3fb29d3cafd_0.geojson")%>%
+ st_transform('ESRI:102728')
 
 const_permits <- 
-  #st_read("C:/Users/agarw/Documents/MUSA 801/Data/const_permit.csv") %>%
-  #st_read("C:/Users/Prince/Desktop/Tree Canopy Data/const_permit.csv") %>%
-  st_read("C:/Users/Kyle McCarthy/Documents/Practicum/permits.csv")%>%
- # st_read("/Users/annaduan/Desktop/Y3S2/Practicum/Data/const_permit.csv")%>%
+   st_read("C:/Users/agarw/Documents/MUSA 801/Data/const_permit.csv") %>%
+ # st_read("C:/Users/Prince/Desktop/Tree Canopy Data/const_permit.csv") %>%
+  #st_read("C:/Users/Kyle McCarthy/Documents/Practicum/permits.csv")%>%
+   #st_read("/Users/annaduan/Desktop/Y3S2/Practicum/Data/const_permit.csv")%>%
   mutate(X = geocode_x,
          Y = geocode_y) 
 const_permits[const_permits==""]<-NA
@@ -272,8 +280,52 @@ const_spatial <- const_spatial %>% st_transform('ESRI:102728')
 # const <- const_spatial %>%
 #   filter(permitissuedate <= '30/06/2017 00:00')
 
-#Zoning <- st_read("http://data.phl.opendata.arcgis.com/datasets/0bdb0b5f13774c03abf8dc2f1aa01693_0.geojson")%>% 
-#  st_transform('ESRI:102728')
+const_spatial$permit_issue <- mdy_hm(const$permitissuedate)
+const_spatial$year <- year(const_spatial$permit_issue)
+
+const <- const_spatial %>%
+   filter(year <= "2017")
+
+
+LandUseFishnet <- 
+  #st_read("C:/Users/Kyle McCarthy/Documents/Practicum/Data/Fishnet_LU_Intersect/fishnet_LUS_Intersect_dissolve.shp")  %>%
+   st_read("C:/Users/agarw/Documents/MUSA 801/Data/fishnet_LUS_Intersect_dissolve.geojson") %>%
+#st_read("/Users/annaduan/Desktop/Y3S2/Practicum/Data/fishnet_LUS_Intersect_dissolve.geojson") %>%
+#  st_read("C:/Users/Prince/Desktop/Tree Canopy Data/fishnet_LUS_Intersect_dissolve.geojson") %>%
+   st_transform('ESRI:102728')
+
+
+Hydrology <-
+  st_read("https://opendata.arcgis.com/datasets/a31f7d7469404e919517e038fc133a8e_0.geojson")%>%
+    st_transform('ESRI:102728')
+  
+Hydrology <-
+  st_intersection(st_make_valid(Philadelphia), st_make_valid(Hydrology))
+
+ 
+ Parks <- 
+   #st_read("/Users/annaduan/Desktop/Y3S2/Practicum/Data/Parks") %>%
+   #st_read("C:/Users/Kyle McCarthy/Documents/Practicum/Data/Parks/Philadelphia_PPR_Park_Boundaries2016.shp ")%>%
+   st_read("C:/Users/agarw/Documents/MUSA 801/Data/Philadelphia_PPR_Park_Boundaries2016.shp") %>%
+   #st_read("C:/Users/Prince/Desktop/Tree Canopy Data/Philadelphia_PPR_Park_Boundaries2016.shp") %>%
+     st_transform('ESRI:102728') %>%
+   st_make_valid() %>%
+   select(geometry)
+
+Conservation <- 
+  #st_read("/Users/annaduan/Desktop/Y3S2/Practicum/Data/Conservation/ConservationEasements202103.shp") %>%
+  #st_read("C:/Users/Kyle McCarthy/Documents/Practicum/Data/Conservation/ConservationEasements202103.shp")%>%
+   st_read("C:/Users/agarw/Documents/MUSA 801/Data/ConservationEasements202103.shp") %>%
+   #  st_read("C:/Users/Prince/Desktop/Tree Canopy Data/ConservationEasements202103.shp") %>%
+   st_transform('ESRI:102728') %>%
+  st_intersection(st_make_valid(Philadelphia), st_make_valid(Conservation)) %>%
+  st_make_valid() %>%
+   select(geometry)
+
+ConservationNParks <- rbind(Parks, Conservation)
+
+
+# philadelphia_revised <- st_read("C:/Users/Kyle McCarthy/Documents/Practicum/Data/Conservation/philly_revised.shp")
 ```
 
 ## Exploratory Analysis
@@ -282,14 +334,52 @@ const_spatial <- const_spatial %>% st_transform('ESRI:102728')
 
 ```r
 # Make fishnet
-fishnet <- 
+# fishnet <- 
+#   st_make_grid(philadelphia_revised,
+#                cellsize = 800) %>%
+#   st_sf() %>%
+#   mutate(uniqueID = rownames(.))%>%
+#   st_transform('ESRI:102728')
+# 
+# 
+# ggplot() +
+#   geom_sf(data = fishnet) +
+#   mapTheme()
+# 
+# ggplot() +
+#   geom_sf(data = philadelphia_revised) +
+#   mapTheme()
+```
+
+
+```r
+fishnet2 <- 
   st_make_grid(Philadelphia,
                cellsize = 1615) %>%
   st_sf() %>%
   mutate(uniqueID = rownames(.))%>%
   st_transform('ESRI:102728')
+
+FishnetIntersect <- st_intersection(fishnet2, ConservationNParks )%>% 
+  mutate(Area = as.numeric(st_area(.)))%>%
+  st_drop_geometry()%>%
+  group_by(uniqueID)%>%
+  summarise(ConservationArea = sum(Area))%>% 
+  left_join(fishnet2, .)%>%
+  mutate_all(funs(replace_na(.,0)))%>% 
+  mutate(ConservationPct = ConservationArea /2608225 * 100) %>%
+  filter(ConservationPct <= 20)
+
+ggplot() +
+  geom_sf(data = FishnetIntersect) +
+  mapTheme()
 ```
 
+![](Tree_Canopy_Loss_files/figure-html/Fishnet 2-1.png)<!-- -->
+
+```r
+fishnet <- FishnetIntersect
+```
 
 
 ```r
@@ -383,15 +473,15 @@ FinalFishnet <-
 
 FinalFishnet<- 
   fishnet%>%
-  left_join(FinalFishnet)%>%
-  na.omit()
+  left_join(FinalFishnet)
 
 FinalFishnet<- 
   FinalFishnet%>% 
   mutate(pctChange = (AreaCoverage18 - AreaCoverage08) / (AreaCoverage08) * 100)%>%
-  mutate(netChange = AreaGain - AreaLoss)
+  mutate(netChange = AreaGain - AreaLoss, 
+         LogPctLoss = log10(pctLoss), 
+         LogPctGain = log10(pctGain))
   
-
 
 
 FinalFishnet$pctCoverage08Cat <- cut(FinalFishnet$pctCoverage08, 
@@ -433,7 +523,7 @@ In Philadelphia, the Northwest, parts of the West, and parts of the Northeast ha
 
 ```r
 ggplot()+ 
-  geom_sf(data = FinalFishnet, aes(fill = pctCoverage18Cat))+ 
+  geom_sf(data = FinalFishnet, colour = "transparent", aes(fill = pctCoverage18Cat))+ 
      scale_fill_manual(values = palette7, 
                     name = "2018 Percent Coverage")+ 
   labs(title = "Tree Canopy Coverage, 2018", 
@@ -442,7 +532,7 @@ subtitle = "2018 Tree Canopy Area / Gridcell Size") +
         legend.title = element_text(size = 12)) +  mapTheme()
 ```
 
-![](Tree_Canopy_Loss_files/figure-html/2018 Tree Canopy-1.png)<!-- -->
+![](Tree_Canopy_Loss_files/figure-html/2018 Canopy-1.png)<!-- -->
 
 **Tree Canopy Change**  
 
@@ -466,28 +556,30 @@ subtitle = "2018 Tree Canopy Area / Gridcell Size") +
 #   theme(plot.title = element_text( size = 24, face = "bold", hjust = 0.5), 
 #         legend.title = element_text(size = 12), 
 #         legend.text = element_text(size = 10)) + mapTheme()) 
+library(gridExtra)
+library(grid)
 
 
 
-grid.arrange(ncol=2,
-             
-ggplot()+ 
-  geom_sf(data = FinalFishnet, aes(fill = pctLossCat))+ 
-  scale_fill_manual(values = palette7,
-                    name = "Percent Loss")+
+v <- ggplot()+ 
+  geom_sf(data = FinalFishnet, aes(fill = pctLoss))+
+ # scale_fill_manual(values = palette7,name = "Percent Loss")+
   labs(title= "What was the Percent of Tree Canopy Loss in Each Grid Cell?", 
        subtitle = "Tree Canopy Lost From 2008 - 2018 / Total Tree Canopy Coverage in 2008")+
   theme(plot.title = element_text(hjust = 0.3), 
-        plot.subtitle = element_text(hjust = 0.3)) + mapTheme(),
-             
-ggplot()+ 
-  geom_sf(data = FinalFishnet, aes(fill = pctGainCat))+ 
-  scale_fill_manual(values = palette7,
-                    name = "Percent Gain")+
+        plot.subtitle = element_text(hjust = 0.3)) + mapTheme()
+
+z <- ggplot()+ 
+  geom_sf(data = FinalFishnet, aes(fill = pctGain))+ 
+ # scale_fill_manual(values = palette7,name = "Percent Gain")+
   labs(title= "What was the Percent of Tree Canopy Gain in Each Grid Cell?", 
        subtitle = "Tree Canopy Gained From 2008 - 2018 / Total Tree Canopy Coverage in 2018")+
   theme(plot.title = element_text(hjust = 0.3), 
-        plot.subtitle = element_text(hjust = 0.3)) + mapTheme())  
+        plot.subtitle = element_text(hjust = 0.3)) + mapTheme()  
+
+grid.arrange(ncol=2,
+v + scale_fill_distiller(palette = "YlOrRd", direction = 1),
+z + scale_fill_distiller(palette = "YlGr", direction = 1))
 ```
 
 ![](Tree_Canopy_Loss_files/figure-html/Change in tree canopy-1.png)<!-- -->
@@ -500,51 +592,41 @@ FinalFishnet$PctChangeCat <- cut(FinalFishnet$pctChange,
                        right = FALSE)
 
 
-
-
-ggplot()+ 
-               geom_sf(data = FinalFishnet, aes(fill = PctChangeCat))+ 
-               scale_fill_manual(values = palette5,
-                                 name = "Area Loss (f^2)")+
-               labs(title= "How Much Tree Canopy Was Lost in Each Gridcell \n From 2008 - 2018?")+
-               mapTheme()
-```
-
-![](Tree_Canopy_Loss_files/figure-html/Gain Minus Loss-1.png)<!-- -->
-
-```r
-ggplot()+ 
-  geom_sf(data = FinalFishnet, aes(fill = PctChangeCat))+ 
-  scale_fill_manual(values = palette8,
-                    name = "Percent Change")+
+b <- ggplot()+ 
+  geom_sf(data = FinalFishnet, colour = "black", aes(fill = PctChangeCat))+ 
+ # scale_fill_manual(values = palette8,name = "Percent Change")+
   labs(title= " What is the Net Percent Gain or Loss from 2008- 2018?", 
        subtitle = "Percent Tree Canopy Gain - Percent Tree Canopy Loss") +
   theme(plot.title = element_text(hjust = 0.3), 
         legend.title = element_text(size = 12), 
         legend.text = element_text(size = 10)) + mapTheme()
+
+  
+
+b + scale_fill_brewer(palette = "PiYG", direction = 1, aesthetics = c("colour", "fill"), guide = guide_legend(reverse = TRUE))
 ```
 
-![](Tree_Canopy_Loss_files/figure-html/Gain Minus Loss-2.png)<!-- -->
+![](Tree_Canopy_Loss_files/figure-html/Gain Minus Loss-1.png)<!-- -->
 
 
 ```r
 grid.arrange(ncol=2,
              
 ggplot(FinalFishnet, aes(x = pctGain, y = pctCoverage18))+
-  geom_point()+ 
+  geom_point(colour = "dark green", alpha = 0.3, size = 2)+ 
       scale_x_log10() + scale_y_log10() +
   labs(title = "Percent Tree Canopy Gain (2008 - 2018) vs. \n Percent Tree Canopy Coverage (2018)", 
-       subtitle = "Aggregated by Fishnet") + 
+       subtitle = "1 dot = 1 fishnet cell") + 
   xlab("Percent of Tree Canopy Gained (2008 - 2018)") + 
   ylab("Percent of Tree Canopy Coverage of Each Fishnet Cell (2018)") + 
   theme(plot.title = element_text(hjust = 0.3, size = 12), plot.subtitle = element_text(hjust = 0.3, size = 8)) +
     plotTheme(), 
 
 ggplot(FinalFishnet, aes(x = pctLoss, y = pctCoverage18))+
-  geom_point()+ 
+  geom_point(colour = "dark green", alpha = 0.3, size = 2)+ 
       scale_x_log10() + scale_y_log10() +
   labs(title = "Percent Tree Canopy Loss (2008 - 2018) vs. \n Percent Tree Canopy Coverage (2018) ", 
-       subtitle = "Aggregated by Fishnet") + 
+       subtitle = "1 dot = 1 fishnet cell") + 
   xlab("Percent of Tree Canopy Lost (2008 - 2018)") + 
   ylab("Percent of Tree Canopy Coverage of Each Fishnet Cell (2018)") + 
   theme(plot.title = element_text(hjust = 0.3, size = 12), plot.subtitle = element_text(hjust = 0.3, size = 8)) +
@@ -554,14 +636,14 @@ ggplot(FinalFishnet, aes(x = pctLoss, y = pctCoverage18))+
 ![](Tree_Canopy_Loss_files/figure-html/Comparing Tree Canopy Area to Loss/Gain2-1.png)<!-- -->
 
 ```r
-pctChangeGraph = 
+pctChangeGraph <- 
   FinalFishnet%>% 
   filter(pctChange < 100)
 
 ggplot(pctChangeGraph, aes(x = pctChange, y = pctCoverage18))+
-  geom_point()+ 
-  labs(title = "Percent Change \n vs. Percent Tree Canopy Coverage (2018)", 
-       subtilte = "Aggregated by Fishnet") + 
+  geom_point(colour = "dark green", alpha = 0.3, size = 2)+ 
+  labs(title = "Percent Change \n vs. Percent Tree Canopy (2018)", 
+       subtitle = "1 dot = 1 fishnet cell") + 
   xlab("Percent Change in Tree Canopy from 2008-2018 ") + 
   ylab("Percent of Tree Canopy Coverage of Each Grid Cell (2018)") + 
   theme(plot.title = element_text(hjust = 0.5, size = 15, face = "bold"), plot.subtitle = element_text(hjust = 0.5, size = 8)) +
@@ -583,7 +665,6 @@ FinalFishnet1 <- fishnet_centroid %>%
   st_drop_geometry() %>%
   left_join(FinalFishnet,.,by="uniqueID") %>%
   dplyr::select(GEOID) %>%
-  na.omit() %>%
   mutate(uniqueID = as.numeric(rownames(.)))
 
 # Make fishnet with ACS variables
@@ -618,64 +699,78 @@ What about income? Higher income neighborhoods in Philadelphia generally have mo
 
 ```r
 library(magrittr)
-library(dplyr)
+
 #making basemap
  ll <- function(dat, proj4 = 4326){
    st_transform(dat, proj4)
  }
 
 #Juniata Park
-# JPBound <- Neighborhood %>%  
-#   dplyr::filter(NAME=="JUNIATA_PARK")
-# 
-# JuniataPark <- st_intersection(st_make_valid(TreeCanopy), JPBound)
-# 
-# ggplot() +
-#   geom_sf(data = JPBound, fill = "black") +
-#   geom_sf(data = JuniataPark, aes(fill = CLASS_NAME), colour = "transparent") +
-#   scale_fill_manual(values = paletteJ, name = "Canopy Change") +
-#   labs(title = "Juniata Park Tree Canopy Change 2008-2018", subtitle = "Philadelphia, PA") +
-#     mapTheme()
-# 
-# #Upper Roxborough
-# URBound <- Neighborhood %>%  dplyr::filter(NAME=="UPPER_ROXBOROUGH")
-# UpperRoxborough <- st_intersection(st_make_valid(TreeCanopy), URBound)
-# 
-# ggplot() +
-#   geom_sf(data = URBound, fill = "black") +
-#   geom_sf(data = UpperRoxborough, aes(fill = CLASS_NAME), colour = "transparent") +
-#   scale_fill_manual(values = paletteJ, name = "Canopy Change") +
-#   labs(title = "Upper Roxborough Tree Canopy Change 2008-2018", subtitle = "Philadelphia, PA") +
-#     mapTheme()
-
-#Fairhill
-# FHBound <- Neighborhood %>%  dplyr::filter(NAME=="FAIRHILL")
-# Fairhill <- st_intersection(st_make_valid(TreeCanopy), FHBound)
-# 
-# base_mapFH <- get_map(location =  unname(st_bbox(ll(st_buffer(st_centroid(Fairhill),1100)))),
-#                     maptype = "satellite") #get a basemap
-# 
-# ggmap(base_mapFH, darken = c(0.3, "white")) + 
-#   geom_sf(data = ll(FHBound), fill = "black", alpha = 0.3, inherit.aes = FALSE) +
-#   geom_sf(data = ll(Fairhill), aes(fill = CLASS_NAME), colour = "transparent", inherit.aes = FALSE) +
-#   scale_fill_manual(values = paletteJ, name = "Canopy Change") +
-#   labs(title = "Fairhill Tree Canopy Change 2008-2018", subtitle = "Philadelphia, PA") +
-#     mapTheme()
-# 
-# #GRad hospital
-# GHBound <- Neighborhood %>%  dplyr::filter(NAME=="GRADUATE_HOSPITAL")
-# GraduateHospital <- st_intersection(st_make_valid(TreeCanopy), GHBound)
-# 
-# base_mapGH <- get_map(location =  unname(st_bbox(ll(st_buffer(st_centroid(GraduateHospital),1100)))),
-#                     maptype = "satellite") #get a basemap
-# 
-# ggmap(base_mapGH, darken = c(0.3, "white")) + 
-#   geom_sf(data = ll(GHBound), fill = "black", alpha = 0.3, inherit.aes = FALSE) +
-#   geom_sf(data = ll(GraduateHospital), aes(fill = CLASS_NAME), colour = "transparent", inherit.aes = FALSE) +
-#   scale_fill_manual(values = paletteJ, name = "Canopy Change") +
-#   labs(title = "Graduate Hospital Tree Canopy Change 2008-2018", subtitle = "Philadelphia, PA") +
-#     mapTheme()
+ JPBound <- Neighborhood %>%  
+   dplyr::filter(NAME=="JUNIATA_PARK")
+ 
+ JuniataPark <- st_intersection(st_make_valid(TreeCanopy), JPBound)
+ 
+ ggplot() +
+   geom_sf(data = JPBound, fill = "black") +
+   geom_sf(data = JuniataPark, aes(fill = CLASS_NAME), colour = "transparent") +
+   scale_fill_manual(values = paletteJ, name = "Canopy Change") +
+   labs(title = "Juniata Park Tree Canopy Change 2008-2018", subtitle = "Philadelphia, PA") +
+     mapTheme()
 ```
+
+![](Tree_Canopy_Loss_files/figure-html/Neighborhood level Tree Loss-1.png)<!-- -->
+
+```r
+#Upper Roxborough
+ URBound <- Neighborhood %>%  dplyr::filter(NAME=="UPPER_ROXBOROUGH")
+ UpperRoxborough <- st_intersection(st_make_valid(TreeCanopy), URBound)
+ 
+  ggplot() +
+   geom_sf(data = URBound, fill = "black") +
+   geom_sf(data = UpperRoxborough, aes(fill = CLASS_NAME), colour = "transparent") +
+   scale_fill_manual(values = paletteJ, name = "Canopy Change") +
+   labs(title = "Upper Roxborough Tree Canopy Change 2008-2018", subtitle = "Philadelphia, PA") +
+     mapTheme()
+```
+
+![](Tree_Canopy_Loss_files/figure-html/Neighborhood level Tree Loss-2.png)<!-- -->
+
+```r
+#Fairhill
+ FHBound <- Neighborhood %>%  dplyr::filter(NAME=="FAIRHILL")
+ Fairhill <- st_intersection(st_make_valid(TreeCanopy), FHBound)
+ 
+ base_mapFH <- get_map(location =  unname(st_bbox(ll(st_buffer(st_centroid(Fairhill),1100)))),
+                     maptype = "satellite") #get a basemap
+ 
+ ggmap(base_mapFH, darken = c(0.3, "white")) + 
+   geom_sf(data = ll(FHBound), fill = "black", alpha = 0.3, inherit.aes = FALSE) +
+   geom_sf(data = ll(Fairhill), aes(fill = CLASS_NAME), colour = "transparent", inherit.aes = FALSE) +
+   scale_fill_manual(values = paletteJ, name = "Canopy Change") +
+   labs(title = "Fairhill Tree Canopy Change 2008-2018", subtitle = "Philadelphia, PA") +
+     mapTheme()
+```
+
+![](Tree_Canopy_Loss_files/figure-html/Neighborhood level Tree Loss-3.png)<!-- -->
+
+```r
+ #GRad hospital
+ GHBound <- Neighborhood %>%  dplyr::filter(NAME=="GRADUATE_HOSPITAL")
+ GraduateHospital <- st_intersection(st_make_valid(TreeCanopy), GHBound)
+ 
+ base_mapGH <- get_map(location =  unname(st_bbox(ll(st_buffer(st_centroid(GraduateHospital),1100)))),
+                     maptype = "satellite") #get a basemap
+ 
+ ggmap(base_mapGH, darken = c(0.3, "white")) + 
+   geom_sf(data = ll(GHBound), fill = "black", alpha = 0.3, inherit.aes = FALSE) +
+   geom_sf(data = ll(GraduateHospital), aes(fill = CLASS_NAME), colour = "transparent", inherit.aes = FALSE) +
+   scale_fill_manual(values = paletteJ, name = "Canopy Change") +
+   labs(title = "Graduate Hospital Tree Canopy Change 2008-2018", subtitle = "Philadelphia, PA") +
+     mapTheme()
+```
+
+![](Tree_Canopy_Loss_files/figure-html/Neighborhood level Tree Loss-4.png)<!-- -->
 
 
 ### 2. Which neighborhoods do not meet the 30% tree canopy coverage?   
@@ -776,37 +871,64 @@ FinalNeighborhood$GainMinusLossCat <- cut(FinalNeighborhood$GainMinusLoss,
 
 
 ```r
-ggplot() +
+o <- ggplot() +
   geom_sf(data = FinalNeighborhood, aes(fill = GoalCat), color = "white") +
-  scale_fill_manual(values = GoalPalette, 
-                    name = "Percent Away From Achieving 30% Goal")+
+#  scale_fill_manual(values = GoalPalette, name = "Percent Away From Achieving 30% Goal")+
   labs(title = "How Far is Each Neighborhood Away From Meeting\n Philadelphia's 30% Tree Canopy Goal in Each Neighborhood?") +
   theme(plot.title = element_text(hjust = 0.5, size = 8), 
         legend.position = "bottom", 
         legend.title = element_blank())+
   mapTheme() 
+
+
+p <- ggplot() +
+  geom_sf(data = FinalNeighborhood, aes(fill = GainMinusLossCat), color = "white") +
+  # scale_fill_manual(values = paletteLG, name = "Gain or Loss")+ 
+  labs(title = "What is the Tree Canopy Net Gain or Loss \nin Each Neighborhood from 2008 - 2018?") +
+  theme(plot.title = element_text(hjust = 0.5, size = 6))+
+  mapTheme()
+
+o + scale_fill_brewer(palette = "PiYG", direction = 1, aesthetics = c("colour", "fill"), guide = guide_legend(reverse = TRUE))
 ```
 
 ![](Tree_Canopy_Loss_files/figure-html/Neighborhood Maps-1.png)<!-- -->
 
 ```r
-ggplot() +
-  geom_sf(data = FinalNeighborhood, aes(fill = GainMinusLossCat), color = "white") +
-  scale_fill_manual(values = paletteLG, name = "Gain or Loss")+ 
-  labs(title = "What is the Tree Canopy Net Gain or Loss \nin Each Neighborhood from 2008 - 2018?") +
-  theme(plot.title = element_text(hjust = 0.5, size = 6))+
-  mapTheme()
+p + scale_fill_brewer(palette = "PiYG", direction = 1, aesthetics = c("colour", "fill"), guide = guide_legend(reverse = TRUE))
 ```
 
 ![](Tree_Canopy_Loss_files/figure-html/Neighborhood Maps-2.png)<!-- -->
+
+```r
+#Test above
+
+# ggplot() +
+#   geom_sf(data = FinalNeighborhood, aes(fill = GoalCat), color = "white") +
+#   scale_fill_manual(values = GoalPalette, 
+#                     name = "Percent Away From Achieving 30% Goal")+
+#   labs(title = "How Far is Each Neighborhood Away From Meeting\n Philadelphia's 30% Tree Canopy Goal in Each Neighborhood?") +
+#   theme(plot.title = element_text(hjust = 0.5, size = 8), 
+#         legend.position = "bottom", 
+#         legend.title = element_blank())+
+#   mapTheme() 
+# 
+# 
+# ggplot() +
+#   geom_sf(data = FinalNeighborhood, aes(fill = GainMinusLossCat), color = "white") +
+#   scale_fill_manual(values = paletteLG, name = "Gain or Loss")+ 
+#   labs(title = "What is the Tree Canopy Net Gain or Loss \nin Each Neighborhood from 2008 - 2018?") +
+#   theme(plot.title = element_text(hjust = 0.5, size = 6))+
+#   mapTheme()
+```
 
 The demographic attribute most correlated with tree canopy coverage is income.
 
 ```r
 correlation.long <-
   st_drop_geometry(FinalFishnet) %>%
-     dplyr::select(population, medHHInc, housing_units, Rent, pctBach, pctWhite, pctNoVehicle, netChange) %>%
-    gather(Variable, Value, -netChange)
+     dplyr::select(population, medHHInc, housing_units, Rent, pctWhite, pctNoVehicle, netChange) %>%
+    gather(Variable, Value, -netChange) 
+
 
 correlation.cor <-
   correlation.long %>%
@@ -851,43 +973,43 @@ correlation.cor3 <-
 library(grid)
 grid.arrange(ncol=2, top=textGrob("Fishnet Variables in Comparison to Local Demographics"),
              ggplot(correlation.long, aes(Value, netChange)) +
-  geom_point(size = 0.1) +
-    scale_x_log10() + scale_y_log10() +
+  geom_point(colour = "dark green", alpha = 0.3, size = .5) +
+   scale_y_log10() +
   geom_text(data = correlation.cor, aes(label = paste("r =", round(correlation, 2))),
             x=-Inf, y=Inf, vjust = 1.5, hjust = -.1) +
-  geom_smooth(method = "lm", se = FALSE, colour = "red") +
+  geom_smooth(method = "lm", se = FALSE, colour = "black") +
   facet_wrap(~Variable, ncol = 2, scales = "free") +
   labs(title = "Percent Tree Canopy Gained (2008 -2018) \n Minus Percent Tree Canopy Lost (2008 - 2018)") +
   plotTheme(), 
   
   ggplot(correlation.long1, aes(Value, pctLoss)) +
-  geom_point(size = 0.1) +
-    scale_x_log10() + scale_y_log10() +
+  geom_point(colour = "dark green", alpha = 0.3, size = .5) +
+  scale_y_log10() +
   geom_text(data = correlation.cor1, aes(label = paste("r =", round(correlation, 2))),
             x=-Inf, y=Inf, vjust = 1.5, hjust = -.1) +
-  geom_smooth(method = "lm", se = FALSE, colour = "red") +
+  geom_smooth(method = "lm", se = FALSE, colour = "black") +
   facet_wrap(~Variable, ncol = 2, scales = "free") +
   labs(title = "Percent Tree Canopy Lost From 2008 - 2018 ") +
   plotTheme(), 
   
   ggplot(correlation.long2, aes(Value, pctGain)) +
-  geom_point(size = 0.1) +
-    scale_x_log10() + scale_y_log10() +
+  geom_point(colour = "dark green", alpha = 0.3, size = .5) +
+  scale_y_log10() +
     geom_text(data = correlation.cor2, aes(label = paste("r =", round(correlation, 2))),
             x=-Inf, y=Inf, vjust = 1.5, hjust = -.1) +
-  geom_smooth(method = "lm", se = FALSE, colour = "red") +
+  geom_smooth(method = "lm", se = FALSE, colour = "black") +
   facet_wrap(~Variable, ncol = 2, scales = "free") +
   labs(title = "Percent Tree Canopy Gained From 2008 - 2018 ") +
   plotTheme(), 
   
   ggplot(correlation.long3, aes(Value, pctCoverage18)) +
-  geom_point(size = 0.1) +
-    scale_x_log10() + scale_y_log10() +
+  geom_point(colour = "dark green", alpha = 0.3, size = .5) +
+  scale_y_log10() +
   geom_text(data = correlation.cor3, aes(label = paste("r =", round(correlation, 2))),
             x=-Inf, y=Inf, vjust = 1.5, hjust = -.1) +
-  geom_smooth(method = "lm", se = FALSE, colour = "red") +
+  geom_smooth(method = "lm", se = FALSE, colour = "black") +
   facet_wrap(~Variable, ncol = 2, scales = "free") +
-  labs(title = "Percent Tree Canopy Coverage (2018)") +
+  labs(title = "Percent Tree Canopy Coverage (2018)") + 
   plotTheme()) 
 ```
 
@@ -923,69 +1045,124 @@ grid.arrange(ncol=2, top=textGrob("Fishnet Variables in Comparison to Local Demo
 ```r
 # Parcels make little difference, except if you are looking at total net change (looks like a normal distribution). Im commenting it out, but feel free to play around with the data. 
 
-# 
-# # Parcels 
-# parcels <- 
-# parcels %>%
-#  mutate(ParcelArea = st_area(parcels))%>%
-#  st_centroid()%>%
-#  dplyr:: select(ParcelArea)
-# 
-# 
-# FinalFishnet1 <- st_join(FinalFishnet, parcels)
-# 
-# FinalFishnet1<- 
-# FinalFishnet1 %>%
-#   st_drop_geometry()%>%
-#   group_by(uniqueID)%>%
-#   summarise(avgParcelSize = mean(ParcelArea))
-# 
-# 
-# FinalFishnet1 <-
-#   FinalFishnet%>%
-#   left_join(FinalFishnet1)
-# 
-# FinalFishnet1<- 
-#   FinalFishnet1%>% 
-#   mutate(pctChange = (AreaCoverage18 - AreaCoverage08) / (AreaCoverage08) * 100)%>%
-#   mutate(netChange = AreaGain - AreaLoss)%>%
-#   mutate(avgParcelSize = as.numeric(avgParcelSize))
-# 
-# ggplot(Graph, aes(y = avgParcelSize, x = pctChange))+
-#   geom_point()+ 
-#   labs(title = "Percent Tree Canopy Loss (2008 - 2018) vs. \n Percent Tree Canopy Coverage (2018) ", 
-#        subtilte = "Aggregated by Fishnet") + 
-#   xlab("Percent of Tree Canopy Lost (2008 - 2018)") + 
-#   ylab("Percent of Tree Canopy Coverage of Each Fishnet Cell (2018)") + 
-#   theme(plot.title = element_text(hjust = 0.3, size = 12), plot.subtitle = element_text(hjust = 0.3, size = 8)) +
-#   plotTheme()
+#
+# # Parcels
+parcels <-
+  parcels%>%
+ st_centroid()%>%
+  dplyr::select(Shape__Area)
 
-# e311Trees <- 
-#   st_read('C:/Users/Kyle McCarthy/Documents/Practicum/e311.csv')
-#   
-# e311Trees<- 
-#   e311Trees%>%
-#   dplyr:: select(service_name, lat, lon)%>% 
-#   filter(service_name == "Tree Dangerous" | service_name == "Street Tree")%>% 
-#   mutate(lon = as.numeric(lon), 
-#          lat = as.numeric(lat))%>% 
-#     na.omit()%>% 
-#   st_as_sf(.,coords=c("lon","lat"),crs=4326)%>% 
-#   st_transform('ESRI:102728')
-#    
-# 
-# e311_net_tree <- 
-#   e311Trees%>%
-#   mutate(e311TreeCount = 1) %>% 
-#   dplyr::select(e311TreeCount)%>%
-#   aggregate(., FinalFishnet, sum) %>%
-#   mutate(e311TreeCount = replace_na(e311TreeCount, 0))%>%
-#   st_centroid()%>%
-#   st_join(FinalFishnet, .)
-# 
-# 
-#   
+
+FinalFishnet1 <- st_join(FinalFishnet, parcels)
+
+FinalFishnet<-
+FinalFishnet1 %>%
+  st_drop_geometry()%>%
+  group_by(uniqueID)%>%
+  summarise(avgParcelSize = mean(Shape__Area))%>%
+  left_join(FinalFishnet, .)%>%
+  mutate(LogAvgParcelSize = log10(avgParcelSize), 
+         LogPctLoss = log10(pctLoss))
+
+ggplot(FinalFishnet, aes(y = LogPctLoss, x = LogAvgParcelSize))+
+  geom_point(colour = "dark green", size = .8)+
+  labs(title = "Percent Tree Canopy Loss (2008 - 2018) vs. \n Percent Tree Canopy Coverage (2018) ",
+       subtitle = "Aggregated by Fishnet") +
+  xlab("Percent of Tree Canopy Lost (2008 - 2018)") +
+  ylab("Percent of Tree Canopy Coverage of Each Fishnet Cell (2018)") +
+  theme(plot.title = element_text(hjust = 0.3, size = 12), plot.subtitle = element_text(hjust = 0.3, size = 8)) +
+  plotTheme()
 ```
+
+![](Tree_Canopy_Loss_files/figure-html/Potential Risk Factors-1.png)<!-- -->
+
+
+```r
+Hydrology <- Hydrology %>%
+   select(geometry) 
+
+HydrologyNet <- st_buffer(Hydrology, 100) %>%
+st_intersection(FinalFishnet, Hydrology) %>%
+mutate(Area = as.numeric(st_area(.))) %>%
+st_drop_geometry() %>%
+group_by(uniqueID) %>%
+summarise(HydrologyArea = sum(Area)) %>%
+left_join(FinalFishnet, .) %>%
+mutate_all(funs(replace_na(.,0)))%>%
+mutate(HydrologyPct = HydrologyArea /2608225 * 100) 
+
+ggplot() +
+  geom_sf(data = HydrologyNet, aes(fill = HydrologyArea)) +
+  mapTheme()
+```
+
+![](Tree_Canopy_Loss_files/figure-html/hydrology-1.png)<!-- -->
+
+```r
+ggplot(HydrologyNet, aes(y = LogPctLoss, x = HydrologyPct))+
+  geom_point()+
+  labs(title = "Percent Tree Canopy Loss (2008 - 2018) vs. \n Nearby Water Sources (2018) ",
+       subtilte = "Aggregated by Fishnet") +
+  xlab("Amount of nearby water sources") +
+  ylab("Log Percent of Tree Canopy Loss in Each Fishnet Cell (2018)") +
+  theme(plot.title = element_text(hjust = 0.3, size = 12), plot.subtitle = element_text(hjust = 0.3, size = 8)) +
+  plotTheme()
+```
+
+![](Tree_Canopy_Loss_files/figure-html/hydrology-2.png)<!-- -->
+
+```r
+FinalFishnet <-
+   HydrologyNet %>%
+   st_drop_geometry() %>%
+   left_join(FinalFishnet, .)
+```
+
+
+
+```r
+e311Trees <-
+  #st_read('C:/Users/Kyle McCarthy/Documents/Practicum/e311.csv') 
+  #st_read("/Users/annaduan/Desktop/Y3S2/Practicum/Data/streettree311.csv")
+  st_read('C:/Users/agarw/Documents/MUSA 801/Data/e311.csv')
+#st_read("C:/Users/Prince/Desktop/Tree Canopy Data/e311.csv") %>%
+
+
+e311Trees<-
+  e311Trees%>%
+  dplyr:: select(service_name, lat, lon)%>%
+  mutate(lon = as.numeric(lon),
+         lat = as.numeric(lat))%>%
+    na.omit()%>%
+  st_as_sf(.,coords=c("lon","lat"),crs=4326)%>%
+  st_transform('ESRI:102728')
+
+
+FinalFishnet <-
+  e311Trees%>%
+  mutate(e311Count = 1) %>%
+  dplyr::select(e311Count)%>%
+  st_join(FinalFishnet)%>% 
+  st_drop_geometry()%>% 
+  group_by(uniqueID)%>% 
+  summarise(e311Count = sum(e311Count))%>% 
+  mutate(e311Count = replace_na(e311Count, 0))%>%
+  left_join(FinalFishnet, .)%>%
+  mutate(Loge311Count = log10(e311Count),
+         LogPctLoss = log10(pctLoss))
+
+ggplot(FinalFishnet, aes(y = LogPctLoss, x = Loge311Count))+
+  geom_point()+
+  labs(title = "Percent Tree Canopy Loss (2008 - 2018) vs. \n Percent Tree Canopy Coverage (2018) ",
+       subtilte = "Aggregated by Fishnet") +
+  xlab("Percent of Tree Canopy Lost (2008 - 2018)") +
+  ylab("Percent of Tree Canopy Coverage of Each Fishnet Cell (2018)") +
+  theme(plot.title = element_text(hjust = 0.3, size = 12), plot.subtitle = element_text(hjust = 0.3, size = 8)) +
+  plotTheme()
+```
+
+![](Tree_Canopy_Loss_files/figure-html/E911 Trees-1.png)<!-- -->
+
 
 
 ```r
@@ -993,36 +1170,55 @@ const_spatial2 <-
   const_spatial %>%
   filter(permitdescription == 'RESIDENTIAL BUILDING PERMIT ' | permitdescription == 'COMMERCIAL BUILDING PERMIT')
 
-# ggplot()+
-#   geom_sf(data = Philadelphia) +
-#   geom_sf(data = const_spatial2)
-
-### Aggregate points to the neighborhood
-## add a value of 1 to each crime, sum them with aggregate
-const_net <- 
-  dplyr::select(const_spatial2) %>% 
-  mutate(countConst = 1) %>% 
-  aggregate(., Neighborhood, sum) %>%
-  mutate(countConst = replace_na(countConst, 0),
-         neigh = Neighborhood$NAME)
-
-             
-
-const_net_fish <- 
-  dplyr::select(const_spatial2) %>% 
-  mutate(countConst = 1) %>% 
-  aggregate(., fishnet, sum) %>%
-  mutate(countConst = replace_na(countConst, 0),
-         uniqueID = rownames(.))
-             
-             ggplot() +
-                  geom_sf(data = const_net, aes(fill = countConst), color = NA) +
-                  scale_fill_viridis() +
-                  labs(title = "Count of Construction permits for the neighborhood") +
-                  mapTheme()
+ggplot()+
+ geom_sf(data = Philadelphia) +
+ geom_sf(data = const_spatial2)
 ```
 
 ![](Tree_Canopy_Loss_files/figure-html/Const_Permit-1.png)<!-- -->
+
+```r
+# 
+### Aggregate points to the neighborhood
+## add a value of 1 to each crime, sum them with aggregate
+const_net <- 
+   dplyr::select(const_spatial) %>% 
+   mutate(countConst = 1) %>% 
+   aggregate(., Neighborhood, sum) %>%
+   mutate(countConst = replace_na(countConst, 0),
+          neigh = Neighborhood$NAME)
+
+# 
+#              
+# 
+const_net_fish <- 
+   dplyr::select(const_spatial) %>% 
+   mutate(countConst = 1) %>% 
+   aggregate(., fishnet, sum) %>%
+   mutate(countConst = replace_na(countConst, 0),
+          uniqueID = rownames(.))
+#              
+const_net$countConstCat <- cut(const_net$countConst, 
+                      breaks = c(-Inf,  1302,  3002, 5400, Inf), 
+                       labels = c("Least permits", "Some permits", "Moderate permits", "Most permits"), 
+                       right = FALSE)
+
+ggplot() +
+   geom_sf(data = const_net, aes(fill = as.factor(countConstCat)), color = NA) + scale_fill_brewer(palette = "YlOrRd", direction = 1, aesthetics = c("colour", "fill"), guide = guide_legend(reverse = TRUE), name = "Permit Count") +
+   #scale_fill_viridis() +
+   labs(title = "Construction Permits by Neighborhood, 2020", subtitle = "Philadelphia, PA") +
+   mapTheme()
+```
+
+![](Tree_Canopy_Loss_files/figure-html/Const_Permit-2.png)<!-- -->
+
+```r
+FinalFishnet <-
+   const_net_fish %>%
+   st_drop_geometry() %>%
+   left_join(FinalFishnet, .)%>%
+   mutate(countConst = replace_na(countConst, 0))
+```
 
 
 ```r
@@ -1035,21 +1231,22 @@ const_max_neigh <-
 Max_neigh <- Neighborhood %>%
   filter(NAME == const_max_neigh$neigh)
 
-const_neigh <- st_intersection(const_spatial2, Max_neigh)
+const_neigh <- st_intersection(const_spatial, Max_neigh)
   
 
 
-Max_neigh_tree <- st_intersection(st_make_valid(TreeCanopy), Max_neigh)
+Max_neigh_tree <- st_intersection(st_make_valid(TreeCanopy), Max_neigh) %>%
+  filter(CLASS_NAME == 'Loss')
 
 base_mapGH <- get_map(location =  unname(st_bbox(ll(st_buffer(st_centroid(Max_neigh_tree),1100)))),
                     maptype = "satellite") #get a basemap
 
 ggmap(base_mapGH, darken = c(0.3, "white")) + 
   geom_sf(data = ll(Max_neigh), fill = "black", alpha = 0.3, inherit.aes = FALSE) +
-  geom_sf(data = ll(Max_neigh_tree), aes(fill = CLASS_NAME), colour = "transparent", inherit.aes = FALSE) +
-  geom_sf(data = ll(const_neigh), inherit.aes = FALSE) +
+  geom_sf(data = ll(Max_neigh_tree), aes(colour = CLASS_NAME), colour = "red", inherit.aes = FALSE) +
+  geom_sf(data = ll(const_neigh), size = 0.1, inherit.aes = FALSE) +
   scale_fill_manual(values = paletteJ, name = "Canopy Change") +
-  labs(title = "University City Tree Canopy Change 2008-2018 with construction permits", subtitle = "Philadelphia, PA") +
+  labs(title = "Pont Breeze Tree Canopy Change 2008-2018 with construction permits", subtitle = "Philadelphia, PA") +
     mapTheme()
 ```
 
@@ -1058,67 +1255,91 @@ ggmap(base_mapGH, darken = c(0.3, "white")) +
 
 ```r
 #Juniata Park
-# 
-# const_JB <- st_intersection(const_spatial2, JPBound)
-# 
-# base_mapGH <- get_map(location =  unname(st_bbox(ll(st_buffer(st_centroid(JuniataPark),1100)))),
-#                     maptype = "satellite") #get a basemap
-# 
-# ggmap(base_mapGH, darken = c(0.3, "white")) + 
-#   geom_sf(data = ll(JPBound), fill = "black", alpha = 0.3, inherit.aes = FALSE) +
-#   geom_sf(data = ll(JuniataPark), aes(fill = CLASS_NAME), colour = "transparent", inherit.aes = FALSE) +
-#   geom_sf(data = ll(const_JB), inherit.aes = FALSE) +
-#   scale_fill_manual(values = paletteJ, name = "Canopy Change") +
-#   labs(title = "Juniata Park Tree Canopy Change 2008-2018 with construction permits", subtitle = "Philadelphia, PA") +
-#     mapTheme()
-# 
-# #Upper Roxborough
-# 
-# const_UR <- st_intersection(const_spatial2, URBound)
-# 
-# base_mapGH <- get_map(location =  unname(st_bbox(ll(st_buffer(st_centroid(UpperRoxborough),1100)))),
-#                     maptype = "satellite") #get a basemap
-# 
-# ggmap(base_mapGH, darken = c(0.3, "white")) + 
-#   geom_sf(data = ll(URBound), fill = "black", alpha = 0.3, inherit.aes = FALSE) +
-#   geom_sf(data = ll(UpperRoxborough), aes(fill = CLASS_NAME), colour = "transparent", inherit.aes = FALSE) +
-#   geom_sf(data = ll(const_UR), inherit.aes = FALSE) +
-#   scale_fill_manual(values = paletteJ, name = "Canopy Change") +
-#   labs(title = "Upper Roxborough Tree Canopy Change 2008-2018 with construction permits", subtitle = "Philadelphia, PA") +
-#     mapTheme()
-# 
-# 
-# #Fairhill
-# 
-# const_FH <- st_intersection(const_spatial2, Fairhill)
-# 
-# base_mapGH <- get_map(location =  unname(st_bbox(ll(st_buffer(st_centroid(Fairhill),1100)))),
-#                     maptype = "satellite") #get a basemap
-# 
-# ggmap(base_mapGH, darken = c(0.3, "white")) + 
-#   geom_sf(data = ll(FHBound), fill = "black", alpha = 0.3, inherit.aes = FALSE) +
-#   geom_sf(data = ll(Fairhill), aes(fill = CLASS_NAME), colour = "transparent", inherit.aes = FALSE) +
-#   geom_sf(data = ll(const_FH), inherit.aes = FALSE) +
-#   scale_fill_manual(values = paletteJ, name = "Canopy Change") +
-#   labs(title = "FairHill Tree Canopy Change 2008-2018 with construction permits", subtitle = "Philadelphia, PA") +
-#     mapTheme()
-# 
-# 
-# #GRad hospital
-# 
-# const_GH <- st_intersection(const_spatial2, GraduateHospital)
-# 
-# base_mapGH <- get_map(location =  unname(st_bbox(ll(st_buffer(st_centroid(GraduateHospital),1100)))),
-#                     maptype = "satellite") #get a basemap
-# 
-# ggmap(base_mapGH, darken = c(0.3, "white")) + 
-#   geom_sf(data = ll(GHBound), fill = "black", alpha = 0.3, inherit.aes = FALSE) +
-#   geom_sf(data = ll(GraduateHospital), aes(fill = CLASS_NAME), colour = "transparent", inherit.aes = FALSE) +
-#   geom_sf(data = ll(const_GH), inherit.aes = FALSE) +
-#   scale_fill_manual(values = paletteJ, name = "Canopy Change") +
-#   labs(title = "Graduate Hospital Tree Canopy Change 2008-2018 with construction permits", subtitle = "Philadelphia, PA") +
-#     mapTheme()
+ 
+ const_JB <- st_intersection(const_spatial, JPBound)
+
+JuniataPark <- JuniataPark %>%
+  filter(CLASS_NAME == 'Loss')
+ 
+ base_mapGH <- get_map(location =  unname(st_bbox(ll(st_buffer(st_centroid(JuniataPark),1100)))),
+                     maptype = "satellite") #get a basemap
+ 
+ ggmap(base_mapGH, darken = c(0.3, "white")) + 
+   geom_sf(data = ll(JPBound), fill = "black", alpha = 0.3, inherit.aes = FALSE) +
+   geom_sf(data = ll(JuniataPark), aes(colour = CLASS_NAME), colour = "red", inherit.aes = FALSE) +
+   geom_sf(data = ll(const_JB), size = 0.1, inherit.aes = FALSE) +
+   scale_fill_manual(values = paletteJ, name = "Canopy Change") +
+   labs(title = "Juniata Park Tree Canopy Change 2008-2018 with construction permits", subtitle = "Philadelphia, PA") +
+     mapTheme()
 ```
+
+![](Tree_Canopy_Loss_files/figure-html/Const_Permit3-1.png)<!-- -->
+
+```r
+#Upper Roxborough
+ 
+ const_UR <- st_intersection(const_spatial, URBound)
+ 
+ UpperRoxborough <- UpperRoxborough %>%
+   filter(CLASS_NAME == 'Loss')
+ 
+ base_mapGH <- get_map(location =  unname(st_bbox(ll(st_buffer(st_centroid(UpperRoxborough),1100)))),
+                     maptype = "satellite") #get a basemap
+ 
+ ggmap(base_mapGH, darken = c(0.3, "white")) + 
+   geom_sf(data = ll(URBound), fill = "black", alpha = 0.3, inherit.aes = FALSE) +
+   geom_sf(data = ll(UpperRoxborough), aes(colour = CLASS_NAME), colour = "red", inherit.aes = FALSE) +
+   geom_sf(data = ll(const_UR), size = 0.1, inherit.aes = FALSE) +
+   scale_fill_manual(values = paletteJ, name = "Canopy Change") +
+   labs(title = "Upper Roxborough Tree Canopy Change 2008-2018 with construction permits", subtitle = "Philadelphia, PA") +
+     mapTheme()
+```
+
+![](Tree_Canopy_Loss_files/figure-html/Const_Permit3-2.png)<!-- -->
+
+```r
+#Fairhill
+ 
+ const_FH <- st_intersection(const_spatial, Fairhill)
+ 
+ Fairhill <- Fairhill %>%
+   filter(CLASS_NAME == 'Loss')
+ 
+ base_mapGH <- get_map(location =  unname(st_bbox(ll(st_buffer(st_centroid(Fairhill),1100)))),
+                     maptype = "satellite") #get a basemap
+ 
+ ggmap(base_mapGH, darken = c(0.3, "white")) + 
+   geom_sf(data = ll(FHBound), fill = "black", alpha = 0.3, inherit.aes = FALSE) +
+   geom_sf(data = ll(Fairhill), aes(colour = CLASS_NAME), colour = "red", inherit.aes = FALSE) +
+   geom_sf(data = ll(const_FH), size = 0.1, inherit.aes = FALSE) +
+   scale_fill_manual(values = paletteJ, name = "Canopy Change") +
+   labs(title = "FairHill Tree Canopy Change 2008-2018 with construction permits", subtitle = "Philadelphia, PA") +
+     mapTheme()
+```
+
+![](Tree_Canopy_Loss_files/figure-html/Const_Permit3-3.png)<!-- -->
+
+```r
+ #GRad hospital
+ 
+ const_GH <- st_intersection(const_spatial, GraduateHospital)
+ 
+ GraduateHospital <- GraduateHospital %>%
+   filter(CLASS_NAME == 'Loss')
+ 
+ base_mapGH <- get_map(location =  unname(st_bbox(ll(st_buffer(st_centroid(GraduateHospital),1100)))),
+                     maptype = "satellite") #get a basemap
+ 
+ ggmap(base_mapGH, darken = c(0.3, "white")) + 
+   geom_sf(data = ll(GHBound), fill = "black", alpha = 0.3, inherit.aes = FALSE) +
+   geom_sf(data = ll(GraduateHospital), aes(colour = CLASS_NAME), colour = "red", inherit.aes = FALSE) +
+   geom_sf(data = ll(const_GH), size = 0.1, inherit.aes = FALSE) +
+   scale_fill_manual(values = paletteJ, name = "Canopy Change") +
+   labs(title = "Graduate Hospital Tree Canopy Change 2008-2018 with construction permits", subtitle = "Philadelphia, PA") +
+     mapTheme()
+```
+
+![](Tree_Canopy_Loss_files/figure-html/Const_Permit3-4.png)<!-- -->
 
 
 
@@ -1126,9 +1347,9 @@ ggmap(base_mapGH, darken = c(0.3, "white")) +
 # Analysis completed in ArcGIS -- Processing time to long in R. 500,000 Parcels and 614,000 Tree Canopy Polygons aggregated in this analysis. I plan on writing out what the code would be for reproducability purposes. 
 
 LandUse1 <-
-  st_read("C:/Users/Kyle McCarthy/Documents/Practicum/Data/LandUse/landu.csv")%>%
-  #st_read("C:/Users/agarw/Documents/MUSA 801/Data/landu.csv")%>%
- # st_read("/Users/annaduan/Desktop/Y3S2/Practicum/Data/landu.csv") %>%
+  #st_read("C:/Users/Kyle McCarthy/Documents/Practicum/Data/LandUse/landu.csv")%>%
+  st_read("C:/Users/agarw/Documents/MUSA 801/Data/landu.csv")%>%
+  #st_read("/Users/annaduan/Desktop/Y3S2/Practicum/Data/landu.csv") %>%
   #st_read("C:/Users/Prince/Desktop/Tree Canopy Data/landu.csv") %>%
   mutate(AreaGain = as.numeric(AreaGain),
          AreaLoss = as.numeric(AreaLoss),
@@ -1157,11 +1378,11 @@ LandUseLong<-
 
 ggplot(LandUseLong, aes(fill = variable, y=Descriptio, x=value))+
   geom_bar(stat='identity', position = "stack", width = .5)+
-  scale_fill_manual(values = landusepal,
-                    name = "Area Gain or Loss")+
+ scale_fill_manual(values = landusepal, name = "Area Gain or Loss")+
   labs(title = "Total Area Lost or Gained by Land Use Type")+
   xlab("        Total Area Lossed                Total Area Gained")+
-  ylab("Land Use Type")
+  ylab("Land Use Type") +
+  plotTheme()
 ```
 
 ![](Tree_Canopy_Loss_files/figure-html/land-1.png)<!-- -->
@@ -1182,7 +1403,8 @@ ggplot(LandUseLong, aes(fill = variable, y=Descriptio, x=value))+
   xlab("Percentage of 2008 Trees Lost            Percentage of 2018 Trees Gained")+
   ylab("Land Use Type")+
   theme(plot.title = element_text(hjust = 0.5),
-        axis.title.x = element_text(size = 9, face = "bold"))
+        axis.title.x = element_text(size = 9, face = "bold")) +
+  plotTheme()
 ```
 
 ![](Tree_Canopy_Loss_files/figure-html/land-2.png)<!-- -->
@@ -1203,7 +1425,8 @@ ggplot(LandUse, aes(y=Descriptio, x=netChange))+
        subtitle = "Area Gain - Area Loss")+
   xlab("Land Use Type")+
   ylab("Total Net Change")+
-  theme(axis.text.x = element_text(angle = 90, vjust = 0.5, hjust=1)),
+  theme(axis.text.x = element_text(angle = 90, vjust = 0.5, hjust=1)) +
+  plotTheme(),
 
 ggplot(LandUse, aes(y=Descriptio, x=pctChange))+
   geom_bar(stat='identity', fill="forest green", width = .4)+
@@ -1211,7 +1434,8 @@ ggplot(LandUse, aes(y=Descriptio, x=pctChange))+
        subtitle = "('18 Tree Canopy Coverage - '08 Tree Canopy Coverage) / ('18 Tree Canopy Coverage) * 100 ")+
   xlab("Percent Net Change")+
   ylab("Land Use Type")+
-  theme(axis.text.x = element_text(angle = 90, vjust = 0.5, hjust=1)))
+  theme(axis.text.x = element_text(angle = 90, vjust = 0.5, hjust=1)) +
+  plotTheme())
 ```
 
 ![](Tree_Canopy_Loss_files/figure-html/Landuse2-1.png)<!-- -->
@@ -1239,7 +1463,8 @@ ggplot(LandUse2, aes(y=C_DIG2DESC, x=netChange))+
        subtitle = "Area Gain - Area Loss")+
   ylab("Residential Land Use Type")+
   xlab("Total Net Change")+
-  theme(axis.text.x = element_text(angle = 90, vjust = 0.5, hjust=1)),
+  theme(axis.text.x = element_text(angle = 90, vjust = 0.5, hjust=1)) +
+  plotTheme(),
 
 ggplot(LandUse2, aes(y=C_DIG2DESC, x=pctChange))+
   geom_bar(stat='identity', fill="forest green", width = 0.4)+
@@ -1247,13 +1472,16 @@ ggplot(LandUse2, aes(y=C_DIG2DESC, x=pctChange))+
        subtitle = "('18 Tree Canopy Coverage - '08 Tree Canopy Coverage) / ('18 Tree Canopy Coverage) * 100 ")+
   ylab("Residential Land Use Type")+
   xlab("Percent Tree Canopy Change")+
-  theme(axis.text.x = element_text(angle = 90, vjust = 0.5, hjust=1)))
+  theme(axis.text.x = element_text(angle = 90, vjust = 0.5, hjust=1)) +
+  plotTheme())
 ```
 
-![](Tree_Canopy_Loss_files/figure-html/Exploring Residential Furrther-1.png)<!-- -->
+![](Tree_Canopy_Loss_files/figure-html/Exploring Residential Further-1.png)<!-- -->
 
 
 ```r
+# Code to Intersect land use with fishnet. Intersection took about 3 hours with the below code. Completed in arcGIS instead. 
+
 # LandUseAg<- 
 #   LandUse1%>%
 #   filter(Descriptio == "Residential" | Descriptio == "Transportation") %>% 
@@ -1269,6 +1497,52 @@ ggplot(LandUse2, aes(y=C_DIG2DESC, x=pctChange))+
 #   FinalFishnet %>%
 #   st_make_valid()%>%
 #   st_intersection(LandUseAg)
+
+
+# st_write(fishnet, "C:/Users/Kyle McCarthy/Documents/Practicum/Data/Fishnet_LU_Intersect/fishnet.shp")
+
+
+
+LandUseFishnet_ResTrans<- 
+LandUseFishnet%>% 
+filter(Descriptio == "Residential" | Descriptio == "Transportation")%>% 
+dplyr::select(uniqueID, Descriptio)%>% 
+mutate(Area = as.numeric(st_area(.)))%>% 
+st_drop_geometry()%>%
+group_by(uniqueID)%>% 
+summarise(Area = sum(Area))%>%
+mutate(pctTransRes = Area / 2608225)%>% 
+dplyr::select(pctTransRes, uniqueID)
+
+LandUseFishnet_Trans<- 
+LandUseFishnet%>% 
+filter(Descriptio == "Transportation")%>% 
+dplyr::select(uniqueID, Descriptio)%>% 
+mutate(Area = as.numeric(st_area(.)))%>% 
+st_drop_geometry()%>%
+group_by(uniqueID)%>% 
+summarise(Area = sum(Area))%>%
+mutate(pctTrans = Area / 2608225)%>% 
+dplyr::select(pctTrans, uniqueID)
+
+LandUseFishnet_Res<- 
+LandUseFishnet%>% 
+filter(Descriptio == "Residential")%>% 
+dplyr::select(uniqueID, Descriptio)%>% 
+mutate(Area = as.numeric(st_area(.)))%>% 
+st_drop_geometry()%>%
+group_by(uniqueID)%>% 
+summarise(Area = sum(Area))%>%
+mutate(pctRes = Area / 2608225)%>% 
+dplyr::select(pctRes, uniqueID)
+
+FinalFishnet<- 
+left_join(LandUseFishnet_ResTrans, LandUseFishnet_Res)%>% 
+left_join(., LandUseFishnet_Trans)%>% 
+mutate_all(~replace(., is.na(.), 0))%>%
+left_join(FinalFishnet, .)%>% 
+mutate(LogPctRes = log10(pctRes), 
+LogPctResTrans = log10(pctTransRes))
 ```
 
 ### 4. How do current patterns of tree canopy coverage and loss reflect disinvestment as a result of redlining and older planning practices?  
@@ -1320,22 +1594,705 @@ ggplot()+
 
 ![](Tree_Canopy_Loss_files/figure-html/HOLC-1.png)<!-- -->
 
+```r
+holc_net <- st_intersection(fishnet_centroid, HOLC) %>%
+  dplyr::select(uniqueID, holc_grade)
+  
+
+FinalFishnet <-
+   holc_net %>%
+   st_drop_geometry() %>%
+   left_join(FinalFishnet, .)%>%
+   mutate(holc_grade = replace_na(holc_grade, 0))
+```
+
 
 ```r
-# publichealth <- 
-#   read.socrata("https://chronicdata.cdc.gov/resource/yjkw-uj5s.json") %>%
-#   filter(countyname == "Philadelphia") 
-# 
-# # Joining by GEOID to get geometry
-# phillyhealth <- 
-#   merge(x = publichealth, y = ACS, by.y = "GEOID", by.x = "tractfips", all.x = TRUE)
-# 
-# ggplot() +
-#   geom_sf(data = phillyhealth, aes(fill = casthma_crude95ci))+
-#   plotTheme()
+library(RSocrata)
+
+ publichealth <- 
+   read.socrata("https://chronicdata.cdc.gov/resource/yjkw-uj5s.json") %>%
+   filter(countyname == "Philadelphia") 
+ 
+# Joining by GEOID to get geometry
+ phillyhealth <- 
+   merge(x = publichealth, y = ACS, by.y = "GEOID", by.x = "tractfips", all.x = TRUE)%>%
+   st_as_sf()%>%
+   mutate(tractarea = st_area(geometry)) %>%
+   mutate(tractarea = as.numeric(tractarea))
+
+ 
+ # ggplot() +
+ #   geom_sf(data = phillyhealth, aes(fill = casthma_crudeprev))+
+ #   plotTheme()
+ 
+ # find area of tree canopy in census tracts
+  
+ treecanopy_census <- 
+  TreeCanopy%>%
+  st_make_valid() %>%
+  st_intersection(phillyhealth)
+ 
+treecanopy_census<- 
+  treecanopy_census%>%
+  mutate(TreeArea = st_area(treecanopy_census))%>%
+  mutate(TreeArea = as.numeric(TreeArea))
+
+ # ggplot() +
+ #   geom_sf(data = treecanopy_census, aes(fill = casthma_crudeprev))+
+ #   plotTheme()
+ # 
+ 
+# Tree Canopy Loss
+
+TreeCanopyLoss_census <- 
+  treecanopy_census%>%
+  filter(CLASS_NAME == "Loss")%>%
+  group_by(tractfips,tractarea)%>%
+  summarise(AreaLoss = sum(TreeArea))%>%
+  mutate(pctLoss = AreaLoss/tractarea) %>%
+  st_drop_geometry()
+
+TreeCanopyGain_census <- 
+  treecanopy_census%>%
+  filter(CLASS_NAME == "Gain")%>%
+  group_by(tractfips,tractarea)%>%
+  summarise(AreaLoss = sum(TreeArea))%>%
+  mutate(pctGain = AreaLoss/tractarea) %>%
+  st_drop_geometry()
+
+TreeCanopyNoC_census <- 
+  treecanopy_census%>%
+  filter(CLASS_NAME == "No Change")%>%
+  group_by(tractfips,tractarea)%>%
+  summarise(AreaLoss = sum(TreeArea))%>%
+  mutate(pctNoC = AreaLoss/tractarea) %>%
+  st_drop_geometry()
+
+phillyhealth <-
+  merge(x = TreeCanopyLoss_census, y = phillyhealth, by = "tractfips", all = TRUE)
+
+phillyhealth <-
+  merge(x = TreeCanopyGain_census, y = phillyhealth, by = "tractfips", all = TRUE)
+  
+phillyhealth <-
+  merge(x = TreeCanopyNoC_census, y = phillyhealth, by = "tractfips", all = TRUE) 
+
+phillyhealth <- phillyhealth %>%
+  dplyr::select(tractfips,casthma_crudeprev,AreaLoss.x,pctGain,pctLoss,geometry,stroke_crudeprev,phlth_crudeprev,
+                obesity_crudeprev,mhlth_crudeprev,lpa_crudeprev)%>%
+  mutate(LogPctLoss = log10(pctLoss),
+         LogPctGain = log10(pctGain))
+
+
+correlation.long4 <-
+  phillyhealth%>%
+     dplyr::select(casthma_crudeprev, phlth_crudeprev,stroke_crudeprev,
+                obesity_crudeprev,mhlth_crudeprev,lpa_crudeprev, pctLoss) %>%
+    gather(Variable, Value, -pctLoss) %>%
+  mutate(Value = as.numeric(Value))
+
+correlation.cor4 <-
+  correlation.long4 %>%
+    group_by(Variable) %>%
+    summarize(correlation = cor(Value, pctLoss, use = "complete.obs"))
+
+ggplot(correlation.long4, aes(Value, pctLoss)) +
+  geom_point(size = 0.1) +
+    scale_x_log10() + scale_y_log10() +
+  geom_text(data = correlation.cor4, aes(label = paste("r =", round(correlation, 2))),
+            x=-Inf, y=Inf, vjust = 1.5, hjust = -.1) +
+  geom_smooth(method = "lm", se = FALSE, colour = "red") +
+  facet_wrap(~Variable, ncol = 2, scales = "free") +
+  labs(title = "Percent Tree Canopy Coverage (2018)") +
+  plotTheme()
 ```
+
+![](Tree_Canopy_Loss_files/figure-html/Public_health-1.png)<!-- -->
+
+```r
+ggplot(phillyhealth, aes(y = pctLoss, x = casthma_crudeprev))+
+  geom_point()+
+  labs(title = "Percent Tree Canopy Loss (2008 - 2018) vs. \n Percent Tree Canopy Coverage (2018) ",
+       subtilte = "Aggregated by Fishnet") +
+  xlab("Percent of Tree Canopy Lost (2008 - 2018)") +
+  ylab("Percent of Tree Canopy Coverage of Each Fishnet Cell (2018)") +
+  theme(plot.title = element_text(hjust = 0.3, size = 12), plot.subtitle = element_text(hjust = 0.3, size = 8)) +
+  plotTheme()
+```
+
+![](Tree_Canopy_Loss_files/figure-html/Public_health-2.png)<!-- -->
+
+
+
+```r
+function(measureFrom,measureTo,k) {
+  measureFrom_Matrix <-
+    as.matrix(measureFrom)
+  measureTo_Matrix <-
+    as.matrix(measureTo)
+  nn <-   
+    get.knnx(measureTo, measureFrom, k)$nn.dist
+  output <-
+    as.data.frame(nn) %>%
+    rownames_to_column(var = "thisPoint") %>%
+    gather(points, point_distance, V1:ncol(.)) %>%
+    arrange(as.numeric(thisPoint)) %>%
+    group_by(thisPoint) %>%
+    summarize(pointDistance = mean(point_distance)) %>%
+    arrange(as.numeric(thisPoint)) %>% 
+    dplyr::select(-thisPoint) %>%
+    pull()
+  
+  return(output)  
+}
+
+st_c <- st_coordinates
+
+# Construction nearest neighbor
+constfilter <- 
+  const%>% filter(permitdescription == "NEW CONSTRUCTION PERMIT")
+  
+
+TreeCanopyCentroids <- 
+  TreeCanopy%>% 
+  mutate(Construction_nn1 = nn_function(st_c(st_centroid(.)), st_c(const), 1)) %>%
+  dplyr::select(Construction_nn1, geometry, CLASS_NAME)
+
+
+TreeCanopyCentroids1<- 
+  TreeCanopyCentroids%>%
+  st_drop_geometry()%>%
+  group_by(CLASS_NAME)%>%
+  summarise(avg_nnConst = mean(Construction_nn1))
+
+ggplot(TreeCanopyCentroids1, aes(y=avg_nnConst, x=CLASS_NAME))+
+  geom_bar(stat='identity', fill="forest green", width = 0.4)+
+  labs(title = "Total Tree Canopy Net Change in Residential Land Use Parcels",
+       subtitle = "Area Gain - Area Loss")+
+  ylab("Residential Land Use Type")+
+  xlab("Total Net Change")+
+  theme(axis.text.x = element_text(angle = 90, vjust = 0.5, hjust=1))
+```
+
+![](Tree_Canopy_Loss_files/figure-html/Nearest Neighbor-1.png)<!-- -->
+
+```r
+FinalFishnet2 <- 
+  st_join(FinalFishnet, TreeCanopyCentroids)%>%
+  st_drop_geometry()%>%
+  group_by(uniqueID)%>%
+  summarise(avg_nnConst = mean(Construction_nn1))
+
+FinalFishnet2 <- FinalFishnet2%>% 
+  left_join(FinalFishnet, .)
+
+FinalFishnet <- FinalFishnet2
+
+
+ggplot(FinalFishnet, aes(y = LogPctLoss , x = avg_nnConst))+
+  geom_point()+ 
+  labs(title = "Percent Change vs Construction nn1", 
+       subtilte = "Aggregated by Fishnet") + 
+  xlab("Average Percent Change ") + 
+  ylab("Log Percent Loss") + 
+  theme(plot.title = element_text(hjust = 0.5, size = 15, face = "bold"), plot.subtitle = element_text(hjust = 0.5, size = 8)) +
+  plotTheme()
+```
+
+![](Tree_Canopy_Loss_files/figure-html/Nearest Neighbor-2.png)<!-- -->
+
+
+
+```r
+# Intersection performed in ArcGIS to conserve time 
+ 
+# imperviousness <- st_read("C:/Users/Kyle McCarthy/Documents/CPLN 675/Midterm/Impervious_Surfaces_2004.shp")%>% 
+# st_transform('ESRI:102728')%>% 
+# st_make_valid()%>%
+# st_intersection(fishnet) 
+
+
+#imperviousness <- st_read("C:/Users/Kyle McCarthy/Documents/Practicum/Data/impervious_intersect.shp")%>%
+#imperviousness <-
+#imperviousness%>%
+#st_transform('ESRI:102728')%>%
+#mutate(Area = as.numeric(st_area(.)))%>%
+#st_drop_geometry()%>%
+#group_by(uniqueID)%>%
+#summarise(ImperviousArea = sum(Area))%>%
+#mutate(pctImpervious = ImperviousArea / 2608225 )%>%
+#left_join(FinalFishnet, .)
+
+#ggplot(imperviousness, aes(y = LogPctLoss , x = ImperviousArea))+
+ # geom_point()+
+#  labs(title = "Percent Change vs Construction nn1",
+ #      subtilte = "Aggregated by Fishnet") +
+#  xlab("Average Percent Change ") +
+#  ylab("Log Percent Loss") +
+#  theme(plot.title = element_text(hjust = 0.5, size = 15, face = "bold"), plot.subtitle = element_text(hjust = 0.5, size = 8)) +
+#  plotTheme()
+
+# parks 
+
+poles <- st_read('http://data.phl.opendata.arcgis.com/datasets/9059a7546b6a4d658bef9ce9c84e4b03_0.geojson') %>% 
+st_transform('ESRI:102728')%>% 
+st_centroid()
+
+poles_nn1 <- 
+  TreeCanopy%>% 
+  mutate(Poles_nn1 = nn_function(st_c(st_centroid(.)), st_c(poles), 10))
+  
+TreeCanopyCentroids <- st_join(FinalFishnet, poles_nn1)
+
+TreeCanopyCentroids1<- 
+  TreeCanopyCentroids%>% 
+  st_drop_geometry()%>%
+  group_by(uniqueID)%>%
+  summarise(avg_nnPole = mean(Poles_nn1))
+
+FinalFishnet<-
+  TreeCanopyCentroids1%>% 
+  left_join(FinalFishnet, .)%>% 
+  mutate(LogPole = log10(avg_nnPole), 
+  LogPctGain = log10(pctGain))
+  
+
+ggplot(FinalFishnet, aes(y = LogPctLoss , x = LogPole))+
+  geom_point()+
+  labs(title = "Percent Change vs Construction nn1",
+       subtilte = "Aggregated by Fishnet") +
+  xlab("Average Percent Change ") +
+  ylab("Log Percent Loss") +
+  theme(plot.title = element_text(hjust = 0.5, size = 15, face = "bold"), plot.subtitle = element_text(hjust = 0.5, size = 8)) +
+  plotTheme()
+```
+
+![](Tree_Canopy_Loss_files/figure-html/Imperviousness-1.png)<!-- -->
+
+
+
+
+```r
+library(randomForest)
+
+
+FinalFishnet5 <-
+  FinalFishnet %>%
+  mutate(LogPctLoss = log(pctLoss),
+         LogPctGain = log(pctGain),
+         LogPctChange = log(pctChange))
+
+FinalFishnet5$avg_nnConst <- ifelse(is.na(FinalFishnet5$avg_nnConst),0, FinalFishnet5$avg_nnConst)
+FinalFishnet5$avg_nnPole <- ifelse(is.na(FinalFishnet5$avg_nnPole),0, FinalFishnet5$avg_nnPole)
+FinalFishnet5$pctWhite <- ifelse(is.na(FinalFishnet5$pctWhite),0, FinalFishnet5$pctWhite)
+FinalFishnet5$pctBach <- ifelse(is.na(FinalFishnet5$pctBach),0, FinalFishnet5$pctBach)
+FinalFishnet5$population <- ifelse(is.na(FinalFishnet5$population),0, FinalFishnet5$population)
+FinalFishnet5$italian <- ifelse(is.na(FinalFishnet5$italian),0, FinalFishnet5$italian)
+FinalFishnet5$medHHInc <- ifelse(is.na(FinalFishnet5$medHHInc),0, FinalFishnet5$medHHInc)
+FinalFishnet5$e311Count <- ifelse(is.na(FinalFishnet5$e311Count),0, FinalFishnet5$e311Count)
+FinalFishnet5$pctTransRes <- ifelse(is.na(FinalFishnet5$pctTransRes),0, FinalFishnet5$pctTransRes)
+FinalFishnet5$pctRes <- ifelse(is.na(FinalFishnet5$pctRes),0, FinalFishnet5$pctRes)
+FinalFishnet5$pctTrans <- ifelse(is.na(FinalFishnet5$pctTrans),0, FinalFishnet5$pctTrans)
+FinalFishnet5$LogAvgParcelSize <- ifelse(is.na(FinalFishnet5$LogAvgParcelSize),0, FinalFishnet5$LogAvgParcelSize)
+FinalFishnet5$LogPctChange <- ifelse(is.na(FinalFishnet5$LogPctChange),0, FinalFishnet5$LogPctChange)
+FinalFishnet5$Loge311Count <- ifelse(is.na(FinalFishnet5$Loge311Count),0, FinalFishnet5$Loge311Count)
+FinalFishnet5$LogPctRes <- ifelse(is.na(FinalFishnet5$LogPctRes),0, FinalFishnet5$LogPctRes)
+FinalFishnet5$LogPctRes <- ifelse(is.infinite(FinalFishnet5$LogPctRes),0, FinalFishnet5$LogPctRes)
+FinalFishnet5$LogPctResTrans <- ifelse(is.infinite(FinalFishnet5$LogPctResTrans),0, FinalFishnet5$LogPctResTrans)
+FinalFishnet5$LogPctResTrans <- ifelse(is.na(FinalFishnet5$LogPctResTrans),0, FinalFishnet5$LogPctResTrans)
+FinalFishnet5$LogPctLoss <- ifelse(is.infinite(FinalFishnet5$LogPctLoss),0, FinalFishnet5$LogPctLoss)
+FinalFishnet5$LogPctGain <- ifelse(is.infinite(FinalFishnet5$LogPctGain),0, FinalFishnet5$LogPctGain)
+FinalFishnet5$LogPctChange <- ifelse(is.infinite(FinalFishnet5$LogPctChange),0, FinalFishnet5$LogPctChange)
+FinalFishnet5$countConst <- ifelse(is.na(FinalFishnet5$countConst),0, FinalFishnet5$countConst)
+FinalFishnet5$Variable <- ifelse((FinalFishnet5$netChange > 0), 1, 0)
+FinalFishnet5$HydrologyPct <- ifelse(is.na(FinalFishnet5$HydrologyPct),0, FinalFishnet5$HydrologyPct)
+  
+FinalFishnet5 <-
+  FinalFishnet5 %>%
+  dplyr::select(pctCoverage18, LogAvgParcelSize,Loge311Count, LogPctRes, avg_nnConst,avg_nnPole,
+                                    countConst, pctWhite, pctBach, e311Count, Loge311Count, pctTransRes, pctRes, HydrologyPct,
+                                    pctTrans, LogPctResTrans, population, italian, medHHInc, Variable, pctCoverage08Cat, holc_grade)
+
+# FinalFishnet5 <-
+#   FinalFishnet5%>%
+#   mutate(pctCoverage18 = ifelse(pctCoverage18 > 25, 1, 0))
+# 
+# FinalFishnet5 <-
+#   FinalFishnet5%>%
+#   mutate(pctWhite = ifelse(pctWhite > 66.67, 1, 0))
+# 
+# FinalFishnet5 <-
+#   FinalFishnet5%>%
+#   mutate(pctBach = ifelse(pctBach > 66.67, 1, 0))
+# 
+# FinalFishnet5 <-
+#   FinalFishnet5%>%
+#   mutate(pctRes = ifelse(pctRes > 66.67, 1, 0))
+# 
+# FinalFishnet5 <-
+#   FinalFishnet5%>%
+#   mutate(pctTransRes = ifelse(pctTransRes > 50, 1, 0))
+# 
+# FinalFishnet5 <-
+#   FinalFishnet5%>%
+#   mutate(pctTrans = ifelse(pctTrans > 66.67, 1, 0))
+
+
+
+
+# LOGISTIC MODEL
+set.seed(1214)
+trainIndex <- createDataPartition(
+                                  y = FinalFishnet5$holc_grade,
+                                  p = 0.60, 
+                                  list = FALSE)
+
+finalTrain <- FinalFishnet5[ trainIndex,] %>% st_drop_geometry()
+finalTest  <- FinalFishnet5[-trainIndex,] %>% st_drop_geometry()
+finalTest2  <- FinalFishnet5[-trainIndex,] 
+
+# MODEL
+finalModel <- glm(finalTrain$Variable ~ .,
+                    data=finalTrain %>% 
+                     dplyr::select(pctCoverage18, LogAvgParcelSize, avg_nnConst,avg_nnPole,
+                                    countConst, pctWhite, pctBach, Loge311Count, pctRes,
+                                    pctTrans,  italian, medHHInc, LogPctRes, holc_grade, HydrologyPct),#, LogPctResTrans, population, e311Count, pctTransRes
+                    family="binomial" (link="logit"))
+
+summary(finalModel)
+```
+
+```
+## 
+## Call:
+## glm(formula = finalTrain$Variable ~ ., family = binomial(link = "logit"), 
+##     data = finalTrain %>% dplyr::select(pctCoverage18, LogAvgParcelSize, 
+##         avg_nnConst, avg_nnPole, countConst, pctWhite, pctBach, 
+##         Loge311Count, pctRes, pctTrans, italian, medHHInc, LogPctRes, 
+##         holc_grade, HydrologyPct))
+## 
+## Deviance Residuals: 
+##     Min       1Q   Median       3Q      Max  
+## -1.8951  -0.7819  -0.4597   0.9356   2.6638  
+## 
+## Coefficients:
+##                      Estimate   Std. Error z value   Pr(>|z|)    
+## (Intercept)      -1.578829486  0.346345776  -4.559 0.00000515 ***
+## pctCoverage18     0.026405874  0.010142103   2.604    0.00923 ** 
+## LogAvgParcelSize  0.058351877  0.071055135   0.821    0.41152    
+## avg_nnConst       0.000373901  0.000292868   1.277    0.20171    
+## avg_nnPole        0.000460875  0.000215073   2.143    0.03212 *  
+## countConst        0.000076118  0.000118839   0.641    0.52184    
+## pctWhite          0.119050712  0.475696664   0.250    0.80238    
+## pctBach          -1.039390516  2.099403416  -0.495    0.62054    
+## Loge311Count      0.152626038  0.178774648   0.854    0.39325    
+## pctRes           -3.152679754  0.741272121  -4.253 0.00002109 ***
+## pctTrans          0.950560901  0.478741741   1.986    0.04708 *  
+## italian          -0.000077655  0.000383001  -0.203    0.83933    
+## medHHInc         -0.000005113  0.000006362  -0.804    0.42156    
+## LogPctRes        -0.182811937  0.164877270  -1.109    0.26753    
+## holc_gradeA      -0.551731327  0.599430686  -0.920    0.35735    
+## holc_gradeB      -0.816033092  0.384405620  -2.123    0.03377 *  
+## holc_gradeC      -0.080946372  0.344146847  -0.235    0.81405    
+## holc_gradeD       1.179817346  0.275704454   4.279 0.00001875 ***
+## HydrologyPct      0.026469652  0.022584652   1.172    0.24119    
+## ---
+## Signif. codes:  0 '***' 0.001 '**' 0.01 '*' 0.05 '.' 0.1 ' ' 1
+## 
+## (Dispersion parameter for binomial family taken to be 1)
+## 
+##     Null deviance: 997.79  on 848  degrees of freedom
+## Residual deviance: 829.22  on 830  degrees of freedom
+## AIC: 867.22
+## 
+## Number of Fisher Scoring iterations: 5
+```
+
+```r
+## Adding Coefficients
+x <- finalModel$coefficients
+
+### Fit metrics
+#pR2(finalModel)
+
+## Prediction
+testProbs <- data.frame(Outcome = as.factor(finalTest$Variable),
+                        Probs = predict(finalModel, finalTest, type= "response"))
+
+# ROC Curve
+## This us a goodness of fit measure, 1 would be a perfect fit, .5 is a coin toss
+auc(testProbs$Outcome, testProbs$Probs)
+```
+
+```
+## Area under the curve: 0.693
+```
+
+```r
+ggplot(testProbs, aes(d = as.numeric(testProbs$Outcome), m = Probs)) +
+  geom_roc(n.cuts = 50, labels = FALSE, colour = "#FE9900") +
+  style_roc(theme = theme_grey) +
+  geom_abline(slope = 1, intercept = 0, size = 1.5, color = 'grey') +
+  labs(title = "ROC Curve - Model with Feature Engineering")
+```
+
+![](Tree_Canopy_Loss_files/figure-html/Logit-model-1.png)<!-- -->
+
+```r
+## optimizing threshold
+
+iterateThresholds <- function(data, observedClass, predictedProbs, group) {
+#This function takes as its inputs, a data frame with an observed binomial class (1 or 0); a vector of predicted probabilities; and optionally a group indicator like race. It returns accuracy plus counts and rates of confusion matrix outcomes. It's a bit verbose because of the if (missing(group)). I don't know another way to make an optional parameter.
+  observedClass <- enquo(observedClass)
+  predictedProbs <- enquo(predictedProbs)
+  group <- enquo(group)
+  x = .01
+  all_prediction <- data.frame()
+  
+  if (missing(group)) {
+  
+    while (x <= 1) {
+    this_prediction <- data.frame()
+    
+    this_prediction <-
+      data %>%
+      mutate(predclass = ifelse(!!predictedProbs > x, 1,0)) %>%
+      count(predclass, !!observedClass) %>%
+      summarize(Count_TN = sum(n[predclass==0 & !!observedClass==0]),
+                Count_TP = sum(n[predclass==1 & !!observedClass==1]),
+                Count_FN = sum(n[predclass==0 & !!observedClass==1]),
+                Count_FP = sum(n[predclass==1 & !!observedClass==0]),
+                Rate_TP = Count_TP / (Count_TP + Count_FN),
+                Rate_FP = Count_FP / (Count_FP + Count_TN),
+                Rate_FN = Count_FN / (Count_FN + Count_TP),
+                Rate_TN = Count_TN / (Count_TN + Count_FP),
+                Accuracy = (Count_TP + Count_TN) / 
+                           (Count_TP + Count_TN + Count_FN + Count_FP)) %>%
+      mutate(Threshold = round(x,2))
+    
+    all_prediction <- rbind(all_prediction,this_prediction)
+    x <- x + .01
+  }
+  return(all_prediction)
+  }
+  else if (!missing(group)) { 
+   while (x <= 1) {
+    this_prediction <- data.frame()
+    
+    this_prediction <-
+      data %>%
+      mutate(predclass = ifelse(!!predictedProbs > x, 1,0)) %>%
+      group_by(!!group) %>%
+      count(predclass, !!observedClass) %>%
+      summarize(Count_TN = sum(n[predclass==0 & !!observedClass==0]),
+                Count_TP = sum(n[predclass==1 & !!observedClass==1]),
+                Count_FN = sum(n[predclass==0 & !!observedClass==1]),
+                Count_FP = sum(n[predclass==1 & !!observedClass==0]),
+                Rate_TP = Count_TP / (Count_TP + Count_FN),
+                Rate_FP = Count_FP / (Count_FP + Count_TN),
+                Rate_FN = Count_FN / (Count_FN + Count_TP),
+                Rate_TN = Count_TN / (Count_TN + Count_FP),
+                Accuracy = (Count_TP + Count_TN) / 
+                           (Count_TP + Count_TN + Count_FN + Count_FP)) %>%
+      mutate(Threshold = round(x,2))
+    
+    all_prediction <- rbind(all_prediction,this_prediction)
+    x <- x + .01
+  }
+  return(all_prediction)
+  }
+}
+
+whichThreshold <- 
+  iterateThresholds(
+     data=testProbs, observedClass = Outcome, predictedProbs = Probs)
+
+whichThreshold <- 
+  whichThreshold %>%
+    dplyr::select(starts_with("Rate"), Threshold) %>%
+    gather(Variable, Rate, Rate_TN,Rate_TP,Rate_FN,Rate_FP) 
+
+whichThreshold %>%
+  ggplot(.,aes(Threshold,Rate,colour = Variable)) +
+  geom_point() +
+  #scale_colour_manual(values = palette5[c(5, 1:3)]) +    
+  labs(title = "Confusion Metric Rates at Different Thresholds",
+       y = "Count") +
+  plotTheme() +
+  guides(colour=guide_legend(title = "Confusion Metric")) 
+```
+
+![](Tree_Canopy_Loss_files/figure-html/Logit-model-2.png)<!-- -->
+
+```r
+rf <- randomForest(
+  finalTrain$Variable ~ .,
+  data=finalTrain %>% 
+                     dplyr::select(pctCoverage18, LogAvgParcelSize, avg_nnConst,avg_nnPole,
+                                    countConst, pctWhite, pctBach, Loge311Count, pctRes,
+                                    pctTrans,  italian, medHHInc, LogPctRes, holc_grade, HydrologyPct)
+)
+
+#pred2 = data.frame(predict(rf, newdata=finalTest))
+
+#cm = table(finalTest$Variable, pred2)
+
+## Prediction
+testProbs2 <- data.frame(Outcome = as.factor(finalTest$Variable),
+                        Probs = predict(rf, finalTest, type= "response"))
+
+# ROC Curve
+## This us a goodness of fit measure, 1 would be a perfect fit, .5 is a coin toss
+auc(testProbs2$Outcome, testProbs2$Probs)
+```
+
+```
+## Area under the curve: 0.7283
+```
+
+```r
+ggplot(testProbs2, aes(d = as.numeric(testProbs2$Outcome), m = Probs)) +
+  geom_roc(n.cuts = 50, labels = FALSE, colour = "#FE9900") +
+  style_roc(theme = theme_grey) +
+  geom_abline(slope = 1, intercept = 0, size = 1.5, color = 'grey') +
+  labs(title = "ROC Curve - Model with Feature Engineering")
+```
+
+![](Tree_Canopy_Loss_files/figure-html/Logit-model-3.png)<!-- -->
 
 
 ## Team Roles
 
 ![Gantt Chart](Gantt.png)
+
+```r
+# FinalFishnet6 <- 
+#   FinalFishnet5 %>% 
+#   dplyr::select(pctCoverage18, LogAvgParcelSize,Loge311Count, LogPctRes, avg_nnConst,avg_nnPole, LogPctLoss, pctLoss)
+# 
+# FinalFishnet6 <- 
+#   FinalFishnet6%>% 
+#   mutate(pctLossObs = ifelse(pctLoss > 25, 1, 0))%>% 
+#   dplyr::select(-pctLoss, -LogPctLoss)
+# 
+# set.seed(346)
+# trainIndex <- createDataPartition(FinalFishnet6$pctLossObs, p = .70,
+#                                   list = FALSE,
+#                                   times = 1)
+# preserveTrain <- FinalFishnet6[ -trainIndex,]
+# preserveTest  <- FinalFishnet6[-trainIndex,]
+# 
+# 
+# preserveModel <- glm(pctLossObs ~ ., 
+#                     family="binomial"(link="logit"), data = preserveTrain %>%
+#                                                             as.data.frame() %>%
+#                                                             dplyr::select(-geometry))
+# summary(preserveModel)
+# 
+# 
+# 
+# classProbs <- predict(preserveModel, preserveTest, type="response")
+# 
+# hist(classProbs)
+# 
+# testProbs <- data.frame(obs = as.numeric(preserveTest$pctLossObs),
+#                         pred = classProbs)
+# 
+# ggplot(testProbs, aes(d = obs, m = pred)) + 
+#   geom_roc(n.cuts = 50, labels = FALSE) + 
+#   style_roc(theme = theme_grey) +
+#   geom_abline(slope = 1, intercept = 0, size = 1.5, color = 'grey')
+# 
+# ggplot(testProbs, aes(x = pred, fill=as.factor(obs))) + geom_density() +
+#   facet_grid(obs ~ .) + xlab("Probability") + geom_vline(xintercept = .5) +
+#   scale_fill_manual(values = c("dodgerblue4", "darkgreen"),
+#                       labels = c("Low Percent Loss","Moderate-High Percent Loss"),
+#                       name = "")
+# 
+testProbs2$predClass  = ifelse(testProbs2$Probs > 0.25 , 1,0)
+# 
+# confusion <- caret::confusionMatrix(reference = as.factor(testProbs$obs), 
+#                        data = as.factor(testProbs$predClass), 
+#                        positive = "1")
+
+
+# draw_confusion_matrix <- function(cm) {
+# 
+#   layout(matrix(c(1,1,2)))
+#   par(mar=c(2,2,2,2))
+#   plot(c(100, 345), c(300, 450), type = "n", xlab="", ylab="", xaxt='n', yaxt='n')
+#   title('CONFUSION MATRIX', cex.main=2)
+# 
+#   # create the matrix 
+#   rect(150, 430, 240, 370, col='#3F97D0')
+#   text(195, 435, 'Low Loss', cex=1.2)
+#   rect(250, 430, 340, 370, col='#F7AD50')
+#   text(295, 435, 'Moderate - High Loss', cex=1.2)
+#   text(125, 370, 'Predicted', cex=1.3, srt=90, font=2)
+#   text(245, 450, 'Actual', cex=1.3, font=2)
+#   rect(150, 305, 240, 365, col='#F7AD50')
+#   rect(250, 305, 340, 365, col='#3F97D0')
+#   text(140, 400, 'Low Loss', cex=1.2, srt=90)
+#   text(140, 335, 'Moderate - High Loss', cex=1.2, srt=90)
+# 
+#   # add in the cm results 
+#   res <- as.numeric(cm$table)
+#   text(195, 400, res[1], cex=1.6, font=2, col='white')
+#   text(195, 335, res[2], cex=1.6, font=2, col='white')
+#   text(295, 400, res[3], cex=1.6, font=2, col='white')
+#   text(295, 335, res[4], cex=1.6, font=2, col='white')
+# 
+#   # add in the specifics 
+#   plot(c(100, 0), c(100, 0), type = "n", xlab="", ylab="", main = "DETAILS", xaxt='n', yaxt='n')
+#   text(10, 85, names(cm$byClass[1]), cex=1.2, font=2)
+#   text(10, 70, round(as.numeric(cm$byClass[1]), 3), cex=1.2)
+#   text(30, 85, names(cm$byClass[2]), cex=1.2, font=2)
+#   text(30, 70, round(as.numeric(cm$byClass[2]), 3), cex=1.2)
+#   text(50, 85, names(cm$byClass[5]), cex=1.2, font=2)
+#   text(50, 70, round(as.numeric(cm$byClass[5]), 3), cex=1.2)
+#   text(70, 85, names(cm$byClass[6]), cex=1.2, font=2)
+#   text(70, 70, round(as.numeric(cm$byClass[6]), 3), cex=1.2)
+#   text(90, 85, names(cm$byClass[7]), cex=1.2, font=2)
+#   text(90, 70, round(as.numeric(cm$byClass[7]), 3), cex=1.2)
+# 
+#   # add in the accuracy information 
+#   text(30, 35, names(cm$overall[1]), cex=1.5, font=2)
+#   text(30, 20, round(as.numeric(cm$overall[1]), 3), cex=1.4)
+#   text(70, 35, names(cm$overall[2]), cex=1.5, font=2)
+#   text(70, 20, round(as.numeric(cm$overall[2]), 3), cex=1.4)
+# }  
+# 
+# draw_confusion_matrix(confusion) 
+# 
+# 
+finalTest2$uniqueID <- seq.int(nrow(finalTest))
+
+testProbs2$uniqueID <- seq.int(nrow(finalTest))
+
+try <- left_join(finalTest2, testProbs2)
+
+try <-
+  try%>%
+  mutate(result = "0")%>%
+  mutate(result = ifelse(Outcome == 0 & predClass == 0, "True Negative", result))%>%
+  mutate(result = ifelse(Outcome == 1 & predClass == 1, "True Positive", result))%>%
+  mutate(result = ifelse(Outcome == 0 & predClass == 1, "False Positive", result))%>%
+  mutate(result = ifelse(Outcome == 1 & predClass == 0, "False Negative", result))
+
+
+palette3 <- c("#FFA866",  "#F17007", "#43C4DB", "#004CFF")
+
+ggplot() +
+  geom_sf(data = fishnet, fill = "white")+
+  geom_sf(data = try, aes(fill = result))+
+  labs(title = "Mapped Correlation Matrix")+
+  scale_fill_manual(values = palette3, name = "My name",
+                  guide = guide_legend(reverse = TRUE))+
+  theme(legend.position = "bottom",
+        legend.title = element_blank(),
+        plot.title = element_text(hjust = 0.5))+
+  mapTheme()
+```
+
+![](Tree_Canopy_Loss_files/figure-html/Confusion Model-1.png)<!-- -->
