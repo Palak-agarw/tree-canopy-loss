@@ -12,24 +12,34 @@ output:
     number_sections: FALSE
 ---
 
+[Return to MUSA 801 Projects Page](https://pennmusa.github.io/MUSA_801.io/)  
+This project was completed as part of the Master in Urban Spatial Analytics Spring 2021 Practicum instructed by Ken Steif, Michael Fichman, and Matt Harris. We thank our instructors as well as Dexter Locke and Lara Roman from the United States Forest Service for their feedback and help navigating the data. 
 
-## Introduction  
-Between 2008 and 2018, Philadelphia lost more than 1000 football fields' equivalent of tree canopy. Most of this loss occurred in historically disenfranchised communities. The City of Philadelphia has set important milestones for conserve and increase the current tree canopy in the city. In this analysis, we assess neighborhoods which meet these goals, ones which are close, and ones which are far from the goals. Using this information, we identify risk factors for tree canopy loss in the city and create a planning tool which helps tree planting organizations best allocate their limited resources of money, trees, and labor.  
+This document is intended to help other researchers replicate a study of tree canopy loss linked to spatial risk factors. We first introduce our motivation, followed by data exploration and analysis, and finally predictive modeling. We include hyperlinks thorough our document and in the appendix for reproducibility. Our hope is that this document and our policy tool can help tree planting agencies, tree advocates, and the interested public understand the forces contributing to tree canopy loss in Philadelphia and imagine different scenarios for our tree canopy based on construction.  
 
-### Why does the tree canopy matter?  
+## Introduction   
+
+**Between 2008 and 2018, Philadelphia lost more than 1000 football fields’ worth of tree canopy.**  
+
+Most of this loss occurred in historically disenfranchised communities. In response, the City of Philadelphia has set important milestones for conserving and increasing the current tree canopy in the city. In this analysis, we model tree canopy loss in Philadelphia and identify risk factors. We additionally assess the city’s progress on the goals and how this varies across neighborhoods.  
+
+### The Planning Tool: Canopy View  
+
+Using this information, we created a predictive scenario policy tool which displays future tree canopy loss under three construction scenarios. The general population and tree advocates can use our tool to understand the potential impact of construction on the tree canopy.
+
+### Why does the tree canopy matter?   
+
 Tree canopy is defined as the area of land which, viewed from a bird's eye view, is covered by trees. Trees offer important benefits to cities including mitigating the urban heat island effect, absorbing stormwater runoff, a habitat for wildlife, and aesthetic and recreational benefits. In addition, trees are a preventative public health measure that improves mental health, increases social interactions and activity, and reduce crime, violence, and stress. A 2020 study published in The Lancet found that if Philadelphia reaches 30% tree canopy in all of its neighborhoods, the city would see [403 fewer premature deaths](https://www.fs.fed.us/nrs/pubs/jrnl/2020/nrs_2020_kondo_001.pdf) per year. However, despite the importance of trees to the city's health, appearance, and ecology, trees are regularly removed for reasons ranging from construction to homeowners' personal preference.
 
-### Philadelphia's Tree Canopy Goals  
-**30% Tree Canopy in each neighborhood by 2025**  
-Philadelphia has set the goal of achieving 30% tree canopy coverage in all neighborhoods by 2025. Currently, the citywide average is 20%, although this is highly uneven. More affluent neighborhoods in the northwest that have many parks and large lawns have much higher tree canopy than industrial neighborhoods in south and north Philadelphia which are full of impervious surfaces. The neighborhoods which have lower canopy coverage tend to be historically disenfranchised, lower income, and predominantly communities of color. This is an environmental justice problem. Neighborhoods like Philadelphia's Hunting Park have a much lower ratio of tree canopy to impervious surfaces than the citywide average, resulting in higher temperatures during summertime heat waves and poorer air quality.  
+### Philadelphia's Tree Canopy Goals    
+
+**30% Tree Canopy in each neighborhood by 2025**    
+
+Philadelphia (under a previous mayoral administration) set the goal of achieving 30% tree canopy coverage in all neighborhoods by 2025. Currently, the citywide average is 20%, although this is highly uneven. More affluent neighborhoods in the northwest that have many parks and large lawns have much higher tree canopy than industrial neighborhoods in south and north Philadelphia which are full of impervious surfaces. The neighborhoods which have lower canopy coverage tend to be historically disenfranchised, lower income, and predominantly communities of color. This is an environmental justice problem. Neighborhoods like Philadelphia’s Hunting Park have a much lower ratio of tree canopy to impervious surfaces than the citywide average, resulting in higher temperatures during summertime heat waves and poorer air quality.  
 
 **1 acre of tree canopy within a 10 minute walk for all residents**  
-13% of Philadelphia's residents are considered under-served by green space, meaning that they live more than a 10 minute walk away from at least 1 acre of green space. The city has therefore set a goal of ensuring that all residents are no more than 10 minutes away from at least 1 acre of green space by 2035. To this end, the city is prioritizing adding green space in historically disenfranchised neighborhoods and making efforts to green spaces in schools and recreation centers.   
 
-## The Planning Tool
-We propose ______, a web-based application which maps the current tree canopy, patterns of loss, canopy loss risk factors, and newly planted trees, as a planning tool to help Philadelphia tree planting organizations decide where to allocate their efforts. 
-* Demand side: composite layer of tree canopy (loss) and risk factor (e.g. asthma, premature mortality)
-* Supply side: approved tree organizations log where they planted trees so that organizations can collaborate on greening Philadelphia and know where interventions are most needed.  
+13% of Philadelphia's residents are considered under-served by green space, meaning that they live more than a 10 minute walk away from at least 1 acre of green space. The city has therefore set a goal of ensuring that all residents are no more than 10 minutes away from at least 1 acre of green space by 2035. To this end, the city is prioritizing adding green space in historically disenfranchised neighborhoods and making efforts to green spaces in schools and recreation centers.     
 
 ## Data and Methods
 Our analysis is guided by the following questions:   
@@ -43,24 +53,24 @@ Our analysis is guided by the following questions:
 
 We use the following data:
 
-**Independent variable**: Tree Canopy LiDAR data consisting of canopy polygons marked as loss, gain, or no change from 2008-2018 [OpenDataPhilly](https://www.opendataphilly.org/dataset/ppr-tree-canopy)  
+**Independent variable**: Tree Canopy LiDAR data consisting of canopy polygons marked as loss, gain, or no change from 2008-2018   [OpenDataPhilly](https://www.opendataphilly.org/dataset/ppr-tree-canopy)    
 
 **Neighborhood sociodemographic attributes**: 2018 [American Community Survey data](https://api.census.gov/data/2018/acs/acs5/variables.html) from the U.S. Census Bureau  
 
 **Neighborhoood level risk factors**:
-* Construction
-* Parcels
-* Streets
-* Impervious surfaces
-* 311 requests - tree based 
-* Temperature 
-* Pipelines
-* NDVI
-* Slope, aspect, soil type
-* Hydrology
-* Zoning
-* Home Prices
+* Construction  
+* Parcels  
+* Streets  
+* Tree-related 311 requests  
+* Normalized difference vegetation index (NDVI)  
+* Hydrology   
+* Zoning  
+* Health outcomes   
 
+
+## Exploratory Analysis  
+
+#### Set up
 ```{r setup, message=FALSE, warning=FALSE, include=TRUE, results='hide', cache=TRUE}
 #Reload
 knitr::opts_chunk$set(message = FALSE, warning = FALSE)
@@ -304,18 +314,18 @@ Hydrology <-
 
  
  Parks <- 
-   #st_read("/Users/annaduan/Desktop/Y3S2/Practicum/Data/Parks") %>%
+   st_read("/Users/annaduan/Desktop/Y3S2/Practicum/Data/Parks") %>%
    #st_read("C:/Users/Kyle McCarthy/Documents/Practicum/Data/Parks/Philadelphia_PPR_Park_Boundaries2016.shp ")%>%
-   st_read("C:/Users/agarw/Documents/MUSA 801/Data/Philadelphia_PPR_Park_Boundaries2016.shp") %>%
+   #st_read("C:/Users/agarw/Documents/MUSA 801/Data/Philadelphia_PPR_Park_Boundaries2016.shp") %>%
    #st_read("C:/Users/Prince/Desktop/Tree Canopy Data/Philadelphia_PPR_Park_Boundaries2016.shp") %>%
      st_transform('ESRI:102728') %>%
    st_make_valid() %>%
    select(geometry)
 
 Conservation <- 
-  #st_read("/Users/annaduan/Desktop/Y3S2/Practicum/Data/Conservation/ConservationEasements202103.shp") %>%
+  st_read("/Users/annaduan/Desktop/Y3S2/Practicum/Data/Conservation/ConservationEasements202103.shp") %>%
   #st_read("C:/Users/Kyle McCarthy/Documents/Practicum/Data/Conservation/ConservationEasements202103.shp")%>%
-   st_read("C:/Users/agarw/Documents/MUSA 801/Data/ConservationEasements202103.shp") %>%
+  # st_read("C:/Users/agarw/Documents/MUSA 801/Data/ConservationEasements202103.shp") %>%
    #  st_read("C:/Users/Prince/Desktop/Tree Canopy Data/ConservationEasements202103.shp") %>%
    st_transform('ESRI:102728') %>%
   st_intersection(st_make_valid(Philadelphia), st_make_valid(Conservation)) %>%
@@ -329,31 +339,10 @@ ConservationNParks <- rbind(Parks, Conservation)
 
 ```
 
-## Exploratory Analysis
 
-### Creating a fishnet
+#### Creating a fishnet
+We use fishnet grid cells as our unit of analysis to take advantage of high resolution spatial data such as 311 service requests. Below, we create a fishnet cells of 1615 feet, or around the size of a city block. We then subtract fishnet cells that are more than 20% [conservation easement](https://www.conservationeasement.us/what-is-a-conservation-easement/) and/or park space to isolate land that may be protected and experience different tree canopy loss processes. All in all, we have 1411 fishnet cells representing Philadelphia.  
 ```{r Fishnet, cache=TRUE, message=FALSE, warning=FALSE, include=TRUE, results='hide'}
-
-
-# Make fishnet
-# fishnet <- 
-#   st_make_grid(philadelphia_revised,
-#                cellsize = 800) %>%
-#   st_sf() %>%
-#   mutate(uniqueID = rownames(.))%>%
-#   st_transform('ESRI:102728')
-# 
-# 
-# ggplot() +
-#   geom_sf(data = fishnet) +
-#   mapTheme()
-# 
-# ggplot() +
-#   geom_sf(data = philadelphia_revised) +
-#   mapTheme()
-```
-
-```{r Fishnet 2, cache=TRUE, message=FALSE, warning=FALSE, include=TRUE, results='hide'}
 
 fishnet2 <- 
   st_make_grid(Philadelphia,
@@ -382,6 +371,7 @@ fishnet <- FishnetIntersect
 
 ```
 
+We then aggregate our tree canopy data to the fishnet.  
 ```{r Fishnet Aggregation, cache=TRUE, message=FALSE, warning=FALSE, include=TRUE, results='hide'}
 
 # Make canopy loss layers
@@ -517,10 +507,11 @@ FinalFishnet$pctLossCat <- cut(FinalFishnet$pctLoss,
 ```
 
 
-### 1. How does tree canopy loss vary across neighborhoods and sociodemographic contexts?  
+### 1. Existing tree canopy and tree canopy change
 
 **Philadelphia's 2018 Canopy**  
-In Philadelphia, the Northwest, parts of the West, and parts of the Northeast have the most tree canopy while North and South Philadelphia and Center City have very little canopy. 
+Northwest, West, and Northeast Philadelphia have the most tree canopy. In North and South Philadelphia as well as Center City, tree canopy is more sparse.  
+
 ```{r 2018 Canopy, cache=TRUE, message=FALSE, warning=FALSE, include=TRUE, results='hide'}
 
 ggplot()+ 
