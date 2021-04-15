@@ -216,16 +216,17 @@ Neighborhood <-
  # st_transform('ESRI:102728')
 
 HOLC <- 
-  #st_read("/Users/annaduan/Desktop/Y3S2/Practicum/Data/PAPhiladelphia1937.geojson") %>%
+  st_read("/Users/annaduan/Desktop/Y3S2/Practicum/Data/PAPhiladelphia1937.geojson") %>%
 # st_read("C:/Users/Prince/Desktop/Tree Canopy Data/PAPhiladelphia1937.geojson") %>%
   #st_read("C:/Users/Kyle McCarthy/Documents/Practicum/Data/PAPhiladelphia1937.geojson")%>%
-  st_read("C:/Users/agarw/Documents/MUSA 801/Data/PAPhiladelphia1937.geojson")%>%
+ # st_read("C:/Users/agarw/Documents/MUSA 801/Data/PAPhiladelphia1937.geojson")%>%
   st_transform('ESRI:102728')
 
 HOLC <-
   HOLC%>%
   mutate(HOLCArea = st_area(HOLC))%>%
-  mutate(HOLCArea = as.numeric(HOLCArea))
+  mutate(HOLCArea = as.numeric(HOLCArea)) %>%
+  dplyr::select(holc_grade)
 
 
 # ACS
@@ -1048,6 +1049,143 @@ ggplot(FinalFishnet, aes(y = LogPctLoss, x = LogAvgParcelSize))+
 
 ```
 
+As previously mentioned, land use appears to have a correlation with tree canopy. A 2019 report suggests that the most trees were removed next to streets and on residential property. This proves true in our analysis: the top two land use types that experienced tree canopy change are residential and transportation.  
+```{r land use, message=FALSE, warning=FALSE, include=TRUE, results='hide', fig.height = 7, fig.width = 8, cache=TRUE}
+
+
+# Analysis completed in ArcGIS -- Processing time to long in R. 500,000 Parcels and 614,000 Tree Canopy Polygons aggregated in this analysis. I plan on writing out what the code would be for reproducability purposes. 
+
+LandUse1 <-
+  #st_read("C:/Users/Kyle McCarthy/Documents/Practicum/Data/LandUse/landu.csv")%>%
+  st_read("C:/Users/agarw/Documents/MUSA 801/Data/landu.csv")%>%
+  #st_read("/Users/annaduan/Desktop/Y3S2/Practicum/Data/landu.csv") %>%
+  #st_read("C:/Users/Prince/Desktop/Tree Canopy Data/landu.csv") %>%
+  mutate(AreaGain = as.numeric(AreaGain),
+         AreaLoss = as.numeric(AreaLoss),
+         Coverage08 = as.numeric(Coverage08),
+         Coverage18 = as.numeric(Coverage18))
+ LandUse1 <- LandUse1%>% replace(is.na(LandUse1), 0)
+
+LandUse<-
+  LandUse1%>%
+  group_by(Descriptio)%>%
+  summarise(AreaGain = sum(AreaGain),
+            AreaLoss = sum(AreaLoss),
+            Coverage08 = sum(Coverage08),
+            Coverage18 = sum(Coverage18))%>%
+  mutate(pctLoss = as.numeric(AreaLoss / Coverage08),
+         pctGain = as.numeric(AreaGain/ Coverage18),
+         pctChange = (Coverage18 - Coverage08)/ (Coverage08) * 100,
+         netChange = AreaGain - AreaLoss)
+
+LandUseLong<-
+  LandUse%>%
+  mutate(AreaLoss = AreaLoss * -1)%>%
+  dplyr::select(AreaGain, AreaLoss, Descriptio)%>%
+  gather(variable, value, -c(Descriptio))%>%
+  mutate(variable = ifelse(variable == "AreaGain", "Area Gain", "Area Loss"))
+
+ggplot(LandUseLong, aes(fill = variable, y=Descriptio, x=value))+
+  geom_bar(stat='identity', position = "stack", width = .5)+
+ scale_fill_manual(values = landusepal, name = "Area Gain or Loss")+
+  labs(title = "Total Area Lost or Gained by Land Use Type")+
+  xlab("        Total Area Lossed                Total Area Gained")+
+  ylab("Land Use Type") +
+  plotTheme()
+
+
+LandUseLong<-
+  LandUse%>%
+  mutate(pctLoss = pctLoss * -1)%>%
+  dplyr::select(pctGain, pctLoss, Descriptio)%>%
+  gather(variable, value, -c(Descriptio))%>%
+  mutate(variable = ifelse(variable == "pctGain", "Percent Gained", "Percent Lost"))
+
+# ggplot(LandUseLong, aes(fill = variable, y=Descriptio, x=value))+
+#   geom_bar(stat='identity', position = "stack", width = .5)+
+#   scale_fill_manual(values = landusepal,
+#                     name = "Area Gain or Loss")+
+#   labs(title = "Relative Percent Lost or Relative Percent Gained")+
+#   xlab("Percentage of 2008 Trees Lost            Percentage of 2018 Trees Gained")+
+#   ylab("Land Use Type")+
+#   theme(plot.title = element_text(hjust = 0.5),
+#         axis.title.x = element_text(size = 9, face = "bold")) +
+#   plotTheme()
+  
+```
+
+```{r land use percent, message=FALSE, warning=FALSE, include=TRUE, results='hide', fig.height = 10, fig.width = 10, cache=TRUE}
+
+
+LandUseLong<-
+  LandUse%>%
+  mutate(pctLoss = pctLoss * -1)%>%
+  dplyr::select(netChange, pctChange, Descriptio)%>%
+  gather(variable, value, -c(Descriptio))
+
+# grid.arrange(ncol= 1,
+# 
+# ggplot(LandUse, aes(y=Descriptio, x=netChange))+
+#   geom_bar(stat='identity', fill="forest green", width = .4)+
+#   labs(title = "Total Net Change",
+#        subtitle = "Area Gain - Area Loss")+
+#   xlab("Land Use Type")+
+#   ylab("Total Net Change")+
+#   theme(axis.text.x = element_text(angle = 90, vjust = 0.5, hjust=1)) +
+#   plotTheme(),
+
+ggplot(LandUse, aes(y=Descriptio, x=pctChange))+
+  geom_bar(stat='identity', fill="forest green", width = .4)+
+  labs(title = "Percent Change",
+       subtitle = "('18 Tree Canopy Coverage - '08 Tree Canopy Coverage) / ('18 Tree Canopy Coverage) * 100 ")+
+  xlab("Percent Net Change")+
+  ylab("Land Use Type")+
+  theme(axis.text.x = element_text(angle = 90, vjust = 0.5, hjust=1)) +
+  plotTheme()
+# )
+#   
+
+```
+
+```{r Residential density, message=FALSE, warning=FALSE, include=TRUE, results='hide', fig.height = 5, fig.width = 5, cache=TRUE}
+
+LandUse2 <-
+  LandUse1%>%
+  filter(Descriptio == "Residential")%>%
+  group_by(C_DIG2DESC)%>%
+  summarise(AreaGain = sum(AreaGain),
+            AreaLoss = sum(AreaLoss),
+            Coverage08 = sum(Coverage08),
+            Coverage18 = sum(Coverage18))%>%
+  mutate(pctChange = (Coverage18 - Coverage08)/ (Coverage08) * 100,
+         netChange = AreaGain - AreaLoss)
+
+
+#   grid.arrange(ncol= 1,
+# 
+# ggplot(LandUse2, aes(y=C_DIG2DESC, x=netChange))+
+#   geom_bar(stat='identity', fill="forest green", width = 0.4)+
+#   labs(title = "Total Tree Canopy Net Change in Residential Land Use Parcels",
+#        subtitle = "Area Gain - Area Loss")+
+#   ylab("Residential Land Use Type")+
+#   xlab("Total Net Change")+
+#   theme(axis.text.x = element_text(angle = 90, vjust = 0.5, hjust=1)) +
+#   plotTheme(),
+
+ggplot(LandUse2, aes(y=C_DIG2DESC, x=pctChange))+
+  geom_bar(stat='identity', fill="forest green", width = 0.4)+
+  labs(title = "Percent Change in Residential Land Use Parcels",
+       subtitle = "('18 Canopy - '08 Canopy) / ('18 Canopy) * 100 ")+
+  ylab("Residential Land Use Type")+
+  xlab("Percent Tree Canopy Change")+
+  theme(axis.text.x = element_text(angle = 90, vjust = 0.5, hjust=1)) +
+  plotTheme()
+# )
+
+
+```
+
+
 ```{r E911 Trees, fig.height = 12,fig.width = 12, message=FALSE, warning=FALSE, include=TRUE, results='hide', cache=TRUE}
 
 e311Trees <-
@@ -1083,7 +1221,7 @@ FinalFishnet <-
 ggplot(FinalFishnet, aes(y = LogPctLoss, x = Loge311Count))+
   geom_point()+
   labs(title = "Relationship between  Tree Canopy Loss and \n Tree-related 311 Requests",
-       subtilte = "Aggregated by Fishnet") +
+       subtitle = "Aggregated by Fishnet") +
   xlab("Log-transformed Tree-related 311 Requests") +
   ylab("Log-transformed Percent of Tree Canopy Lost (2008 - 2018)") +
   theme(plot.title = element_text(hjust = 0.3, size = 12), plot.subtitle = element_text(hjust = 0.3, size = 8)) +
@@ -1254,140 +1392,6 @@ JuniataPark <- JuniataPark %>%
 ```
 
 
-```{r land, message=FALSE, warning=FALSE, include=TRUE, results='hide', fig.height = 7, fig.width = 8, cache=TRUE}
-
-
-# Analysis completed in ArcGIS -- Processing time to long in R. 500,000 Parcels and 614,000 Tree Canopy Polygons aggregated in this analysis. I plan on writing out what the code would be for reproducability purposes. 
-
-LandUse1 <-
-  #st_read("C:/Users/Kyle McCarthy/Documents/Practicum/Data/LandUse/landu.csv")%>%
-  st_read("C:/Users/agarw/Documents/MUSA 801/Data/landu.csv")%>%
-  #st_read("/Users/annaduan/Desktop/Y3S2/Practicum/Data/landu.csv") %>%
-  #st_read("C:/Users/Prince/Desktop/Tree Canopy Data/landu.csv") %>%
-  mutate(AreaGain = as.numeric(AreaGain),
-         AreaLoss = as.numeric(AreaLoss),
-         Coverage08 = as.numeric(Coverage08),
-         Coverage18 = as.numeric(Coverage18))
- LandUse1 <- LandUse1%>% replace(is.na(LandUse1), 0)
-
-LandUse<-
-  LandUse1%>%
-  group_by(Descriptio)%>%
-  summarise(AreaGain = sum(AreaGain),
-            AreaLoss = sum(AreaLoss),
-            Coverage08 = sum(Coverage08),
-            Coverage18 = sum(Coverage18))%>%
-  mutate(pctLoss = as.numeric(AreaLoss / Coverage08),
-         pctGain = as.numeric(AreaGain/ Coverage18),
-         pctChange = (Coverage18 - Coverage08)/ (Coverage08) * 100,
-         netChange = AreaGain - AreaLoss)
-
-LandUseLong<-
-  LandUse%>%
-  mutate(AreaLoss = AreaLoss * -1)%>%
-  dplyr::select(AreaGain, AreaLoss, Descriptio)%>%
-  gather(variable, value, -c(Descriptio))%>%
-  mutate(variable = ifelse(variable == "AreaGain", "Area Gain", "Area Loss"))
-
-ggplot(LandUseLong, aes(fill = variable, y=Descriptio, x=value))+
-  geom_bar(stat='identity', position = "stack", width = .5)+
- scale_fill_manual(values = landusepal, name = "Area Gain or Loss")+
-  labs(title = "Total Area Lost or Gained by Land Use Type")+
-  xlab("        Total Area Lossed                Total Area Gained")+
-  ylab("Land Use Type") +
-  plotTheme()
-
-
-LandUseLong<-
-  LandUse%>%
-  mutate(pctLoss = pctLoss * -1)%>%
-  dplyr::select(pctGain, pctLoss, Descriptio)%>%
-  gather(variable, value, -c(Descriptio))%>%
-  mutate(variable = ifelse(variable == "pctGain", "Percent Gained", "Percent Lost"))
-
-ggplot(LandUseLong, aes(fill = variable, y=Descriptio, x=value))+
-  geom_bar(stat='identity', position = "stack", width = .5)+
-  scale_fill_manual(values = landusepal,
-                    name = "Area Gain or Loss")+
-  labs(title = "Relative Percent Lost or Relative Percent Gained")+
-  xlab("Percentage of 2008 Trees Lost            Percentage of 2018 Trees Gained")+
-  ylab("Land Use Type")+
-  theme(plot.title = element_text(hjust = 0.5),
-        axis.title.x = element_text(size = 9, face = "bold")) +
-  plotTheme()
-  
-```
-
-```{r Landuse2, message=FALSE, warning=FALSE, include=TRUE, results='hide', fig.height = 10, fig.width = 10, cache=TRUE}
-
-
-LandUseLong<-
-  LandUse%>%
-  mutate(pctLoss = pctLoss * -1)%>%
-  dplyr::select(netChange, pctChange, Descriptio)%>%
-  gather(variable, value, -c(Descriptio))
-
-grid.arrange(ncol= 1,
-
-ggplot(LandUse, aes(y=Descriptio, x=netChange))+
-  geom_bar(stat='identity', fill="forest green", width = .4)+
-  labs(title = "Total Net Change",
-       subtitle = "Area Gain - Area Loss")+
-  xlab("Land Use Type")+
-  ylab("Total Net Change")+
-  theme(axis.text.x = element_text(angle = 90, vjust = 0.5, hjust=1)) +
-  plotTheme(),
-
-ggplot(LandUse, aes(y=Descriptio, x=pctChange))+
-  geom_bar(stat='identity', fill="forest green", width = .4)+
-  labs(title = "Percent Change",
-       subtitle = "('18 Tree Canopy Coverage - '08 Tree Canopy Coverage) / ('18 Tree Canopy Coverage) * 100 ")+
-  xlab("Percent Net Change")+
-  ylab("Land Use Type")+
-  theme(axis.text.x = element_text(angle = 90, vjust = 0.5, hjust=1)) +
-  plotTheme())
-  
-
-```
-
-
-```{r Exploring Residential Further, message=FALSE, warning=FALSE, include=TRUE, results='hide', fig.height = 5, fig.width = 5, cache=TRUE}
-
-LandUse2 <-
-  LandUse1%>%
-  filter(Descriptio == "Residential")%>%
-  group_by(C_DIG2DESC)%>%
-  summarise(AreaGain = sum(AreaGain),
-            AreaLoss = sum(AreaLoss),
-            Coverage08 = sum(Coverage08),
-            Coverage18 = sum(Coverage18))%>%
-  mutate(pctChange = (Coverage18 - Coverage08)/ (Coverage08) * 100,
-         netChange = AreaGain - AreaLoss)
-
-
-  grid.arrange(ncol= 1,
-
-ggplot(LandUse2, aes(y=C_DIG2DESC, x=netChange))+
-  geom_bar(stat='identity', fill="forest green", width = 0.4)+
-  labs(title = "Total Tree Canopy Net Change in Residential Land Use Parcels",
-       subtitle = "Area Gain - Area Loss")+
-  ylab("Residential Land Use Type")+
-  xlab("Total Net Change")+
-  theme(axis.text.x = element_text(angle = 90, vjust = 0.5, hjust=1)) +
-  plotTheme(),
-
-ggplot(LandUse2, aes(y=C_DIG2DESC, x=pctChange))+
-  geom_bar(stat='identity', fill="forest green", width = 0.4)+
-  labs(title = "Percent Change in Residential Land Use Parcels",
-       subtitle = "('18 Tree Canopy Coverage - '08 Tree Canopy Coverage) / ('18 Tree Canopy Coverage) * 100 ")+
-  ylab("Residential Land Use Type")+
-  xlab("Percent Tree Canopy Change")+
-  theme(axis.text.x = element_text(angle = 90, vjust = 0.5, hjust=1)) +
-  plotTheme())
-
-
-```
-
 ```{r Land Use to Fishnet, message=FALSE, warning=FALSE, include=TRUE, results='hide', fig.height =  7, fig.width = 7, cache=TRUE}
 
 # Code to Intersect land use with fishnet. Intersection took about 3 hours with the below code. Completed in arcGIS instead. 
@@ -1453,14 +1457,31 @@ mutate_all(~replace(., is.na(.), 0))%>%
 left_join(FinalFishnet, .)%>% 
 mutate(LogPctRes = log10(pctRes), 
 LogPctResTrans = log10(pctTransRes))
-
-
-
-
 ```
 
-### 4. How do current patterns of tree canopy coverage and loss reflect disinvestment as a result of redlining and older planning practices?  
+We also look at redlining boundaries from the Homeowner’s Loan Corporation (HOLC). As trees take decades to grow, the spatial configuration of tree canopy and likely their change is influenced by historical planning decisions. In 1937, HOLC created “redlining” maps which rated neighborhoods’ desirability in four categories. They rated neighborhoods with residents of color as the least desirable and majority-white neighborhoods as the most desirable. As a result, the low-ranked neighborhoods experienced disinvestment and greater difficulty attracting investment. Based on our analysis, it appears that tree canopy loss is correlated with a neighborhood’s HOLC grade. Areas with the most desirable grade, A, experienced the least percentage loss, while areas ranked D experienced the most.
 ```{r HOLC, message=FALSE, warning=FALSE, results='hide', cache=TRUE}
+
+HOLC2 <- HOLC %>%
+  st_intersection(st_make_valid(Philadelphia), HOLC) %>%
+  st_union() %>%
+  st_as_sf()
+
+HOLC2 <- HOLC2 %>%
+  st_sym_difference(Philadelphia, HOLC2) %>%
+  st_as_sf() %>%
+  mutate(holc_grade = "Unclassified") %>%
+  select(holc_grade) %>%
+  as.data.frame %>%
+  rename(geometry = x)
+
+HOLC <- full_join(as.data.frame(HOLC), as.data.frame(HOLC2)) %>%
+  st_as_sf()
+
+ggplot() +
+  geom_sf(data = HOLC, aes(fill = holc_grade)) +
+  mapTheme()
+
 TreeCanopyAllHOLC <-
 TreeCanopy%>%
 st_make_valid() %>%
@@ -1485,13 +1506,13 @@ TreeCanopyLossHOLC<-
   left_join(TreeCanopyLossHOLC)
 
 
-# ggplot() +
-#   geom_sf(data = Philadelphia, colour = "gray90", fill = "gray90") +
-#     geom_sf(data = Loss, colour = "black", fill = "transparent") +
-#   geom_sf(data = HOLC, aes(fill = holc_grade), alpha = 0.6, colour = "gray90") +
-#   scale_fill_manual(values = paletteHolc) +
-#   labs(title = "Tree Canopy Loss and Redlining", subtitle = "Philadelphia, PA") +
-#   mapTheme()
+ ggplot() +
+   geom_sf(data = Philadelphia, colour = "gray90", fill = "gray90") +
+   #  geom_sf(data = Loss, colour = "black", fill = "transparent") +
+   geom_sf(data = HOLC, aes(fill = holc_grade), alpha = 0.6, colour = "gray90") +
+   scale_fill_manual(values = paletteHolc) +
+   labs(title = "Tree Canopy Loss and Redlining", subtitle = "Philadelphia, PA") +
+   mapTheme()
 
 TreeCanopyLossHOLC %>%
  # group_by(holc_grade) %>%
