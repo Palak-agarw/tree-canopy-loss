@@ -1425,12 +1425,12 @@ We also look at redlining boundaries from the Homeowner’s Loan Corporation (HO
 ```{r HOLC, message=FALSE, warning=FALSE, results='hide', cache=TRUE}
 
 HOLC2 <- HOLC %>%
-  st_intersection(st_make_valid(fishnet), HOLC) %>%  ##replaced Philadelphia with fishnet
+  st_intersection(st_make_valid(Philadelphia), HOLC) %>%  
   st_union() %>%
   st_as_sf()
 
 HOLC2 <- HOLC2 %>%
-  st_sym_difference(fishnet, HOLC2) %>%
+  st_sym_difference(Philadelphia, HOLC2) %>%
   st_as_sf() %>%
   mutate(holc_grade = "Unclassified") %>%
   select(holc_grade) %>%
