@@ -1467,7 +1467,6 @@ TreeCanopyLossHOLC<-
   HOLC%>%
   left_join(TreeCanopyLossHOLC)
 
-
  ggplot() +
    geom_sf(data = Philadelphia, colour = "gray90", fill = "gray90") +
    #  geom_sf(data = Loss, colour = "black", fill = "transparent") +
@@ -1756,6 +1755,7 @@ ggplot(FinalFishnet, aes(y = LogPctLoss , x = LogPole))+
 
 ```{r corr plot, message=FALSE, warning=FALSE, results='hide', fig.height =  8, fig.width =8,cache=TRUE}
 
+library(ggcorrplot)
 # corrplotvars <- FinalFishnet %>%
 #   dplyr::select()
 
