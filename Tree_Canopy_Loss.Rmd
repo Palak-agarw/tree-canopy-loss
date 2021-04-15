@@ -995,7 +995,7 @@ hydro <- ggplot() +
   labs(title = "Weighted Proximity to Hydrology", subtitle = "Philadelphia, PA") +
   mapTheme()
 
-hydro + scale_fill_brewer(palette = "YlGnBu", direction = -1, aesthetics = c("colour", "fill"), guide = guide_legend(reverse = TRUE))
+# hydro + scale_fill_discrete(palette = "YlGnBu", direction = -1, aesthetics = c("colour", "fill"), guide = guide_legend(reverse = TRUE))
 ```
 
 ```{r hydrology 2, fig.height = 12,fig.width = 12, message=FALSE, warning=FALSE, include=TRUE, results='hide', cache=TRUE}
@@ -1056,8 +1056,8 @@ As previously mentioned, land use appears to have a correlation with tree canopy
 
 LandUse1 <-
   #st_read("C:/Users/Kyle McCarthy/Documents/Practicum/Data/LandUse/landu.csv")%>%
-  st_read("C:/Users/agarw/Documents/MUSA 801/Data/landu.csv")%>%
-  #st_read("/Users/annaduan/Desktop/Y3S2/Practicum/Data/landu.csv") %>%
+  #st_read("C:/Users/agarw/Documents/MUSA 801/Data/landu.csv")%>%
+   st_read("/Users/annaduan/Desktop/Y3S2/Practicum/Data/landu.csv") %>%
   #st_read("C:/Users/Prince/Desktop/Tree Canopy Data/landu.csv") %>%
   mutate(AreaGain = as.numeric(AreaGain),
          AreaLoss = as.numeric(AreaLoss),
@@ -1189,8 +1189,8 @@ ggplot(LandUse2, aes(y=C_DIG2DESC, x=pctChange))+
 
 e311Trees <-
   #st_read('C:/Users/Kyle McCarthy/Documents/Practicum/e311.csv') 
-  #st_read("/Users/annaduan/Desktop/Y3S2/Practicum/Data/streettree311.csv")
-  st_read('C:/Users/agarw/Documents/MUSA 801/Data/e311.csv')
+   st_read("/Users/annaduan/Desktop/Y3S2/Practicum/Data/streettree311.csv")
+  #st_read('C:/Users/agarw/Documents/MUSA 801/Data/e311.csv')
 #st_read("C:/Users/Prince/Desktop/Tree Canopy Data/e311.csv") %>%
 
 
@@ -1290,7 +1290,6 @@ Max_neigh <- Neighborhood %>%
   filter(NAME == const_max_neigh$neigh)
 
 const_neigh <- st_intersection(const_spatial, Max_neigh)
-  
 
 
 Max_neigh_tree <- st_intersection(st_make_valid(TreeCanopy), Max_neigh) %>%
@@ -1304,7 +1303,7 @@ ggmap(base_mapGH, darken = c(0.3, "white")) +
   geom_sf(data = ll(Max_neigh_tree), aes(colour = CLASS_NAME), colour = "red", inherit.aes = FALSE) +
   geom_sf(data = ll(const_neigh), size = 0.1, inherit.aes = FALSE) +
   scale_fill_manual(values = paletteJ, name = "Canopy Change") +
-  labs(title = "Pont Breeze Tree Canopy Change 2008-2018 with construction permits", subtitle = "Philadelphia, PA") +
+  labs(title = "Point Breeze Tree Canopy Change 2008-2018 with Construction Permits", subtitle = "Philadelphia, PA") +
     mapTheme()
 
 ```
@@ -1458,7 +1457,8 @@ mutate(LogPctRes = log10(pctRes),
 LogPctResTrans = log10(pctTransRes))
 ```
 
-We also look at redlining boundaries from the Homeowner’s Loan Corporation (HOLC). As trees take decades to grow, the spatial configuration of tree canopy and likely their change is influenced by historical planning decisions. In 1937, HOLC created “redlining” maps which rated neighborhoods’ desirability in four categories. They rated neighborhoods with residents of color as the least desirable and majority-white neighborhoods as the most desirable. As a result, the low-ranked neighborhoods experienced disinvestment and greater difficulty attracting investment. Based on our analysis, it appears that tree canopy loss is correlated with a neighborhood’s HOLC grade. Areas with the most desirable grade, A, experienced the least percentage loss, while areas ranked D experienced the most.
+We also look at redlining boundaries from the Homeowner’s Loan Corporation (HOLC). As trees take decades to grow, the spatial configuration of tree canopy and likely their change is influenced by historical planning decisions. In 1937, HOLC created “redlining” maps which rated neighborhoods’ desirability in four categories. They rated neighborhoods with residents of color as the least desirable and majority-white neighborhoods as the most desirable. As a result, the low-ranked neighborhoods experienced disinvestment and greater difficulty attracting investment. Based on our analysis, it appears that tree canopy loss is correlated with a neighborhood’s HOLC grade. Areas with the most desirable grade, A, experienced the least percentage loss, while areas ranked D experienced the most.  
+
 ```{r HOLC, message=FALSE, warning=FALSE, results='hide', cache=TRUE}
 
 HOLC2 <- HOLC %>%
@@ -1781,14 +1781,17 @@ FinalFishnet<-
 
 ggplot(FinalFishnet, aes(y = LogPctLoss , x = LogPole))+
   geom_point()+
-  labs(title = "Percent Change vs Construction nn1",
-       subtilte = "Aggregated by Fishnet") +
+  labs(title = "Percent Change vs Poles nn1",
+       subtitle = "Aggregated by Fishnet") +
   xlab("Average Percent Change ") +
   ylab("Log Percent Loss") +
   theme(plot.title = element_text(hjust = 0.5, size = 15, face = "bold"), plot.subtitle = element_text(hjust = 0.5, size = 8)) +
   plotTheme()
   
 
+```
+
+```{r corr plot, message=FALSE, warning=FALSE, results='hide', fig.height =  8, fig.width =8,cache=TRUE}
 ```
 
 
