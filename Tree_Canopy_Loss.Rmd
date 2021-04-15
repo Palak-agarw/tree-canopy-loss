@@ -990,12 +990,17 @@ left_join(FinalFishnet, .) %>%
 mutate_all(funs(replace_na(.,0)))%>%
 mutate(HydrologyPct = HydrologyArea /2608225 * 100) 
 
+HydrologyNet$HydrologyAreaCat <- cut(HydrologyNet$HydrologyArea, 
+                      breaks = c(-Inf, 0, 382, 85305, 1637508, Inf), 
+                       labels = c("None", "Little hydrology", "Some hydrology", "Much hydrology", "Most hydrology"), 
+                       right = FALSE)
+
 hydro <- ggplot() +
-  geom_sf(data = HydrologyNet, aes(fill = HydrologyArea)) +
+  geom_sf(data = HydrologyNet, aes(fill = HydrologyAreaCat), colour = "white") +
   labs(title = "Weighted Proximity to Hydrology", subtitle = "Philadelphia, PA") +
   mapTheme()
 
-# hydro + scale_fill_discrete(palette = "YlGnBu", direction = -1, aesthetics = c("colour", "fill"), guide = guide_legend(reverse = TRUE))
+hydro + scale_fill_brewer(palette = "YlGnBu", direction = 1, aesthetics = c("colour", "fill"), guide = guide_legend(reverse = TRUE))
 ```
 
 ```{r hydrology 2, fig.height = 12,fig.width = 12, message=FALSE, warning=FALSE, include=TRUE, results='hide', cache=TRUE}
@@ -1310,22 +1315,22 @@ ggmap(base_mapGH, darken = c(0.3, "white")) +
 
 ```{r Const_Permit3, message=FALSE, warning=FALSE, include=TRUE, results='hide', fig.height = 7, fig.width = 8, cache=TRUE}
 
-#Juniata Park
+#Richmond
  
- const_JB <- st_intersection(const_spatial, JPBound)
+ const_RM <- st_intersection(const_spatial, RMBound)
 
-JuniataPark <- JuniataPark %>%
+Richmond <- Richmond %>%
   filter(CLASS_NAME == 'Loss')
  
- base_mapGH <- get_map(location =  unname(st_bbox(ll(st_buffer(st_centroid(JuniataPark),1100)))),
+ base_mapRM <- get_map(location =  unname(st_bbox(ll(st_buffer(st_centroid(Richmond),1100)))),
                      maptype = "satellite") #get a basemap
  
- ggmap(base_mapGH, darken = c(0.3, "white")) + 
-   geom_sf(data = ll(JPBound), fill = "black", alpha = 0.3, inherit.aes = FALSE) +
-   geom_sf(data = ll(JuniataPark), aes(colour = CLASS_NAME), colour = "red", inherit.aes = FALSE) +
-   geom_sf(data = ll(const_JB), size = 0.1, inherit.aes = FALSE) +
+ ggmap(base_mapRM, darken = c(0.3, "white")) + 
+   geom_sf(data = ll(RMBound), fill = "black", alpha = 0.3, inherit.aes = FALSE) +
+   geom_sf(data = ll(Richmond), aes(colour = CLASS_NAME), colour = "red", inherit.aes = FALSE) +
+   geom_sf(data = ll(const_RM), size = 0.1, inherit.aes = FALSE) +
    scale_fill_manual(values = paletteJ, name = "Canopy Change") +
-   labs(title = "Juniata Park Tree Canopy Change 2008-2018 with construction permits", subtitle = "Philadelphia, PA") +
+   labs(title = "Richmond Tree Canopy Change 2008-2018 with construction permits", subtitle = "Philadelphia, PA") +
      mapTheme()
  
 #Upper Roxborough
@@ -1335,58 +1340,16 @@ JuniataPark <- JuniataPark %>%
  UpperRoxborough <- UpperRoxborough %>%
    filter(CLASS_NAME == 'Loss')
  
- base_mapGH <- get_map(location =  unname(st_bbox(ll(st_buffer(st_centroid(UpperRoxborough),1100)))),
+ base_mapUR <- get_map(location =  unname(st_bbox(ll(st_buffer(st_centroid(UpperRoxborough),1100)))),
                      maptype = "satellite") #get a basemap
  
- ggmap(base_mapGH, darken = c(0.3, "white")) + 
+ ggmap(base_mapUR, darken = c(0.3, "white")) + 
    geom_sf(data = ll(URBound), fill = "black", alpha = 0.3, inherit.aes = FALSE) +
    geom_sf(data = ll(UpperRoxborough), aes(colour = CLASS_NAME), colour = "red", inherit.aes = FALSE) +
    geom_sf(data = ll(const_UR), size = 0.1, inherit.aes = FALSE) +
    scale_fill_manual(values = paletteJ, name = "Canopy Change") +
    labs(title = "Upper Roxborough Tree Canopy Change 2008-2018 with construction permits", subtitle = "Philadelphia, PA") +
      mapTheme()
- 
- 
-#Fairhill
- 
- const_FH <- st_intersection(const_spatial, Fairhill)
- 
- Fairhill <- Fairhill %>%
-   filter(CLASS_NAME == 'Loss')
- 
- base_mapGH <- get_map(location =  unname(st_bbox(ll(st_buffer(st_centroid(Fairhill),1100)))),
-                     maptype = "satellite") #get a basemap
- 
- ggmap(base_mapGH, darken = c(0.3, "white")) + 
-   geom_sf(data = ll(FHBound), fill = "black", alpha = 0.3, inherit.aes = FALSE) +
-   geom_sf(data = ll(Fairhill), aes(colour = CLASS_NAME), colour = "red", inherit.aes = FALSE) +
-   geom_sf(data = ll(const_FH), size = 0.1, inherit.aes = FALSE) +
-   scale_fill_manual(values = paletteJ, name = "Canopy Change") +
-   labs(title = "FairHill Tree Canopy Change 2008-2018 with construction permits", subtitle = "Philadelphia, PA") +
-     mapTheme()
- 
- 
- #GRad hospital
- 
- const_GH <- st_intersection(const_spatial, GraduateHospital)
- 
- GraduateHospital <- GraduateHospital %>%
-   filter(CLASS_NAME == 'Loss')
- 
- base_mapGH <- get_map(location =  unname(st_bbox(ll(st_buffer(st_centroid(GraduateHospital),1100)))),
-                     maptype = "satellite") #get a basemap
- 
- ggmap(base_mapGH, darken = c(0.3, "white")) + 
-   geom_sf(data = ll(GHBound), fill = "black", alpha = 0.3, inherit.aes = FALSE) +
-   geom_sf(data = ll(GraduateHospital), aes(colour = CLASS_NAME), colour = "red", inherit.aes = FALSE) +
-   geom_sf(data = ll(const_GH), size = 0.1, inherit.aes = FALSE) +
-   scale_fill_manual(values = paletteJ, name = "Canopy Change") +
-   labs(title = "Graduate Hospital Tree Canopy Change 2008-2018 with construction permits", subtitle = "Philadelphia, PA") +
-     mapTheme()
- 
- 
- 
-
 ```
 
 
@@ -1537,7 +1500,7 @@ FinalFishnet <-
 
 ```
 
-```{r Public_health, message=FALSE, warning=FALSE, results='hide', cache=TRUE}
+```{r Public health, message=FALSE, warning=FALSE, results='hide', cache=TRUE}
 library(RSocrata)
 
  publichealth <- 
@@ -1792,6 +1755,21 @@ ggplot(FinalFishnet, aes(y = LogPctLoss , x = LogPole))+
 ```
 
 ```{r corr plot, message=FALSE, warning=FALSE, results='hide', fig.height =  8, fig.width =8,cache=TRUE}
+
+# corrplotvars <- FinalFishnet %>%
+#   dplyr::select()
+
+numericVars <-
+  select_if(st_drop_geometry(FinalFishnet), is.numeric) %>% na.omit()
+
+ggcorrplot(
+  round(cor(numericVars), 1),
+  p.mat = cor_pmat(numericVars),
+  colors = c("magenta", "white", "green"),
+  type="lower",
+  insig = "blank") +  
+    labs(title = "Numeric Variables Correlation Plot") +
+  plotTheme()
 ```
 
 
