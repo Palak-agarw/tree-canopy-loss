@@ -182,8 +182,8 @@ plotTheme <- function(base_size = 12) {
 # Tree Canopy
 TreeCanopy <-
  #st_read("C:/Users/Kyle McCarthy/Documents/Practicum/TreeCanopyChange_2008_2018.shp")%>%
-  #st_read("/Users/annaduan/Desktop/Y3S2/Practicum/Data/TreeCanopyChange_2008_2018-shp/TreeCanopyChange_2008_2018.shp") %>%
-  st_read("C:/Users/agarw/Documents/MUSA 801/Data/TreeCanopyChange_2008_2018.shp") %>%
+  st_read("/Users/annaduan/Desktop/Y3S2/Practicum/Data/TreeCanopyChange_2008_2018-shp/TreeCanopyChange_2008_2018.shp") %>%
+ # st_read("C:/Users/agarw/Documents/MUSA 801/Data/TreeCanopyChange_2008_2018.shp") %>%
 #st_read("C:/Users/Prince/Desktop/Tree Canopy Data/TreeCanopyChange_2008_2018.shp") %>%
   st_transform('ESRI:102728') 
 
@@ -200,8 +200,8 @@ Philadelphia <- st_read("http://data.phl.opendata.arcgis.com/datasets/405ec3da94
 # Neighborhoods
 Neighborhood <-
  #st_read("C:/Users/Kyle McCarthy/Documents/Practicum/Data/Neighborhoods/Neighborhoods_Philadelphia.shp") %>%
- #st_read("/Users/annaduan/Desktop/Y3S2/Practicum/Data/Neighborhoods_Philadelphia/Neighborhoods_Philadelphia.shp")%>%
-  st_read("C:/Users/agarw/Documents/MUSA 801/Data/Neighborhoods_Philadelphia.shp") %>%
+ st_read("/Users/annaduan/Desktop/Y3S2/Practicum/Data/Neighborhoods_Philadelphia/Neighborhoods_Philadelphia.shp")%>%
+ # st_read("C:/Users/agarw/Documents/MUSA 801/Data/Neighborhoods_Philadelphia.shp") %>%
 #st_read("C:/Users/Prince/Desktop/Tree Canopy Data/Neighborhoods_Philadelphia/Neighborhoods_Philadelphia.shp") %>%
   st_transform('ESRI:102728')
 
@@ -278,10 +278,10 @@ parcels <- st_read("http://data-phl.opendata.arcgis.com/datasets/1c57dd1b3ff8444
  st_transform('ESRI:102728')
 
 const_permits <- 
-   st_read("C:/Users/agarw/Documents/MUSA 801/Data/const_permit.csv") %>%
+  # st_read("C:/Users/agarw/Documents/MUSA 801/Data/const_permit.csv") %>%
  # st_read("C:/Users/Prince/Desktop/Tree Canopy Data/const_permit.csv") %>%
   #st_read("C:/Users/Kyle McCarthy/Documents/Practicum/permits.csv")%>%
-   #st_read("/Users/annaduan/Desktop/Y3S2/Practicum/Data/const_permit.csv")%>%
+  st_read("/Users/annaduan/Desktop/Y3S2/Practicum/Data/const_permit.csv")%>%
   mutate(X = geocode_x,
          Y = geocode_y) 
 const_permits[const_permits==""]<-NA
@@ -300,8 +300,8 @@ const <- const_spatial %>%
 
 LandUseFishnet <- 
   #st_read("C:/Users/Kyle McCarthy/Documents/Practicum/Data/Fishnet_LU_Intersect/fishnet_LUS_Intersect_dissolve.shp")  %>%
-   st_read("C:/Users/agarw/Documents/MUSA 801/Data/fishnet_LUS_Intersect_dissolve.geojson") %>%
-#st_read("/Users/annaduan/Desktop/Y3S2/Practicum/Data/fishnet_LUS_Intersect_dissolve.geojson") %>%
+  # st_read("C:/Users/agarw/Documents/MUSA 801/Data/fishnet_LUS_Intersect_dissolve.geojson") %>%
+st_read("/Users/annaduan/Desktop/Y3S2/Practicum/Data/fishnet_LUS_Intersect_dissolve.geojson") %>%
 #  st_read("C:/Users/Prince/Desktop/Tree Canopy Data/fishnet_LUS_Intersect_dissolve.geojson") %>%
    st_transform('ESRI:102728')
 
@@ -363,7 +363,9 @@ FishnetIntersect <- st_intersection(fishnet2, ConservationNParks )%>%
   filter(ConservationPct <= 20)
 
 ggplot() +
-  geom_sf(data = FishnetIntersect) +
+  geom_sf(data = FishnetIntersect, fill = "yellow", colour = "white") +
+  labs(title = "Philadelphia Fishnet Grid", 
+       subtitle = "1 cell = 1615 ft ^2, 1411 cells total") +
   mapTheme()
 
 fishnet <- FishnetIntersect
@@ -390,7 +392,7 @@ TreeCanopyAll<-
 
 TreeCanopyLoss <- 
   TreeCanopyAll%>%
-  filter(CLASS_NAME == "Loss")%>%
+  filter(CLASS_NAME == "Loss") %>%
   group_by(uniqueID)%>%
   summarise(AreaLoss = sum(TreeArea))%>%
   mutate(pctLoss = AreaLoss / 2608225)%>%
@@ -582,17 +584,6 @@ FinalFishnet$PctChangeCat <- cut(FinalFishnet$pctChange,
                        labels = c("Significant Net Loss", "Moderate Net Loss", "Low Net Loss", "Low Net Gain", "Moderate Net Gain", "Significant Net Gain"), 
                        right = FALSE)
 
-
-b <- ggplot()+ 
-  geom_sf(data = FinalFishnet, colour = "black", aes(fill = PctChangeCat))+ 
- # scale_fill_manual(values = palette8,name = "Percent Change")+
-  labs(title= " What is the Net Percent Gain or Loss from 2008- 2018?", 
-       subtitle = "Percent Tree Canopy Gain - Percent Tree Canopy Loss") +
-  theme(plot.title = element_text(hjust = 0.3), 
-        legend.title = element_text(size = 12), 
-        legend.text = element_text(size = 10)) + mapTheme()
-
-  
 ```
 
 This is confirmed when we plot the log-transformed percent tree canopy and percent tree canopy gained/lost for each fishnet cell. We see a negative relationship, meaning that fishnet cells with more trees experience less percentage change.  
@@ -626,7 +617,7 @@ pctChangeGraph <-
   filter(pctChange < 100)
 
 ggplot(pctChangeGraph, aes(x = pctChange, y = pctCoverage18))+
-  geom_point(colour = "dark green", alpha = 0.3, size = 2)+ 
+  geom_point(colour = "black", alpha = 0.3, size = 4)+ 
   labs(title = "Percent Change \n vs. Percent Tree Canopy (2018)", 
        subtitle = "1 dot = 1 fishnet cell") + 
   xlab("Percent Change in Tree Canopy from 2008-2018 ") + 
@@ -638,7 +629,15 @@ ggplot(pctChangeGraph, aes(x = pctChange, y = pctCoverage18))+
 Looking at the city as a whole, we see that the majority of fishnet cells experienced low net loss, while a similar amount of cells experienced either substantial loss or gain.   
 
 ```{r gain minus loss 2,  message=FALSE, warning=FALSE, results='hide', fig.height = 8, fig.width = 8, cache=TRUE}
-b + scale_fill_brewer(palette = "PiYG", direction = 1, aesthetics = c("colour", "fill"), guide = guide_legend(reverse = TRUE))
+b <- ggplot()+ 
+  geom_sf(data = FinalFishnet, colour = "white", aes(fill = PctChangeCat))+ 
+  labs(title= "Tree Canopy Change 2008 - 2018", 
+       subtitle = "Percent Tree Canopy Gain - Percent Tree Canopy Loss") +
+  theme(plot.title = element_text(hjust = 0.3), 
+        legend.title = element_text(size = 12), 
+        legend.text = element_text(size = 10)) + mapTheme()
+
+b + scale_fill_brewer(palette = "PiYG", name = "Percent Change", direction = 1, aesthetics = c("colour", "fill"), guide = guide_legend(reverse = TRUE))
 ```
 
 ```{r Add ACS to fishnet, message=FALSE, warning=FALSE, results='hide', fig.height = 7, fig.width = 10,  cache=TRUE}
@@ -1463,12 +1462,12 @@ We also look at redlining boundaries from the Homeowner’s Loan Corporation (HO
 ```{r HOLC, message=FALSE, warning=FALSE, results='hide', cache=TRUE}
 
 HOLC2 <- HOLC %>%
-  st_intersection(st_make_valid(Philadelphia), HOLC) %>%
+  st_intersection(st_make_valid(fishnet), HOLC) %>%  ##replaced Philadelphia with fishnet
   st_union() %>%
   st_as_sf()
 
 HOLC2 <- HOLC2 %>%
-  st_sym_difference(Philadelphia, HOLC2) %>%
+  st_sym_difference(fishnet, HOLC2) %>%
   st_as_sf() %>%
   mutate(holc_grade = "Unclassified") %>%
   select(holc_grade) %>%
