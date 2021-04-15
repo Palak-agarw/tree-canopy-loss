@@ -1756,11 +1756,11 @@ ggplot(FinalFishnet, aes(y = LogPctLoss , x = LogPole))+
 ```{r corr plot, message=FALSE, warning=FALSE, results='hide', fig.height =  8, fig.width =8,cache=TRUE}
 
 library(ggcorrplot)
-# corrplotvars <- FinalFishnet %>%
-#   dplyr::select()
+corrplotvars <- FinalFishnet %>%
+   dplyr::select(ConservationPct, pctLoss, pctGain, pctCoverage08, LogPctLoss, LogPctGain, population, medHHInc, housing_units, Rent, pctBach, pctWhite, pctNoVehicle, HydrologyArea, LogAvgParcelSize, e311Count, countConst, pctRes, pctTrans)
 
 numericVars <-
-  select_if(st_drop_geometry(FinalFishnet), is.numeric) %>% na.omit()
+  select_if(st_drop_geometry(corrplotvars), is.numeric) %>% na.omit()
 
 ggcorrplot(
   round(cor(numericVars), 1),
