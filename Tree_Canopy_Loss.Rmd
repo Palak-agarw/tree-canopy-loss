@@ -1447,7 +1447,7 @@ ggplot() +
 TreeCanopyAllHOLC <-
 TreeCanopy%>%
 st_make_valid() %>%
-st_intersection(HOLC)
+st_intersection(st_make_valid(HOLC))
 
 TreeCanopyAllHOLC <-
   TreeCanopyAllHOLC %>%
@@ -1766,8 +1766,9 @@ ggcorrplot(
   round(cor(numericVars), 1),
   p.mat = cor_pmat(numericVars),
   colors = c("magenta", "white", "green"),
-  type="lower",
-  insig = "blank") +  
+  type="upper",
+  insig = "blank", 
+  outline.color = "white") +  
     labs(title = "Numeric Variables Correlation Plot") +
   plotTheme()
 ```
