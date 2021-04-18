@@ -1445,8 +1445,7 @@ ggplot() +
   mapTheme()
 
 TreeCanopyAllHOLC <-
-TreeCanopy%>%
-st_make_valid() %>%
+st_make_valid(TreeCanopy)%>%
 st_intersection(st_make_valid(HOLC))
 
 TreeCanopyAllHOLC <-
