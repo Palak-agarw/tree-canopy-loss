@@ -1445,7 +1445,8 @@ ggplot() +
   mapTheme()
 
 TreeCanopyAllHOLC <-
-st_make_valid(TreeCanopy)%>%
+TreeCanopy%>%
+st_make_valid() %>%
 st_intersection(st_make_valid(HOLC))
 
 TreeCanopyAllHOLC <-
@@ -1809,12 +1810,14 @@ FinalFishnet5$LogPctChange <- ifelse(is.infinite(FinalFishnet5$LogPctChange),0, 
 FinalFishnet5$countConst <- ifelse(is.na(FinalFishnet5$countConst),0, FinalFishnet5$countConst)
 FinalFishnet5$Variable <- ifelse((FinalFishnet5$netChange > 0), 1, 0)
 FinalFishnet5$HydrologyPct <- ifelse(is.na(FinalFishnet5$HydrologyPct),0, FinalFishnet5$HydrologyPct)
+FinalFishnet5$pctLoss <- ifelse(is.na(FinalFishnet5$pctLoss),0, FinalFishnet5$pctLoss)
+FinalFishnet5$pctLoss <- ifelse(is.infinite(FinalFishnet5$pctLoss),0, FinalFishnet5$pctLoss)
   
 FinalFishnet5 <-
   FinalFishnet5 %>%
   dplyr::select(pctCoverage18, LogAvgParcelSize,Loge311Count, LogPctRes, avg_nnConst,avg_nnPole,
                                     countConst, pctWhite, pctBach, e311Count, Loge311Count, pctTransRes, pctRes, HydrologyPct,
-                                    pctTrans, LogPctResTrans, population, italian, medHHInc, Variable, pctCoverage08Cat) #, holc_grade
+                                    pctTrans, LogPctResTrans, population, italian, medHHInc, Variable, pctCoverage08Cat, pctLoss) #, holc_grade
 
 # FinalFishnet5 <-
 #   FinalFishnet5%>%
@@ -1855,7 +1858,7 @@ finalTest  <- FinalFishnet5[-trainIndex,] %>% st_drop_geometry()
 finalTest2  <- FinalFishnet5[-trainIndex,] 
 
 # MODEL
-finalModel <- glm(finalTrain$Variable ~ .,
+finalModel <- glm(finalTrain$pctLoss ~ .,
                     data=finalTrain %>% 
                      dplyr::select(pctCoverage18, LogAvgParcelSize, avg_nnConst,avg_nnPole,
                                     countConst, pctWhite, pctBach, Loge311Count, pctRes,
@@ -1970,11 +1973,12 @@ whichThreshold %>%
 
 
 rf <- randomForest(
-  finalTrain$Variable ~ .,
+  finalTrain$pctLoss ~ .,
   data=finalTrain %>% 
                      dplyr::select(pctCoverage18, LogAvgParcelSize, avg_nnConst,avg_nnPole,
                                     countConst, pctWhite, pctBach, Loge311Count, pctRes,
-                                    pctTrans,  italian, medHHInc, LogPctRes, HydrologyPct) #, holc_grade
+                                    pctTrans,  italian, medHHInc, LogPctRes, HydrologyPct),
+  na.action = na.roughfix#, holc_grade
 )
 
 #pred2 = data.frame(predict(rf, newdata=finalTest))
@@ -1982,7 +1986,7 @@ rf <- randomForest(
 #cm = table(finalTest$Variable, pred2)
 
 ## Prediction
-testProbs2 <- data.frame(Outcome = as.factor(finalTest$Variable),
+testProbs2 <- data.frame(Outcome = as.factor(finalTest$pctLoss),
                         Probs = predict(rf, finalTest, type= "response"))
 
 # ROC Curve
@@ -2152,7 +2156,6 @@ cvFitkitchensink
 
 
 ## Goodness metrics
-grid.arrange(ncol = 2,
 
   dplyr::select(cvFitkitchensink$resample, -Resample) %>%
   gather(metric, value) %>%
@@ -2163,17 +2166,6 @@ grid.arrange(ncol = 2,
   geom_vline(aes(xintercept = mean), colour = "#981FAC", linetype = 3, size = 1.5) +
   scale_x_continuous(limits = c(0, 1)) +
   labs(x="Goodness of Fit", y="Count", title="CV Goodness of Fit Metrics \n Kitchen Sink Model",
-       subtitle = "Across-fold mean reprented as dotted lines"),
+       subtitle = "Across-fold mean reprented as dotted lines")
 
-
-  dplyr::select(cvFit$resample, -Resample) %>%
-  gather(metric, value) %>%
-  left_join(gather(cvFit$results[2:4], metric, mean)) %>%
-  ggplot(aes(value)) + 
-  geom_histogram(bins=35, fill = "#FF006A") +
-  facet_wrap(~metric) +
-  geom_vline(aes(xintercept = mean), colour = "#981FAC", linetype = 3, size = 1.5) +
-  scale_x_continuous(limits = c(0, 1)) +
-  labs(x="Goodness of Fit", y="Count", title="CV Goodness of Fit Metrics \n Feature Engineered Model",
-       subtitle = "Across-fold mean reprented as dotted lines"))
 ```
