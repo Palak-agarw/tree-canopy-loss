@@ -1437,53 +1437,41 @@ HOLC2 <- HOLC2 %>%
   as.data.frame %>%
   rename(geometry = x)
 
-HOLC <- full_join(as.data.frame(HOLC), as.data.frame(HOLC2)) %>%
+HOLC_plot <- full_join(as.data.frame(HOLC), as.data.frame(HOLC2)) %>%
   st_as_sf()
 
 ggplot() +
-  geom_sf(data = HOLC, aes(fill = holc_grade)) +
+  geom_sf(data = HOLC_plot, aes(fill = holc_grade)) +
   mapTheme()
 
-TreeCanopyAllHOLC <-
-st_make_valid(TreeCanopy)%>%
-st_intersection(st_make_valid(HOLC))
-
-TreeCanopyAllHOLC <-
-  TreeCanopyAllHOLC %>%
-  mutate(TreeArea = st_area(TreeCanopyAllHOLC))%>%
-  mutate(TreeArea = as.numeric(TreeArea))
-
-TreeCanopyLossHOLC <- 
-  TreeCanopyAllHOLC%>%
-  filter(CLASS_NAME == "Loss")%>%
-  group_by(area_description_data, HOLCArea)%>%
-  summarise(AreaLoss = sum(TreeArea))%>%
-  mutate(pctLoss = AreaLoss / HOLCArea)%>%
-  mutate(pctLoss = as.numeric(pctLoss))%>%
-  st_drop_geometry()
-
-TreeCanopyLossHOLC<- 
-  HOLC%>%
-  left_join(TreeCanopyLossHOLC)
+# TreeCanopyAllHOLC <-
+# st_make_valid(TreeCanopy)%>%
+# st_intersection(st_make_valid(HOLC))
+# 
+# TreeCanopyAllHOLC <-
+#   TreeCanopyAllHOLC %>%
+#   mutate(TreeArea = st_area(TreeCanopyAllHOLC))%>%
+#   mutate(TreeArea = as.numeric(TreeArea))
+# 
+# TreeCanopyLossHOLC <- 
+#   TreeCanopyAllHOLC%>%
+#   filter(CLASS_NAME == "Loss")%>%
+#   group_by(area_description_data, HOLCArea)%>%
+#   summarise(AreaLoss = sum(TreeArea))%>%
+#   mutate(pctLoss = AreaLoss / HOLCArea)%>%
+#   mutate(pctLoss = as.numeric(pctLoss))%>%
+#   st_drop_geometry()
+# 
+# TreeCanopyLossHOLC<- 
+#   HOLC%>%
+#   left_join(TreeCanopyLossHOLC)
 
  ggplot() +
    geom_sf(data = Philadelphia, colour = "gray90", fill = "gray90") +
-   #  geom_sf(data = Loss, colour = "black", fill = "transparent") +
-   geom_sf(data = HOLC, aes(fill = holc_grade), alpha = 0.6, colour = "gray90") +
-   scale_fill_manual(values = paletteHolc) +
-   labs(title = "Tree Canopy Loss and Redlining", subtitle = "Philadelphia, PA") +
+   scale_fill_brewer(palette = "Spectral", name = "HOLC Grade", direction = -1, aesthetics = c("colour", "fill"), guide = guide_legend(reverse = TRUE)) +
+   geom_sf(data = HOLC_plot, aes(fill = holc_grade), alpha = 0.6, colour = "gray90") +
+   labs(title = "HOLC Redlining Boundaries", subtitle = "Philadelphia, PA") +
    mapTheme()
-
-TreeCanopyLossHOLC %>%
- # group_by(holc_grade) %>%
-ggplot()+
-  geom_histogram(aes(pctLoss), binwidth = 1, fill = "red")+
-  labs(title="Tree Canopy Loss by HOLC Grade from 2008-2018",
-  subtitle="Philadelphia, PA",
-       x="HOLC Rating", 
-       y="% Loss")+
-  facet_wrap(~holc_grade, nrow = 1)+
-  plotTheme()
 
 holc_net <- st_intersection(fishnet_centroid, HOLC) %>%
   dplyr::select(uniqueID, holc_grade)
@@ -1494,8 +1482,20 @@ FinalFishnet <-
    st_drop_geometry() %>%
    left_join(FinalFishnet, .)%>%
    mutate(holc_grade = replace_na(holc_grade, 0))
-  
 
+
+FinalFishnet %>%
+  select(pctLoss, holc_grade) %>%
+  group_by(holc_grade) %>%
+  summarize(mean_loss = mean(pctLoss)) %>%
+  ggplot()+
+  geom_histogram(aes(mean_loss), binwidth = 1, fill = "red")+
+  labs(title="Tree Canopy Loss by HOLC Grade from 2008-2018",
+  subtitle="Philadelphia, PA",
+       x="HOLC Rating", 
+       y="% Loss")+
+  facet_wrap(~holc_grade, nrow = 1)+
+  plotTheme()
 ```
 
 ```{r Public health, message=FALSE, warning=FALSE, results='hide', cache=TRUE}
