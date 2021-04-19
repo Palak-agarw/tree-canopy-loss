@@ -2171,7 +2171,7 @@ mean(Phil.test$SalePrice.AbsError, na.rm = T)
 
 mean(Phil.test$SalePrice.APE, na.rm = T)
 
-fitControl <- trainControl(method = "cv", number = 5)
+fitControl <- trainControl(method = "cv", number = 400)
 set.seed(825)
 
 reg.cv <- 
