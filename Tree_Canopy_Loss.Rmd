@@ -1814,7 +1814,7 @@ FinalFishnet5 <-
   FinalFishnet5 %>%
   dplyr::select(pctCoverage18, LogAvgParcelSize,Loge311Count, LogPctRes, avg_nnConst,avg_nnPole,
                                     countConst, pctWhite, pctBach, e311Count, Loge311Count, pctTransRes, pctRes, HydrologyPct,
-                                    pctTrans, LogPctResTrans, population, italian, medHHInc, Variable, pctCoverage08Cat) #, holc_grade
+                                    pctTrans, LogPctResTrans, population, italian, medHHInc, Variable, pctCoverage08Cat, LogPctLoss) #, holc_grade
 
 # FinalFishnet5 <-
 #   FinalFishnet5%>%
@@ -1970,11 +1970,12 @@ whichThreshold %>%
 
 
 rf <- randomForest(
-  finalTrain$Variable ~ .,
+  finalTrain$LogPctLoss ~ .,
   data=finalTrain %>% 
                      dplyr::select(pctCoverage18, LogAvgParcelSize, avg_nnConst,avg_nnPole,
                                     countConst, pctWhite, pctBach, Loge311Count, pctRes,
-                                    pctTrans,  italian, medHHInc, LogPctRes, HydrologyPct) #, holc_grade
+                                    pctTrans,  italian, medHHInc, LogPctRes, HydrologyPct),
+  na.action = na.roughfix#, holc_grade
 )
 
 #pred2 = data.frame(predict(rf, newdata=finalTest))
@@ -1982,7 +1983,7 @@ rf <- randomForest(
 #cm = table(finalTest$Variable, pred2)
 
 ## Prediction
-testProbs2 <- data.frame(Outcome = as.factor(finalTest$Variable),
+testProbs2 <- data.frame(Outcome = finalTest$LogPctLoss,
                         Probs = predict(rf, finalTest, type= "response"))
 
 # ROC Curve
