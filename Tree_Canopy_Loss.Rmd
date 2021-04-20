@@ -181,9 +181,9 @@ plotTheme <- function(base_size = 12) {
 
 # Tree Canopy
 TreeCanopy <-
- st_read("C:/Users/Kyle McCarthy/Documents/Practicum/Data/TreeUse/TreeCanopyChange_2008_2018.shp")%>%
+ #st_read("C:/Users/Kyle McCarthy/Documents/Practicum/Data/TreeUse/TreeCanopyChange_2008_2018.shp")%>%
  # st_read("/Users/annaduan/Desktop/Y3S2/Practicum/Data/TreeCanopyChange_2008_2018-shp/TreeCanopyChange_2008_2018.shp") %>%
- # st_read("C:/Users/agarw/Documents/MUSA 801/Data/TreeCanopyChange_2008_2018.shp") %>%
+  st_read("C:/Users/agarw/Documents/MUSA 801/Data/TreeCanopyChange_2008_2018.shp") %>%
 #st_read("C:/Users/Prince/Desktop/Tree Canopy Data/TreeCanopyChange_2008_2018.shp") %>%
   st_transform('ESRI:102728') 
 
@@ -199,9 +199,9 @@ Philadelphia <- st_read("http://data.phl.opendata.arcgis.com/datasets/405ec3da94
 
 # Neighborhoods
 Neighborhood <-
- st_read("C:/Users/Kyle McCarthy/Documents/Practicum/Data/Neighborhoods/Neighborhoods_Philadelphia.shp") %>%
+ #st_read("C:/Users/Kyle McCarthy/Documents/Practicum/Data/Neighborhoods/Neighborhoods_Philadelphia.shp") %>%
  #st_read("/Users/annaduan/Desktop/Y3S2/Practicum/Data/Neighborhoods_Philadelphia/Neighborhoods_Philadelphia.shp")%>%
- # st_read("C:/Users/agarw/Documents/MUSA 801/Data/Neighborhoods_Philadelphia.shp") %>%
+  st_read("C:/Users/agarw/Documents/MUSA 801/Data/Neighborhoods_Philadelphia.shp") %>%
 #st_read("C:/Users/Prince/Desktop/Tree Canopy Data/Neighborhoods_Philadelphia/Neighborhoods_Philadelphia.shp") %>%
   st_transform('ESRI:102728')
 
@@ -218,8 +218,8 @@ Neighborhood <-
 HOLC <- 
  # st_read("/Users/annaduan/Desktop/Y3S2/Practicum/Data/PAPhiladelphia1937.geojson") %>%
 # st_read("C:/Users/Prince/Desktop/Tree Canopy Data/PAPhiladelphia1937.geojson") %>%
-  st_read("C:/Users/Kyle McCarthy/Documents/Practicum/Data/PAPhiladelphia1937.geojson")%>%
- # st_read("C:/Users/agarw/Documents/MUSA 801/Data/PAPhiladelphia1937.geojson")%>%
+ # st_read("C:/Users/Kyle McCarthy/Documents/Practicum/Data/PAPhiladelphia1937.geojson")%>%
+  st_read("C:/Users/agarw/Documents/MUSA 801/Data/PAPhiladelphia1937.geojson")%>%
   st_transform('ESRI:102728')
 
 HOLC <-
@@ -278,9 +278,9 @@ parcels <- st_read("http://data-phl.opendata.arcgis.com/datasets/1c57dd1b3ff8444
  st_transform('ESRI:102728')
 
 const_permits <- 
-  # st_read("C:/Users/agarw/Documents/MUSA 801/Data/const_permit.csv") %>%
+   st_read("C:/Users/agarw/Documents/MUSA 801/Data/const_permit.csv") %>%
  # st_read("C:/Users/Prince/Desktop/Tree Canopy Data/const_permit.csv") %>%
-  st_read("C:/Users/Kyle McCarthy/Documents/Practicum/permits.csv")%>%
+ # st_read("C:/Users/Kyle McCarthy/Documents/Practicum/permits.csv")%>%
  # st_read("/Users/annaduan/Desktop/Y3S2/Practicum/Data/const_permit.csv")%>%
   mutate(X = geocode_x,
          Y = geocode_y) 
@@ -299,8 +299,8 @@ const <- const_spatial %>%
 
 
 LandUseFishnet <- 
-  st_read("C:/Users/Kyle McCarthy/Documents/Practicum/Data/Fishnet_LU_Intersect/fishnet_LUS_Intersect_dissolve.shp")  %>%
-  # st_read("C:/Users/agarw/Documents/MUSA 801/Data/fishnet_LUS_Intersect_dissolve.geojson") %>%
+  #st_read("C:/Users/Kyle McCarthy/Documents/Practicum/Data/Fishnet_LU_Intersect/fishnet_LUS_Intersect_dissolve.shp")  %>%
+   st_read("C:/Users/agarw/Documents/MUSA 801/Data/fishnet_LUS_Intersect_dissolve.geojson") %>%
 #st_read("/Users/annaduan/Desktop/Y3S2/Practicum/Data/fishnet_LUS_Intersect_dissolve.geojson") %>%
 #  st_read("C:/Users/Prince/Desktop/Tree Canopy Data/fishnet_LUS_Intersect_dissolve.geojson") %>%
    st_transform('ESRI:102728')
@@ -316,8 +316,8 @@ Hydrology <-
  
  Parks <- 
   # st_read("/Users/annaduan/Desktop/Y3S2/Practicum/Data/Parks") %>%
-   st_read("C:/Users/Kyle McCarthy/Documents/Practicum/Data/Parks/Philadelphia_PPR_Park_Boundaries2016.shp ")%>%
-   #st_read("C:/Users/agarw/Documents/MUSA 801/Data/Philadelphia_PPR_Park_Boundaries2016.shp") %>%
+  # st_read("C:/Users/Kyle McCarthy/Documents/Practicum/Data/Parks/Philadelphia_PPR_Park_Boundaries2016.shp ")%>%
+   st_read("C:/Users/agarw/Documents/MUSA 801/Data/Philadelphia_PPR_Park_Boundaries2016.shp") %>%
    #st_read("C:/Users/Prince/Desktop/Tree Canopy Data/Philadelphia_PPR_Park_Boundaries2016.shp") %>%
      st_transform('ESRI:102728') %>%
    st_make_valid() %>%
@@ -325,8 +325,8 @@ Hydrology <-
 
 Conservation <- 
   #st_read("/Users/annaduan/Desktop/Y3S2/Practicum/Data/Conservation/ConservationEasements202103.shp") %>%
-  st_read("C:/Users/Kyle McCarthy/Documents/Practicum/Data/Conservation/ConservationEasements202103.shp")%>%
-  # st_read("C:/Users/agarw/Documents/MUSA 801/Data/ConservationEasements202103.shp") %>%
+  #st_read("C:/Users/Kyle McCarthy/Documents/Practicum/Data/Conservation/ConservationEasements202103.shp")%>%
+   st_read("C:/Users/agarw/Documents/MUSA 801/Data/ConservationEasements202103.shp") %>%
    #  st_read("C:/Users/Prince/Desktop/Tree Canopy Data/ConservationEasements202103.shp") %>%
    st_transform('ESRI:102728') %>%
   st_intersection(st_make_valid(Philadelphia), st_make_valid(Conservation)) %>%
@@ -1060,8 +1060,8 @@ As previously mentioned, land use appears to have a correlation with tree canopy
 # Analysis completed in ArcGIS -- Processing time to long in R. 500,000 Parcels and 614,000 Tree Canopy Polygons aggregated in this analysis. I plan on writing out what the code would be for reproducability purposes. 
 
 LandUse1 <-
-  st_read("C:/Users/Kyle McCarthy/Documents/Practicum/Data/LandUse/landu.csv")%>%
-  #st_read("C:/Users/agarw/Documents/MUSA 801/Data/landu.csv")%>%
+  #st_read("C:/Users/Kyle McCarthy/Documents/Practicum/Data/LandUse/landu.csv")%>%
+  st_read("C:/Users/agarw/Documents/MUSA 801/Data/landu.csv")%>%
    #st_read("/Users/annaduan/Desktop/Y3S2/Practicum/Data/landu.csv") %>%
   #st_read("C:/Users/Prince/Desktop/Tree Canopy Data/landu.csv") %>%
   mutate(AreaGain = as.numeric(AreaGain),
@@ -1193,9 +1193,9 @@ ggplot(LandUse2, aes(y=C_DIG2DESC, x=pctChange))+
 ```{r E911 Trees, fig.height = 12,fig.width = 12, message=FALSE, warning=FALSE, include=TRUE, results='hide', cache=TRUE}
 
 e311Trees <-
-  st_read('C:/Users/Kyle McCarthy/Documents/Practicum/e311.csv') 
+  #st_read('C:/Users/Kyle McCarthy/Documents/Practicum/e311.csv') 
    #st_read("/Users/annaduan/Desktop/Y3S2/Practicum/Data/streettree311.csv")
-  #st_read('C:/Users/agarw/Documents/MUSA 801/Data/e311.csv')
+  st_read('C:/Users/agarw/Documents/MUSA 801/Data/e311.csv')
 #st_read("C:/Users/Prince/Desktop/Tree Canopy Data/e311.csv") %>%
 
 
@@ -1446,47 +1446,47 @@ ggplot() +
   geom_sf(data = HOLC, aes(fill = holc_grade)) +
   mapTheme()
 
-TreeCanopyAllHOLC <-
-TreeCanopy%>%
-st_make_valid() %>%
-st_intersection(st_make_valid(HOLC))
+# TreeCanopyAllHOLC <-
+# TreeCanopy%>%
+# st_make_valid() %>%
+# st_intersection(st_make_valid(HOLC))
+# 
+# TreeCanopyAllHOLC <-
+#   TreeCanopyAllHOLC %>%
+#   mutate(TreeArea = st_area(TreeCanopyAllHOLC))%>%
+#   mutate(TreeArea = as.numeric(TreeArea))
+# 
+# TreeCanopyLossHOLC <- 
+#   TreeCanopyAllHOLC%>%
+#   filter(CLASS_NAME == "Loss")%>%
+#   group_by(area_description_data, HOLCArea)%>%
+#   summarise(AreaLoss = sum(TreeArea))%>%
+#   mutate(pctLoss = AreaLoss / HOLCArea)%>%
+#   mutate(pctLoss = as.numeric(pctLoss))%>%
+#   st_drop_geometry()
 
-TreeCanopyAllHOLC <-
-  TreeCanopyAllHOLC %>%
-  mutate(TreeArea = st_area(TreeCanopyAllHOLC))%>%
-  mutate(TreeArea = as.numeric(TreeArea))
-
-TreeCanopyLossHOLC <- 
-  TreeCanopyAllHOLC%>%
-  filter(CLASS_NAME == "Loss")%>%
-  group_by(area_description_data, HOLCArea)%>%
-  summarise(AreaLoss = sum(TreeArea))%>%
-  mutate(pctLoss = AreaLoss / HOLCArea)%>%
-  mutate(pctLoss = as.numeric(pctLoss))%>%
-  st_drop_geometry()
-
-TreeCanopyLossHOLC<- 
-  HOLC%>%
-  left_join(TreeCanopyLossHOLC)
-
- ggplot() +
-   geom_sf(data = Philadelphia, colour = "gray90", fill = "gray90") +
-   #  geom_sf(data = Loss, colour = "black", fill = "transparent") +
-   geom_sf(data = HOLC, aes(fill = holc_grade), alpha = 0.6, colour = "gray90") +
-   scale_fill_manual(values = paletteHolc) +
-   labs(title = "Tree Canopy Loss and Redlining", subtitle = "Philadelphia, PA") +
-   mapTheme()
-
-TreeCanopyLossHOLC %>%
- # group_by(holc_grade) %>%
-ggplot()+
-  geom_histogram(aes(pctLoss), binwidth = 1, fill = "red")+
-  labs(title="Tree Canopy Loss by HOLC Grade from 2008-2018",
-  subtitle="Philadelphia, PA",
-       x="HOLC Rating", 
-       y="% Loss")+
-  facet_wrap(~holc_grade, nrow = 1)+
-  plotTheme()
+# TreeCanopyLossHOLC<- 
+#   HOLC%>%
+#   left_join(TreeCanopyLossHOLC)
+# 
+#  ggplot() +
+#    geom_sf(data = Philadelphia, colour = "gray90", fill = "gray90") +
+#    #  geom_sf(data = Loss, colour = "black", fill = "transparent") +
+#    geom_sf(data = HOLC, aes(fill = holc_grade), alpha = 0.6, colour = "gray90") +
+#    scale_fill_manual(values = paletteHolc) +
+#    labs(title = "Tree Canopy Loss and Redlining", subtitle = "Philadelphia, PA") +
+#    mapTheme()
+# 
+# TreeCanopyLossHOLC %>%
+#  # group_by(holc_grade) %>%
+# ggplot()+
+#   geom_histogram(aes(pctLoss), binwidth = 1, fill = "red")+
+#   labs(title="Tree Canopy Loss by HOLC Grade from 2008-2018",
+#   subtitle="Philadelphia, PA",
+#        x="HOLC Rating", 
+#        y="% Loss")+
+#   facet_wrap(~holc_grade, nrow = 1)+
+#   plotTheme()
 
 holc_net <- st_intersection(fishnet_centroid, HOLC) %>%
   dplyr::select(uniqueID, holc_grade)
@@ -1820,9 +1820,9 @@ FinalFishnet5$HydrologyPct <- ifelse(is.na(FinalFishnet5$HydrologyPct),0, FinalF
   
 FinalFishnet5 <-
   FinalFishnet5 %>%
-  dplyr::select(pctCoverage18, LogAvgParcelSize,Loge311Count, LogPctRes, avg_nnConst,avg_nnPole,
+  dplyr::select(pctCoverage18, LogAvgParcelSize,Loge311Count, LogPctRes, avg_nnConst,avg_nnPole, pctLoss, LogPctLoss,
                                     countConst, pctWhite, pctBach, e311Count, Loge311Count, pctTransRes, pctRes, HydrologyPct,
-                                    pctTrans, LogPctResTrans, population, italian, medHHInc, Variable, pctCoverage08Cat)
+                                    pctTrans, LogPctResTrans, population, italian, medHHInc, Variable, pctCoverage08Cat, holc_grade)
 
 # FinalFishnet5 <-
 #   FinalFishnet5%>%
@@ -2154,7 +2154,7 @@ inTrain <- createDataPartition(
 L.training <- FinalFishnet5[inTrain,] 
 L.test <- FinalFishnet5[-inTrain,]  
 
-reg.training <- lm(pctLoss ~ ., data = st_drop_geometry(L.training) %>% 
+reg.training <- lm(L.training$pctLoss ~ ., data = st_drop_geometry(L.training) %>% 
                                     dplyr::select(pctCoverage18, LogAvgParcelSize, avg_nnConst,avg_nnPole,
                                     countConst, pctWhite, pctBach, Loge311Count, pctRes,
                                     pctTrans,  italian, medHHInc, LogPctRes, HydrologyPct, LogPctLoss))
