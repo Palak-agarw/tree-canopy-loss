@@ -1495,7 +1495,7 @@ FinalFishnet <-
    holc_net %>%
    st_drop_geometry() %>%
    left_join(FinalFishnet, .)%>%
-   mutate(holc_grade = replace_na(holc_grade, 0))
+   mutate(holc_grade = replace_na(holc_grade, "unclassified"))
   
 
 ```
@@ -1792,6 +1792,9 @@ FinalFishnet5 <-
          LogPctGain = log(pctGain),
          LogPctChange = log(pctChange))
 
+test <- FinalFishnet %>%
+  select(holc_grade)
+
 FinalFishnet5$avg_nnConst <- ifelse(is.na(FinalFishnet5$avg_nnConst),0, FinalFishnet5$avg_nnConst)
 FinalFishnet5$avg_nnPole <- ifelse(is.na(FinalFishnet5$avg_nnPole),0, FinalFishnet5$avg_nnPole)
 FinalFishnet5$pctWhite <- ifelse(is.na(FinalFishnet5$pctWhite),0, FinalFishnet5$pctWhite)
@@ -1848,6 +1851,9 @@ FinalFishnet5 <-
 #   mutate(pctTrans = ifelse(pctTrans > 66.67, 1, 0))
 
 
+ggplot() +
+  geom_sf(data = FinalFishnet, aes(fill = holc_grade)) +
+  mapTheme()
 
 
 # LOGISTIC MODEL
