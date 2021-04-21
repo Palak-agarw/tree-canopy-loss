@@ -2131,15 +2131,15 @@ finalTest  <- FinalFishnet5[-trainIndex,] %>% st_drop_geometry()
 finalTest2  <- FinalFishnet5[-trainIndex,] 
 
 rf1 <- randomForest(
-  finalTrain$Variable ~ .,
-  data=finalTrain %>% 
+  FinalFishnet5$Variable ~ .,
+  data=st_drop_geometry(FinalFishnet5) %>% 
                      dplyr::select(pctCoverage18, LogAvgParcelSize, avg_nnConst,LogPctTrans, LogPole,
                                     countConst1, Loge311Count,pctTrans, LogPctRes, holc_grade, HydrologyPct)
 )
 
 ## Prediction
-testProbs_const1 <- data.frame(Outcome = as.factor(finalTest$Variable),
-                        Probs = predict(rf1, finalTest, type= "response"))
+testProbs_const1 <- data.frame(Outcome = as.factor(FinalFishnet5$Variable),
+                        Probs = predict(rf1, FinalFishnet5, type= "response"))
 
 
 
@@ -2283,7 +2283,7 @@ ctrl <- trainControl(method = "cv", number = 10, classProbs=F, summaryFunction=t
 FinalFishnet5$Variable <- as.factor(FinalFishnet5$Variable)
 FinalFishnet5$pctCoverage0 <- as.numeric(FinalFishnet5$pctCoverage18)
 
-FinalFishnet5$Variable2 <- ifelse(FinalFishnet5$Variable == 0, "yes", "no")
+FinalFishnet5$Variable2 <- ifelse(FinalFishnet5$Variable == 0, "A", "B")
 
 FinalFishnet5 %>% 
   mutate(Variable = factor(Variable, 
@@ -2292,7 +2292,7 @@ FinalFishnet5 %>%
 reg.cv <-train(FinalFishnet5$Variable2 ~ ., data = st_drop_geometry(FinalFishnet5) %>% 
                                 dplyr::select(pctCoverage18, LogAvgParcelSize, avg_nnConst,avg_nnPole,
                                     countConst, Loge311Count, pctTrans, LogPctRes, holc_grade, HydrologyPct),
-               method="rpart", trControl = ctrl)
+              method="glm", family="binomial", trControl = ctrl)
 
 reg.cv
 
@@ -2306,6 +2306,7 @@ dplyr::select(reg.cv$resample, -Resample) %>%
   scale_x_continuous(limits = c(0, 1)) +
   labs(x="Goodness of Fit", y="Count", title="CV Goodness of Fit Metrics",
        subtitle = "Across-fold mean reprented as dotted lines")
+
 ```
 
 
