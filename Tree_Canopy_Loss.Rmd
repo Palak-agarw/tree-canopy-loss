@@ -2118,10 +2118,9 @@ FinalFishnet5$Variable <- as.factor(FinalFishnet5$Variable)
 
 reg.cv <-train(FinalFishnet5$Variable ~ ., data = st_drop_geometry(FinalFishnet5) %>% 
                                 dplyr::select(pctCoverage18, LogAvgParcelSize, avg_nnConst,avg_nnPole,
-                                    countConst, Loge311Count, pctRes,
-                                    pctTrans, LogPctRes, holc_grade, HydrologyPct) %>%
-                 dplyr::mutate(y = ifelse(y==0,"c1.yes","c2.no")),
-               method="rpart", family="binomial", trControl = ctrl)
+                                    countConst, Loge311Count, pctRes, pctTrans, LogPctRes, holc_grade, HydrologyPct) %>%
+                                dplyr::mutate(Variable = ifelse(FinalFishnet5$Variable == 0,"X0","X1")),
+               method="rpart", trControl = ctrl)
 
 reg.cv
 ```
