@@ -1908,8 +1908,8 @@ rf <- randomForest(
   finalTrain$Variable ~ .,
   data=finalTrain %>% 
                      dplyr::select(pctCoverage18, LogAvgParcelSize, avg_nnConst,avg_nnPole,
-                                    countConst, pctWhite, pctBach, Loge311Count, pctRes,
-                                    pctTrans,  italian, medHHInc, LogPctRes, holc_grade, HydrologyPct)
+                                    countConst, Loge311Count, pctRes,
+                                    pctTrans, LogPctRes, holc_grade, HydrologyPct)
 )
 
 #pred2 = data.frame(predict(rf, newdata=finalTest))
@@ -1996,7 +1996,7 @@ iterateThresholds <- function(data, observedClass, predictedProbs, group) {
 
 whichThreshold <- 
   iterateThresholds(
-     data=testProbs, observedClass = Outcome, predictedProbs = Probs)
+     data=testProbs2, observedClass = Outcome, predictedProbs = Probs)
 
 whichThreshold <- 
   whichThreshold %>%
@@ -2111,17 +2111,17 @@ ggplot() +
 
 ``````{r CV, message=FALSE, warning=FALSE, fig.height = 6, fig.width = 6}  
 
+## Cross validation
+ctrl <- trainControl(method = "cv", number = 100, classProbs=TRUE, summaryFunction=twoClassSummary)
 
-fitControl <- trainControl(method = "cv", number = 100, classProbs=TRUE, summaryFunction=twoClassSummary)
-set.seed(825)
+FinalFishnet5$Variable <- as.factor(FinalFishnet5$Variable)
 
-reg.cv <- 
-  train(FinalFishnet5$Variable ~ ., data = st_drop_geometry(FinalFishnet5) %>% 
+reg.cv <-train(FinalFishnet5$Variable ~ ., data = st_drop_geometry(FinalFishnet5) %>% 
                                 dplyr::select(pctCoverage18, LogAvgParcelSize, avg_nnConst,avg_nnPole,
-                                    countConst, pctWhite, pctBach, Loge311Count, pctRes,
-                                    pctTrans,  italian, medHHInc, LogPctRes, holc_grade, HydrologyPct), 
-     method="glm", family="binomial",
-               metric="ROC", trControl = ctrl)
+                                    countConst, Loge311Count, pctRes,
+                                    pctTrans, LogPctRes, holc_grade, HydrologyPct) %>%
+                 dplyr::mutate(y = ifelse(y==0,"c1.yes","c2.no")),
+               method="rpart", family="binomial", trControl = ctrl)
 
 reg.cv
 ```
