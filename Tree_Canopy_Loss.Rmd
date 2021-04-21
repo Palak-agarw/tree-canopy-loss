@@ -1934,6 +1934,7 @@ ggplot(testProbs2, aes(d = as.numeric(testProbs2$Outcome), m = Probs)) +
   geom_abline(slope = 1, intercept = 0, size = 1.5, color = 'grey') +
   labs(title = "ROC Curve - Model with Feature Engineering")
 
+
 ## optimizing threshold
 
 iterateThresholds <- function(data, observedClass, predictedProbs, group) {
@@ -2266,10 +2267,10 @@ ggplot() +
   labs(title="Predicted Risk Scores Across Philadelphia given \nCounstruction counts increased by 50%")+
   mapTheme()
 
-st_write(construction4, "construction-50plus.geojson")
-st_write(construction3, "construction-25plus.geojson")
-st_write(construction2, "construction-50less.geojson")
-st_write(construction1, "construction-25less.geojson")
+# st_write(construction4, "construction-50plus.geojson")
+# st_write(construction3, "construction-25plus.geojson")
+# st_write(construction2, "construction-50less.geojson")
+# st_write(construction1, "construction-25less.geojson")
 
 ```
 
@@ -2288,10 +2289,10 @@ FinalFishnet5 %>%
   mutate(Variable = factor(Variable, 
                         labels = make.names(levels(Variable))))
 
-reg.cv <-train(FinalFishnet5$Variable ~ ., data = st_drop_geometry(FinalFishnet5) %>% 
+reg.cv <-train(FinalFishnet5$Variable2 ~ ., data = st_drop_geometry(FinalFishnet5) %>% 
                                 dplyr::select(pctCoverage18, LogAvgParcelSize, avg_nnConst,avg_nnPole,
                                     countConst, Loge311Count, pctTrans, LogPctRes, holc_grade, HydrologyPct),
-               method="rpart", family="binomial", trControl = ctrl)
+               method="rpart", trControl = ctrl)
 
 reg.cv
 ```
