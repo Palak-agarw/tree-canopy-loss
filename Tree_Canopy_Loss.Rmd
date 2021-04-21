@@ -2115,12 +2115,12 @@ ggplot() +
 ctrl <- trainControl(method = "cv", number = 100, classProbs=TRUE, summaryFunction=twoClassSummary)
 
 FinalFishnet5$Variable <- as.factor(FinalFishnet5$Variable)
+FinalFishnet5$pctCoverage0 <- as.numeric(FinalFishnet5$pctCoverage18)
 
 reg.cv <-train(FinalFishnet5$Variable ~ ., data = st_drop_geometry(FinalFishnet5) %>% 
                                 dplyr::select(pctCoverage18, LogAvgParcelSize, avg_nnConst,avg_nnPole,
-                                    countConst, Loge311Count, pctRes, pctTrans, LogPctRes, holc_grade, HydrologyPct) %>%
-                                dplyr::mutate(Variable = ifelse(FinalFishnet5$Variable == 0,"X0","X1")),
-               method="rpart", trControl = ctrl)
+                                    countConst, Loge311Count, pctRes, pctTrans, LogPctRes, holc_grade, HydrologyPct),
+               method="rpart", family="binomial", trControl = ctrl)
 
 reg.cv
 ```
