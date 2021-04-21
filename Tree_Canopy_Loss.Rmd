@@ -2295,6 +2295,17 @@ reg.cv <-train(FinalFishnet5$Variable2 ~ ., data = st_drop_geometry(FinalFishnet
                method="rpart", trControl = ctrl)
 
 reg.cv
+
+dplyr::select(reg.cv$resample, -Resample) %>%
+  gather(metric, value) %>%
+  left_join(gather(reg.cv$results[2:4], metric, mean)) %>%
+  ggplot(aes(value)) + 
+  geom_histogram(bins=35, fill = "#FF006A") +
+  facet_wrap(~metric) +
+  geom_vline(aes(xintercept = mean), colour = "#981FAC", linetype = 3, size = 1.5) +
+  scale_x_continuous(limits = c(0, 1)) +
+  labs(x="Goodness of Fit", y="Count", title="CV Goodness of Fit Metrics",
+       subtitle = "Across-fold mean reprented as dotted lines")
 ```
 
 
