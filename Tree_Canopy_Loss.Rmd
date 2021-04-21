@@ -1790,7 +1790,8 @@ FinalFishnet5 <-
   FinalFishnet %>%
   mutate(LogPctLoss = log(pctLoss),
          LogPctGain = log(pctGain),
-         LogPctChange = log(pctChange))
+         LogPctChange = log(pctChange),
+         LogPctTrans = log(pctTrans))
 
 # test <- FinalFishnet %>%
 #   select(holc_grade)
@@ -1811,6 +1812,8 @@ FinalFishnet5$LogPctChange <- ifelse(is.na(FinalFishnet5$LogPctChange),0, FinalF
 FinalFishnet5$Loge311Count <- ifelse(is.na(FinalFishnet5$Loge311Count),0, FinalFishnet5$Loge311Count)
 FinalFishnet5$LogPctRes <- ifelse(is.na(FinalFishnet5$LogPctRes),0, FinalFishnet5$LogPctRes)
 FinalFishnet5$LogPctRes <- ifelse(is.infinite(FinalFishnet5$LogPctRes),0, FinalFishnet5$LogPctRes)
+FinalFishnet5$LogPctTrans <- ifelse(is.na(FinalFishnet5$LogPctTrans),0, FinalFishnet5$LogPctTrans)
+FinalFishnet5$LogPctTrans <- ifelse(is.infinite(FinalFishnet5$LogPctTrans),0, FinalFishnet5$LogPctTrans)
 FinalFishnet5$LogPctResTrans <- ifelse(is.infinite(FinalFishnet5$LogPctResTrans),0, FinalFishnet5$LogPctResTrans)
 FinalFishnet5$LogPctResTrans <- ifelse(is.na(FinalFishnet5$LogPctResTrans),0, FinalFishnet5$LogPctResTrans)
 FinalFishnet5$LogPctLoss <- ifelse(is.infinite(FinalFishnet5$LogPctLoss),0, FinalFishnet5$LogPctLoss)
@@ -1820,12 +1823,14 @@ FinalFishnet5$countConst <- ifelse(is.na(FinalFishnet5$countConst),0, FinalFishn
 FinalFishnet5$Variable <- ifelse((FinalFishnet5$netChange > 0), 1, 0)
 FinalFishnet5$HydrologyPct <- ifelse(is.na(FinalFishnet5$HydrologyPct),0, FinalFishnet5$HydrologyPct)
 FinalFishnet5$pctLoss <- ifelse(is.na(FinalFishnet5$pctLoss),0, FinalFishnet5$pctLoss)
+FinalFishnet5$LogPole <- ifelse(is.na(FinalFishnet5$LogPole),0, FinalFishnet5$LogPole)
+FinalFishnet5$LogPole <- ifelse(is.infinite(FinalFishnet5$LogPole),0, FinalFishnet5$LogPole)
   
 FinalFishnet5 <-
   FinalFishnet5 %>%
   dplyr::select(pctCoverage18, LogAvgParcelSize,Loge311Count, LogPctRes, avg_nnConst,avg_nnPole, pctLoss, holc_grade,
                                     countConst, pctWhite, pctBach, e311Count, Loge311Count, pctTransRes, pctRes, HydrologyPct,
-                                    pctTrans, LogPctResTrans, population, italian, medHHInc, Variable, pctCoverage08Cat)
+                                    pctTrans, LogPctResTrans, population, italian, medHHInc, Variable, pctCoverage08Cat, LogPctTrans, LogPole)
 
 hist(FinalFishnet5$pctLoss,xlab="Percent Loss",
      breaks=50, col="purple", main = "Histogram of Percent Loss ")
@@ -1862,7 +1867,7 @@ FinalFishnet5$Variable <- ifelse(FinalFishnet5$pctLoss > 25,0, 1)
 #   mapTheme()
 
 
-# LOGISTIC MODEL
+# RANDOM FOREST MODEL
 set.seed(1214)
 trainIndex <- createDataPartition(
                                   y = FinalFishnet5$holc_grade,
@@ -1907,9 +1912,8 @@ finalTest2  <- FinalFishnet5[-trainIndex,]
 rf <- randomForest(
   finalTrain$Variable ~ .,
   data=finalTrain %>% 
-                     dplyr::select(pctCoverage18, LogAvgParcelSize, avg_nnConst,avg_nnPole,
-                                    countConst, Loge311Count, pctRes,
-                                    pctTrans, LogPctRes, holc_grade, HydrologyPct)
+                     dplyr::select(pctCoverage18, LogAvgParcelSize, avg_nnConst,LogPctTrans, LogPole,
+                                    countConst, Loge311Count,pctTrans, LogPctRes, holc_grade, HydrologyPct)
 )
 
 #pred2 = data.frame(predict(rf, newdata=finalTest))
@@ -2108,18 +2112,180 @@ ggplot() +
 
 ```
 
+```{r Construction_scenarios, message=FALSE, warning=FALSE, fig.height = 6, fig.width = 6}
+
+FinalFishnet5$countConst1 <- FinalFishnet5$countConst * 0.75
+FinalFishnet5$countConst2 <- FinalFishnet5$countConst * 0.50
+FinalFishnet5$countConst3 <- FinalFishnet5$countConst * 1.25
+FinalFishnet5$countConst4 <- FinalFishnet5$countConst * 1.50
+
+set.seed(1214)
+trainIndex <- createDataPartition(
+                                  y = FinalFishnet5$holc_grade,
+                                  p = 0.60, 
+                                  list = FALSE)
+
+finalTrain <- FinalFishnet5[ trainIndex,] %>% st_drop_geometry()
+finalTest  <- FinalFishnet5[-trainIndex,] %>% st_drop_geometry()
+finalTest2  <- FinalFishnet5[-trainIndex,] 
+
+rf1 <- randomForest(
+  finalTrain$Variable ~ .,
+  data=finalTrain %>% 
+                     dplyr::select(pctCoverage18, LogAvgParcelSize, avg_nnConst,LogPctTrans, LogPole,
+                                    countConst1, Loge311Count,pctTrans, LogPctRes, holc_grade, HydrologyPct)
+)
+
+## Prediction
+testProbs_const1 <- data.frame(Outcome = as.factor(finalTest$Variable),
+                        Probs = predict(rf1, finalTest, type= "response"))
+
+
+
+testProbs_const1 <- testProbs_const1 %>% mutate(Risk_Cat=
+                                            case_when(Probs <=.2 ~ "Very Low",
+                                                   Probs > 0.2 & Probs < .4 ~ "Low",    
+                                                   Probs >= 0.4 & Probs < .6 ~ "Moderate",
+                                                   Probs >=.6 & Probs < .80 ~ "High",
+                                                   Probs >=.8 ~ "Severe"))
+
+
+finalTest2$uniqueID <- seq.int(nrow(finalTest))
+
+testProbs_const1$uniqueID <- seq.int(nrow(finalTest))
+
+construction1 <- left_join(finalTest2, testProbs_const1)
+
+
+ggplot() +
+  geom_sf(data = fishnet, fill = "white")+
+  geom_sf(data=construction1, aes(fill=Risk_Cat), color="transparent")+
+  scale_fill_manual(values=palette5, name="Risk Score") +
+  labs(title="Predicted Risk Scores Across Philadelphia given \nCounstruction counts reduce by 25%")+
+  mapTheme()
+
+rf2 <- randomForest(
+  finalTrain$Variable ~ .,
+  data=finalTrain %>% 
+                     dplyr::select(pctCoverage18, LogAvgParcelSize, avg_nnConst,LogPctTrans, LogPole,
+                                    countConst2, Loge311Count,pctTrans, LogPctRes, holc_grade, HydrologyPct)
+)
+
+## Prediction
+testProbs_const2 <- data.frame(Outcome = as.factor(finalTest$Variable),
+                        Probs = predict(rf2, finalTest, type= "response"))
+
+
+
+testProbs_const2 <- testProbs_const2 %>% mutate(Risk_Cat=
+                                            case_when(Probs <=.2 ~ "Very Low",
+                                                   Probs > 0.2 & Probs < .4 ~ "Low",    
+                                                   Probs >= 0.4 & Probs < .6 ~ "Moderate",
+                                                   Probs >=.6 & Probs < .80 ~ "High",
+                                                   Probs >=.8 ~ "Severe"))
+
+
+finalTest2$uniqueID <- seq.int(nrow(finalTest))
+
+testProbs_const2$uniqueID <- seq.int(nrow(finalTest))
+
+construction2 <- left_join(finalTest2, testProbs_const2)
+
+ggplot() +
+  geom_sf(data = fishnet, fill = "white")+
+  geom_sf(data=construction2, aes(fill=Risk_Cat), color="transparent")+
+  scale_fill_manual(values=palette5, name="Risk Score") +
+  labs(title="Predicted Risk Scores Across Philadelphia given \nCounstruction counts reduce by 50%")+
+  mapTheme()
+
+rf3 <- randomForest(
+  finalTrain$Variable ~ .,
+  data=finalTrain %>% 
+                     dplyr::select(pctCoverage18, LogAvgParcelSize, avg_nnConst,LogPctTrans, LogPole,
+                                    countConst3, Loge311Count,pctTrans, LogPctRes, holc_grade, HydrologyPct)
+)
+
+## Prediction
+testProbs_const3 <- data.frame(Outcome = as.factor(finalTest$Variable),
+                        Probs = predict(rf3, finalTest, type= "response"))
+
+
+
+testProbs_const3 <- testProbs_const3 %>% mutate(Risk_Cat=
+                                            case_when(Probs <=.2 ~ "Very Low",
+                                                   Probs > 0.2 & Probs < .4 ~ "Low",    
+                                                   Probs >= 0.4 & Probs < .6 ~ "Moderate",
+                                                   Probs >=.6 & Probs < .80 ~ "High",
+                                                   Probs >=.8 ~ "Severe"))
+
+
+finalTest2$uniqueID <- seq.int(nrow(finalTest))
+
+testProbs_const3$uniqueID <- seq.int(nrow(finalTest))
+
+construction3 <- left_join(finalTest2, testProbs_const3)
+
+ggplot() +
+  geom_sf(data = fishnet, fill = "white")+
+  geom_sf(data=construction3, aes(fill=Risk_Cat), color="transparent")+
+  scale_fill_manual(values=palette5, name="Risk Score") +
+  labs(title="Predicted Risk Scores Across Philadelphia given \nCounstruction counts increased by 25%")+
+  mapTheme()
+
+rf4 <- randomForest(
+  finalTrain$Variable ~ .,
+  data=finalTrain %>% 
+                     dplyr::select(pctCoverage18, LogAvgParcelSize, avg_nnConst,LogPctTrans, LogPole,
+                                    countConst4, Loge311Count,pctTrans, LogPctRes, holc_grade, HydrologyPct)
+)
+
+## Prediction
+testProbs_const4 <- data.frame(Outcome = as.factor(finalTest$Variable),
+                        Probs = predict(rf4, finalTest, type= "response"))
+
+
+
+testProbs_const4 <- testProbs_const4 %>% mutate(Risk_Cat=
+                                            case_when(Probs <=.2 ~ "Very Low",
+                                                   Probs > 0.2 & Probs < .4 ~ "Low",    
+                                                   Probs >= 0.4 & Probs < .6 ~ "Moderate",
+                                                   Probs >=.6 & Probs < .80 ~ "High",
+                                                   Probs >=.8 ~ "Severe"))
+
+
+finalTest2$uniqueID <- seq.int(nrow(finalTest))
+
+testProbs_const4$uniqueID <- seq.int(nrow(finalTest))
+
+construction4 <- left_join(finalTest2, testProbs_const4)
+
+ggplot() +
+  geom_sf(data = fishnet, fill = "white")+
+  geom_sf(data=construction4, aes(fill=Risk_Cat), color="transparent")+
+  scale_fill_manual(values=palette5, name="Risk Score") +
+  labs(title="Predicted Risk Scores Across Philadelphia given \nCounstruction counts increased by 50%")+
+  mapTheme()
+
+```
+
 
 ``````{r CV, message=FALSE, warning=FALSE, fig.height = 6, fig.width = 6}  
 
 ## Cross validation
-ctrl <- trainControl(method = "cv", number = 100, classProbs=TRUE, summaryFunction=twoClassSummary)
+ctrl <- trainControl(method = "cv", number = 10, classProbs=F, summaryFunction=twoClassSummary)
 
 FinalFishnet5$Variable <- as.factor(FinalFishnet5$Variable)
 FinalFishnet5$pctCoverage0 <- as.numeric(FinalFishnet5$pctCoverage18)
 
+FinalFishnet5$Variable2 <- ifelse(FinalFishnet5$Variable == 0, "yes", "no")
+
+FinalFishnet5 %>% 
+  mutate(Variable = factor(Variable, 
+                        labels = make.names(levels(Variable))))
+
 reg.cv <-train(FinalFishnet5$Variable ~ ., data = st_drop_geometry(FinalFishnet5) %>% 
                                 dplyr::select(pctCoverage18, LogAvgParcelSize, avg_nnConst,avg_nnPole,
-                                    countConst, Loge311Count, pctRes, pctTrans, LogPctRes, holc_grade, HydrologyPct),
+                                    countConst, Loge311Count, pctTrans, LogPctRes, holc_grade, HydrologyPct),
                method="rpart", family="binomial", trControl = ctrl)
 
 reg.cv
