@@ -1424,7 +1424,7 @@ LogPctResTrans = log10(pctTransRes))
 
 We also look at redlining boundaries from the Homeowner’s Loan Corporation (HOLC). As trees take decades to grow, the spatial configuration of tree canopy and likely their change is influenced by historical planning decisions. In 1937, HOLC created “redlining” maps which rated neighborhoods’ desirability in four categories. They rated neighborhoods with residents of color as the least desirable and majority-white neighborhoods as the most desirable. As a result, the low-ranked neighborhoods experienced disinvestment and greater difficulty attracting investment. Based on our analysis, it appears that tree canopy loss is correlated with a neighborhood’s HOLC grade. Areas with the most desirable grade, A, experienced the least percentage loss, while areas ranked D experienced the most.  
 
-```{r HOLC plots, message=FALSE, warning=FALSE, results='hide', cache=TRUE}
+```{r HOLC areas, message=FALSE, warning=FALSE, results='hide', cache=TRUE}
 
 HOLC2 <- HOLC %>%
   st_intersection(st_make_valid(Philadelphia), HOLC) %>%  
@@ -1466,9 +1466,9 @@ ggplot() +
 #   mutate(pctLoss = as.numeric(pctLoss))%>%
 #   st_drop_geometry()
 
-TreeCanopyLossHOLC<- 
-  HOLC%>%
-  left_join(TreeCanopyLossHOLC)
+# TreeCanopyLossHOLC<- 
+#   HOLC%>%
+#   left_join(TreeCanopyLossHOLC)
 
  ggplot() +
    geom_sf(data = Philadelphia, colour = "gray90", fill = "gray90") +
@@ -1477,26 +1477,25 @@ TreeCanopyLossHOLC<-
    labs(title = "HOLC Redlining Boundaries", subtitle = "Philadelphia, PA") +
    mapTheme()
 
-TreeCanopyLossHOLC %>%
- # group_by(holc_grade) %>%
-ggplot()+
-  geom_histogram(aes(pctLoss), binwidth = 1, fill = "red")+
-  labs(title="Tree Canopy Loss by HOLC Grade from 2008-2018",
-  subtitle="Philadelphia, PA",
-       x="HOLC Rating", 
-       y="% Loss")+
-  facet_wrap(~holc_grade, nrow = 1)+
-  plotTheme()
-
-holc_net <- st_intersection(fishnet_centroid, HOLC) %>%
-  dplyr::select(uniqueID, holc_grade)
-  
+# FinalFishnet %>%
+# ggplot()+
+#   geom_histogram(aes(pctLoss), binwidth = 1, fill = "red")+
+#   labs(title="Tree Canopy Loss by HOLC Grade from 2008-2018",
+#   subtitle="Philadelphia, PA",
+#        x="HOLC Rating", 
+#        y="% Loss")+
+#   facet_wrap(~holc_grade, nrow = 1)+
+#   plotTheme()
+# 
+ holc_net <- st_intersection(fishnet_centroid, HOLC) %>%
+   dplyr::select(uniqueID, holc_grade)
+   
 
 FinalFishnet <-
    holc_net %>%
    st_drop_geometry() %>%
    left_join(FinalFishnet, .)%>%
-   mutate(holc_grade = replace_na(holc_grade, 0))
+   mutate(holc_grade = replace_na(holc_grade, "unclassified"))
   
 
 ```
@@ -1793,6 +1792,9 @@ FinalFishnet5 <-
          LogPctGain = log(pctGain),
          LogPctChange = log(pctChange))
 
+test <- FinalFishnet %>%
+  select(holc_grade)
+
 FinalFishnet5$avg_nnConst <- ifelse(is.na(FinalFishnet5$avg_nnConst),0, FinalFishnet5$avg_nnConst)
 FinalFishnet5$avg_nnPole <- ifelse(is.na(FinalFishnet5$avg_nnPole),0, FinalFishnet5$avg_nnPole)
 FinalFishnet5$pctWhite <- ifelse(is.na(FinalFishnet5$pctWhite),0, FinalFishnet5$pctWhite)
@@ -1849,6 +1851,9 @@ FinalFishnet5 <-
 #   mutate(pctTrans = ifelse(pctTrans > 66.67, 1, 0))
 
 
+ggplot() +
+  geom_sf(data = FinalFishnet, aes(fill = holc_grade)) +
+  mapTheme()
 
 
 # LOGISTIC MODEL
