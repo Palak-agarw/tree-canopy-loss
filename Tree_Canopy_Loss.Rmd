@@ -2148,14 +2148,14 @@ testProbs_const1 <- testProbs_const1 %>% mutate(Risk_Cat=
                                                    Probs > 0.2 & Probs < .4 ~ "Low",    
                                                    Probs >= 0.4 & Probs < .6 ~ "Moderate",
                                                    Probs >=.6 & Probs < .80 ~ "High",
-                                                   Probs >=.8 ~ "Severe"))
+                                                   Probs >=.80 ~ "Severe"))
 
 
-finalTest2$uniqueID <- seq.int(nrow(finalTest))
+FinalFishnet2$uniqueID <- seq.int(nrow(FinalFishnet5))
 
-testProbs_const1$uniqueID <- seq.int(nrow(finalTest))
+testProbs_const1$uniqueID <- seq.int(nrow(FinalFishnet5))
 
-construction1 <- left_join(finalTest2, testProbs_const1)
+construction1 <- left_join(FinalFishnet2, testProbs_const1)
 
 
 ggplot() +
@@ -2166,15 +2166,15 @@ ggplot() +
   mapTheme()
 
 rf2 <- randomForest(
-  finalTrain$Variable ~ .,
-  data=finalTrain %>% 
+  FinalFishnet5$Variable ~ .,
+  data=st_drop_geometry(FinalFishnet5) %>% 
                      dplyr::select(pctCoverage18, LogAvgParcelSize, avg_nnConst,LogPctTrans, LogPole,
                                     countConst2, Loge311Count,pctTrans, LogPctRes, holc_grade, HydrologyPct)
 )
 
 ## Prediction
-testProbs_const2 <- data.frame(Outcome = as.factor(finalTest$Variable),
-                        Probs = predict(rf2, finalTest, type= "response"))
+testProbs_const2 <- data.frame(Outcome = as.factor(FinalFishnet5$Variable),
+                        Probs = predict(rf2, FinalFishnet5, type= "response"))
 
 
 
@@ -2186,11 +2186,11 @@ testProbs_const2 <- testProbs_const2 %>% mutate(Risk_Cat=
                                                    Probs >=.8 ~ "Severe"))
 
 
-finalTest2$uniqueID <- seq.int(nrow(finalTest))
+FinalFishnet2$uniqueID <- seq.int(nrow(FinalFishnet5))
 
-testProbs_const2$uniqueID <- seq.int(nrow(finalTest))
+testProbs_const2$uniqueID <- seq.int(nrow(FinalFishnet5))
 
-construction2 <- left_join(finalTest2, testProbs_const2)
+construction2 <- left_join(FinalFishnet2, testProbs_const2)
 
 ggplot() +
   geom_sf(data = fishnet, fill = "white")+
@@ -2200,15 +2200,15 @@ ggplot() +
   mapTheme()
 
 rf3 <- randomForest(
-  finalTrain$Variable ~ .,
-  data=finalTrain %>% 
+  FinalFishnet5$Variable ~ .,
+  data=st_drop_geometry(FinalFishnet5) %>% 
                      dplyr::select(pctCoverage18, LogAvgParcelSize, avg_nnConst,LogPctTrans, LogPole,
                                     countConst3, Loge311Count,pctTrans, LogPctRes, holc_grade, HydrologyPct)
 )
 
 ## Prediction
-testProbs_const3 <- data.frame(Outcome = as.factor(finalTest$Variable),
-                        Probs = predict(rf3, finalTest, type= "response"))
+testProbs_const3 <- data.frame(Outcome = as.factor(FinalFishnet5$Variable),
+                        Probs = predict(rf3, FinalFishnet5, type= "response"))
 
 
 
@@ -2220,11 +2220,11 @@ testProbs_const3 <- testProbs_const3 %>% mutate(Risk_Cat=
                                                    Probs >=.8 ~ "Severe"))
 
 
-finalTest2$uniqueID <- seq.int(nrow(finalTest))
+FinalFishnet2$uniqueID <- seq.int(nrow(FinalFishnet5))
 
-testProbs_const3$uniqueID <- seq.int(nrow(finalTest))
+testProbs_const3$uniqueID <- seq.int(nrow(FinalFishnet5))
 
-construction3 <- left_join(finalTest2, testProbs_const3)
+construction3 <- left_join(FinalFishnet2, testProbs_const3)
 
 ggplot() +
   geom_sf(data = fishnet, fill = "white")+
@@ -2234,15 +2234,15 @@ ggplot() +
   mapTheme()
 
 rf4 <- randomForest(
-  finalTrain$Variable ~ .,
-  data=finalTrain %>% 
+  FinalFishnet5$Variable ~ .,
+  data=st_drop_geometry(FinalFishnet5) %>% 
                      dplyr::select(pctCoverage18, LogAvgParcelSize, avg_nnConst,LogPctTrans, LogPole,
                                     countConst4, Loge311Count,pctTrans, LogPctRes, holc_grade, HydrologyPct)
 )
 
 ## Prediction
-testProbs_const4 <- data.frame(Outcome = as.factor(finalTest$Variable),
-                        Probs = predict(rf4, finalTest, type= "response"))
+testProbs_const4 <- data.frame(Outcome = as.factor(FinalFishnet5$Variable),
+                        Probs = predict(rf4, FinalFishnet5, type= "response"))
 
 
 
@@ -2254,11 +2254,11 @@ testProbs_const4 <- testProbs_const4 %>% mutate(Risk_Cat=
                                                    Probs >=.8 ~ "Severe"))
 
 
-finalTest2$uniqueID <- seq.int(nrow(finalTest))
+FinalFishnet2$uniqueID <- seq.int(nrow(FinalFishnet5))
 
-testProbs_const4$uniqueID <- seq.int(nrow(finalTest))
+testProbs_const4$uniqueID <- seq.int(nrow(FinalFishnet5))
 
-construction4 <- left_join(finalTest2, testProbs_const4)
+construction4 <- left_join(FinalFishnet2, testProbs_const4)
 
 ggplot() +
   geom_sf(data = fishnet, fill = "white")+
@@ -2267,10 +2267,10 @@ ggplot() +
   labs(title="Predicted Risk Scores Across Philadelphia given \nCounstruction counts increased by 50%")+
   mapTheme()
 
-# st_write(construction4, "construction-50plus.geojson")
-# st_write(construction3, "construction-25plus.geojson")
-# st_write(construction2, "construction-50less.geojson")
-# st_write(construction1, "construction-25less.geojson")
+st_write(construction4, "construction-50plus.geojson")
+st_write(construction3, "construction-25plus.geojson")
+st_write(construction2, "construction-50less.geojson")
+st_write(construction1, "construction-25less.geojson")
 
 ```
 
