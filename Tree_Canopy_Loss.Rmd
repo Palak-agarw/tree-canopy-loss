@@ -1835,7 +1835,7 @@ FinalFishnet5 <-
 hist(FinalFishnet5$pctLoss,xlab="Percent Loss",
      breaks=50, col="purple", main = "Histogram of Percent Loss ")
 
-FinalFishnet5$Variable <- ifelse(FinalFishnet5$pctLoss > 25,0, 1)
+FinalFishnet5$Variable <- ifelse(FinalFishnet5$pctLoss > 25,1, 0)
 
 # FinalFishnet5 <-
 #   FinalFishnet5%>%
@@ -2267,10 +2267,10 @@ ggplot() +
   labs(title="Predicted Risk Scores Across Philadelphia given \nCounstruction counts increased by 50%")+
   mapTheme()
 
-# st_write(construction4, "construction-50plus_new.geojson")
-# st_write(construction3, "construction-25plus_new.geojson")
-# st_write(construction2, "construction-50less_new.geojson")
-# st_write(construction1, "construction-25less_new.geojson")
+st_write(construction4, "construction-50plus_new1.geojson")
+st_write(construction3, "construction-25plus_new1.geojson")
+st_write(construction2, "construction-50less_new1.geojson")
+st_write(construction1, "construction-25less_new1.geojson")
 
 ```
 
