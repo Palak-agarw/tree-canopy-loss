@@ -2336,21 +2336,22 @@ const_scenarios <- rbind(construction1, construction2, construction3, constructi
 ``````{r CV, message=FALSE, warning=FALSE, fig.height = 6, fig.width = 6}  
 
 ## Cross validation
-ctrl <- trainControl(method = "cv", number = 10, classProbs=F, summaryFunction=twoClassSummary)
+ctrl <- trainControl(method = "cv", number = 10, classProbs=TRUE, summaryFunction=twoClassSummary)
 
 FinalFishnet5$Variable <- as.factor(FinalFishnet5$Variable)
 FinalFishnet5$pctCoverage0 <- as.numeric(FinalFishnet5$pctCoverage18)
 
 FinalFishnet5$Variable2 <- ifelse(FinalFishnet5$Variable == 0, "A", "B")
+FinalFishnet5$Variable2 <- as.factor(FinalFishnet5$Variable2)
 
 FinalFishnet5 %>% 
   mutate(Variable = factor(Variable, 
                         labels = make.names(levels(Variable))))
 
 reg.cv <-train(FinalFishnet5$Variable2 ~ ., data = st_drop_geometry(FinalFishnet5) %>% 
-                                dplyr::select(pctCoverage18, LogAvgParcelSize, avg_nnConst,avg_nnPole,
-                                    countConst, Loge311Count, pctTrans, LogPctRes, holc_grade, HydrologyPct),
-              method="glm", family="binomial", trControl = ctrl)
+                                dplyr::select(pctCoverage18, LogAvgParcelSize, avg_nnConst,LogPctTrans, LogPole,
+                                    countConst, Loge311Count,pctTrans, LogPctRes, holc_grade, HydrologyPct),
+              method="rpart", family="binomial", trControl = ctrl, metric = "ROC",)
 
 reg.cv
 
