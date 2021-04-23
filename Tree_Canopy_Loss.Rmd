@@ -1,7 +1,7 @@
 ---
 title: "Tree Canopy Loss in Philadelphia"
 author: "Anna, Palak, Kyle"
-date: "2/22/2021"
+date: "4/23/2021"
 output:
   html_document:
     keep_md: true
@@ -17,49 +17,44 @@ This project was completed as part of the Master in Urban Spatial Analytics Spri
 
 This document is intended to help other researchers replicate a study of tree canopy loss linked to spatial risk factors. We first introduce our motivation, followed by data exploration and analysis, and finally predictive modeling. We include hyperlinks thorough our document and in the appendix for reproducibility. Our hope is that this document and our policy tool can help tree planting agencies, tree advocates, and the interested public understand the forces contributing to tree canopy loss in Philadelphia and imagine different scenarios for our tree canopy based on construction.  
 
-## Introduction   
+# Introduction   
 
 **Between 2008 and 2018, Philadelphia lost more than 1000 football fields’ worth of tree canopy.**  
 
 Most of this loss occurred in historically disenfranchised communities. In response, the City of Philadelphia has set important milestones for conserving and increasing the current tree canopy in the city. In this analysis, we model tree canopy loss in Philadelphia and identify risk factors. We additionally assess the city’s progress on the goals and how this varies across neighborhoods.  
 
-### The Planning Tool: Canopy View  
 
-Using this information, we created a predictive scenario policy tool which displays future tree canopy loss under three construction scenarios. The general population and tree advocates can use our tool to understand the potential impact of construction on the tree canopy.
-
-### Why does the tree canopy matter?   
+**Why does the tree canopy matter?**  
 
 Tree canopy is defined as the area of land which, viewed from a bird's eye view, is covered by trees. Trees offer important benefits to cities including mitigating the urban heat island effect, absorbing stormwater runoff, a habitat for wildlife, and aesthetic and recreational benefits. In addition, trees are a preventative public health measure that improves mental health, increases social interactions and activity, and reduce crime, violence, and stress. A 2020 study published in The Lancet found that if Philadelphia reaches 30% tree canopy in all of its neighborhoods, the city would see [403 fewer premature deaths](https://www.fs.fed.us/nrs/pubs/jrnl/2020/nrs_2020_kondo_001.pdf) per year. However, despite the importance of trees to the city's health, appearance, and ecology, trees are regularly removed for reasons ranging from construction to homeowners' personal preference.
 
-### Philadelphia's Tree Canopy Goals    
 
-**30% Tree Canopy in each neighborhood by 2025**    
+**Philadelphia's Tree Canopy Goals** 
+
+1. 30% Tree Canopy in each neighborhood by 2025  
 
 Philadelphia (under a previous mayoral administration) set the goal of achieving 30% tree canopy coverage in all neighborhoods by 2025. Currently, the citywide average is 20%, although this is highly uneven. More affluent neighborhoods in the northwest that have many parks and large lawns have much higher tree canopy than industrial neighborhoods in south and north Philadelphia which are full of impervious surfaces. The neighborhoods which have lower canopy coverage tend to be historically disenfranchised, lower income, and predominantly communities of color. This is an environmental justice problem. Neighborhoods like Philadelphia’s Hunting Park have a much lower ratio of tree canopy to impervious surfaces than the citywide average, resulting in higher temperatures during summertime heat waves and poorer air quality.  
 
-**1 acre of tree canopy within a 10 minute walk for all residents**  
+2. 1 acre of tree canopy within a 10 minute walk for all residents 
 
 13% of Philadelphia's residents are considered under-served by green space, meaning that they live more than a 10 minute walk away from at least 1 acre of green space. The city has therefore set a goal of ensuring that all residents are no more than 10 minutes away from at least 1 acre of green space by 2035. To this end, the city is prioritizing adding green space in historically disenfranchised neighborhoods and making efforts to green spaces in schools and recreation centers.     
 
-## Data and Methods
-Our analysis is guided by the following questions:   
+# Planning Tool: Canopy View  
 
-1. How does tree canopy loss vary across neighborhoods and sociodemographic contexts?
-2. Which neighborhood do not meet the 30% tree canopy coverage?   
-3. What are the risk factors for tree canopy loss?   
-4. How do current patterns of tree canopy coverage and loss reflect disinvestment as a result of redlining and older planning practices?   
-5. Where and how should Parks and Recreation and other tree planting organizations intervene?
+Using this information, we created a predictive scenario policy tool which displays future tree canopy loss under three construction scenarios. The general population and tree advocates can use our tool to understand the potential impact of construction on the tree canopy.
 
 
-We use the following data:
+# Data and Methods  
 
-**Independent variable**: Tree Canopy LiDAR data consisting of canopy polygons marked as loss, gain, or no change from 2008-2018   [OpenDataPhilly](https://www.opendataphilly.org/dataset/ppr-tree-canopy)    
+In this analysis, we use the following data:
 
-**Neighborhood sociodemographic attributes**: 2018 [American Community Survey data](https://api.census.gov/data/2018/acs/acs5/variables.html) from the U.S. Census Bureau  
+* Independent variable: Tree Canopy LiDAR data consisting of canopy polygons marked as loss, gain, or no change from 2008-2018     [OpenDataPhilly](https://www.opendataphilly.org/dataset/ppr-tree-canopy)    
 
-**Neighborhoood level risk factors**:
-* Construction  
-* Parcels  
+*Neighborhood sociodemographic attributes: 2018 [American Community Survey data](https://api.census.gov/data/2018/acs/acs5/variables.html) from the U.S. Census Bureau  
+
+*Neighborhoood level risk factors:    
+* Construction   
+* Parcels   
 * Streets  
 * Tree-related 311 requests  
 * Normalized difference vegetation index (NDVI)  
@@ -68,10 +63,9 @@ We use the following data:
 * Health outcomes   
 
 
-## Exploratory Analysis  
+# Exploratory Analysis  
 
-#### Set up
-```{r setup, message=FALSE, warning=FALSE, include=TRUE, results='hide', cache=TRUE}
+```{r Set Up, message=FALSE, warning=FALSE, include=TRUE, results='hide', cache=TRUE}
 #Reload
 knitr::opts_chunk$set(message = FALSE, warning = FALSE)
 options(scipen=10000000)
@@ -182,8 +176,8 @@ plotTheme <- function(base_size = 12) {
 # Tree Canopy
 TreeCanopy <-
  #st_read("C:/Users/Kyle McCarthy/Documents/Practicum/Data/TreeUse/TreeCanopyChange_2008_2018.shp")%>%
-  #st_read("/Users/annaduan/Desktop/Y3S2/Practicum/Data/TreeCanopyChange_2008_2018-shp/TreeCanopyChange_2008_2018.shp") %>%
- st_read("C:/Users/agarw/Documents/MUSA 801/Data/TreeCanopyChange_2008_2018.shp") %>%
+st_read("/Users/annaduan/Desktop/Y3S2/Practicum/Data/TreeCanopyChange_2008_2018-shp/TreeCanopyChange_2008_2018.shp") %>%
+# st_read("C:/Users/agarw/Documents/MUSA 801/Data/TreeCanopyChange_2008_2018.shp") %>%
 #st_read("C:/Users/Prince/Desktop/Tree Canopy Data/TreeCanopyChange_2008_2018.shp") %>%
   st_transform('ESRI:102728') 
 
@@ -200,8 +194,8 @@ Philadelphia <- st_read("http://data.phl.opendata.arcgis.com/datasets/405ec3da94
 # Neighborhoods
 Neighborhood <-
  #st_read("C:/Users/Kyle McCarthy/Documents/Practicum/Data/Neighborhoods/Neighborhoods_Philadelphia.shp") %>%
- #st_read("/Users/annaduan/Desktop/Y3S2/Practicum/Data/Neighborhoods_Philadelphia/Neighborhoods_Philadelphia.shp")%>%
-  st_read("C:/Users/agarw/Documents/MUSA 801/Data/Neighborhoods_Philadelphia.shp") %>%
+ st_read("/Users/annaduan/Desktop/Y3S2/Practicum/Data/Neighborhoods_Philadelphia/Neighborhoods_Philadelphia.shp")%>%
+ # st_read("C:/Users/agarw/Documents/MUSA 801/Data/Neighborhoods_Philadelphia.shp") %>%
 #st_read("C:/Users/Prince/Desktop/Tree Canopy Data/Neighborhoods_Philadelphia/Neighborhoods_Philadelphia.shp") %>%
   st_transform('ESRI:102728')
 
@@ -216,10 +210,10 @@ Neighborhood <-
  # st_transform('ESRI:102728')
 
 HOLC <- 
-  #st_read("/Users/annaduan/Desktop/Y3S2/Practicum/Data/PAPhiladelphia1937.geojson") %>%
+  st_read("/Users/annaduan/Desktop/Y3S2/Practicum/Data/PAPhiladelphia1937.geojson") %>%
 # st_read("C:/Users/Prince/Desktop/Tree Canopy Data/PAPhiladelphia1937.geojson") %>%
   #st_read("C:/Users/Kyle McCarthy/Documents/Practicum/Data/PAPhiladelphia1937.geojson")%>%
- st_read("C:/Users/agarw/Documents/MUSA 801/Data/PAPhiladelphia1937.geojson")%>%
+ #st_read("C:/Users/agarw/Documents/MUSA 801/Data/PAPhiladelphia1937.geojson")%>%
   st_transform('ESRI:102728')
 
 HOLC <-
@@ -278,10 +272,10 @@ parcels <- st_read("http://data-phl.opendata.arcgis.com/datasets/1c57dd1b3ff8444
  st_transform('ESRI:102728')
 
 const_permits <- 
-   st_read("C:/Users/agarw/Documents/MUSA 801/Data/const_permit.csv") %>%
+  # st_read("C:/Users/agarw/Documents/MUSA 801/Data/const_permit.csv") %>%
  # st_read("C:/Users/Prince/Desktop/Tree Canopy Data/const_permit.csv") %>%
 #  st_read("C:/Users/Kyle McCarthy/Documents/Practicum/permits.csv")%>%
- # st_read("/Users/annaduan/Desktop/Y3S2/Practicum/Data/const_permit.csv")%>%
+  st_read("/Users/annaduan/Desktop/Y3S2/Practicum/Data/const_permit.csv")%>%
   mutate(X = geocode_x,
          Y = geocode_y) 
 const_permits[const_permits==""]<-NA
@@ -300,8 +294,8 @@ const <- const_spatial %>%
 
 LandUseFishnet <- 
   #st_read("C:/Users/Kyle McCarthy/Documents/Practicum/Data/Fishnet_LU_Intersect/fishnet_LUS_Intersect_dissolve.shp")  %>%
-   st_read("C:/Users/agarw/Documents/MUSA 801/Data/fishnet_LUS_Intersect_dissolve.geojson") %>%
- #st_read("/Users/annaduan/Desktop/Y3S2/Practicum/Data/fishnet_LUS_Intersect_dissolve.geojson") %>%
+  # st_read("C:/Users/agarw/Documents/MUSA 801/Data/fishnet_LUS_Intersect_dissolve.geojson") %>%
+ st_read("/Users/annaduan/Desktop/Y3S2/Practicum/Data/fishnet_LUS_Intersect_dissolve.geojson") %>%
 #  st_read("C:/Users/Prince/Desktop/Tree Canopy Data/fishnet_LUS_Intersect_dissolve.geojson") %>%
    st_transform('ESRI:102728')
 
@@ -315,18 +309,18 @@ Hydrology <-
 
  
  Parks <- 
-   #st_read("/Users/annaduan/Desktop/Y3S2/Practicum/Data/Parks") %>%
+   st_read("/Users/annaduan/Desktop/Y3S2/Practicum/Data/Parks") %>%
    #st_read("C:/Users/Kyle McCarthy/Documents/Practicum/Data/Parks/Philadelphia_PPR_Park_Boundaries2016.shp ")%>%
-   st_read("C:/Users/agarw/Documents/MUSA 801/Data/Philadelphia_PPR_Park_Boundaries2016.shp") %>%
+  # st_read("C:/Users/agarw/Documents/MUSA 801/Data/Philadelphia_PPR_Park_Boundaries2016.shp") %>%
    #st_read("C:/Users/Prince/Desktop/Tree Canopy Data/Philadelphia_PPR_Park_Boundaries2016.shp") %>%
      st_transform('ESRI:102728') %>%
    st_make_valid() %>%
    select(geometry)
 
 Conservation <- 
-  #st_read("/Users/annaduan/Desktop/Y3S2/Practicum/Data/Conservation/ConservationEasements202103.shp") %>%
+  st_read("/Users/annaduan/Desktop/Y3S2/Practicum/Data/Conservation/ConservationEasements202103.shp") %>%
   #st_read("C:/Users/Kyle McCarthy/Documents/Practicum/Data/Conservation/ConservationEasements202103.shp")%>%
-   st_read("C:/Users/agarw/Documents/MUSA 801/Data/ConservationEasements202103.shp") %>%
+  # st_read("C:/Users/agarw/Documents/MUSA 801/Data/ConservationEasements202103.shp") %>%
    #  st_read("C:/Users/Prince/Desktop/Tree Canopy Data/ConservationEasements202103.shp") %>%
    st_transform('ESRI:102728') %>%
   st_intersection(st_make_valid(Philadelphia), st_make_valid(Conservation)) %>%
@@ -341,7 +335,7 @@ ConservationNParks <- rbind(Parks, Conservation)
 ```
 
 
-#### Creating a fishnet
+## Creating a fishnet
 We use fishnet grid cells as our unit of analysis to take advantage of high resolution spatial data such as 311 service requests. Below, we create a fishnet cells of 1615 feet, or around the size of a city block. We then subtract fishnet cells that are more than 20% [conservation easement](https://www.conservationeasement.us/what-is-a-conservation-easement/) and/or park space to isolate land that may be protected and experience different tree canopy loss processes. All in all, we have 1411 fishnet cells representing Philadelphia.  
 ```{r Fishnet, cache=TRUE, message=FALSE, warning=FALSE, include=TRUE, results='hide'}
 
@@ -363,15 +357,12 @@ FishnetIntersect <- st_intersection(fishnet2, ConservationNParks )%>%
   filter(ConservationPct <= 20)
 
 ggplot() +
-  geom_sf(data = FishnetIntersect, fill = "yellow", colour = "white") +
+  geom_sf(data = FishnetIntersect, fill = "light green", colour = "white") +
   labs(title = "Philadelphia Fishnet Grid", 
        subtitle = "1 cell = 1615 ft ^2, 1411 cells total") +
   mapTheme()
 
 fishnet <- FishnetIntersect
-  
-
-
 ```
 
 We then aggregate our tree canopy data to the fishnet.  
@@ -509,20 +500,28 @@ FinalFishnet$pctLossCat <- cut(FinalFishnet$pctLoss,
                        right = FALSE)
 ```
 
+Our analysis in the following sections is guided by the following questions:
+
+1. What does Philadelphia's tree canopy look like?
+2. Where are neighborhoods at with achieving the 30% goal?
+3. What are the risk factors for tree canopy loss?   
+4. How do current patterns of tree canopy coverage and loss reflect disinvestment as a result of redlining and older planning practices?   
+5. Where and how should Parks and Recreation and other tree planting organizations intervene?
+
 
 ### 1. Existing tree canopy and tree canopy change
 
 **Philadelphia's 2018 Canopy**  
 Northwest, West, and Northeast Philadelphia have the most tree canopy. In North and South Philadelphia as well as Center City, tree canopy is more sparse.  
 
-```{r 2018 Canopy, cache=TRUE, message=FALSE, warning=FALSE, include=TRUE, results='hide'}
+```{r 2018 Tree Canopy, cache=TRUE, message=FALSE, warning=FALSE, include=TRUE, results='hide'}
 
 ggplot()+ 
   geom_sf(data = FinalFishnet, colour = "transparent", aes(fill = pctCoverage18Cat))+ 
      scale_fill_manual(values = palette7, 
                     name = "2018 Percent Coverage")+ 
-  labs(title = "Tree Canopy Coverage, 2018", 
-subtitle = "2018 Tree Canopy Area / Gridcell Size") + 
+  labs(title = "Tree Canopy, 2018", 
+subtitle = "Tree Canopy Area / Gridcell Area") + 
   theme(plot.title = element_text(size = 30, face = "bold"), 
         legend.title = element_text(size = 12)) +  mapTheme()
 
@@ -841,7 +840,7 @@ In Figure XX, we see that most neighborhoods experienced either no change or net
 p <- ggplot() +
   geom_sf(data = FinalNeighborhood, aes(fill = GainMinusLossCat), color = "white") +
   # scale_fill_manual(values = paletteLG, name = "Gain or Loss")+ 
-  labs(title = "What is the Tree Canopy Net Gain or Loss \nin Each Neighborhood from 2008 - 2018?") +
+  labs(title = "Tree Canopy Net Gain or Loss \nin Each Neighborhood from 2008 - 2018") +
   theme(plot.title = element_text(hjust = 0.5, size = 6))+
   mapTheme()
 
@@ -1061,8 +1060,8 @@ As previously mentioned, land use appears to have a correlation with tree canopy
 
 LandUse1 <-
   #st_read("C:/Users/Kyle McCarthy/Documents/Practicum/Data/LandUse/landu.csv")%>%
-  st_read("C:/Users/agarw/Documents/MUSA 801/Data/landu.csv")%>%
-   #st_read("/Users/annaduan/Desktop/Y3S2/Practicum/Data/landu.csv") %>%
+ # st_read("C:/Users/agarw/Documents/MUSA 801/Data/landu.csv")%>%
+   st_read("/Users/annaduan/Desktop/Y3S2/Practicum/Data/landu.csv") %>%
   #st_read("C:/Users/Prince/Desktop/Tree Canopy Data/landu.csv") %>%
   mutate(AreaGain = as.numeric(AreaGain),
          AreaLoss = as.numeric(AreaLoss),
@@ -1194,8 +1193,8 @@ ggplot(LandUse2, aes(y=C_DIG2DESC, x=pctChange))+
 
 e311Trees <-
  # st_read('C:/Users/Kyle McCarthy/Documents/Practicum/e311.csv') 
-   #st_read("/Users/annaduan/Desktop/Y3S2/Practicum/Data/streettree311.csv")
-  st_read('C:/Users/agarw/Documents/MUSA 801/Data/e311.csv')
+   st_read("/Users/annaduan/Desktop/Y3S2/Practicum/Data/streettree311.csv")
+  #st_read('C:/Users/agarw/Documents/MUSA 801/Data/e311.csv')
 #st_read("C:/Users/Prince/Desktop/Tree Canopy Data/e311.csv") %>%
 
 
@@ -1424,7 +1423,7 @@ LogPctResTrans = log10(pctTransRes))
 
 We also look at redlining boundaries from the Homeowner’s Loan Corporation (HOLC). As trees take decades to grow, the spatial configuration of tree canopy and likely their change is influenced by historical planning decisions. In 1937, HOLC created “redlining” maps which rated neighborhoods’ desirability in four categories. They rated neighborhoods with residents of color as the least desirable and majority-white neighborhoods as the most desirable. As a result, the low-ranked neighborhoods experienced disinvestment and greater difficulty attracting investment. Based on our analysis, it appears that tree canopy loss is correlated with a neighborhood’s HOLC grade. Areas with the most desirable grade, A, experienced the least percentage loss, while areas ranked D experienced the most.  
 
-```{r HOLC areas, message=FALSE, warning=FALSE, results='hide', cache=TRUE}
+```{r HOLC categories, message=FALSE, warning=FALSE, results='hide', cache=TRUE}
 
 HOLC2 <- HOLC %>%
   st_intersection(st_make_valid(Philadelphia), HOLC) %>%  
@@ -1781,10 +1780,11 @@ ggcorrplot(
 
 
 
-```{r Logit-model, message=FALSE, warning=FALSE}
+```{r Logit model, message=FALSE, warning=FALSE, cache=TRUE}
 
 library(randomForest)
-
+library(dplyr)
+library(caret)
 
 FinalFishnet5 <-
   FinalFishnet %>%
@@ -2023,7 +2023,7 @@ whichThreshold %>%
 ## Team Roles
 
 ![Gantt Chart](Gantt.png)
-```{r Confusion Model, message=FALSE, warning=FALSE, fig.height = 6, fig.width = 6}  
+```{r Confusion Model, message=FALSE, warning=FALSE, fig.height = 6, fig.width = 6, cache=TRUE}  
 
 
 testProbs2$predClass  = ifelse(testProbs2$Probs > 0.25 , 1,0)
@@ -2113,7 +2113,7 @@ ggplot() +
 
 ```
 
-```{r Construction_scenarios, message=FALSE, warning=FALSE, fig.height = 6, fig.width = 6}
+```{r Construction_scenarios, message=FALSE, warning=FALSE, fig.height = 6, fig.width = 6, cache=TRUE}
 
 FinalFishnet5$countConst1 <- FinalFishnet5$countConst * 0.75
 FinalFishnet5$countConst2 <- FinalFishnet5$countConst * 0.50
@@ -2277,8 +2277,9 @@ ggplot() +
   geom_sf(data = fishnet, fill = "white")+
   geom_sf(data=construction4, aes(fill=Risk_Cat), color="transparent")+
   scale_fill_manual(values=palette5, name="Risk Score") +
-  labs(title="Predicted Risk Scores Across Philadelphia given \nCounstruction counts increased by 50%")+
+  labs(title="Predicted Risk Scores Across Philadelphia given \nConstruction counts increased by 50%")+
   mapTheme()
+
 
 
 ## Construction scenario 5 - original
@@ -2323,48 +2324,41 @@ ggplot() +
 
 const_scenarios <- rbind(construction1, construction2, construction3, construction4, construction5)
 
-# st_write(const_scenarios, "construction-scenarios.geojson")
-
-# st_write(construction4, "construction-50plus_new1.geojson")
-# st_write(construction3, "construction-25plus_new1.geojson")
-# st_write(construction2, "construction-50less_new1.geojson")
-# st_write(construction1, "construction-25less_new1.geojson")
 
 ```
 
 
-``````{r CV, message=FALSE, warning=FALSE, fig.height = 6, fig.width = 6}  
-
-## Cross validation
-ctrl <- trainControl(method = "cv", number = 10, classProbs=TRUE, summaryFunction=twoClassSummary)
-
-FinalFishnet5$Variable <- as.factor(FinalFishnet5$Variable)
-FinalFishnet5$pctCoverage0 <- as.numeric(FinalFishnet5$pctCoverage18)
-
-FinalFishnet5$Variable2 <- ifelse(FinalFishnet5$Variable == 0, "A", "B")
-FinalFishnet5$Variable2 <- as.factor(FinalFishnet5$Variable2)
-
-FinalFishnet5 %>% 
-  mutate(Variable = factor(Variable, 
-                        labels = make.names(levels(Variable))))
-
-reg.cv <-train(FinalFishnet5$Variable2 ~ ., data = st_drop_geometry(FinalFishnet5) %>% 
-                                dplyr::select(pctCoverage18, LogAvgParcelSize, avg_nnConst,LogPctTrans, LogPole,
-                                    countConst, Loge311Count,pctTrans, LogPctRes, holc_grade, HydrologyPct),
-              method="rpart", family="binomial", trControl = ctrl, metric = "ROC",)
-
-reg.cv
-
-dplyr::select(reg.cv$resample, -Resample) %>%
-  gather(metric, value) %>%
-  left_join(gather(reg.cv$results[2:4], metric, mean)) %>%
-  ggplot(aes(value)) + 
-  geom_histogram(bins=35, fill = "#FF006A") +
-  facet_wrap(~metric) +
-  geom_vline(aes(xintercept = mean), colour = "#981FAC", linetype = 3, size = 1.5) +
-  scale_x_continuous(limits = c(0, 1)) +
-  labs(x="Goodness of Fit", y="Count", title="CV Goodness of Fit Metrics",
-       subtitle = "Across-fold mean reprented as dotted lines")
+``````{r CV, message=FALSE, warning=FALSE, fig.height = 6, fig.width = 6, cache=TRUE}  
+# 
+# ## Cross validation
+# ctrl <- trainControl(method = "cv", number = 10, classProbs=F, summaryFunction=twoClassSummary)
+# 
+# FinalFishnet5$Variable <- as.factor(FinalFishnet5$Variable)
+# FinalFishnet5$pctCoverage0 <- as.numeric(FinalFishnet5$pctCoverage18)
+# 
+# FinalFishnet5$Variable2 <- ifelse(FinalFishnet5$Variable == 0, "A", "B")
+# 
+# FinalFishnet5 %>% 
+#   mutate(Variable = factor(Variable, 
+#                         labels = make.names(levels(Variable))))
+# 
+# reg.cv <-train(FinalFishnet5$Variable2 ~ ., data = st_drop_geometry(FinalFishnet5) %>% 
+#                                 dplyr::select(pctCoverage18, LogAvgParcelSize, avg_nnConst,avg_nnPole,
+#                                     countConst, Loge311Count, pctTrans, LogPctRes, holc_grade, HydrologyPct),
+#               method="glm", family="binomial", trControl = ctrl)
+# 
+# reg.cv
+# 
+# dplyr::select(reg.cv$resample, -Resample) %>%
+#   gather(metric, value) %>%
+#   left_join(gather(reg.cv$results[2:4], metric, mean)) %>%
+#   ggplot(aes(value)) + 
+#   geom_histogram(bins=35, fill = "#FF006A") +
+#   facet_wrap(~metric) +
+#   geom_vline(aes(xintercept = mean), colour = "#981FAC", linetype = 3, size = 1.5) +
+#   scale_x_continuous(limits = c(0, 1)) +
+#   labs(x="Goodness of Fit", y="Count", title="CV Goodness of Fit Metrics",
+#        subtitle = "Across-fold mean represented as dotted lines")
 
 ```
 
