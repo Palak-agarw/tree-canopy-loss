@@ -2329,36 +2329,36 @@ const_scenarios <- rbind(construction1, construction2, construction3, constructi
 
 
 ``````{r CV, message=FALSE, warning=FALSE, fig.height = 6, fig.width = 6, cache=TRUE}  
-# 
-# ## Cross validation
-# ctrl <- trainControl(method = "cv", number = 10, classProbs=F, summaryFunction=twoClassSummary)
-# 
-# FinalFishnet5$Variable <- as.factor(FinalFishnet5$Variable)
-# FinalFishnet5$pctCoverage0 <- as.numeric(FinalFishnet5$pctCoverage18)
-# 
-# FinalFishnet5$Variable2 <- ifelse(FinalFishnet5$Variable == 0, "A", "B")
-# 
-# FinalFishnet5 %>% 
-#   mutate(Variable = factor(Variable, 
-#                         labels = make.names(levels(Variable))))
-# 
-# reg.cv <-train(FinalFishnet5$Variable2 ~ ., data = st_drop_geometry(FinalFishnet5) %>% 
-#                                 dplyr::select(pctCoverage18, LogAvgParcelSize, avg_nnConst,avg_nnPole,
-#                                     countConst, Loge311Count, pctTrans, LogPctRes, holc_grade, HydrologyPct),
-#               method="glm", family="binomial", trControl = ctrl)
-# 
-# reg.cv
-# 
-# dplyr::select(reg.cv$resample, -Resample) %>%
-#   gather(metric, value) %>%
-#   left_join(gather(reg.cv$results[2:4], metric, mean)) %>%
-#   ggplot(aes(value)) + 
-#   geom_histogram(bins=35, fill = "#FF006A") +
-#   facet_wrap(~metric) +
-#   geom_vline(aes(xintercept = mean), colour = "#981FAC", linetype = 3, size = 1.5) +
-#   scale_x_continuous(limits = c(0, 1)) +
-#   labs(x="Goodness of Fit", y="Count", title="CV Goodness of Fit Metrics",
-#        subtitle = "Across-fold mean represented as dotted lines")
+
+## Cross validation
+ctrl <- trainControl(method = "cv", number = 10, classProbs=F, summaryFunction=twoClassSummary)
+
+FinalFishnet5$Variable <- as.factor(FinalFishnet5$Variable)
+FinalFishnet5$pctCoverage0 <- as.numeric(FinalFishnet5$pctCoverage18)
+
+FinalFishnet5$Variable2 <- ifelse(FinalFishnet5$Variable == 0, "A", "B")
+
+FinalFishnet5 %>%
+  mutate(Variable = factor(Variable,
+                        labels = make.names(levels(Variable))))
+
+reg.cv <-train(FinalFishnet5$Variable2 ~ ., data = st_drop_geometry(FinalFishnet5) %>%
+                                dplyr::select(pctCoverage18, LogAvgParcelSize, avg_nnConst,avg_nnPole,
+                                    countConst, Loge311Count, pctTrans, LogPctRes, holc_grade, HydrologyPct),
+              method="glm", family="binomial", trControl = ctrl)
+
+reg.cv
+
+dplyr::select(reg.cv$resample, -Resample) %>%
+  gather(metric, value) %>%
+  left_join(gather(reg.cv$results[2:4], metric, mean)) %>%
+  ggplot(aes(value)) +
+  geom_histogram(bins=35, fill = "#FF006A") +
+  facet_wrap(~metric) +
+  geom_vline(aes(xintercept = mean), colour = "#981FAC", linetype = 3, size = 1.5) +
+  scale_x_continuous(limits = c(0, 1)) +
+  labs(x="Goodness of Fit", y="Count", title="CV Goodness of Fit Metrics",
+       subtitle = "Across-fold mean represented as dotted lines")
 
 ```
 
