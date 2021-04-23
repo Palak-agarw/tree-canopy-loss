@@ -2120,16 +2120,8 @@ FinalFishnet5$countConst2 <- FinalFishnet5$countConst * 0.50
 FinalFishnet5$countConst3 <- FinalFishnet5$countConst * 1.25
 FinalFishnet5$countConst4 <- FinalFishnet5$countConst * 1.50
 
-set.seed(1214)
-trainIndex <- createDataPartition(
-                                  y = FinalFishnet5$holc_grade,
-                                  p = 0.60, 
-                                  list = FALSE)
 
-finalTrain <- FinalFishnet5[ trainIndex,] %>% st_drop_geometry()
-finalTest  <- FinalFishnet5[-trainIndex,] %>% st_drop_geometry()
-finalTest2  <- FinalFishnet5[-trainIndex,] 
-
+## Construction scenario 1 - 25 less
 rf1 <- randomForest(
   FinalFishnet5$Variable ~ .,
   data=st_drop_geometry(FinalFishnet5) %>% 
@@ -2157,6 +2149,10 @@ testProbs_const1$uniqueID <- seq.int(nrow(FinalFishnet5))
 
 construction1 <- left_join(FinalFishnet2, testProbs_const1)
 
+construction1 <- construction1 %>%
+  mutate(Scenario = "const_25less") %>%
+  dplyr::select (Outcome,Probs,Risk_Cat,geometry,Scenario)
+
 
 ggplot() +
   geom_sf(data = fishnet, fill = "white")+
@@ -2165,6 +2161,7 @@ ggplot() +
   labs(title="Predicted Risk Scores Across Philadelphia given \nCounstruction counts reduce by 25%")+
   mapTheme()
 
+## Construction scenario 2 - 50 less
 rf2 <- randomForest(
   FinalFishnet5$Variable ~ .,
   data=st_drop_geometry(FinalFishnet5) %>% 
@@ -2192,6 +2189,10 @@ testProbs_const2$uniqueID <- seq.int(nrow(FinalFishnet5))
 
 construction2 <- left_join(FinalFishnet2, testProbs_const2)
 
+construction2 <- construction2 %>%
+  mutate(Scenario = "const_50less") %>%
+  dplyr::select (Outcome,Probs,Risk_Cat,geometry,Scenario)
+
 ggplot() +
   geom_sf(data = fishnet, fill = "white")+
   geom_sf(data=construction2, aes(fill=Risk_Cat), color="transparent")+
@@ -2199,6 +2200,8 @@ ggplot() +
   labs(title="Predicted Risk Scores Across Philadelphia given \nCounstruction counts reduce by 50%")+
   mapTheme()
 
+
+## Construction scenario 3 - 25 more
 rf3 <- randomForest(
   FinalFishnet5$Variable ~ .,
   data=st_drop_geometry(FinalFishnet5) %>% 
@@ -2226,6 +2229,10 @@ testProbs_const3$uniqueID <- seq.int(nrow(FinalFishnet5))
 
 construction3 <- left_join(FinalFishnet2, testProbs_const3)
 
+construction3 <- construction3 %>%
+  mutate(Scenario = "const_25more") %>%
+  dplyr::select (Outcome,Probs,Risk_Cat,geometry,Scenario)
+
 ggplot() +
   geom_sf(data = fishnet, fill = "white")+
   geom_sf(data=construction3, aes(fill=Risk_Cat), color="transparent")+
@@ -2233,6 +2240,8 @@ ggplot() +
   labs(title="Predicted Risk Scores Across Philadelphia given \nCounstruction counts increased by 25%")+
   mapTheme()
 
+
+## Construction scenario 4 - 50 more
 rf4 <- randomForest(
   FinalFishnet5$Variable ~ .,
   data=st_drop_geometry(FinalFishnet5) %>% 
@@ -2260,6 +2269,10 @@ testProbs_const4$uniqueID <- seq.int(nrow(FinalFishnet5))
 
 construction4 <- left_join(FinalFishnet2, testProbs_const4)
 
+construction4 <- construction4 %>%
+  mutate(Scenario = "const_50more") %>%
+  dplyr::select (Outcome,Probs,Risk_Cat,geometry,Scenario)
+
 ggplot() +
   geom_sf(data = fishnet, fill = "white")+
   geom_sf(data=construction4, aes(fill=Risk_Cat), color="transparent")+
@@ -2267,10 +2280,55 @@ ggplot() +
   labs(title="Predicted Risk Scores Across Philadelphia given \nCounstruction counts increased by 50%")+
   mapTheme()
 
-st_write(construction4, "construction-50plus_new1.geojson")
-st_write(construction3, "construction-25plus_new1.geojson")
-st_write(construction2, "construction-50less_new1.geojson")
-st_write(construction1, "construction-25less_new1.geojson")
+
+## Construction scenario 5 - original
+rf5 <- randomForest(
+  FinalFishnet5$Variable ~ .,
+  data=st_drop_geometry(FinalFishnet5) %>% 
+                     dplyr::select(pctCoverage18, LogAvgParcelSize, avg_nnConst,LogPctTrans, LogPole,
+                                    countConst, Loge311Count,pctTrans, LogPctRes, holc_grade, HydrologyPct)
+)
+
+## Prediction
+testProbs_const5 <- data.frame(Outcome = as.factor(FinalFishnet5$Variable),
+                        Probs = predict(rf4, FinalFishnet5, type= "response"))
+
+
+
+testProbs_const5 <- testProbs_const5 %>% mutate(Risk_Cat=
+                                            case_when(Probs <=.2 ~ "Very Low",
+                                                   Probs > 0.2 & Probs < .4 ~ "Low",    
+                                                   Probs >= 0.4 & Probs < .6 ~ "Moderate",
+                                                   Probs >=.6 & Probs < .80 ~ "High",
+                                                   Probs >=.8 ~ "Severe"))
+
+
+FinalFishnet2$uniqueID <- seq.int(nrow(FinalFishnet5))
+
+testProbs_const5$uniqueID <- seq.int(nrow(FinalFishnet5))
+
+construction5 <- left_join(FinalFishnet2, testProbs_const4)
+
+construction5 <- construction5 %>%
+  mutate(Scenario = "const_original") %>%
+  dplyr::select (Outcome,Probs,Risk_Cat,geometry,Scenario)
+
+ggplot() +
+  geom_sf(data = fishnet, fill = "white")+
+  geom_sf(data=construction5, aes(fill=Risk_Cat), color="transparent")+
+  scale_fill_manual(values=palette5, name="Risk Score") +
+  labs(title="Predicted Risk Scores Across Philadelphia given \nCounstruction counts increased by 50%")+
+  mapTheme()
+
+
+const_scenarios <- rbind(construction1, construction2, construction3, construction4, construction5)
+
+st_write(const_scenarios, "construction-scenarios.geojson")
+
+# st_write(construction4, "construction-50plus_new1.geojson")
+# st_write(construction3, "construction-25plus_new1.geojson")
+# st_write(construction2, "construction-50less_new1.geojson")
+# st_write(construction1, "construction-25less_new1.geojson")
 
 ```
 
