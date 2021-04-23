@@ -2317,13 +2317,13 @@ ggplot() +
   geom_sf(data = fishnet, fill = "white")+
   geom_sf(data=construction5, aes(fill=Risk_Cat), color="transparent")+
   scale_fill_manual(values=palette5, name="Risk Score") +
-  labs(title="Predicted Risk Scores Across Philadelphia given \nCounstruction counts increased by 50%")+
+  labs(title="Predicted Risk Scores Across Philadelphia given \norigional Counstruction counts ")+
   mapTheme()
 
 
 const_scenarios <- rbind(construction1, construction2, construction3, construction4, construction5)
 
-st_write(const_scenarios, "construction-scenarios.geojson")
+# st_write(const_scenarios, "construction-scenarios.geojson")
 
 # st_write(construction4, "construction-50plus_new1.geojson")
 # st_write(construction3, "construction-25plus_new1.geojson")
