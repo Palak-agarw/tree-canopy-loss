@@ -661,8 +661,7 @@ FinalFishnet <-
 ```
 
 
-
-### 2. How close are neighborhoods to achieving the 30% goal?
+### 2. How close are neighborhoods to the 30% goal?
 ```{r The 30 Percent Goal, message=FALSE, warning=FALSE, results='hide', fig.height = 7, fig.width = 8, cache=TRUE}
 
 # Tree Loss by Neighborhood
