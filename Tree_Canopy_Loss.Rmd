@@ -500,10 +500,10 @@ FinalFishnet$pctLossCat <- cut(FinalFishnet$pctLoss,
                        right = FALSE)
 ```
 
-Our analysis in the following sections is structured by the following questions:
+Our analysis in the following sections is guided by the following questions:
 
-1. How does tree canopy loss vary across neighborhoods and sociodemographic contexts?
-2. Which neighborhood do not meet the 30% tree canopy coverage?   
+1. What does Philadelphia's tree canopy look like?
+2. Where are neighborhoods at with achieving the 30% goal?
 3. What are the risk factors for tree canopy loss?   
 4. How do current patterns of tree canopy coverage and loss reflect disinvestment as a result of redlining and older planning practices?   
 5. Where and how should Parks and Recreation and other tree planting organizations intervene?
