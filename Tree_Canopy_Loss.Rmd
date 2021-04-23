@@ -1720,13 +1720,16 @@ ggplot(FinalFishnet, aes(y = LogPctLoss , x = LogPole))+
   geom_point()+
   labs(title = "Percent Change and Poles",
        subtitle = "Aggregated by Fishnet") +
-  xlab("Average Percent Change ") +
+  xlab("Log Pole Count") +
   ylab("Log Percent Loss") +
   theme(plot.title = element_text(hjust = 0.5, size = 15, face = "bold"), plot.subtitle = element_text(hjust = 0.5, size = 8)) +
   plotTheme()
   
 
 ```
+
+### Correlation Plot  
+To select a set of variables for our model, we make a correlation plot. 
 
 ```{r corr plot, message=FALSE, warning=FALSE, results='hide', fig.height =  8, fig.width =8,cache=TRUE}
 
@@ -1749,6 +1752,17 @@ ggcorrplot(
 ```
 
 
+Based on this plot, we select the following variables for our model:    
+  
+* Percent tree canopy coverage 2018    
+* Parcel size (Log average)    
+* Construction distance (Average nearest neighbor)   
+* Poles (Log)   
+* Construction density    
+* 311 Requests (Log)  
+* Percent residential land use (Log)  
+* HOLC grade    
+* Hydrology (%)  
 
 ```{r Logit model, message=FALSE, warning=FALSE, cache=TRUE}
 
