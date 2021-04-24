@@ -780,10 +780,10 @@ o + scale_fill_brewer(palette = "PiYG", direction = -1, aesthetics = c("colour",
 ### A closer look: neighborhood-level tree canopy change   
 To better understand tree canopy change patterns in these neighborhoods, we analyze more closely a neighborhood that has reached the goal and one that is substantially below the goal. In both, the bulk of the tree canopy did not change between 2008 and 2018. However, when we look closer, we see that tree canopy loss and gain are much more clustered in Upper Roxborough, which meets the goal. Here, it appears that some of the loss is related to tree removal along an entire street or throughout a property, whereas in Richmond, ___________________________________. This suggests that we will need to look at land use and streets as potential risk factor variables related to tree canopy loss.   
 
-```{r Neighborhood level Tree Loss, message=FALSE, warning=FALSE, results='hide', fig.height = 6, fig.width = 9, cache = TRUE}
+```{r Neighborhood level Tree Loss, message=FALSE, warning=FALSE, results='hide', fig.height = 9, fig.width = 13, cache = TRUE}
 library(magrittr)
 
-paletteChange <- c("lavender", "orange", "light green")
+paletteChange <- c("purple", "orange", "green")
 
 #making basemap
  ll <- function(dat, proj4 = 4326){
@@ -1248,11 +1248,10 @@ const_net$countConstCat <- cut(const_net$countConst,
                        right = FALSE)
 
 ggplot() +
-   geom_sf(data = const_net, aes(fill = as.factor(countConstCat)), color = NA) + scale_fill_brewer(palette = "Greys", direction = 1, aesthetics = c("fill"), colour = "red", guide = guide_legend(reverse = TRUE), name = "Permit Count") +
+   geom_sf(data = const_net, aes(fill = as.factor(countConstCat)), color = NA) + scale_fill_brewer(palette = "Greys", direction = 1, aesthetics = c("fill"), guide = guide_legend(reverse = TRUE), name = "Permit Count") +
    #scale_fill_viridis() +
    labs(title = "Construction Permits by Neighborhood, 2020", subtitle = "Philadelphia, PA") +
    mapTheme()
-
 
 
 FinalFishnet <-
@@ -2313,36 +2312,36 @@ const_scenarios <- rbind(construction1, construction2, construction3, constructi
 
 
 ``````{r CV, message=FALSE, warning=FALSE, fig.height = 6, fig.width = 6, cache=TRUE}  
-
-## Cross validation
-ctrl <- trainControl(method = "cv", number = 10, classProbs=F, summaryFunction=twoClassSummary)
-
-FinalFishnet5$Variable <- as.factor(FinalFishnet5$Variable)
-FinalFishnet5$pctCoverage0 <- as.numeric(FinalFishnet5$pctCoverage18)
-
-FinalFishnet5$Variable2 <- ifelse(FinalFishnet5$Variable == 0, "A", "B")
-
-FinalFishnet5 %>%
-  mutate(Variable = factor(Variable,
-                        labels = make.names(levels(Variable))))
-
-reg.cv <-train(FinalFishnet5$Variable2 ~ ., data = st_drop_geometry(FinalFishnet5) %>%
-                                dplyr::select(pctCoverage18, LogAvgParcelSize, avg_nnConst,avg_nnPole,
-                                    countConst, Loge311Count, pctTrans, LogPctRes, holc_grade, HydrologyPct),
-              method="glm", family="binomial", trControl = ctrl)
-
-reg.cv
-
-dplyr::select(reg.cv$resample, -Resample) %>%
-  gather(metric, value) %>%
-  left_join(gather(reg.cv$results[2:4], metric, mean)) %>%
-  ggplot(aes(value)) +
-  geom_histogram(bins=35, fill = "#FF006A") +
-  facet_wrap(~metric) +
-  geom_vline(aes(xintercept = mean), colour = "#981FAC", linetype = 3, size = 1.5) +
-  scale_x_continuous(limits = c(0, 1)) +
-  labs(x="Goodness of Fit", y="Count", title="CV Goodness of Fit Metrics",
-       subtitle = "Across-fold mean represented as dotted lines")
+# 
+# ## Cross validation
+# ctrl <- trainControl(method = "cv", number = 10, classProbs=F, summaryFunction=twoClassSummary)
+# 
+# FinalFishnet5$Variable <- as.factor(FinalFishnet5$Variable)
+# FinalFishnet5$pctCoverage0 <- as.numeric(FinalFishnet5$pctCoverage18)
+# 
+# FinalFishnet5$Variable2 <- ifelse(FinalFishnet5$Variable == 0, "A", "B")
+# 
+# FinalFishnet5 %>%
+#   mutate(Variable = factor(Variable,
+#                         labels = make.names(levels(Variable))))
+# 
+# reg.cv <-train(FinalFishnet5$Variable2 ~ ., data = st_drop_geometry(FinalFishnet5) %>%
+#                                 dplyr::select(pctCoverage18, LogAvgParcelSize, avg_nnConst,avg_nnPole,
+#                                     countConst, Loge311Count, pctTrans, LogPctRes, holc_grade, HydrologyPct),
+#               method="glm", family="binomial", trControl = ctrl)
+# 
+# reg.cv
+# 
+# dplyr::select(reg.cv$resample, -Resample) %>%
+#   gather(metric, value) %>%
+#   left_join(gather(reg.cv$results[2:4], metric, mean)) %>%
+#   ggplot(aes(value)) +
+#   geom_histogram(bins=35, fill = "#FF006A") +
+#   facet_wrap(~metric) +
+#   geom_vline(aes(xintercept = mean), colour = "#981FAC", linetype = 3, size = 1.5) +
+#   scale_x_continuous(limits = c(0, 1)) +
+#   labs(x="Goodness of Fit", y="Count", title="CV Goodness of Fit Metrics",
+#        subtitle = "Across-fold mean represented as dotted lines")
 
 ```
 
