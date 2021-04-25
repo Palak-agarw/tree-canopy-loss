@@ -1913,7 +1913,7 @@ rf <- randomForest(
   finalTrain$Variable ~ .,
   data=finalTrain %>% 
                      dplyr::select(pctCoverage18, LogAvgParcelSize, avg_nnConst,LogPctTrans, LogPole,
-                                    countConst, Loge311Count,pctTrans, LogPctRes, holc_grade, HydrologyPct)
+                                    countConst, Loge311Count, LogPctRes, holc_grade, HydrologyPct)
 )
 
 #pred2 = data.frame(predict(rf, newdata=finalTest))
@@ -2026,7 +2026,7 @@ whichThreshold %>%
 ```{r Confusion Model, message=FALSE, warning=FALSE, fig.height = 6, fig.width = 6, cache=TRUE}  
 
 
-testProbs2$predClass  = ifelse(testProbs2$Probs > 0.25 , 1,0)
+testProbs2$predClass  = ifelse(testProbs2$Probs > 0.35 , 1,0)
 
 confusion <- caret::confusionMatrix(reference = as.factor(testProbs2$Outcome),
                         data = as.factor(testProbs2$predClass),
@@ -2336,8 +2336,14 @@ ctrl <- trainControl(method = "cv", number = 10, classProbs=F, summaryFunction=t
 FinalFishnet5$Variable <- as.factor(FinalFishnet5$Variable)
 FinalFishnet5$pctCoverage0 <- as.numeric(FinalFishnet5$pctCoverage18)
 
-FinalFishnet5$Variable2 <- ifelse(FinalFishnet5$Variable == 0, "A", "B")
+factor(FinalFishnet5$Variable)
 
+factor(FinalFishnet5$Variable, levels = c(0,1), labels = c("zero", "one"))
+
+FinalFishnet5$Variable2 <- ifelse(FinalFishnet5$Variable == 0, "zero", "one")
+  
+FinalFishnet5$Variable2 <- as.factor(FinalFishnet5$Variable)
+  
 FinalFishnet5 %>%
   mutate(Variable = factor(Variable,
                         labels = make.names(levels(Variable))))
@@ -2345,7 +2351,7 @@ FinalFishnet5 %>%
 reg.cv <-train(FinalFishnet5$Variable2 ~ ., data = st_drop_geometry(FinalFishnet5) %>%
                                 dplyr::select(pctCoverage18, LogAvgParcelSize, avg_nnConst,avg_nnPole,
                                     countConst, Loge311Count, pctTrans, LogPctRes, holc_grade, HydrologyPct),
-              method="glm", family="binomial", trControl = ctrl)
+              method="rpart", family="binomial", trControl = ctrl)
 
 reg.cv
 
