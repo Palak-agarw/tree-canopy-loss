@@ -2009,7 +2009,7 @@ whichThreshold %>%
 ```{r Confusion Model, message=FALSE, warning=FALSE, fig.height = 6, fig.width = 6, cache=TRUE}  
 
 
-testProbs2$predClass  = ifelse(testProbs2$Probs > 0.25 , 1,0)
+testProbs2$predClass  = ifelse(testProbs2$Probs > 0.35 , 1,0)
 
 confusion <- caret::confusionMatrix(reference = as.factor(testProbs2$Outcome),
                         data = as.factor(testProbs2$predClass),
