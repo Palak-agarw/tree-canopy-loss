@@ -2301,7 +2301,7 @@ ggplot() +
   geom_sf(data = fishnet, fill = "white")+
   geom_sf(data=construction5, aes(fill=Risk_Cat), color="transparent")+
   scale_fill_manual(values=palette5, name="Risk Score") +
-  labs(title="Predicted Risk Scores Across Philadelphia given \norigional Counstruction counts ")+
+  labs(title="Predicted Risk Scores Across Philadelphia given \nOrigional Counstruction counts ")+
   mapTheme()
 
 
