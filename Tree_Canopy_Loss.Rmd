@@ -2080,11 +2080,11 @@ try <-
   mutate(result = ifelse(Outcome == 1 & predClass == 0, "False Negative", result))
 
 
-palette3 <- c("#FFA866",  "#F17007", "#43C4DB", "#004CFF")
+palette3 <- c("orange",  "yellow", "lavender", "purple")
 
 ggplot() +
-  geom_sf(data = fishnet, fill = "white")+
-  geom_sf(data = try, aes(fill = result))+
+  geom_sf(data = fishnet, fill = "white", colour = "transparent")+
+  geom_sf(data = try, aes(fill = result), colour = "transparent")+
   labs(title = "Mapped Correlation Matrix")+
   scale_fill_manual(values = palette3, name = "My name",
                   guide = guide_legend(reverse = TRUE))+
