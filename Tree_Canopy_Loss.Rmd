@@ -17,6 +17,8 @@ This project was completed as part of the Master in Urban Spatial Analytics Spri
 
 This document is intended to help other researchers replicate a study of tree canopy loss linked to spatial risk factors. We first introduce our motivation, followed by data exploration and analysis, and finally predictive modeling. We include hyperlinks thorough our document and in the appendix for reproducibility. Our hope is that this document and our policy tool can help tree planting agencies, tree advocates, and the interested public understand the forces contributing to tree canopy loss in Philadelphia and imagine different scenarios for our tree canopy based on construction.  
 
+![Canopy View](FrontPage.png)
+
 # Introduction   
 
 **Between 2008 and 2018, Philadelphia lost more than 1000 football fields’ worth of tree canopy.**  
@@ -31,11 +33,11 @@ Tree canopy is defined as the area of land which, viewed from a bird's eye view,
 
 **Philadelphia's Tree Canopy Goals** 
 
-1. 30% Tree Canopy in each neighborhood by 2025  
+1: 30% Tree Canopy in each neighborhood by 2025  
 
 Philadelphia (under a previous mayoral administration) set the goal of achieving 30% tree canopy coverage in all neighborhoods by 2025. Currently, the citywide average is 20%, although this is highly uneven. More affluent neighborhoods in the northwest that have many parks and large lawns have much higher tree canopy than industrial neighborhoods in south and north Philadelphia which are full of impervious surfaces. The neighborhoods which have lower canopy coverage tend to be historically disenfranchised, lower income, and predominantly communities of color. This is an environmental justice problem. Neighborhoods like Philadelphia’s Hunting Park have a much lower ratio of tree canopy to impervious surfaces than the citywide average, resulting in higher temperatures during summertime heat waves and poorer air quality.  
 
-2. 1 acre of tree canopy within a 10 minute walk for all residents 
+2: 1 acre of tree canopy within a 10 minute walk for all residents 
 
 13% of Philadelphia's residents are considered under-served by green space, meaning that they live more than a 10 minute walk away from at least 1 acre of green space. The city has therefore set a goal of ensuring that all residents are no more than 10 minutes away from at least 1 acre of green space by 2035. To this end, the city is prioritizing adding green space in historically disenfranchised neighborhoods and making efforts to green spaces in schools and recreation centers.     
 
@@ -50,17 +52,17 @@ In this analysis, we use the following data:
 
 * Independent variable: Tree Canopy LiDAR data consisting of canopy polygons marked as loss, gain, or no change from 2008-2018     [OpenDataPhilly](https://www.opendataphilly.org/dataset/ppr-tree-canopy)    
 
-*Neighborhood sociodemographic attributes: 2018 [American Community Survey data](https://api.census.gov/data/2018/acs/acs5/variables.html) from the U.S. Census Bureau  
+* Neighborhood sociodemographic attributes: 2018 [American Community Survey data](https://api.census.gov/data/2018/acs/acs5/variables.html) from the U.S. Census Bureau  
 
-*Neighborhoood level risk factors:    
-* Construction   
-* Parcels   
-* Streets  
-* Tree-related 311 requests  
-* Normalized difference vegetation index (NDVI)  
-* Hydrology   
-* Zoning  
-* Health outcomes   
+* Neighborhoood level risk factors:    
+  * Construction   
+  * Parcels   
+  * Streets  
+  * Tree-related 311 requests  
+  * Normalized difference vegetation index (NDVI)  
+  * Hydrology   
+  * Zoning  
+  * Health outcomes   
 
 
 ```{r Set Up, message=FALSE, warning=FALSE, include=TRUE, results='hide', cache=TRUE}
@@ -336,6 +338,7 @@ ConservationNParks <- rbind(Parks, Conservation)
 ## Creating a fishnet
 We use fishnet grid cells as our unit of analysis to take advantage of high resolution spatial data such as 311 service requests. Below, we create a fishnet cells of 1615 feet, or around the size of a city block. We then subtract fishnet cells that are more than 20% [conservation easement](https://www.conservationeasement.us/what-is-a-conservation-easement/) and/or park space to isolate land that may be protected and experience different tree canopy loss processes. All in all, we have 1411 fishnet cells representing Philadelphia.  
 ```{r Fishnet, cache=TRUE, message=FALSE, warning=FALSE, include=TRUE, results='hide'}
+neighb <- readShapePoly("SF_neighborhoods")
 
 fishnet2 <- 
   st_make_grid(Philadelphia,
@@ -355,7 +358,7 @@ FishnetIntersect <- st_intersection(fishnet2, ConservationNParks )%>%
   filter(ConservationPct <= 20)
 
 ggplot() +
-  geom_sf(data = FishnetIntersect, fill = "light green", colour = "white") +
+  geom_sf(data = FishnetIntersect, fill = "light blue", colour = "white") +
   labs(title = "Philadelphia Fishnet Grid", 
        subtitle = "1 cell = 1615 ft ^2, 1411 cells total") +
   mapTheme()
@@ -507,8 +510,6 @@ Our analysis in the following sections is guided by the following questions:
 2. Where are neighborhoods at with achieving the 30% goal?
 3. What are the risk factors for tree canopy loss?   
 4. How do current patterns of tree canopy coverage and loss reflect disinvestment as a result of redlining and older planning practices?   
-5. Where and how should Parks and Recreation and other tree planting organizations intervene?
-
 
 ## 1. Existing tree canopy and tree canopy change  
   
