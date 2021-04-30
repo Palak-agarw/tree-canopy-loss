@@ -1770,6 +1770,16 @@ library(randomForest)
 library(dplyr)
 library(caret)
 
+neigh_net <- st_intersection(fishnet_centroid, Neighborhood) %>%
+   dplyr::select(uniqueID, NAME)
+   
+
+FinalFishnet <-
+   neigh_net %>%
+   st_drop_geometry() %>%
+   left_join(FinalFishnet, .)%>%
+   mutate(NAME = replace_na(NAME, "unclassified"))
+
 FinalFishnet5 <-
   FinalFishnet %>%
   mutate(LogPctLoss = log(pctLoss),
@@ -1812,7 +1822,7 @@ FinalFishnet5$LogPole <- ifelse(is.infinite(FinalFishnet5$LogPole),0, FinalFishn
   
 FinalFishnet5 <-
   FinalFishnet5 %>%
-  dplyr::select(pctCoverage18, LogAvgParcelSize,Loge311Count, LogPctRes, avg_nnConst,avg_nnPole, pctLoss, holc_grade,
+  dplyr::select(uniqueID, pctCoverage18, LogAvgParcelSize,Loge311Count, LogPctRes, avg_nnConst,avg_nnPole, pctLoss, holc_grade, NAME,
                                     countConst, pctWhite, pctBach, e311Count, Loge311Count, pctTransRes, pctRes, HydrologyPct,
                                     pctTrans, LogPctResTrans, population, italian, medHHInc, Variable, pctCoverage08Cat, LogPctTrans, LogPole)
 
@@ -1820,6 +1830,7 @@ hist(FinalFishnet5$pctLoss,xlab="Percent Loss",
      breaks=50, col="purple", main = "Histogram of Percent Loss ")
 
 FinalFishnet5$Variable <- ifelse(FinalFishnet5$pctLoss > 25,1, 0)
+
 
 # FinalFishnet5 <-
 #   FinalFishnet5%>%
@@ -1896,7 +1907,7 @@ finalTest2  <- FinalFishnet5[-trainIndex,]
 rf <- randomForest(
   finalTrain$Variable ~ .,
   data=finalTrain %>% 
-                     dplyr::select(pctCoverage18, LogAvgParcelSize, avg_nnConst,LogPctTrans, LogPole,
+                     dplyr::select(pctCoverage18, LogAvgParcelSize, avg_nnConst,LogPctTrans, LogPole, NAME,
                                     countConst, Loge311Count,pctTrans, LogPctRes, holc_grade, HydrologyPct)
 )
 
@@ -2109,7 +2120,7 @@ FinalFishnet5$countConst4 <- FinalFishnet5$countConst * 1.50
 rf1 <- randomForest(
   FinalFishnet5$Variable ~ .,
   data=st_drop_geometry(FinalFishnet5) %>% 
-                     dplyr::select(pctCoverage18, LogAvgParcelSize, avg_nnConst,LogPctTrans, LogPole,
+                     dplyr::select(pctCoverage18, LogAvgParcelSize, avg_nnConst,LogPctTrans, LogPole, NAME,
                                     countConst1, Loge311Count,pctTrans, LogPctRes, holc_grade, HydrologyPct)
 )
 
@@ -2149,7 +2160,7 @@ ggplot() +
 rf2 <- randomForest(
   FinalFishnet5$Variable ~ .,
   data=st_drop_geometry(FinalFishnet5) %>% 
-                     dplyr::select(pctCoverage18, LogAvgParcelSize, avg_nnConst,LogPctTrans, LogPole,
+                     dplyr::select(pctCoverage18, LogAvgParcelSize, avg_nnConst,LogPctTrans, LogPole, NAME,
                                     countConst2, Loge311Count,pctTrans, LogPctRes, holc_grade, HydrologyPct)
 )
 
@@ -2189,7 +2200,7 @@ ggplot() +
 rf3 <- randomForest(
   FinalFishnet5$Variable ~ .,
   data=st_drop_geometry(FinalFishnet5) %>% 
-                     dplyr::select(pctCoverage18, LogAvgParcelSize, avg_nnConst,LogPctTrans, LogPole,
+                     dplyr::select(pctCoverage18, LogAvgParcelSize, avg_nnConst,LogPctTrans, LogPole, NAME,
                                     countConst3, Loge311Count,pctTrans, LogPctRes, holc_grade, HydrologyPct)
 )
 
@@ -2229,7 +2240,7 @@ ggplot() +
 rf4 <- randomForest(
   FinalFishnet5$Variable ~ .,
   data=st_drop_geometry(FinalFishnet5) %>% 
-                     dplyr::select(pctCoverage18, LogAvgParcelSize, avg_nnConst,LogPctTrans, LogPole,
+                     dplyr::select(pctCoverage18, LogAvgParcelSize, avg_nnConst,LogPctTrans, LogPole, NAME,
                                     countConst4, Loge311Count,pctTrans, LogPctRes, holc_grade, HydrologyPct)
 )
 
@@ -2270,7 +2281,7 @@ ggplot() +
 rf5 <- randomForest(
   FinalFishnet5$Variable ~ .,
   data=st_drop_geometry(FinalFishnet5) %>% 
-                     dplyr::select(pctCoverage18, LogAvgParcelSize, avg_nnConst,LogPctTrans, LogPole,
+                     dplyr::select(pctCoverage18, LogAvgParcelSize, avg_nnConst,LogPctTrans, LogPole, NAME,
                                     countConst, Loge311Count,pctTrans, LogPctRes, holc_grade, HydrologyPct)
 )
 
@@ -2314,8 +2325,9 @@ const_scenarios <- rbind(construction1, construction2, construction3, constructi
 
 ``````{r CV, message=FALSE, warning=FALSE, fig.height = 6, fig.width = 6, cache=TRUE}  
 
+library(MLeval)
 ## Cross validation
-ctrl <- trainControl(method = "cv", number = 10, classProbs=TRUE)
+ctrl <- trainControl(method = "cv", number = 10, classProbs=TRUE,savePredictions = TRUE,verboseIter = TRUE)
 
 FinalFishnet5$Variable <- as.factor(FinalFishnet5$Variable)
 FinalFishnet5$pctCoverage0 <- as.numeric(FinalFishnet5$pctCoverage18)
@@ -2331,7 +2343,7 @@ myGrid <- expand.grid(mtry = c(1, 2, 3, 5, 10),
                       min.node.size = 1) ## Minimal node size; default 1 for classification
 
 reg.cv <-train(Variable2 ~ ., data = st_drop_geometry(FinalFishnet5) %>%
-                                dplyr::select(Variable2, pctCoverage18, LogAvgParcelSize, avg_nnConst,avg_nnPole,
+                                dplyr::select(Variable2, pctCoverage18, LogAvgParcelSize, avg_nnConst,avg_nnPole, NAME,
                                     countConst, Loge311Count, pctTrans, LogPctRes, holc_grade, HydrologyPct),
               method="ranger",
               tuneGrid = myGrid,
@@ -2339,18 +2351,97 @@ reg.cv <-train(Variable2 ~ ., data = st_drop_geometry(FinalFishnet5) %>%
 
 reg.cv
 
+reg.cv1 <-train(Variable2 ~ ., data = st_drop_geometry(FinalFishnet5) %>%
+                                dplyr::select(Variable2, pctCoverage18, LogAvgParcelSize, avg_nnConst,avg_nnPole, NAME,
+                                    countConst, Loge311Count, pctTrans, LogPctRes, holc_grade, HydrologyPct),
+              method="rf",
+              trControl = ctrl)#, metrics = 'ROC', family="binomial")
+
+reg.cv1
+
+x <- evalm(reg.cv1)
+# x <- as.data.frame(x)
+# 
+# ## get roc curve plotted in ggplot2
+# 
+# x$roc
+# 
+# ## get AUC and other metrics
+
+x$stdres
+
+#Goodness of metric
 dplyr::select(reg.cv$resample, -Resample) %>%
   gather(metric, value) %>%
-  left_join(gather(reg.cv$results[2:4], metric, mean)) %>%
+  left_join(gather(reg.cv$results[4:5], metric, mean)) %>%
+  group_by(metric) %>%
+  mutate(mean1 = mean(value)) %>%
   ggplot(aes(value)) +
-  geom_histogram(bins=35, fill = "#FF006A") +
+  geom_histogram(bins = 70, fill = "#FF006A") +
   facet_wrap(~metric) +
-  geom_vline(aes(xintercept = mean), colour = "#981FAC", linetype = 3, size = 1.5) +
+  geom_vline(aes(xintercept = mean1), colour = "#981FAC", linetype = 3, size = 1.5) +
   scale_x_continuous(limits = c(0, 1)) +
   labs(x="Goodness of Fit", y="Count", title="CV Goodness of Fit Metrics",
        subtitle = "Across-fold mean represented as dotted lines")
 
 ```
 
+## Spatial Correlation
+To further test our model's generalizability, we conducted a spatial cross validation. By leaving out one neighborhood at a time, we were able to see how well our model predicts across space.
+```{r spatial_cv, message=FALSE, warning=FALSE, cache=TRUE, results=FALSE}
+# Model Validation
+crossValidate <- function(dataset, id, dependentVariable, indVariables) {
+  
+  allPredictions <- data.frame()
+  cvID_list <- unique(dataset[[id]])
+  
+  for (i in cvID_list) {
+    
+    thisFold <- i
+    cat("This hold out fold is", thisFold, "\n")
+    
+    fold.train <- filter(dataset, dataset[[id]] != thisFold) %>% as.data.frame() %>% 
+      dplyr::select(id, geometry, indVariables, dependentVariable)
+    fold.test  <- filter(dataset, dataset[[id]] == thisFold) %>% as.data.frame() %>% 
+      dplyr::select(id, geometry, indVariables, dependentVariable)
+    
+    regression <-
+      glm(Variable2 ~ ., family = "binomial", 
+          data = fold.train %>% 
+            dplyr::select(-geometry, -id))
+    
+    thisPrediction <- 
+      mutate(fold.test, Prediction = predict(regression, fold.test, type = "response"))
+    
+    allPredictions <-
+      rbind(allPredictions, thisPrediction)
+    
+  }
+  return(st_sf(allPredictions))
+}
+
+
+
+reg.vars <- c("Variable2", "pctCoverage18", "LogAvgParcelSize", "avg_nnConst","avg_nnPole", "NAME",
+              "countConst", "Loge311Count", "pctTrans", "LogPctRes", "holc_grade", "HydrologyPct")
+
+
+reg.spatialCV <- crossValidate(
+  dataset = FinalFishnet5,
+  id = "NAME",
+  dependentVariable = "Variable2",
+  indVariables = reg.vars) 
+
+reg.spatialcv <-
+  reg.spatialCV %>%
+  dplyr::select(cvID = NAME, Variable2, Prediction, geometry)
+
+ggplot() +
+  geom_sf(data = reg.spatialcv, aes(fill = Prediction), color = "transparent")+
+  geom_sf(data = FinalFishnet5, fill = "transparent", color = "black", size=.5)+
+  labs(title="Predicted Probabilities")+
+  mapTheme()
+
+```
 
 
