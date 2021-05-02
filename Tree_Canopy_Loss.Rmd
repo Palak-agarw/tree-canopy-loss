@@ -176,8 +176,8 @@ plotTheme <- function(base_size = 12) {
 # Tree Canopy
 TreeCanopy <-
  #st_read("C:/Users/Kyle McCarthy/Documents/Practicum/Data/TreeUse/TreeCanopyChange_2008_2018.shp")%>%
-#st_read("/Users/annaduan/Desktop/Y3S2/Practicum/Data/TreeCanopyChange_2008_2018-shp/TreeCanopyChange_2008_2018.shp") %>%
- st_read("C:/Users/agarw/Documents/MUSA 801/Data/TreeCanopyChange_2008_2018.shp") %>%
+st_read("/Users/annaduan/Desktop/Y3S2/Practicum/Data/TreeCanopyChange_2008_2018-shp/TreeCanopyChange_2008_2018.shp") %>%
+# st_read("C:/Users/agarw/Documents/MUSA 801/Data/TreeCanopyChange_2008_2018.shp") %>%
 #st_read("C:/Users/Prince/Desktop/Tree Canopy Data/TreeCanopyChange_2008_2018.shp") %>%
   st_transform('ESRI:102728') 
 
@@ -194,8 +194,8 @@ Philadelphia <- st_read("http://data.phl.opendata.arcgis.com/datasets/405ec3da94
 # Neighborhoods
 Neighborhood <-
  #st_read("C:/Users/Kyle McCarthy/Documents/Practicum/Data/Neighborhoods/Neighborhoods_Philadelphia.shp") %>%
-#st_read("/Users/annaduan/Desktop/Y3S2/Practicum/Data/Neighborhoods_Philadelphia/Neighborhoods_Philadelphia.shp")%>%
-  st_read("C:/Users/agarw/Documents/MUSA 801/Data/Neighborhoods_Philadelphia.shp") %>%
+st_read("/Users/annaduan/Desktop/Y3S2/Practicum/Data/Neighborhoods_Philadelphia/Neighborhoods_Philadelphia.shp")%>%
+ # st_read("C:/Users/agarw/Documents/MUSA 801/Data/Neighborhoods_Philadelphia.shp") %>%
 #st_read("C:/Users/Prince/Desktop/Tree Canopy Data/Neighborhoods_Philadelphia/Neighborhoods_Philadelphia.shp") %>%
   st_transform('ESRI:102728')
 
@@ -210,10 +210,10 @@ Neighborhood <-
  # st_transform('ESRI:102728')
 
 HOLC <- 
-#  st_read("/Users/annaduan/Desktop/Y3S2/Practicum/Data/PAPhiladelphia1937.geojson") %>%
+  st_read("/Users/annaduan/Desktop/Y3S2/Practicum/Data/PAPhiladelphia1937.geojson") %>%
 # st_read("C:/Users/Prince/Desktop/Tree Canopy Data/PAPhiladelphia1937.geojson") %>%
   #st_read("C:/Users/Kyle McCarthy/Documents/Practicum/Data/PAPhiladelphia1937.geojson")%>%
- st_read("C:/Users/agarw/Documents/MUSA 801/Data/PAPhiladelphia1937.geojson")%>%
+# st_read("C:/Users/agarw/Documents/MUSA 801/Data/PAPhiladelphia1937.geojson")%>%
   st_transform('ESRI:102728')
 
 HOLC <-
@@ -272,10 +272,10 @@ parcels <- st_read("http://data-phl.opendata.arcgis.com/datasets/1c57dd1b3ff8444
  st_transform('ESRI:102728')
 
 const_permits <- 
- st_read("C:/Users/agarw/Documents/MUSA 801/Data/const_permit.csv") %>%
+ #st_read("C:/Users/agarw/Documents/MUSA 801/Data/const_permit.csv") %>%
  # st_read("C:/Users/Prince/Desktop/Tree Canopy Data/const_permit.csv") %>%
 #  st_read("C:/Users/Kyle McCarthy/Documents/Practicum/permits.csv")%>%
-#  st_read("/Users/annaduan/Desktop/Y3S2/Practicum/Data/const_permit.csv")%>%
+  st_read("/Users/annaduan/Desktop/Y3S2/Practicum/Data/const_permit.csv")%>%
   mutate(X = geocode_x,
          Y = geocode_y) 
 const_permits[const_permits==""]<-NA
@@ -294,8 +294,8 @@ const <- const_spatial %>%
 
 LandUseFishnet <- 
   #st_read("C:/Users/Kyle McCarthy/Documents/Practicum/Data/Fishnet_LU_Intersect/fishnet_LUS_Intersect_dissolve.shp")  %>%
-   st_read("C:/Users/agarw/Documents/MUSA 801/Data/fishnet_LUS_Intersect_dissolve.geojson") %>%
- #st_read("/Users/annaduan/Desktop/Y3S2/Practicum/Data/fishnet_LUS_Intersect_dissolve.geojson") %>%
+ #  st_read("C:/Users/agarw/Documents/MUSA 801/Data/fishnet_LUS_Intersect_dissolve.geojson") %>%
+ st_read("/Users/annaduan/Desktop/Y3S2/Practicum/Data/fishnet_LUS_Intersect_dissolve.geojson") %>%
 #  st_read("C:/Users/Prince/Desktop/Tree Canopy Data/fishnet_LUS_Intersect_dissolve.geojson") %>%
    st_transform('ESRI:102728')
 
@@ -309,18 +309,18 @@ Hydrology <-
 
  
  Parks <- 
-   #st_read("/Users/annaduan/Desktop/Y3S2/Practicum/Data/Parks") %>%
+   st_read("/Users/annaduan/Desktop/Y3S2/Practicum/Data/Parks") %>%
    #st_read("C:/Users/Kyle McCarthy/Documents/Practicum/Data/Parks/Philadelphia_PPR_Park_Boundaries2016.shp ")%>%
-  st_read("C:/Users/agarw/Documents/MUSA 801/Data/Philadelphia_PPR_Park_Boundaries2016.shp") %>%
+ # st_read("C:/Users/agarw/Documents/MUSA 801/Data/Philadelphia_PPR_Park_Boundaries2016.shp") %>%
    #st_read("C:/Users/Prince/Desktop/Tree Canopy Data/Philadelphia_PPR_Park_Boundaries2016.shp") %>%
      st_transform('ESRI:102728') %>%
    st_make_valid() %>%
    dplyr::select(geometry)
 
 Conservation <- 
-   #st_read("/Users/annaduan/Desktop/Y3S2/Practicum/Data/Conservation/ConservationEasements202103.shp") %>%
+   st_read("/Users/annaduan/Desktop/Y3S2/Practicum/Data/Conservation/ConservationEasements202103.shp") %>%
   #st_read("C:/Users/Kyle McCarthy/Documents/Practicum/Data/Conservation/ConservationEasements202103.shp")%>%
-   st_read("C:/Users/agarw/Documents/MUSA 801/Data/ConservationEasements202103.shp") %>%
+  # st_read("C:/Users/agarw/Documents/MUSA 801/Data/ConservationEasements202103.shp") %>%
    #  st_read("C:/Users/Prince/Desktop/Tree Canopy Data/ConservationEasements202103.shp") %>%
    st_transform('ESRI:102728') %>%
   st_intersection(st_make_valid(Philadelphia), st_make_valid(Conservation)) %>%
@@ -337,8 +337,8 @@ ConservationNParks <- rbind(Parks, Conservation)
 
 ## Creating a fishnet
 We use fishnet grid cells as our unit of analysis to take advantage of high resolution spatial data such as 311 service requests. Below, we create a fishnet cells of 1615 feet, or around the size of a city block. We then subtract fishnet cells that are more than 20% [conservation easement](https://www.conservationeasement.us/what-is-a-conservation-easement/) and/or park space to isolate land that may be protected and experience different tree canopy loss processes. All in all, we have 1411 fishnet cells representing Philadelphia.  
+
 ```{r Fishnet, cache=TRUE, message=FALSE, warning=FALSE, include=TRUE, results='hide'}
-neighb <- readShapePoly("SF_neighborhoods")
 
 fishnet2 <- 
   st_make_grid(Philadelphia,
@@ -1042,8 +1042,8 @@ As previously mentioned, land use appears to have a correlation with tree canopy
 
 LandUse1 <-
   #st_read("C:/Users/Kyle McCarthy/Documents/Practicum/Data/LandUse/landu.csv")%>%
-  st_read("C:/Users/agarw/Documents/MUSA 801/Data/landu.csv")%>%
-   #st_read("/Users/annaduan/Desktop/Y3S2/Practicum/Data/landu.csv") %>%
+ # st_read("C:/Users/agarw/Documents/MUSA 801/Data/landu.csv")%>%
+   st_read("/Users/annaduan/Desktop/Y3S2/Practicum/Data/landu.csv") %>%
   #st_read("C:/Users/Prince/Desktop/Tree Canopy Data/landu.csv") %>%
   mutate(AreaGain = as.numeric(AreaGain),
          AreaLoss = as.numeric(AreaLoss),
@@ -1175,8 +1175,8 @@ ggplot(LandUse2, aes(y=C_DIG2DESC, x=pctChange))+
 
 e311Trees <-
  # st_read('C:/Users/Kyle McCarthy/Documents/Practicum/e311.csv') 
-   #st_read("/Users/annaduan/Desktop/Y3S2/Practicum/Data/streettree311.csv")
-  st_read('C:/Users/agarw/Documents/MUSA 801/Data/e311.csv')
+   st_read("/Users/annaduan/Desktop/Y3S2/Practicum/Data/streettree311.csv")
+  #st_read('C:/Users/agarw/Documents/MUSA 801/Data/e311.csv')
 #st_read("C:/Users/Prince/Desktop/Tree Canopy Data/e311.csv") %>%
 
 
@@ -2310,7 +2310,7 @@ construction5 <- construction5 %>%
   dplyr::select (Outcome,Probs,Risk_Cat,geometry,Scenario)
 
 ggplot() +
-  geom_sf(data = fishnet, fill = "white")+
+  geom_sf(data = fishnet, fill = "white", colour = "transparent")+
   geom_sf(data=construction5, aes(fill=Risk_Cat), color="transparent")+
   scale_fill_manual(values=palette5, name="Risk Score") +
   labs(title="Predicted Risk Scores Across Philadelphia given \nOrigional Counstruction counts ")+
@@ -2382,7 +2382,8 @@ dplyr::select(reg.cv$resample, -Resample) %>%
   geom_vline(aes(xintercept = mean1), colour = "#981FAC", linetype = 3, size = 1.5) +
   scale_x_continuous(limits = c(0, 1)) +
   labs(x="Goodness of Fit", y="Count", title="CV Goodness of Fit Metrics",
-       subtitle = "Across-fold mean represented as dotted lines")
+       subtitle = "Across-fold mean represented as dotted lines") +
+  plotTheme()
 
 ```
 
@@ -2438,7 +2439,7 @@ reg.spatialcv <-
 
 ggplot() +
   geom_sf(data = reg.spatialcv, aes(fill = Prediction), color = "transparent")+
-  geom_sf(data = FinalFishnet5, fill = "transparent", color = "black", size=.5)+
+  geom_sf(data = FinalFishnet5, fill = "transparent", color = "white", size=.5)+
   labs(title="Predicted Probabilities")+
   mapTheme()
 
