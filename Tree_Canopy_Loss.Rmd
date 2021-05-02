@@ -771,8 +771,8 @@ FinalNeighborhood$GoalCat <- cut(FinalNeighborhood$PctUnderGoal,
                        right = FALSE)
 
 FinalNeighborhood$GainMinusLossCat <- cut(FinalNeighborhood$GainMinusLoss, 
-                      breaks = c(-Inf, -10000000, -5000000, -2500000, 0, Inf), 
-                       labels = c("Greater Than 1500000 Squared Feet lost", "1000000-1500000 Squared Feet Lost", "500000-1000000 Squared Feet Lost", "0-25000 Squared Feet Lost", "Tree Canopy Gain!"), 
+                      breaks = c(-Inf, -395242, -15647, 0, Inf), 
+                       labels = c("Sustantial loss", "Moderate loss", "Low loss", "Gain"),
                        right = FALSE)
 
 
@@ -780,18 +780,25 @@ FinalNeighborhood$GainMinusLossCat <- cut(FinalNeighborhood$GainMinusLoss,
 
 Below, we see that the neighborhoods farthest from 30% tree canopy are in South Philadelphia and parts of Center City. These neighborhoods are all along the Delaware River. This may mean that waterways and hydrology are a risk factor. The neighborhoods which meet this goal are largely in Northwest Philadelphia.
 
-```{r Neighborhood Maps, message=FALSE, warning=FALSE, results='hide', fig.height = 7, fig.width = 8, cache=TRUE}
+```{r Neighborhood Maps, message=FALSE, warning=FALSE, results='hide', fig.height = 8, fig.width = 16, cache=TRUE}
 
 
-o <- ggmap(base_map) +
+goalProg <- ggmap(base_map) +
   geom_sf(data = ll(FinalNeighborhood), aes(fill = GoalCat), color = "white", inherit.aes = FALSE) +
-#  scale_fill_manual(values = GoalPalette, name = "Percent Away From Achieving 30% Goal")+
   labs(title = "Tree Canopy Progress by Neighborhood",
        subtitle = "% Away from 30% tree canopy") +
   theme(plot.title = element_text(size = 30, face = "bold"), 
-        legend.title = element_text(size = 12)) +  mapTheme()
+        legend.title = element_text(size = 12)) +  mapTheme() +
+  scale_fill_brewer(palette = "PiYG", name = "Canopy Status", direction = -1, aesthetics = c("colour", "fill"), guide = guide_legend(reverse = TRUE))
 
-o + scale_fill_brewer(palette = "PiYG", name = "Canopy Status", direction = -1, aesthetics = c("colour", "fill"), guide = guide_legend(reverse = TRUE))
+netChange <- ggmap(base_map) +
+  geom_sf(data = ll(FinalNeighborhood), aes(fill = GainMinusLossCat), inherit.aes = FALSE, color = "white") +
+  labs(title = "Tree Canopy Net Gain or Loss by Neighborhood, 2008-2018") +
+  theme(plot.title = element_text(size = 30, face = "bold"), 
+        legend.title = element_text(size = 12)) +  mapTheme()+ 
+  scale_fill_brewer(palette = "PiYG", name = "Net Change", direction = 1, aesthetics = c("colour", "fill"), guide = guide_legend(reverse = TRUE))
+
+grid.arrange(goalProg, netChange, ncol=2)
 ```
 
 
@@ -819,7 +826,7 @@ paletteChange <- c("green", "orange", "purple")
 
  
 #reference map
-ggmap(base_map) +
+refmap <- ggmap(base_map) +
   geom_sf(data = ll(Neighborhood), fill = "white", colour = "gray", inherit.aes = FALSE) +
   geom_sf(data = ll(RMBound), colour = "white", fill = "gray", inherit.aes = FALSE) +
     geom_sf(data = ll(URBound), colour = "white", fill = "gray", inherit.aes = FALSE) +
@@ -829,7 +836,7 @@ ggmap(base_map) +
  
  
 RM <- ggmap(RMbase_map) +
-   geom_sf(data = ll(RMBound), fill = "black", inherit.aes = FALSE) +
+   geom_sf(data = ll(RMBound), fill = "gray", inherit.aes = FALSE) +
    geom_sf(data = ll(Richmond), aes(fill = CLASS_NAME), colour = "transparent", inherit.aes = FALSE) +
    scale_fill_manual(values = paletteChange, name = "Canopy Change") +
    labs(title = "Richmond Tree Canopy Change 2008-2018", subtitle = "Philadelphia, PA") +
@@ -838,27 +845,27 @@ RM <- ggmap(RMbase_map) +
  
 #Upper Roxborough
 UR <- ggmap(URbase_map) +
-   geom_sf(data = ll(URBound), fill = "black", inherit.aes = FALSE) +
+   geom_sf(data = ll(URBound), fill = "gray", inherit.aes = FALSE) +
    geom_sf(data = ll(UpperRoxborough), aes(fill = CLASS_NAME), colour = "transparent", inherit.aes = FALSE) +
    scale_fill_manual(values = paletteChange, name = "Canopy Change") +
    labs(title = "Upper Roxborough Tree Canopy Change 2008-2018", subtitle = "Philadelphia, PA") +
   theme(plot.title = element_text(size = 30, face = "bold"), 
         legend.title = element_text(size = 12)) +  mapTheme()
 
-grid.arrange(ncol=2, UR, RM)
+grid.arrange(ncol=2, UR, RM, refmap)
 ```
 
 In Figure XX, we see that most neighborhoods experienced net loss. Interestingly, most tree gain was experienced in South Philadelphia and Center City, suggesting that neighborhoods or city regions may have a strong spatial fixed effect on tree canopy change.   
 ```{r net gain and loss, message=FALSE, warning=FALSE, results='hide', fig.height = 7, fig.width = 8, cache=TRUE}
 
-p <- ggplot() +
-  geom_sf(data = FinalNeighborhood, aes(fill = GainMinusLossCat), color = "white") +
-  # scale_fill_manual(values = paletteLG, name = "Gain or Loss")+ 
-  labs(title = "Tree Canopy Net Gain or Loss by Neighborhood, 2008-2018") +
-  theme(plot.title = element_text(hjust = 0.5, size = 6))+
-  mapTheme()
-
-p + scale_fill_brewer(palette = "PiYG", name = "Net Change", direction = 1, aesthetics = c("colour", "fill"), guide = guide_legend(reverse = TRUE))
+# p <- ggplot() +
+#   geom_sf(data = FinalNeighborhood, aes(fill = GainMinusLossCat), color = "white") +
+#   # scale_fill_manual(values = paletteLG, name = "Gain or Loss")+ 
+#   labs(title = "Tree Canopy Net Gain or Loss by Neighborhood, 2008-2018") +
+#   theme(plot.title = element_text(hjust = 0.5, size = 6))+
+#   mapTheme()
+# 
+# p + scale_fill_brewer(palette = "PiYG", name = "Net Change", direction = 1, aesthetics = c("colour", "fill"), guide = guide_legend(reverse = TRUE))
 
 ```
 
