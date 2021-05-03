@@ -338,7 +338,7 @@ ConservationNParks <- rbind(Parks, Conservation)
 ## Creating a fishnet
 We use fishnet grid cells as our unit of analysis to take advantage of high resolution spatial data such as 311 service requests. Below, we create a fishnet cells of 1615 feet, or around the size of a city block. We then subtract fishnet cells that are more than 20% [conservation easement](https://www.conservationeasement.us/what-is-a-conservation-easement/) and/or park space to isolate land that may be protected and experience different tree canopy loss processes. All in all, we have 1411 fishnet cells representing Philadelphia.  
 ```{r Fishnet, cache=TRUE, message=FALSE, warning=FALSE, include=TRUE, results='hide'}
-neighb <- readShapePoly("SF_neighborhoods")
+#neighb <- readShapePoly("SF_neighborhoods")
 
 fishnet2 <- 
   st_make_grid(Philadelphia,
@@ -2112,7 +2112,7 @@ ggplot() +
 
 FinalFishnet5$countConst1 <- FinalFishnet5$countConst * 0.75
 FinalFishnet5$countConst2 <- FinalFishnet5$countConst * 0.50
-FinalFishnet5$countConst3 <- FinalFishnet5$countConst * 1.25
+FinalFishnet5$countConst3 <- FinalFishnet5$countConst * 2
 FinalFishnet5$countConst4 <- FinalFishnet5$countConst * 1.50
 
 
@@ -2232,7 +2232,7 @@ ggplot() +
   geom_sf(data = fishnet, fill = "white")+
   geom_sf(data=construction3, aes(fill=Risk_Cat), color="transparent")+
   scale_fill_manual(values=palette5, name="Risk Score") +
-  labs(title="Predicted Risk Scores Across Philadelphia given \nCounstruction counts increased by 25%")+
+  labs(title="Predicted Risk Scores Across Philadelphia given \nCounstruction counts increased by 200%")+
   mapTheme()
 
 
@@ -2287,7 +2287,7 @@ rf5 <- randomForest(
 
 ## Prediction
 testProbs_const5 <- data.frame(Outcome = as.factor(FinalFishnet5$Variable),
-                        Probs = predict(rf4, FinalFishnet5, type= "response"))
+                        Probs = predict(rf5, FinalFishnet5, type= "response"))
 
 
 
@@ -2303,7 +2303,7 @@ FinalFishnet2$uniqueID <- seq.int(nrow(FinalFishnet5))
 
 testProbs_const5$uniqueID <- seq.int(nrow(FinalFishnet5))
 
-construction5 <- left_join(FinalFishnet2, testProbs_const4)
+construction5 <- left_join(FinalFishnet2, testProbs_const5)
 
 construction5 <- construction5 %>%
   mutate(Scenario = "const_original") %>%
