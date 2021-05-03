@@ -59,6 +59,10 @@ In this analysis, we use the following data:
 **Neighborhood social attributes:** 2018 [American Community Survey data](https://api.census.gov/data/2018/acs/acs5/variables.html) from the U.S. Census Bureau  
 
 **Neighborhoood level risk factors:**   
+<style>
+div.blue { background-color:#e6f0ff; border-radius: 5px; padding: 20px;}
+</style>
+<div class = "blue">
 * Construction   
 * Parcels   
 * Streets  
@@ -67,12 +71,21 @@ In this analysis, we use the following data:
 * Hydrology   
 * Zoning  
 * Health outcomes    
+</div>
 
 ```r
 #Reload
 knitr::opts_chunk$set(message = FALSE, warning = FALSE)
 options(scipen=10000000)
 library(knitr)
+library(MLeval)
+library(magrittr)
+library(grid)
+library(RSocrata)
+library(ggcorrplot)
+library(randomForest)
+library(dplyr)
+library(caret)
 library(tidyverse)
 library(tidycensus)
 library(sf)
@@ -81,6 +94,7 @@ library(dplyr)
 library(viridis)
 library(mapview)
 library(lubridate)
+library(gridExtra)
 library(grid)
 library(ggplot2)
 library(ggmap)
@@ -214,6 +228,28 @@ Neighborhood <-
   mutate(NArea = st_area(Neighborhood))%>%
   mutate(NArea = as.numeric(NArea))
 
+#basemaps
+#make Philadelphia basemap
+ll <- function(dat, proj4 = 4326){
+  st_transform(dat, proj4)
+}
+
+base_map <- get_map(location = unname(st_bbox(ll(st_buffer(st_centroid(Philadelphia),60000)))), 
+                    source = "stamen",
+                    maptype = "toner") 
+
+ RMBound <- Neighborhood %>%  
+   dplyr::filter(NAME=="RICHMOND")
+ Richmond <- st_intersection(st_make_valid(TreeCanopy), RMBound)
+ RMbase_map <- get_map(location = unname(st_bbox(ll(st_buffer(st_centroid(RMBound),10000)))),
+                     maptype = "satellite")
+ 
+  URBound <- Neighborhood %>%  
+   dplyr::filter(NAME=="UPPER_ROXBOROUGH")
+ UpperRoxborough <- st_intersection(st_make_valid(TreeCanopy), URBound)
+ URbase_map <- get_map(location = unname(st_bbox(ll(st_buffer(st_centroid(URBound),10000)))),
+                     maptype = "satellite")
+ 
 # Tree inventory
 #tree_inventory <-
  # st_read("http://data.phl.opendata.arcgis.com/datasets/957f032f9c874327a1ad800abd887d17_0.geojson") %>%
@@ -354,14 +390,6 @@ We use fishnet grid cells as our unit of analysis to take advantage of high reso
 # library(tidyverse)
 # library(jsonlite)
 
-#make Philadelphia basemap
-ll <- function(dat, proj4 = 4326){
-  st_transform(dat, proj4)
-}
-
-base_map <- get_map(location = unname(st_bbox(ll(st_buffer(st_centroid(Philadelphia),60000)))), 
-                    source = "stamen",
-                    maptype = "toner") 
 
 
 #make fishnet
@@ -564,10 +592,6 @@ subtitle = "Tree Canopy Area / Gridcell Area") +
 Surprisingly, tree canopy loss and gain exhibit similar spatial patterns. Both percent gain and loss are highest in a few neighborhoods in South Philadelphia and in the Northeast. While this seems counter-intuitive, this is because these neighborhoods have the least tree canopy, therefore each individual tree gained or lost has a greater overall impact.   
 
 ```r
-library(gridExtra)
-library(grid)
-
-
 v <- ggmap(base_map) +
   geom_sf(data = ll(FinalFishnet), colour = "white", aes(fill = pctLoss), inherit.aes = FALSE)+
  # scale_fill_manual(values = palette7,name = "Percent Loss")+
@@ -834,23 +858,9 @@ To better understand tree canopy change patterns in these neighborhoods, we anal
 
 
 ```r
-library(magrittr)
-
 paletteChange <- c("green", "orange", "purple")
 
 
-#basemaps
- RMBound <- Neighborhood %>%  
-   dplyr::filter(NAME=="RICHMOND")
- Richmond <- st_intersection(st_make_valid(TreeCanopy), RMBound)
- RMbase_map <- get_map(location = unname(st_bbox(ll(st_buffer(st_centroid(RMBound),10000)))),
-                     maptype = "satellite")
- 
-  URBound <- Neighborhood %>%  
-   dplyr::filter(NAME=="UPPER_ROXBOROUGH")
- UpperRoxborough <- st_intersection(st_make_valid(TreeCanopy), URBound)
- URbase_map <- get_map(location = unname(st_bbox(ll(st_buffer(st_centroid(URBound),10000)))),
-                     maptype = "satellite")
 
  
 #reference map
@@ -891,6 +901,7 @@ grid.arrange(ncol=2, UR, refmap, RM)
 Tree canopy loss, like other urban environmental issues, is has deep equity implications. Low income communities and communities of color are more likely to be in places with less tree canopy. Therefore, we explore demographics variables' correlation with tree canopy gain, loss, net change, and coverage. Surprisingly, demographic variables have little correlation with existing tree canopy or tree canopy change. This is likely because they are accounted for by neighborhood fixed effects.     
 
 ```r
+library(grid)
 correlation.long <-
   st_drop_geometry(FinalFishnet) %>%
      dplyr::select(population, medHHInc, housing_units, Rent, pctBach, pctWhite, pctNoVehicle, netChange) %>%
@@ -980,7 +991,6 @@ stat_density2d(aes(fill = ..level..), geom = "polygon", bins = 20) +
   # plotTheme()
 
 
-library(grid)
 
 grid.arrange(ncol=2, top=textGrob("Neighborhood Attributes and Tree Canopy 2008-2018"),netChange,pctGain) 
 ```
@@ -1533,8 +1543,6 @@ FinalFishnet <-
 
 
 ```r
-library(RSocrata)
-
  publichealth <- 
    read.socrata("https://chronicdata.cdc.gov/resource/yjkw-uj5s.json") %>%
    filter(countyname == "Philadelphia") 
@@ -1806,7 +1814,6 @@ To select a set of variables for our model, we make a correlation plot.
 
 
 ```r
-library(ggcorrplot)
 corrplotvars <- FinalFishnet %>%
    dplyr::select(ConservationPct, pctLoss, pctGain, pctCoverage08, LogPctLoss, LogPctGain, population, medHHInc, housing_units, Rent, pctBach, pctWhite, pctNoVehicle, HydrologyArea, LogAvgParcelSize, e311Count, countConst, pctRes, pctTrans) %>%
   rename(transportation_landuse = pctTrans,
@@ -1859,10 +1866,6 @@ Based on this plot, we select the following variables for our model:
 
 
 ```r
-library(randomForest)
-library(dplyr)
-library(caret)
-
 neigh_net <- st_intersection(fishnet_centroid, Neighborhood) %>%
    dplyr::select(uniqueID, NAME)
    
@@ -2204,7 +2207,7 @@ ggmap(base_map) +
   geom_sf(data = ll(fishnet), fill = "white", colour = "transparent", inherit.aes = FALSE)+
   geom_sf(data = ll(try), aes(fill = result), colour = "transparent", inherit.aes = FALSE)+
   labs(title = "Mapped Correlation Matrix")+
-  scale_fill_manual(values = palette3, name = "My name",
+  scale_fill_manual(values = palette3, name = "Model Metric",
                   guide = guide_legend(reverse = TRUE))+
   theme(legend.position = "bottom",
         legend.title = element_blank(),
@@ -2217,40 +2220,32 @@ ggmap(base_map) +
 
 
 ```r
-FinalFishnet5$countConst1 <- FinalFishnet5$countConst * 0.75
-FinalFishnet5$countConst2 <- FinalFishnet5$countConst * 0.50
-FinalFishnet5$countConst3 <- FinalFishnet5$countConst * 1.50
-FinalFishnet5$countConst4 <- FinalFishnet5$countConst * 2
+FinalFishnet5$countConst1 <- FinalFishnet5$countConst * 0.75       #25 less
+FinalFishnet5$countConst2 <- FinalFishnet5$countConst * 0.50       #50 less
+FinalFishnet5$countConst3 <- FinalFishnet5$countConst * 1.50       #50 more
+FinalFishnet5$countConst4 <- FinalFishnet5$countConst * 2          #100 more
 
 
-## Construction scenario 1 - 25 less
+
+
+
+##SCENARIO 1: 25 less
 rf1 <- randomForest(
   FinalFishnet5$Variable ~ .,
   data=st_drop_geometry(FinalFishnet5) %>% 
                      dplyr::select(pctCoverage18, LogAvgParcelSize, avg_nnConst,LogPctTrans, LogPole, NAME,
-                                    countConst1, Loge311Count,pctTrans, LogPctRes, holc_grade, HydrologyPct)
-)
-
-## Prediction
-testProbs_const1 <- data.frame(Outcome = as.factor(FinalFishnet5$Variable),
+                                    countConst1, Loge311Count,pctTrans, LogPctRes, holc_grade, HydrologyPct))
+testProbs_const1 <- data.frame(Outcome = as.factor(FinalFishnet5$Variable),       ## Prediction
                         Probs = predict(rf1, FinalFishnet5, type= "response"))
-
-
-
 testProbs_const1 <- testProbs_const1 %>% mutate(Risk_Cat=
                                             case_when(Probs <=.2 ~ "Very Low",
                                                    Probs > 0.2 & Probs < .4 ~ "Low",    
                                                    Probs >= 0.4 & Probs < .6 ~ "Moderate",
                                                    Probs >=.6 & Probs < .80 ~ "High",
                                                    Probs >=.80 ~ "Severe"))
-
-
 FinalFishnet2$uniqueID <- seq.int(nrow(FinalFishnet5))
-
 testProbs_const1$uniqueID <- seq.int(nrow(FinalFishnet5))
-
 construction1 <- left_join(FinalFishnet2, testProbs_const1)
-
 construction1 <- construction1 %>%
   mutate(Scenario = "const_25less") %>%
   dplyr::select (Outcome,Probs,Risk_Cat,geometry,Scenario)
@@ -2259,47 +2254,23 @@ construction1 <- construction1 %>%
 
 
 
-
-
-
-
-
-
-less25 <- ggmap(base_map) +
-  geom_sf(data = ll(fishnet), fill = "white", inherit.aes = FALSE)+
-  geom_sf(data=ll(construction1), aes(fill=Risk_Cat), color="transparent", inherit.aes = FALSE)+
- # scale_fill_manual(values=palette5, name="Risk Score") +
-  labs(title="Construction reduced by 25%")+
-  mapTheme()
-
-## Construction scenario 2 - 50 less
+##SCENARIO 2: 50 less
 rf2 <- randomForest(
   FinalFishnet5$Variable ~ .,
   data=st_drop_geometry(FinalFishnet5) %>% 
                      dplyr::select(pctCoverage18, LogAvgParcelSize, avg_nnConst,LogPctTrans, LogPole, NAME,
-                                    countConst2, Loge311Count,pctTrans, LogPctRes, holc_grade, HydrologyPct)
-)
-
-## Prediction
-testProbs_const2 <- data.frame(Outcome = as.factor(FinalFishnet5$Variable),
+                                    countConst2, Loge311Count,pctTrans, LogPctRes, holc_grade, HydrologyPct))
+testProbs_const2 <- data.frame(Outcome = as.factor(FinalFishnet5$Variable),             #prediction   
                         Probs = predict(rf2, FinalFishnet5, type= "response"))
-
-
-
 testProbs_const2 <- testProbs_const2 %>% mutate(Risk_Cat=
                                             case_when(Probs <=.2 ~ "Very Low",
                                                    Probs > 0.2 & Probs < .4 ~ "Low",    
                                                    Probs >= 0.4 & Probs < .6 ~ "Moderate",
                                                    Probs >=.6 & Probs < .80 ~ "High",
                                                    Probs >=.8 ~ "Severe"))
-
-
 FinalFishnet2$uniqueID <- seq.int(nrow(FinalFishnet5))
-
 testProbs_const2$uniqueID <- seq.int(nrow(FinalFishnet5))
-
 construction2 <- left_join(FinalFishnet2, testProbs_const2)
-
 construction2 <- construction2 %>%
   mutate(Scenario = "const_50less") %>%
   dplyr::select (Outcome,Probs,Risk_Cat,geometry,Scenario)
@@ -2308,90 +2279,24 @@ construction2 <- construction2 %>%
 
 
 
-less50 <- ggmap(base_map) +
-  geom_sf(data = ll(fishnet), fill = "white", ineherit.aes = FALSE)+
-  geom_sf(data= ll(construction2), aes(fill=Risk_Cat), color="transparent", inherit.aes = FALSE)+
-#  scale_fill_manual(values=palette5, name="Risk Score") +
-  labs(title="50% Lower")+
-  mapTheme()
-
-
-## Construction scenario 3 - 25 more
+##SCENARIO 3: 50 more
 rf3 <- randomForest(
   FinalFishnet5$Variable ~ .,
   data=st_drop_geometry(FinalFishnet5) %>% 
                      dplyr::select(pctCoverage18, LogAvgParcelSize, avg_nnConst,LogPctTrans, LogPole, NAME,
-                                    countConst3, Loge311Count,pctTrans, LogPctRes, holc_grade, HydrologyPct)
-)
-
-## Prediction
-testProbs_const3 <- data.frame(Outcome = as.factor(FinalFishnet5$Variable),
+                                    countConst3, Loge311Count,pctTrans, LogPctRes, holc_grade, HydrologyPct))
+testProbs_const3 <- data.frame(Outcome = as.factor(FinalFishnet5$Variable),      # Prediction
                         Probs = predict(rf3, FinalFishnet5, type= "response"))
-
-
-
 testProbs_const3 <- testProbs_const3 %>% mutate(Risk_Cat=
                                             case_when(Probs <=.2 ~ "Very Low",
                                                    Probs > 0.2 & Probs < .4 ~ "Low",    
                                                    Probs >= 0.4 & Probs < .6 ~ "Moderate",
                                                    Probs >=.6 & Probs < .80 ~ "High",
                                                    Probs >=.8 ~ "Severe"))
-
-
 FinalFishnet2$uniqueID <- seq.int(nrow(FinalFishnet5))
-
 testProbs_const3$uniqueID <- seq.int(nrow(FinalFishnet5))
-
 construction3 <- left_join(FinalFishnet2, testProbs_const3)
-
 construction3 <- construction3 %>%
-  mutate(Scenario = "const_25more") %>%
-  dplyr::select (Outcome,Probs,Risk_Cat,geometry,Scenario)
-
-
-
-
-
-
-
-
-more25 <- ggmap(base_map) +
-  geom_sf(data = ll(fishnet), fill = "white", inherit.aes = FALSE)+
-  geom_sf(data= ll(construction3), aes(fill=Risk_Cat), color="transparent", inherit.aes = FALSE)+
-  #scale_fill_manual(values=palette5, name="Risk Score") +
-  labs(title="50% Higher")+
-  mapTheme()
-
-
-## Construction scenario 4 - 50 more
-rf4 <- randomForest(
-  FinalFishnet5$Variable ~ .,
-  data=st_drop_geometry(FinalFishnet5) %>% 
-                     dplyr::select(pctCoverage18, LogAvgParcelSize, avg_nnConst,LogPctTrans, LogPole, NAME,
-                                    countConst4, Loge311Count,pctTrans, LogPctRes, holc_grade, HydrologyPct)
-)
-
-## Prediction
-testProbs_const4 <- data.frame(Outcome = as.factor(FinalFishnet5$Variable),
-                        Probs = predict(rf4, FinalFishnet5, type= "response"))
-
-
-
-testProbs_const4 <- testProbs_const4 %>% mutate(Risk_Cat=
-                                            case_when(Probs <=.2 ~ "Very Low",
-                                                   Probs > 0.2 & Probs < .4 ~ "Low",    
-                                                   Probs >= 0.4 & Probs < .6 ~ "Moderate",
-                                                   Probs >=.6 & Probs < .80 ~ "High",
-                                                   Probs >=.8 ~ "Severe"))
-
-
-FinalFishnet2$uniqueID <- seq.int(nrow(FinalFishnet5))
-
-testProbs_const4$uniqueID <- seq.int(nrow(FinalFishnet5))
-
-construction4 <- left_join(FinalFishnet2, testProbs_const4)
-
-construction4 <- construction4 %>%
   mutate(Scenario = "const_50more") %>%
   dplyr::select (Outcome,Probs,Risk_Cat,geometry,Scenario)
 
@@ -2399,77 +2304,139 @@ construction4 <- construction4 %>%
 
 
 
-more50 <- ggmap(base_map) +
-  geom_sf(data = ll(fishnet), fill = "white", inherit.aes = FALSE)+
-  geom_sf(data= ll(construction4), aes(fill=Risk_Cat), color="transparent", inherit.aes = FALSE)+
-  #scale_fill_manual(values=palette5, name="Risk Score") +
-  labs(title="100% Higher")+
-  mapTheme()
+##SCENARIO 4: 100 more
+rf4 <- randomForest(
+  FinalFishnet5$Variable ~ .,
+  data=st_drop_geometry(FinalFishnet5) %>% 
+                     dplyr::select(pctCoverage18, LogAvgParcelSize, avg_nnConst,LogPctTrans, LogPole, NAME,
+                                    countConst4, Loge311Count,pctTrans, LogPctRes, holc_grade, HydrologyPct))
+testProbs_const4 <- data.frame(Outcome = as.factor(FinalFishnet5$Variable),     #Prediction
+                        Probs = predict(rf4, FinalFishnet5, type= "response"))
+testProbs_const4 <- testProbs_const4 %>% mutate(Risk_Cat=
+                                            case_when(Probs <=.2 ~ "Very Low",
+                                                   Probs > 0.2 & Probs < .4 ~ "Low",    
+                                                   Probs >= 0.4 & Probs < .6 ~ "Moderate",
+                                                   Probs >=.6 & Probs < .80 ~ "High",
+                                                   Probs >=.8 ~ "Severe"))
+FinalFishnet2$uniqueID <- seq.int(nrow(FinalFishnet5))
+testProbs_const4$uniqueID <- seq.int(nrow(FinalFishnet5))
+construction4 <- left_join(FinalFishnet2, testProbs_const4)
+construction4 <- construction4 %>%
+  mutate(Scenario = "const_100more") %>%
+  dplyr::select (Outcome,Probs,Risk_Cat,geometry,Scenario)
 
 
 
-## Construction scenario 5 - original
+
+
+##SCENARIO 5: original (current construction levels)
 rf5 <- randomForest(
   FinalFishnet5$Variable ~ .,
   data=st_drop_geometry(FinalFishnet5) %>% 
                      dplyr::select(pctCoverage18, LogAvgParcelSize, avg_nnConst,LogPctTrans, LogPole, NAME,
-                                    countConst, Loge311Count,pctTrans, LogPctRes, holc_grade, HydrologyPct)
-)
-
-## Prediction
-testProbs_const5 <- data.frame(Outcome = as.factor(FinalFishnet5$Variable),
+                                    countConst, Loge311Count,pctTrans, LogPctRes, holc_grade, HydrologyPct))  
+testProbs_const5 <- data.frame(Outcome = as.factor(FinalFishnet5$Variable),        #Prediction
                         Probs = predict(rf5, FinalFishnet5, type= "response"))
-
-
-
 testProbs_const5 <- testProbs_const5 %>% mutate(Risk_Cat=
                                             case_when(Probs <=.2 ~ "Very Low",
                                                    Probs > 0.2 & Probs < .4 ~ "Low",    
                                                    Probs >= 0.4 & Probs < .6 ~ "Moderate",
                                                    Probs >=.6 & Probs < .80 ~ "High",
                                                    Probs >=.8 ~ "Severe"))
-
-
 FinalFishnet2$uniqueID <- seq.int(nrow(FinalFishnet5))
-
 testProbs_const5$uniqueID <- seq.int(nrow(FinalFishnet5))
-
 construction5 <- left_join(FinalFishnet2, testProbs_const5)
-
 construction5 <- construction5 %>%
   mutate(Scenario = "const_original") %>%
   dplyr::select (Outcome,Probs,Risk_Cat,geometry,Scenario)
 
 
+const_scenarios <- rbind(construction1, construction2, construction3, construction4, construction5)
 
+
+
+#SCENARIO 1
+less25 <- ggmap(base_map) +
+  geom_sf(data = ll(fishnet), fill = "white", inherit.aes = FALSE)+
+  geom_sf(data=ll(construction1), aes(fill=Risk_Cat), color="white", inherit.aes = FALSE)+
+  labs(title="Construction reduced by 25%")+
+  theme(plot.title = element_text(size = 30, face = "bold"), 
+        legend.title = element_text(size = 12)) +  mapTheme() +
+  scale_fill_brewer(palette = "PiYG", name = "Risk Score", direction = 1, aesthetics = c("colour", "fill"))
+
+
+less50 <- ggmap(base_map) +
+  geom_sf(data = ll(fishnet), fill = "white", inherit.aes = FALSE)+
+  geom_sf(data=ll(construction2), aes(fill=Risk_Cat), color="white", inherit.aes = FALSE)+
+  labs(title="50% Lower")+
+  theme(plot.title = element_text(size = 30, face = "bold"), 
+        legend.title = element_text(size = 12)) +  mapTheme() +
+  scale_fill_brewer(palette = "PiYG", name = "Risk Score", direction = 1, aesthetics = c("colour", "fill"))
+
+
+more50 <- ggmap(base_map) +
+  geom_sf(data = ll(fishnet), fill = "white", inherit.aes = FALSE)+
+  geom_sf(data= ll(construction3), aes(fill=Risk_Cat), color="transparent", inherit.aes = FALSE)+
+  labs(title="50% Higher")+
+  theme(plot.title = element_text(size = 30, face = "bold"), 
+        legend.title = element_text(size = 12)) +  mapTheme() +
+  scale_fill_brewer(palette = "PiYG", name = "Risk Score", direction = 1, aesthetics = c("colour", "fill"))
+
+more100 <- ggmap(base_map) +
+  geom_sf(data = ll(fishnet), fill = "white", inherit.aes = FALSE)+
+  geom_sf(data= ll(construction4), aes(fill=Risk_Cat), color="transparent", inherit.aes = FALSE)+
+  labs(title="100% Higher")+
+  theme(plot.title = element_text(size = 30, face = "bold"), 
+        legend.title = element_text(size = 12)) +  mapTheme() +
+  scale_fill_brewer(palette = "PiYG", name = "Risk Score", direction = 1, aesthetics = c("colour", "fill"))
 
 original <- ggmap(base_map) +
   geom_sf(data = ll(fishnet), fill = "white", colour = "transparent", inherit.aes = FALSE)+
   geom_sf(data= ll(construction5), aes(fill=Risk_Cat), color="transparent", inherit.aes = FALSE)+
-  #scale_fill_manual(values=palette5, name="Risk Score") +
   labs(title="Original")+
-  mapTheme() +
+  theme(plot.title = element_text(size = 30, face = "bold"), 
+        legend.title = element_text(size = 12)) +  mapTheme() +
   scale_fill_brewer(palette = "PiYG", name = "Risk Score", direction = 1, aesthetics = c("colour", "fill"))
 
-
-const_scenarios <- rbind(construction1, construction2, construction3, construction4, construction5)
-
-#mylegend<-g_legend(original)
-
-# grid.arrange(arrangeGrob(
-#   less50 + theme(legend.position="none") + scale_fill_brewer(palette = "PiYG", name = "Risk Score", direction = 1, aesthetics = c("colour", "fill"), guide = guide_legend(reverse = TRUE)), 
-#   less25+ theme(legend.position="none")  + scale_fill_brewer(palette = "PiYG", name = "Risk Score", direction = 1, aesthetics = c("colour", "fill")), 
-#   original+ theme(legend.position="none"), 
-#   more25+ theme(legend.position="none") + scale_fill_brewer(palette = "PiYG", name = "Risk Score", direction = 1, aesthetics = c("colour", "fill")), 
-#   more50+ theme(legend.position="none") + scale_fill_brewer(palette = "PiYG", name = "Risk Score", direction = 1, aesthetics = c("colour", "fill")), ncol = 5, top = "Canopy Loss Risk Under Construction Scenarios"
-#   #, mylegend
-#   ))
+less50
 ```
+
+![](Tree_Canopy_Loss_files/figure-html/Construction_scenarios-1.png)<!-- -->
+
+```r
+less25 
+```
+
+![](Tree_Canopy_Loss_files/figure-html/Construction_scenarios-2.png)<!-- -->
+
+```r
+original
+```
+
+![](Tree_Canopy_Loss_files/figure-html/Construction_scenarios-3.png)<!-- -->
+
+```r
+more50
+```
+
+![](Tree_Canopy_Loss_files/figure-html/Construction_scenarios-4.png)<!-- -->
+
+```r
+more100
+```
+
+![](Tree_Canopy_Loss_files/figure-html/Construction_scenarios-5.png)<!-- -->
+
+```r
+mylegend<-g_legend(original)
+grid.arrange(arrangeGrob(less50 + theme(legend.position="none"), less25 + theme(legend.position="none"), original + theme(legend.position="none"), more50 + theme(legend.position="none"), more100 + theme(legend.position="none"), ncol = 2, top = "Canopy Change Under 5 Construction Scenarios", mylegend))
+```
+
+![](Tree_Canopy_Loss_files/figure-html/Construction_scenarios-6.png)<!-- -->
 
 
 
 ```r
-library(MLeval)
 ## Cross validation
 ctrl <- trainControl(method = "cv", number = 10, classProbs=TRUE,savePredictions = TRUE,verboseIter = TRUE)
 

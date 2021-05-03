@@ -229,6 +229,15 @@ Neighborhood <-
   mutate(NArea = as.numeric(NArea))
 
 #basemaps
+#make Philadelphia basemap
+ll <- function(dat, proj4 = 4326){
+  st_transform(dat, proj4)
+}
+
+base_map <- get_map(location = unname(st_bbox(ll(st_buffer(st_centroid(Philadelphia),60000)))), 
+                    source = "stamen",
+                    maptype = "toner") 
+
  RMBound <- Neighborhood %>%  
    dplyr::filter(NAME=="RICHMOND")
  Richmond <- st_intersection(st_make_valid(TreeCanopy), RMBound)
@@ -382,14 +391,6 @@ We use fishnet grid cells as our unit of analysis to take advantage of high reso
 # library(tidyverse)
 # library(jsonlite)
 
-#make Philadelphia basemap
-ll <- function(dat, proj4 = 4326){
-  st_transform(dat, proj4)
-}
-
-base_map <- get_map(location = unname(st_bbox(ll(st_buffer(st_centroid(Philadelphia),60000)))), 
-                    source = "stamen",
-                    maptype = "toner") 
 
 
 #make fishnet
@@ -901,6 +902,7 @@ grid.arrange(ncol=2, UR, refmap, RM)
 Tree canopy loss, like other urban environmental issues, is has deep equity implications. Low income communities and communities of color are more likely to be in places with less tree canopy. Therefore, we explore demographics variables' correlation with tree canopy gain, loss, net change, and coverage. Surprisingly, demographic variables have little correlation with existing tree canopy or tree canopy change. This is likely because they are accounted for by neighborhood fixed effects.     
 ```{r Demographics, message=FALSE, warning=FALSE, results='hide', fig.height = 10, fig.width = 13,  cache=TRUE}
 
+library(grid)
 correlation.long <-
   st_drop_geometry(FinalFishnet) %>%
      dplyr::select(population, medHHInc, housing_units, Rent, pctBach, pctWhite, pctNoVehicle, netChange) %>%
