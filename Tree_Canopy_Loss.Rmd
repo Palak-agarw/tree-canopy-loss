@@ -183,6 +183,19 @@ g_legend<-function(a.gplot){
   leg <- which(sapply(tmp$grobs, function(x) x$name) == "guide-box")
   legend <- tmp$grobs[[leg]]
   return(legend)}
+
+#basemaps
+ RMBound <- Neighborhood %>%  
+   dplyr::filter(NAME=="RICHMOND")
+ Richmond <- st_intersection(st_make_valid(TreeCanopy), RMBound)
+ RMbase_map <- get_map(location = unname(st_bbox(ll(st_buffer(st_centroid(RMBound),10000)))),
+                     maptype = "satellite")
+ 
+  URBound <- Neighborhood %>%  
+   dplyr::filter(NAME=="UPPER_ROXBOROUGH")
+ UpperRoxborough <- st_intersection(st_make_valid(TreeCanopy), URBound)
+ URbase_map <- get_map(location = unname(st_bbox(ll(st_buffer(st_centroid(URBound),10000)))),
+                     maptype = "satellite")
 ```
 
 ```{r Data Wrangling, cache=TRUE, message=FALSE, warning=FALSE, include=TRUE, results='hide'}
@@ -841,18 +854,6 @@ library(magrittr)
 paletteChange <- c("green", "orange", "purple")
 
 
-#basemaps
- RMBound <- Neighborhood %>%  
-   dplyr::filter(NAME=="RICHMOND")
- Richmond <- st_intersection(st_make_valid(TreeCanopy), RMBound)
- RMbase_map <- get_map(location = unname(st_bbox(ll(st_buffer(st_centroid(RMBound),10000)))),
-                     maptype = "satellite")
- 
-  URBound <- Neighborhood %>%  
-   dplyr::filter(NAME=="UPPER_ROXBOROUGH")
- UpperRoxborough <- st_intersection(st_make_valid(TreeCanopy), URBound)
- URbase_map <- get_map(location = unname(st_bbox(ll(st_buffer(st_centroid(URBound),10000)))),
-                     maptype = "satellite")
 
  
 #reference map
@@ -2367,9 +2368,14 @@ original <- ggmap(base_map) +
 
 const_scenarios <- rbind(construction1, construction2, construction3, construction4, construction5)
 
+
 mylegend<-g_legend(original)
 
 grid.arrange(less)
+
+st_write(const_scenarios,"constscenario.geojson")
+
+
 
 grid.arrange(arrangeGrob(
   less50 + theme(legend.position="none") + scale_fill_brewer(palette = "PiYG", name = "Risk Score", direction = 1, aesthetics = c("colour", "fill"), guide = guide_legend(reverse = TRUE)),
