@@ -77,6 +77,14 @@ div.blue { background-color:#e6f0ff; border-radius: 5px; padding: 20px;}
 knitr::opts_chunk$set(message = FALSE, warning = FALSE)
 options(scipen=10000000)
 library(knitr)
+library(MLeval)
+library(magrittr)
+library(grid)
+library(RSocrata)
+library(ggcorrplot)
+library(randomForest)
+library(dplyr)
+library(caret)
 library(tidyverse)
 library(tidycensus)
 library(sf)
@@ -85,6 +93,7 @@ library(dplyr)
 library(viridis)
 library(mapview)
 library(lubridate)
+library(gridExtra)
 library(grid)
 library(ggplot2)
 library(ggmap)
@@ -184,18 +193,6 @@ g_legend<-function(a.gplot){
   legend <- tmp$grobs[[leg]]
   return(legend)}
 
-#basemaps
- RMBound <- Neighborhood %>%  
-   dplyr::filter(NAME=="RICHMOND")
- Richmond <- st_intersection(st_make_valid(TreeCanopy), RMBound)
- RMbase_map <- get_map(location = unname(st_bbox(ll(st_buffer(st_centroid(RMBound),10000)))),
-                     maptype = "satellite")
- 
-  URBound <- Neighborhood %>%  
-   dplyr::filter(NAME=="UPPER_ROXBOROUGH")
- UpperRoxborough <- st_intersection(st_make_valid(TreeCanopy), URBound)
- URbase_map <- get_map(location = unname(st_bbox(ll(st_buffer(st_centroid(URBound),10000)))),
-                     maptype = "satellite")
 ```
 
 ```{r Data Wrangling, cache=TRUE, message=FALSE, warning=FALSE, include=TRUE, results='hide'}
@@ -231,6 +228,19 @@ Neighborhood <-
   mutate(NArea = st_area(Neighborhood))%>%
   mutate(NArea = as.numeric(NArea))
 
+#basemaps
+ RMBound <- Neighborhood %>%  
+   dplyr::filter(NAME=="RICHMOND")
+ Richmond <- st_intersection(st_make_valid(TreeCanopy), RMBound)
+ RMbase_map <- get_map(location = unname(st_bbox(ll(st_buffer(st_centroid(RMBound),10000)))),
+                     maptype = "satellite")
+ 
+  URBound <- Neighborhood %>%  
+   dplyr::filter(NAME=="UPPER_ROXBOROUGH")
+ UpperRoxborough <- st_intersection(st_make_valid(TreeCanopy), URBound)
+ URbase_map <- get_map(location = unname(st_bbox(ll(st_buffer(st_centroid(URBound),10000)))),
+                     maptype = "satellite")
+ 
 # Tree inventory
 #tree_inventory <-
  # st_read("http://data.phl.opendata.arcgis.com/datasets/957f032f9c874327a1ad800abd887d17_0.geojson") %>%
@@ -579,8 +589,7 @@ subtitle = "Tree Canopy Area / Gridcell Area") +
 Surprisingly, tree canopy loss and gain exhibit similar spatial patterns. Both percent gain and loss are highest in a few neighborhoods in South Philadelphia and in the Northeast. While this seems counter-intuitive, this is because these neighborhoods have the least tree canopy, therefore each individual tree gained or lost has a greater overall impact.   
 ```{r Change in tree canopy, message=FALSE, warning=FALSE, results='hide', fig.height = 12, fig.width = 20, cache=TRUE}
 
-library(gridExtra)
-library(grid)
+
 
 
 v <- ggmap(base_map) +
@@ -849,7 +858,7 @@ grid.arrange(goalProg, netChange, ncol=2)
 To better understand tree canopy change patterns in these neighborhoods, we analyze more closely a neighborhood that has reached the goal and one that is substantially below the goal. In both, the bulk of the tree canopy did not change between 2008 and 2018. However, when we look closer, we see that tree canopy loss and gain are much more clustered in Upper Roxborough, which meets the goal. Here, it appears that some of the loss is related to tree removal along an entire street or throughout a property, whereas in Richmond, tree canopy change has been more piecemeal and scattered. This suggests that we will need to look at land use and streets as potential risk factor variables related to tree canopy loss.   
 
 ```{r Neighborhood level Tree Loss, message=FALSE, warning=FALSE, results='hide', fig.height = 9, fig.width = 13, cache = TRUE}
-library(magrittr)
+
 
 paletteChange <- c("green", "orange", "purple")
 
@@ -890,7 +899,7 @@ grid.arrange(ncol=2, UR, refmap, RM)
 ## 3.  How does tree canopy change vary by demographic?  
 
 Tree canopy loss, like other urban environmental issues, is has deep equity implications. Low income communities and communities of color are more likely to be in places with less tree canopy. Therefore, we explore demographics variables' correlation with tree canopy gain, loss, net change, and coverage. Surprisingly, demographic variables have little correlation with existing tree canopy or tree canopy change. This is likely because they are accounted for by neighborhood fixed effects.     
-```{r Demographics, message=FALSE, warning=FALSE, results='hide', fig.height = 18, fig.width = 13,  cache=TRUE}
+```{r Demographics, message=FALSE, warning=FALSE, results='hide', fig.height = 10, fig.width = 13,  cache=TRUE}
 
 correlation.long <-
   st_drop_geometry(FinalFishnet) %>%
@@ -981,7 +990,6 @@ stat_density2d(aes(fill = ..level..), geom = "polygon", bins = 20) +
   # plotTheme()
 
 
-library(grid)
 
 grid.arrange(ncol=2, top=textGrob("Neighborhood Attributes and Tree Canopy 2008-2018"),netChange,pctGain) 
 ```
@@ -1531,7 +1539,7 @@ FinalFishnet <-
 ```
 
 ```{r Public health, message=FALSE, warning=FALSE, results='hide', cache=TRUE}
-library(RSocrata)
+
 
  publichealth <- 
    read.socrata("https://chronicdata.cdc.gov/resource/yjkw-uj5s.json") %>%
@@ -1800,7 +1808,6 @@ To select a set of variables for our model, we make a correlation plot.
 
 ```{r corr plot, message=FALSE, warning=FALSE, results='hide', fig.height =  8, fig.width =8,cache=TRUE}
 
-library(ggcorrplot)
 corrplotvars <- FinalFishnet %>%
    dplyr::select(ConservationPct, pctLoss, pctGain, pctCoverage08, LogPctLoss, LogPctGain, population, medHHInc, housing_units, Rent, pctBach, pctWhite, pctNoVehicle, HydrologyArea, LogAvgParcelSize, e311Count, countConst, pctRes, pctTrans) %>%
   rename(transportation_landuse = pctTrans,
@@ -1850,10 +1857,6 @@ Based on this plot, we select the following variables for our model:
 * Hydrology (%)  
 
 ```{r Logit model, message=FALSE, warning=FALSE, cache=TRUE}
-
-library(randomForest)
-library(dplyr)
-library(caret)
 
 neigh_net <- st_intersection(fishnet_centroid, Neighborhood) %>%
    dplyr::select(uniqueID, NAME)
@@ -2182,7 +2185,7 @@ ggmap(base_map) +
   geom_sf(data = ll(fishnet), fill = "white", colour = "transparent", inherit.aes = FALSE)+
   geom_sf(data = ll(try), aes(fill = result), colour = "transparent", inherit.aes = FALSE)+
   labs(title = "Mapped Correlation Matrix")+
-  scale_fill_manual(values = palette3, name = "My name",
+  scale_fill_manual(values = palette3, name = "Model Metric",
                   guide = guide_legend(reverse = TRUE))+
   theme(legend.position = "bottom",
         legend.title = element_blank(),
@@ -2381,23 +2384,12 @@ more100
 
 mylegend<-g_legend(original)
 grid.arrange(arrangeGrob(less50 + theme(legend.position="none"), less25 + theme(legend.position="none"), original + theme(legend.position="none"), more50 + theme(legend.position="none"), more100 + theme(legend.position="none"), ncol = 2, top = "Canopy Change Under 5 Construction Scenarios", mylegend))
- 
-# grid.arrange(arrangeGrob(
-#   less50 + theme(legend.position="none") + scale_fill_brewer(palette = "PiYG", name = "Risk Score", direction = 1, aesthetics = c("colour", "fill"), guide = guide_legend(reverse = TRUE)),
-#   less25+ theme(legend.position="none")  + scale_fill_brewer(palette = "PiYG", name = "Risk Score", direction = 1, aesthetics = c("colour", "fill")),
-#   original+ theme(legend.position="none"),
-#   more25+ theme(legend.position="none") + scale_fill_brewer(palette = "PiYG", name = "Risk Score", direction = 1, aesthetics = c("colour", "fill")),
-#   more50+ theme(legend.position="none") + scale_fill_brewer(palette = "PiYG", name = "Risk Score", direction = 1, aesthetics = c("colour", "fill")), ncol = 5, top = "Canopy Loss Risk Under Construction Scenarios"
-#   , mylegend
-#   ))
-
-
 ```
 
 
 ``````{r CV, message=FALSE, warning=FALSE, fig.height = 6, fig.width = 6, include=TRUE, results='hide', cache=TRUE}  
 
-library(MLeval)
+
 ## Cross validation
 ctrl <- trainControl(method = "cv", number = 10, classProbs=TRUE,savePredictions = TRUE,verboseIter = TRUE)
 
