@@ -2199,7 +2199,7 @@ FinalFishnet5$countConst4 <- FinalFishnet5$countConst * 2
 rf1 <- randomForest(
   FinalFishnet5$Variable ~ .,
   data=st_drop_geometry(FinalFishnet5) %>% 
-                     dplyr::select(pctCoverage18, LogAvgParcelSize, avg_nnConst,LogPctTrans, LogPole, NAME,
+                     dplyr::select(pctCoverage18, LogAvgParcelSize, avg_nnConst,LogPctTrans, LogPole,
                                     countConst1, Loge311Count,pctTrans, LogPctRes, holc_grade, HydrologyPct)
 )
 
@@ -2229,14 +2229,6 @@ construction1 <- construction1 %>%
 
 
 
-
-
-
-
-
-
-
-
 less25 <- ggmap(base_map) +
   geom_sf(data = ll(fishnet), fill = "white", inherit.aes = FALSE)+
   geom_sf(data=ll(construction1), aes(fill=Risk_Cat), color="transparent", inherit.aes = FALSE)+
@@ -2248,7 +2240,7 @@ less25 <- ggmap(base_map) +
 rf2 <- randomForest(
   FinalFishnet5$Variable ~ .,
   data=st_drop_geometry(FinalFishnet5) %>% 
-                     dplyr::select(pctCoverage18, LogAvgParcelSize, avg_nnConst,LogPctTrans, LogPole, NAME,
+                     dplyr::select(pctCoverage18, LogAvgParcelSize, avg_nnConst,LogPctTrans, LogPole,
                                     countConst2, Loge311Count,pctTrans, LogPctRes, holc_grade, HydrologyPct)
 )
 
@@ -2292,7 +2284,7 @@ less50 <- ggmap(base_map) +
 rf3 <- randomForest(
   FinalFishnet5$Variable ~ .,
   data=st_drop_geometry(FinalFishnet5) %>% 
-                     dplyr::select(pctCoverage18, LogAvgParcelSize, avg_nnConst,LogPctTrans, LogPole, NAME,
+                     dplyr::select(pctCoverage18, LogAvgParcelSize, avg_nnConst,LogPctTrans, LogPole,
                                     countConst3, Loge311Count,pctTrans, LogPctRes, holc_grade, HydrologyPct)
 )
 
@@ -2339,7 +2331,7 @@ more25 <- ggmap(base_map) +
 rf4 <- randomForest(
   FinalFishnet5$Variable ~ .,
   data=st_drop_geometry(FinalFishnet5) %>% 
-                     dplyr::select(pctCoverage18, LogAvgParcelSize, avg_nnConst,LogPctTrans, LogPole, NAME,
+                     dplyr::select(pctCoverage18, LogAvgParcelSize, avg_nnConst,LogPctTrans, LogPole,
                                     countConst4, Loge311Count,pctTrans, LogPctRes, holc_grade, HydrologyPct)
 )
 
@@ -2384,7 +2376,7 @@ more50 <- ggmap(base_map) +
 rf5 <- randomForest(
   FinalFishnet5$Variable ~ .,
   data=st_drop_geometry(FinalFishnet5) %>% 
-                     dplyr::select(pctCoverage18, LogAvgParcelSize, avg_nnConst,LogPctTrans, LogPole, NAME,
+                     dplyr::select(pctCoverage18, LogAvgParcelSize, avg_nnConst,LogPctTrans, LogPole,
                                     countConst, Loge311Count,pctTrans, LogPctRes, holc_grade, HydrologyPct)
 )
 
@@ -2426,7 +2418,7 @@ original <- ggmap(base_map) +
 
 const_scenarios <- rbind(construction1, construction2, construction3, construction4, construction5)
 
-st_write(const_scenarios,"constscenario.geojson")
+st_write(const_scenarios,"constscenario1.geojson")
 
 #mylegend<-g_legend(original)
 
