@@ -821,7 +821,7 @@ Below, we see that the neighborhoods farthest from 30% tree canopy are in South 
   
 We also can see that most neighborhoods experienced a net loss in tree canopy. Interestingly, most tree gain was experienced in South Philadelphia and Center City, in neighborhoods which have low existing canopy.  
 
-```{r Neighborhood Maps, message=FALSE, warning=FALSE, results='hide', fig.height = 8, fig.width = 16, cache=TRUE}
+```{r Neighborhood Maps, message=FALSE, warning=FALSE, results='hide', fig.height = 10, fig.width = 20, cache=TRUE}
 
 
 goalProg <- ggmap(base_map) +
@@ -2326,65 +2326,70 @@ construction5 <- construction5 %>%
   dplyr::select (Outcome,Probs,Risk_Cat,geometry,Scenario)
 
 
+const_scenarios <- rbind(construction1, construction2, construction3, construction4, construction5)
 
 
 
 #SCENARIO 1
 less25 <- ggmap(base_map) +
   geom_sf(data = ll(fishnet), fill = "white", inherit.aes = FALSE)+
-  geom_sf(data=ll(construction1), aes(fill=Risk_Cat), color="transparent", inherit.aes = FALSE)+
+  geom_sf(data=ll(construction1), aes(fill=Risk_Cat), color="white", inherit.aes = FALSE)+
   labs(title="Construction reduced by 25%")+
   theme(plot.title = element_text(size = 30, face = "bold"), 
-        legend.title = element_text(size = 12)) +  mapTheme()
+        legend.title = element_text(size = 12)) +  mapTheme() +
+  scale_fill_brewer(palette = "PiYG", name = "Risk Score", direction = 1, aesthetics = c("colour", "fill"))
 
-  less25 + scale_fill_brewer(palette = "PiYG", name = "Risk Score", direction = 1, aesthetics = c("colour", "fill"))
 
 less50 <- ggmap(base_map) +
-  geom_sf(data = ll(fishnet), fill = "white", ineherit.aes = FALSE)+
-  geom_sf(data= ll(construction2), aes(fill=Risk_Cat), color="transparent", inherit.aes = FALSE)+
+  geom_sf(data = ll(fishnet), fill = "white", inherit.aes = FALSE)+
+  geom_sf(data=ll(construction2), aes(fill=Risk_Cat), color="white", inherit.aes = FALSE)+
   labs(title="50% Lower")+
   theme(plot.title = element_text(size = 30, face = "bold"), 
-        legend.title = element_text(size = 12)) +  mapTheme()
+        legend.title = element_text(size = 12)) +  mapTheme() +
+  scale_fill_brewer(palette = "PiYG", name = "Risk Score", direction = 1, aesthetics = c("colour", "fill"))
 
 
 more50 <- ggmap(base_map) +
   geom_sf(data = ll(fishnet), fill = "white", inherit.aes = FALSE)+
   geom_sf(data= ll(construction3), aes(fill=Risk_Cat), color="transparent", inherit.aes = FALSE)+
   labs(title="50% Higher")+
-  mapTheme()
+  theme(plot.title = element_text(size = 30, face = "bold"), 
+        legend.title = element_text(size = 12)) +  mapTheme() +
+  scale_fill_brewer(palette = "PiYG", name = "Risk Score", direction = 1, aesthetics = c("colour", "fill"))
 
 more100 <- ggmap(base_map) +
   geom_sf(data = ll(fishnet), fill = "white", inherit.aes = FALSE)+
   geom_sf(data= ll(construction4), aes(fill=Risk_Cat), color="transparent", inherit.aes = FALSE)+
   labs(title="100% Higher")+
-  mapTheme()
+  theme(plot.title = element_text(size = 30, face = "bold"), 
+        legend.title = element_text(size = 12)) +  mapTheme() +
+  scale_fill_brewer(palette = "PiYG", name = "Risk Score", direction = 1, aesthetics = c("colour", "fill"))
 
 original <- ggmap(base_map) +
   geom_sf(data = ll(fishnet), fill = "white", colour = "transparent", inherit.aes = FALSE)+
   geom_sf(data= ll(construction5), aes(fill=Risk_Cat), color="transparent", inherit.aes = FALSE)+
   labs(title="Original")+
-  mapTheme()
+  theme(plot.title = element_text(size = 30, face = "bold"), 
+        legend.title = element_text(size = 12)) +  mapTheme() +
+  scale_fill_brewer(palette = "PiYG", name = "Risk Score", direction = 1, aesthetics = c("colour", "fill"))
 
-
-const_scenarios <- rbind(construction1, construction2, construction3, construction4, construction5)
-
+less50
+less25 
+original
+more50
+more100
 
 mylegend<-g_legend(original)
-
-grid.arrange(less)
-
-st_write(const_scenarios,"constscenario.geojson")
-
-
-
-grid.arrange(arrangeGrob(
-  less50 + theme(legend.position="none") + scale_fill_brewer(palette = "PiYG", name = "Risk Score", direction = 1, aesthetics = c("colour", "fill"), guide = guide_legend(reverse = TRUE)),
-  less25+ theme(legend.position="none")  + scale_fill_brewer(palette = "PiYG", name = "Risk Score", direction = 1, aesthetics = c("colour", "fill")),
-  original+ theme(legend.position="none"),
-  more25+ theme(legend.position="none") + scale_fill_brewer(palette = "PiYG", name = "Risk Score", direction = 1, aesthetics = c("colour", "fill")),
-  more50+ theme(legend.position="none") + scale_fill_brewer(palette = "PiYG", name = "Risk Score", direction = 1, aesthetics = c("colour", "fill")), ncol = 5, top = "Canopy Loss Risk Under Construction Scenarios"
-  , mylegend
-  ))
+grid.arrange(arrangeGrob(less50 + theme(legend.position="none"), less25 + theme(legend.position="none"), original + theme(legend.position="none"), more50 + theme(legend.position="none"), more100 + theme(legend.position="none"), ncol = 2, top = "Canopy Change Under 5 Construction Scenarios", mylegend))
+ 
+# grid.arrange(arrangeGrob(
+#   less50 + theme(legend.position="none") + scale_fill_brewer(palette = "PiYG", name = "Risk Score", direction = 1, aesthetics = c("colour", "fill"), guide = guide_legend(reverse = TRUE)),
+#   less25+ theme(legend.position="none")  + scale_fill_brewer(palette = "PiYG", name = "Risk Score", direction = 1, aesthetics = c("colour", "fill")),
+#   original+ theme(legend.position="none"),
+#   more25+ theme(legend.position="none") + scale_fill_brewer(palette = "PiYG", name = "Risk Score", direction = 1, aesthetics = c("colour", "fill")),
+#   more50+ theme(legend.position="none") + scale_fill_brewer(palette = "PiYG", name = "Risk Score", direction = 1, aesthetics = c("colour", "fill")), ncol = 5, top = "Canopy Loss Risk Under Construction Scenarios"
+#   , mylegend
+#   ))
 
 
 ```
