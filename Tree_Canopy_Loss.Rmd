@@ -169,6 +169,13 @@ plotTheme <- function(base_size = 12) {
   )
 }
 
+
+#for shared legends
+g_legend<-function(a.gplot){
+  tmp <- ggplot_gtable(ggplot_build(a.gplot))
+  leg <- which(sapply(tmp$grobs, function(x) x$name) == "guide-box")
+  legend <- tmp$grobs[[leg]]
+  return(legend)}
 ```
 
 ```{r Data Wrangling, cache=TRUE, message=FALSE, warning=FALSE, include=TRUE, results='hide'}
@@ -2218,10 +2225,19 @@ construction1 <- construction1 %>%
   dplyr::select (Outcome,Probs,Risk_Cat,geometry,Scenario)
 
 
-less25 <- ggplot() +
-  geom_sf(data = fishnet, fill = "white")+
-  geom_sf(data=construction1, aes(fill=Risk_Cat), color="transparent")+
-  scale_fill_manual(values=palette5, name="Risk Score") +
+
+
+
+
+
+
+
+
+
+less25 <- ggmap(base_map) +
+  geom_sf(data = ll(fishnet), fill = "white", inherit.aes = FALSE)+
+  geom_sf(data=ll(construction1), aes(fill=Risk_Cat), color="transparent", inherit.aes = FALSE)+
+ # scale_fill_manual(values=palette5, name="Risk Score") +
   labs(title="Construction reduced by 25%")+
   mapTheme()
 
@@ -2257,11 +2273,15 @@ construction2 <- construction2 %>%
   mutate(Scenario = "const_50less") %>%
   dplyr::select (Outcome,Probs,Risk_Cat,geometry,Scenario)
 
-less50 <- ggplot() +
-  geom_sf(data = fishnet, fill = "white")+
-  geom_sf(data=construction2, aes(fill=Risk_Cat), color="transparent")+
-  scale_fill_manual(values=palette5, name="Risk Score") +
-  labs(title="Construction reduced by 50%")+
+
+
+
+
+less50 <- ggmap(base_map) +
+  geom_sf(data = ll(fishnet), fill = "white", ineherit.aes = FALSE)+
+  geom_sf(data= ll(construction2), aes(fill=Risk_Cat), color="transparent", inherit.aes = FALSE)+
+#  scale_fill_manual(values=palette5, name="Risk Score") +
+  labs(title="50% Lower")+
   mapTheme()
 
 
@@ -2297,11 +2317,18 @@ construction3 <- construction3 %>%
   mutate(Scenario = "const_25more") %>%
   dplyr::select (Outcome,Probs,Risk_Cat,geometry,Scenario)
 
-more25 <- ggplot() +
-  geom_sf(data = fishnet, fill = "white")+
-  geom_sf(data=construction3, aes(fill=Risk_Cat), color="transparent")+
-  scale_fill_manual(values=palette5, name="Risk Score") +
-  labs(title="Predicted Risk Scores Across Philadelphia given \nConstruction counts increased by 25%")+
+
+
+
+
+
+
+
+more25 <- ggmap(base_map) +
+  geom_sf(data = ll(fishnet), fill = "white", inherit.aes = FALSE)+
+  geom_sf(data= ll(construction3), aes(fill=Risk_Cat), color="transparent", inherit.aes = FALSE)+
+  #scale_fill_manual(values=palette5, name="Risk Score") +
+  labs(title="25% Higher")+
   mapTheme()
 
 
@@ -2337,11 +2364,15 @@ construction4 <- construction4 %>%
   mutate(Scenario = "const_50more") %>%
   dplyr::select (Outcome,Probs,Risk_Cat,geometry,Scenario)
 
-more50 <- ggplot() +
-  geom_sf(data = fishnet, fill = "white")+
-  geom_sf(data=construction4, aes(fill=Risk_Cat), color="transparent")+
-  scale_fill_manual(values=palette5, name="Risk Score") +
-  labs(title="Construction increased by 50%")+
+
+
+
+
+more50 <- ggmap(base_map) +
+  geom_sf(data = ll(fishnet), fill = "white", inherit.aes = FALSE)+
+  geom_sf(data= ll(construction4), aes(fill=Risk_Cat), color="transparent", inherit.aes = FALSE)+
+  #scale_fill_manual(values=palette5, name="Risk Score") +
+  labs(title="50% Higher")+
   mapTheme()
 
 
@@ -2378,25 +2409,31 @@ construction5 <- construction5 %>%
   mutate(Scenario = "const_original") %>%
   dplyr::select (Outcome,Probs,Risk_Cat,geometry,Scenario)
 
-original <- ggplot() +
-  geom_sf(data = fishnet, fill = "white", colour = "transparent")+
-  geom_sf(data=construction5, aes(fill=Risk_Cat), color="transparent")+
-  scale_fill_manual(values=palette5, name="Risk Score") +
-  labs(title="Predicted Risk Scores Across Philadelphia given \nOriginal Counstruction counts ")+
-  mapTheme()
+
+
+
+
+
+
+original <- ggmap(base_map) +
+  geom_sf(data = ll(fishnet), fill = "white", colour = "transparent", inherit.aes = FALSE)+
+  geom_sf(data= ll(construction5), aes(fill=Risk_Cat), color="transparent", inherit.aes = FALSE)+
+  #scale_fill_manual(values=palette5, name="Risk Score") +
+  labs(title="Original")+
+  mapTheme() +
+  scale_fill_brewer(palette = "PiYG", name = "Risk Score", direction = 1, aesthetics = c("colour", "fill"))
 
 
 const_scenarios <- rbind(construction1, construction2, construction3, construction4, construction5)
 
-g_legend<-function(a.gplot){
-  tmp <- ggplot_gtable(ggplot_build(a.gplot))
-  leg <- which(sapply(tmp$grobs, function(x) x$name) == "guide-box")
-  legend <- tmp$grobs[[leg]]
-  return(legend)}
-
 mylegend<-g_legend(original)
 
-grid.arrange(less50, less25, original, more25, more50, ncol = 5, top = "Canopy Loss Risk Under Construction Scenarios", mylegend)
+grid.arrange(arrangeGrob(
+  less50 + theme(legend.position="none") + scale_fill_brewer(palette = "PiYG", name = "Risk Score", direction = 1, aesthetics = c("colour", "fill"), guide = guide_legend(reverse = TRUE)), 
+  less25+ theme(legend.position="none")  + scale_fill_brewer(palette = "PiYG", name = "Risk Score", direction = 1, aesthetics = c("colour", "fill")), 
+  original+ theme(legend.position="none"), 
+  more25+ theme(legend.position="none") + scale_fill_brewer(palette = "PiYG", name = "Risk Score", direction = 1, aesthetics = c("colour", "fill")), 
+  more50+ theme(legend.position="none") + scale_fill_brewer(palette = "PiYG", name = "Risk Score", direction = 1, aesthetics = c("colour", "fill")), ncol = 5, top = "Canopy Loss Risk Under Construction Scenarios", mylegend))
 
 
 ```
