@@ -12,12 +12,13 @@ output:
     number_sections: FALSE
 ---
 
-![ ](FrontPage.png)  
-
 [Return to MUSA 801 Projects Page](https://pennmusa.github.io/MUSA_801.io/)  
 This project was completed as part of the Master in Urban Spatial Analytics Spring 2021 Practicum instructed by Ken Steif, Michael Fichman, and Matt Harris. We thank our instructors as well as Dexter Locke and Lara Roman from the United States Forest Service for their feedback and help navigating the data. 
 
 This document is intended to help other researchers replicate a study of tree canopy loss linked to spatial risk factors. We first introduce our motivation, followed by data exploration and analysis, and finally predictive modeling. We include hyperlinks thorough our document and in the appendix for reproducibility. Our hope is that this document and our policy tool can help tree planting agencies, tree advocates, and the interested public understand the forces contributing to tree canopy loss in Philadelphia and imagine different scenarios for our tree canopy based on construction.  
+
+
+![ ](FrontPage.png)  
 
 
 # Introduction   
@@ -45,8 +46,9 @@ Philadelphia (under a previous mayoral administration) set the goal of achieving
 
 # Planning Tool: Canopy View  
 
-Using this information, we created a predictive scenario policy tool which displays future tree canopy loss under three construction scenarios. The general population and tree advocates can use our tool to understand the potential impact of construction on the tree canopy.  
-![Canopy View web application](WebApp.png) 
+Using this information, we created a predictive scenario policy tool which displays future tree canopy loss under three construction scenarios. The general population and tree advocates can use our tool to understand the potential impact of construction on the tree canopy.    
+
+![Canopy View web application](WebApp.png)   
 
 # Data and Methods  
 
@@ -342,7 +344,7 @@ ConservationNParks <- rbind(Parks, Conservation)
 ```
 
 
-## Creating a fishnet
+## Unit of analysis: the fishnet cell
 We use fishnet grid cells as our unit of analysis to take advantage of high resolution spatial data such as 311 service requests. Below, we create a fishnet cells of 1615 feet, or around the size of a city block. We then subtract fishnet cells that are more than 20% [conservation easement](https://www.conservationeasement.us/what-is-a-conservation-easement/) and/or park space to isolate land that may be protected and experience different tree canopy loss processes. All in all, we have 1411 fishnet cells representing Philadelphia.  
 
 ```{r Fish net, cache=TRUE, message=FALSE, warning=FALSE, include=TRUE, results='hide'}
@@ -390,7 +392,7 @@ ggmap(base_map) +
 fishnet <- FishnetIntersect
 ```
 
-We then aggregate our tree canopy data to the fishnet.  
+We then aggregate our tree canopy data to the fishnet so that we have gain, loss, and total canopy area for each cell.
 
 ```{r Fishnet Aggregation, cache=TRUE, message=FALSE, warning=FALSE, include=TRUE, results='hide'}
 
@@ -799,7 +801,7 @@ FinalNeighborhood$GainMinusLossCat <- cut(FinalNeighborhood$GainMinusLoss,
 
 Below, we see that the neighborhoods farthest from 30% tree canopy are in South Philadelphia and parts of Center City. These neighborhoods are all along the Delaware River. This may mean that waterways and hydrology are a risk factor. The neighborhoods which meet this goal are largely in Northwest Philadelphia.  
   
-We also can see that most neighborhoods experienced a net loss in tree canopy. Interestingly, most tree gain was experienced in South Philadelphia and Center City, in neighborhood which have low existing canopy.  
+We also can see that most neighborhoods experienced a net loss in tree canopy. Interestingly, most tree gain was experienced in South Philadelphia and Center City, in neighborhoods which have low existing canopy.  
 
 ```{r Neighborhood Maps, message=FALSE, warning=FALSE, results='hide', fig.height = 8, fig.width = 16, cache=TRUE}
 
@@ -851,15 +853,15 @@ paletteChange <- c("green", "orange", "purple")
 #reference map
 refmap <- ggmap(base_map) +
   geom_sf(data = ll(Neighborhood), fill = "white", colour = "gray", inherit.aes = FALSE) +
-  geom_sf(data = ll(RMBound), colour = "white", fill = "gray", inherit.aes = FALSE) +
-    geom_sf(data = ll(URBound), colour = "white", fill = "gray", inherit.aes = FALSE) +
+  geom_sf(data = ll(RMBound), colour = "gray", fill = "black", inherit.aes = FALSE) +
+    geom_sf(data = ll(URBound), colour = "gray", fill = "black", inherit.aes = FALSE) +
   labs(title = "Richmond and Upper Roxborough Neighborhoods") +
   theme(plot.title = element_text(size = 30, face = "bold"), 
         legend.title = element_text(size = 12)) +  mapTheme()
  
  
 RM <- ggmap(RMbase_map) +
-   geom_sf(data = ll(RMBound), fill = "gray", inherit.aes = FALSE) +
+   geom_sf(data = ll(RMBound), fill = "black", inherit.aes = FALSE) +
    geom_sf(data = ll(Richmond), aes(fill = CLASS_NAME), colour = "transparent", inherit.aes = FALSE) +
    scale_fill_manual(values = paletteChange, name = "Canopy Change") +
    labs(title = "Richmond Tree Canopy Change 2008-2018", subtitle = "Philadelphia, PA") +
@@ -868,7 +870,7 @@ RM <- ggmap(RMbase_map) +
  
 #Upper Roxborough
 UR <- ggmap(URbase_map) +
-   geom_sf(data = ll(URBound), fill = "gray", inherit.aes = FALSE) +
+   geom_sf(data = ll(URBound), fill = "black", inherit.aes = FALSE) +
    geom_sf(data = ll(UpperRoxborough), aes(fill = CLASS_NAME), colour = "transparent", inherit.aes = FALSE) +
    scale_fill_manual(values = paletteChange, name = "Canopy Change") +
    labs(title = "Upper Roxborough Tree Canopy Change 2008-2018", subtitle = "Philadelphia, PA") +
@@ -1139,12 +1141,12 @@ LandUse <- ggplot(LandUseLong, aes(fill = variable, y=Descriptio, x=value))+
         legend.title = element_text(size = 12)) +  plotTheme()
 
 
-LandUseLong<-
-  LandUse%>%
-  mutate(pctLoss = pctLoss * -1)%>%
-  dplyr::select(pctGain, pctLoss, Descriptio)%>%
-  gather(variable, value, -c(Descriptio))%>%
-  mutate(variable = ifelse(variable == "pctGain", "Percent Gained", "Percent Lost"))
+# LandUseLong<-
+#   LandUse %>%
+#   mutate(pctLoss = pctLoss * (-1))   %>%
+#   dplyr::select(pctGain, pctLoss, Descriptio)%>%
+#   gather(variable, value, -c(Descriptio))%>%
+#   mutate(variable = ifelse(variable == "pctGain", "Percent Gained", "Percent Lost"))
 
 # ggplot(LandUseLong, aes(fill = variable, y=Descriptio, x=value))+
 #   geom_bar(stat='identity', position = "stack", width = .5)+
@@ -1592,24 +1594,25 @@ phillyhealth <-
   
 phillyhealth <-
   merge(x = TreeCanopyNoC_census, y = phillyhealth, by = "tractfips", all = TRUE) 
+```
 
+```{r p health, message=FALSE, warning=FALSE, results='hide', cache=TRUE}
 phillyhealth <- phillyhealth %>%
-  dplyr::select(tractfips,casthma_crudeprev,AreaLoss.x,pctGain,pctLoss,geometry,stroke_crudeprev,phlth_crudeprev,
-                obesity_crudeprev,mhlth_crudeprev,lpa_crudeprev)%>%
+  dplyr::select(tractfips,casthma_crudeprev,AreaLoss.x,pctGain,pctLoss,geometry,stroke_crudeprev,phlth_crudeprev, obesity_crudeprev,mhlth_crudeprev,lpa_crudeprev)%>%
   mutate(LogPctLoss = log10(pctLoss),
          LogPctGain = log10(pctGain)) %>%
   rename(Asthma = casthma_crudeprev,
          Leisure_time = lpa_crudeprev,
          Mental_health = mhlth_crudeprev,
          Obesity = obesity_crudeprev,
-         Physical_health = pthlth_crudeprev,
+         Physical_health = phlth_crudeprev,
          Stroke = stroke_crudeprev) 
 
 
 correlation.long4 <-
   phillyhealth%>%
-     dplyr::select(casthma_crudeprev, phlth_crudeprev,stroke_crudeprev,
-                obesity_crudeprev,mhlth_crudeprev,lpa_crudeprev, pctLoss) %>%
+     dplyr::select(Asthma, Physical_health,Stroke,
+                Obesity,Mental_health,Leisure_time, pctLoss) %>%
     gather(Variable, Value, -pctLoss) %>%
   mutate(Value = as.numeric(Value))
 
@@ -2440,7 +2443,7 @@ st_write(const_scenarios,"constscenario.geojson")
 ```
 
 
-``````{r CV, message=FALSE, warning=FALSE, fig.height = 6, fig.width = 6, cache=TRUE}  
+``````{r CV, message=FALSE, warning=FALSE, fig.height = 6, fig.width = 6, include=TRUE, results='hide', cache=TRUE}  
 
 library(MLeval)
 ## Cross validation
