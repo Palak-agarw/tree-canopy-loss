@@ -2191,8 +2191,8 @@ ggmap(base_map) +
 
 FinalFishnet5$countConst1 <- FinalFishnet5$countConst * 0.75
 FinalFishnet5$countConst2 <- FinalFishnet5$countConst * 0.50
-FinalFishnet5$countConst3 <- FinalFishnet5$countConst * 1.25
-FinalFishnet5$countConst4 <- FinalFishnet5$countConst * 1.50
+FinalFishnet5$countConst3 <- FinalFishnet5$countConst * 1.50
+FinalFishnet5$countConst4 <- FinalFishnet5$countConst * 2
 
 
 ## Construction scenario 1 - 25 less
@@ -2331,7 +2331,7 @@ more25 <- ggmap(base_map) +
   geom_sf(data = ll(fishnet), fill = "white", inherit.aes = FALSE)+
   geom_sf(data= ll(construction3), aes(fill=Risk_Cat), color="transparent", inherit.aes = FALSE)+
   #scale_fill_manual(values=palette5, name="Risk Score") +
-  labs(title="25% Higher")+
+  labs(title="50% Higher")+
   mapTheme()
 
 
@@ -2375,7 +2375,7 @@ more50 <- ggmap(base_map) +
   geom_sf(data = ll(fishnet), fill = "white", inherit.aes = FALSE)+
   geom_sf(data= ll(construction4), aes(fill=Risk_Cat), color="transparent", inherit.aes = FALSE)+
   #scale_fill_manual(values=palette5, name="Risk Score") +
-  labs(title="50% Higher")+
+  labs(title="100% Higher")+
   mapTheme()
 
 
@@ -2390,7 +2390,7 @@ rf5 <- randomForest(
 
 ## Prediction
 testProbs_const5 <- data.frame(Outcome = as.factor(FinalFishnet5$Variable),
-                        Probs = predict(rf4, FinalFishnet5, type= "response"))
+                        Probs = predict(rf5, FinalFishnet5, type= "response"))
 
 
 
@@ -2406,14 +2406,11 @@ FinalFishnet2$uniqueID <- seq.int(nrow(FinalFishnet5))
 
 testProbs_const5$uniqueID <- seq.int(nrow(FinalFishnet5))
 
-construction5 <- left_join(FinalFishnet2, testProbs_const4)
+construction5 <- left_join(FinalFishnet2, testProbs_const5)
 
 construction5 <- construction5 %>%
   mutate(Scenario = "const_original") %>%
   dplyr::select (Outcome,Probs,Risk_Cat,geometry,Scenario)
-
-
-
 
 
 
