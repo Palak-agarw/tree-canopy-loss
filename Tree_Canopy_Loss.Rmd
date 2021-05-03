@@ -2423,6 +2423,8 @@ original <- ggmap(base_map) +
 
 const_scenarios <- rbind(construction1, construction2, construction3, construction4, construction5)
 
+st_write(const_scenarios,"constscenario.geojson")
+
 #mylegend<-g_legend(original)
 
 # grid.arrange(arrangeGrob(
