@@ -238,8 +238,8 @@ ll <- function(dat, proj4 = 4326){
 #                     source = "stamen",
 #                     maptype = "toner") 
 
-base_map <- get_stamenmap(c(left = -75.34937, bottom= 39.84524, right = -74.92109, top = 40.17457),
-                           maptype = "toner-background")
+base_map <- get_stamenmap(c(left = -75.34937, bottom = 39.84524, right = -74.92109, top = 40.17457),
+                           maptype = "toner-lines")
 
 #ggmap(base_map)
 
@@ -390,13 +390,6 @@ We use fishnet grid cells as our unit of analysis to take advantage of high reso
 
 
 ```r
-# library(sf)
-# library(ggmap)
-# library(tidyverse)
-# library(jsonlite)
-
-
-
 #make fishnet
 fishnet2 <- 
   st_make_grid(Philadelphia,
@@ -416,13 +409,13 @@ FishnetIntersect <- st_intersection(fishnet2, ConservationNParks )%>%
   filter(ConservationPct <= 20)
 
 ggmap(base_map) +
-  geom_sf(data = ll(FishnetIntersect), fill = "black", colour = "transparent", inherit.aes = FALSE) +
+  geom_sf(data = ll(FishnetIntersect), fill = "light green", colour = "transparent", inherit.aes = FALSE) +
   labs(title = "Philadelphia Fishnet Grid", 
        subtitle = "1 cell = 1615 ft ^2, roughly 1 block") +
   mapTheme()
 ```
 
-![](Tree_Canopy_Loss_files/figure-html/Fish net-1.png)<!-- -->
+![](Tree_Canopy_Loss_files/figure-html/Fishnet-1.png)<!-- -->
 
 ```r
 fishnet <- FishnetIntersect
@@ -594,14 +587,14 @@ subtitle = "Tree Canopy Area / Gridcell Area") +
         legend.title = element_text(size = 12)) +  mapTheme()
 ```
 
-![](Tree_Canopy_Loss_files/figure-html/2018 Tree Canopy-1.png)<!-- -->
+![](Tree_Canopy_Loss_files/figure-html/Existing Tree Canopy-1.png)<!-- -->
 
 ### Tree Canopy Change
 Surprisingly, tree canopy loss and gain exhibit similar spatial patterns. Both percent gain and loss are highest in a few neighborhoods in South Philadelphia and in the Northeast. While this seems counter-intuitive, this is because these neighborhoods have the least tree canopy, therefore each individual tree gained or lost has a greater overall impact.   
 
 ```r
 v <- ggmap(base_map) +
-  geom_sf(data = ll(FinalFishnet), colour = "white", aes(fill = pctLoss), inherit.aes = FALSE)+
+  geom_sf(data = ll(FinalFishnet), colour = "transparent", aes(fill = pctLoss), inherit.aes = FALSE)+
  # scale_fill_manual(values = palette7,name = "Percent Loss")+
   labs(title= "Percent Tree Canopy Loss", 
        subtitle = "Tree Canopy Lost From 2008 - 2018 / Total Tree Canopy Coverage in 2008")+
@@ -609,7 +602,7 @@ v <- ggmap(base_map) +
         legend.title = element_text(size = 12)) +  mapTheme()
 
 Z <- ggmap(base_map) +
-  geom_sf(data = ll(FinalFishnet),  colour = "white", aes(fill = pctGain), inherit.aes = FALSE)+ 
+  geom_sf(data = ll(FinalFishnet),  colour = "transparent", aes(fill = pctGain), inherit.aes = FALSE)+ 
  # scale_fill_manual(values = palette7,name = "Percent Gain")+
   labs(title= "Percent Tree Canopy Gain", 
        subtitle = "Tree Canopy Gained From 2008 - 2018 / Total Tree Canopy Coverage in 2018")+
@@ -621,7 +614,7 @@ v + scale_fill_distiller(palette = "YlOrRd", direction = 1, name = "% Loss"),
 Z + scale_fill_distiller(palette = "YlGr", direction = 1, name = "% Gain"))
 ```
 
-![](Tree_Canopy_Loss_files/figure-html/Change in tree canopy-1.png)<!-- -->
+![](Tree_Canopy_Loss_files/figure-html/Tree canopy change-1.png)<!-- -->
 
 
 ```r
@@ -687,8 +680,8 @@ Looking at the city as a whole, we see that the majority of fishnet cells experi
 
 ```r
 b <- ggmap(base_map) +
-  geom_sf(data = ll(FinalFishnet), inherit.aes = FALSE, colour = "white", aes(fill = PctChangeCat))+ 
-  labs(title= "Tree Canopy Net Change 2008 - 2018", 
+  geom_sf(data = ll(FinalFishnet), inherit.aes = FALSE, colour = "transparent", aes(fill = PctChangeCat))+ 
+  labs(title= "Tree Canopy Net Change 2008-2018", 
        subtitle = "Percent Tree Canopy Gain - Percent Tree Canopy Loss") +
   theme(plot.title = element_text(size = 30, face = "bold"), 
         legend.title = element_text(size = 12)) +  mapTheme()
@@ -696,7 +689,7 @@ b <- ggmap(base_map) +
 b + scale_fill_brewer(palette = "PiYG", name = "Percent Change", direction = 1, aesthetics = c("colour", "fill"), guide = guide_legend(reverse = TRUE))
 ```
 
-![](Tree_Canopy_Loss_files/figure-html/Net Change-1.png)<!-- -->
+![](Tree_Canopy_Loss_files/figure-html/Net Canopy Change-1.png)<!-- -->
 
 
 ```r
@@ -842,7 +835,7 @@ We also can see that most neighborhoods experienced a net loss in tree canopy. I
 ```r
 goalProg <- ggmap(base_map) +
   geom_sf(data = ll(FinalNeighborhood), aes(fill = GoalCat), color = "white", inherit.aes = FALSE) +
-  labs(title = "Tree Canopy Progress by Neighborhood",
+  labs(title = "30% Canopy Goal by Neighborhood, 2018",
        subtitle = "% Away from 30% tree canopy") +
   theme(plot.title = element_text(size = 30, face = "bold"), 
         legend.title = element_text(size = 12)) +  mapTheme() +
@@ -850,7 +843,7 @@ goalProg <- ggmap(base_map) +
 
 netChange <- ggmap(base_map) +
   geom_sf(data = ll(FinalNeighborhood), aes(fill = GainMinusLossCat), inherit.aes = FALSE, color = "white") +
-  labs(title = "Tree Canopy Net Gain or Loss by Neighborhood, 2008-2018") +
+  labs(title = "Tree Canopy Net Change by Neighborhood, 2008-2018") +
   theme(plot.title = element_text(size = 30, face = "bold"), 
         legend.title = element_text(size = 12)) +  mapTheme()+ 
   scale_fill_brewer(palette = "PiYG", name = "Net Change", direction = 1, aesthetics = c("colour", "fill"), guide = guide_legend(reverse = TRUE))
@@ -858,7 +851,7 @@ netChange <- ggmap(base_map) +
 grid.arrange(goalProg, netChange, ncol=2)
 ```
 
-![](Tree_Canopy_Loss_files/figure-html/Neighborhood Maps-1.png)<!-- -->
+![](Tree_Canopy_Loss_files/figure-html/Neighborhood Canopy Maps-1.png)<!-- -->
 
 
 ### A closer look: neighborhood-level tree canopy change   
@@ -869,8 +862,6 @@ To better understand tree canopy change patterns in these neighborhoods, we anal
 paletteChange <- c("green", "orange", "purple")
 
 
-
- 
 #reference map
 refmap <- ggmap(base_map) +
   geom_sf(data = ll(Neighborhood), fill = "white", colour = "gray", inherit.aes = FALSE) +
@@ -879,7 +870,6 @@ refmap <- ggmap(base_map) +
   labs(title = "Richmond and Upper Roxborough Neighborhoods") +
   theme(plot.title = element_text(size = 30, face = "bold"), 
         legend.title = element_text(size = 12)) +  mapTheme()
- 
  
 RM <- ggmap(RMbase_map) +
    geom_sf(data = ll(RMBound), fill = "black", inherit.aes = FALSE) +
@@ -901,7 +891,7 @@ UR <- ggmap(URbase_map) +
 grid.arrange(ncol=2, UR, refmap, RM)
 ```
 
-![](Tree_Canopy_Loss_files/figure-html/Neighborhood level Tree Loss-1.png)<!-- -->
+![](Tree_Canopy_Loss_files/figure-html/Neighborhood Level Loss-1.png)<!-- -->
 
 
 ## 3.  How does tree canopy change vary by demographic?  
@@ -1055,34 +1045,32 @@ HydrologyNet$HydrologyAreaCat <- cut(HydrologyNet$HydrologyArea,
                        labels = c("None", "Little hydrology", "Some hydrology", "High hydrology", "Most hydrology"), 
                        right = FALSE)
 
-hydro <- ggmap(base_map) +
-  geom_sf(data = ll(HydrologyNet), aes(fill = HydrologyAreaCat), colour = "white", inherit.aes = FALSE, alpha = 0.75) +
-  labs(title = "Weighted Proximity to Water", subtitle = "Philadelphia, PA") +
-  theme(plot.title = element_text(size = 30, face = "bold"), 
-        legend.title = element_text(size = 12)) +  mapTheme()
-
-hydro + scale_fill_brewer(palette = "YlGnBu", name = "Amount of Water", direction = 1, aesthetics = c("colour", "fill"), guide = guide_legend(reverse = TRUE))
-```
-
-![](Tree_Canopy_Loss_files/figure-html/Hydrology-1.png)<!-- -->
-
-
-```r
-hydroPlot <- ggplot(HydrologyNet, aes(y = LogPctLoss, x = HydrologyPct))+
-  stat_density2d(aes(fill = ..level..), geom = "polygon", bins = 20) +
-  scale_fill_gradient(low="light green", high="magenta", name="Distribution") +
-  #geom_point(alpha = 0.5)+
-  labs(title = "Relationship between Tree Canopy Loss and \n Hydrology",
-       subtitle = "Philadelphia, PA \n 2018 \n aggregated by fishnet") +
-  xlab("Proximity to Hydrological Features") +
-  ylab("Log Percent of Tree Canopy Loss from 2008-2018") +
-  theme(plot.title = element_text(hjust = 0.3, size = 12), plot.subtitle = element_text(hjust = 0.3, size = 8)) +
-  plotTheme()
 
 FinalFishnet <-
    HydrologyNet %>%
    st_drop_geometry() %>%
    left_join(FinalFishnet, .)
+
+
+hydro <- ggmap(base_map) +
+  geom_sf(data = ll(HydrologyNet), aes(fill = HydrologyAreaCat), colour = "white", inherit.aes = FALSE, alpha = 0.75) +
+  labs(title = "Weighted Proximity to Water", subtitle = "Philadelphia, PA") +
+  theme(plot.title = element_text(size = 30, face = "bold"), 
+        legend.title = element_text(size = 12)) +  mapTheme()
+```
+
+
+```r
+# hydroPlot <- ggplot(HydrologyNet, aes(y = LogPctLoss, x = HydrologyPct))+
+#   stat_density2d(aes(fill = ..level..), geom = "polygon", bins = 20) +
+#   scale_fill_gradient(low="light green", high="magenta", name="Distribution") +
+#   #geom_point(alpha = 0.5)+
+#   labs(title = "Relationship between Tree Canopy Loss and \n Hydrology",
+#        subtitle = "Philadelphia, PA \n 2018 \n aggregated by fishnet") +
+#   xlab("Proximity to Hydrological Features") +
+#   ylab("Log Percent of Tree Canopy Loss from 2008-2018") +
+#   theme(plot.title = element_text(hjust = 0.3, size = 12), plot.subtitle = element_text(hjust = 0.3, size = 8)) +
+#   plotTheme()
 ```
 
 Next, we look at parcel size. Here, it appears that bigger parcels experience less tree canopy loss.  
@@ -1257,7 +1245,6 @@ grid.arrange(LandUse, resDensity, ncol = 2, top = "Land Use and Tree Canopy Chan
 ![](Tree_Canopy_Loss_files/figure-html/Residential density-1.png)<!-- -->
 
 
-
 ```r
 e311Trees <-
  # st_read('C:/Users/Kyle McCarthy/Documents/Practicum/e311.csv') 
@@ -1300,7 +1287,6 @@ FinalFishnet <-
 ```
 
 
-
 ```r
 const_spatial2 <-
   const_spatial %>%
@@ -1334,17 +1320,13 @@ const_net$countConstCat <- cut(const_net$countConst,
                        labels = c("Least permits", "Some permits", "Moderate permits", "Most permits"), 
                        right = FALSE)
 
-ggplot() +
+constructionPlot <- ggplot() +
    geom_sf(data = const_net, aes(fill = as.factor(countConstCat)), color = NA) + scale_fill_brewer(palette = "Greys", direction = 1, aesthetics = c("fill"), guide = guide_legend(reverse = TRUE), name = "Permit Count") +
    #scale_fill_viridis() +
    labs(title = "Construction Permits by Neighborhood, 2020", subtitle = "Philadelphia, PA") +
   theme(plot.title = element_text(size = 30, face = "bold"), 
         legend.title = element_text(size = 12)) +  mapTheme()
-```
 
-![](Tree_Canopy_Loss_files/figure-html/Const_Permit-1.png)<!-- -->
-
-```r
 FinalFishnet <-
    const_net_fish %>%
    st_drop_geometry() %>%
@@ -1417,11 +1399,7 @@ urNeigh <- ggmap(base_mapUR, darken = c(0.3, "white")) +
    scale_fill_manual(values = paletteJ, name = "Canopy Change") +
    labs(title = "Upper Roxborough", subtitle = "Philadelphia, PA") +
      mapTheme()
-
-grid.arrange(pbNeigh, urNeigh, rmNeigh, ncol = 3, top = "Construction and Canopy Loss in 3 Neighborhoods")
 ```
-
-![](Tree_Canopy_Loss_files/figure-html/Const Permits neigh-1.png)<!-- -->
 
 
 
@@ -1516,16 +1494,16 @@ HOLC_plot <- full_join(as.data.frame(HOLC), as.data.frame(HOLC2)) %>%
 #   HOLC%>%
 #   left_join(TreeCanopyLossHOLC)
 
- ggplot() +
-   geom_sf(data = Philadelphia, colour = "gray90", fill = "gray90") +
+ggmap(base_map) +
+   geom_sf(data = ll(Philadelphia), colour = "gray90", fill = "gray90", inherit.aes = FALSE) +
   scale_fill_brewer(palette = "Spectral", name = "HOLC Grade", direction = -1, aesthetics = c("colour", "fill"), guide = guide_legend(reverse = TRUE)) +
-   geom_sf(data = HOLC_plot, aes(fill = holc_grade), alpha = 0.6, colour = "gray90") +
+   geom_sf(data = ll(HOLC_plot), aes(fill = holc_grade), alpha = 0.6, colour = "white", inherit.aes = FALSE) +
    labs(title = "1937 HOLC Redlining Boundaries", subtitle = "Philadelphia, PA") +
   theme(plot.title = element_text(size = 30, face = "bold"), 
         legend.title = element_text(size = 12)) +  mapTheme()
 ```
 
-![](Tree_Canopy_Loss_files/figure-html/HOLC categories-1.png)<!-- -->
+![](Tree_Canopy_Loss_files/figure-html/HOLC Areas-1.png)<!-- -->
 
 ```r
 # FinalFishnet %>%
@@ -1741,36 +1719,6 @@ FinalFishnet <- FinalFishnet2
 
 
 ```r
-# Intersection performed in ArcGIS to conserve time 
- 
-# imperviousness <- st_read("C:/Users/Kyle McCarthy/Documents/CPLN 675/Midterm/Impervious_Surfaces_2004.shp")%>% 
-# st_transform('ESRI:102728')%>% 
-# st_make_valid()%>%
-# st_intersection(fishnet) 
-
-
-#imperviousness <- st_read("C:/Users/Kyle McCarthy/Documents/Practicum/Data/impervious_intersect.shp")%>%
-#imperviousness <-
-#imperviousness%>%
-#st_transform('ESRI:102728')%>%
-#mutate(Area = as.numeric(st_area(.)))%>%
-#st_drop_geometry()%>%
-#group_by(uniqueID)%>%
-#summarise(ImperviousArea = sum(Area))%>%
-#mutate(pctImpervious = ImperviousArea / 2608225 )%>%
-#left_join(FinalFishnet, .)
-
-#ggplot(imperviousness, aes(y = LogPctLoss , x = ImperviousArea))+
- # geom_point()+
-#  labs(title = "Percent Change vs Construction nn1",
- #      subtilte = "Aggregated by Fishnet") +
-#  xlab("Average Percent Change ") +
-#  ylab("Log Percent Loss") +
-#  theme(plot.title = element_text(hjust = 0.5, size = 15, face = "bold"), plot.subtitle = element_text(hjust = 0.5, size = 8)) +
-#  plotTheme()
-
-# parks 
-
 poles <- st_read('http://data.phl.opendata.arcgis.com/datasets/9059a7546b6a4d658bef9ce9c84e4b03_0.geojson') %>% 
 st_transform('ESRI:102728')%>% 
 st_centroid()
@@ -1800,12 +1748,8 @@ geom_sf(data = ll(FinalFishnet), aes(fill = q5(LogPole)), colour = "white", inhe
   theme(plot.title = element_text(size = 30, face = "bold"), 
         legend.title = element_text(size = 12)) +  mapTheme()
 
-poles + scale_fill_brewer(palette = "YlGnBu", name = "Amount of Poles", direction = 1, aesthetics = c("colour", "fill"), guide = guide_legend(reverse = TRUE))
-```
+polePlot <- poles + scale_fill_brewer(palette = "YlGnBu", name = "Amount of Poles", direction = 1, aesthetics = c("colour", "fill"), guide = guide_legend(reverse = TRUE))
 
-![](Tree_Canopy_Loss_files/figure-html/Poles-1.png)<!-- -->
-
-```r
 # ggplot(FinalFishnet, aes(y = LogPctLoss , x = LogPole))+
 #   geom_point()+
 #   labs(title = "Percent Change and Poles",
@@ -1816,6 +1760,34 @@ poles + scale_fill_brewer(palette = "YlGnBu", name = "Amount of Poles", directio
 #   plotTheme()
 #   
 ```
+
+
+
+
+```r
+hydro + scale_fill_brewer(palette = "YlGnBu", name = "Amount of Water", direction = 1, aesthetics = c("colour", "fill"), guide = guide_legend(reverse = TRUE))
+```
+
+![](Tree_Canopy_Loss_files/figure-html/factor maps-1.png)<!-- -->
+
+```r
+polePlot
+```
+
+![](Tree_Canopy_Loss_files/figure-html/factor maps-2.png)<!-- -->
+
+```r
+constructionPlot
+```
+
+![](Tree_Canopy_Loss_files/figure-html/factor maps-3.png)<!-- -->
+
+```r
+grid.arrange(pbNeigh, urNeigh, rmNeigh, ncol = 3, top = "Construction and Canopy Loss in 3 Neighborhoods")
+```
+
+![](Tree_Canopy_Loss_files/figure-html/factor maps-4.png)<!-- -->
+
 
 ### Correlation Plot  
 To select a set of variables for our model, we make a correlation plot. 
