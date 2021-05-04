@@ -234,9 +234,14 @@ ll <- function(dat, proj4 = 4326){
   st_transform(dat, proj4)
 }
 
-base_map <- get_map(location = unname(st_bbox(ll(st_buffer(st_centroid(Philadelphia),60000)))), 
-                    source = "stamen",
-                    maptype = "toner") 
+# base_map <- get_map(location = unname(st_bbox(ll(st_buffer(st_centroid(Philadelphia),60000)))), 
+#                     source = "stamen",
+#                     maptype = "toner") 
+
+base_map <- get_stamenmap(c(left = -75.34937, bottom = 39.84524, right = -74.92109, top = 40.17457),
+                           maptype = "toner-background")
+
+#ggmap(base_map)
 
  RMBound <- Neighborhood %>%  
    dplyr::filter(NAME=="RICHMOND")
@@ -560,12 +565,15 @@ FinalFishnet$pctLossCat <- cut(FinalFishnet$pctLoss,
 # Exploratory Analysis  
 
 Our analysis in the following sections is guided by the following questions:
-
+<style>
+div.blue { background-color:#e6f0ff; border-radius: 5px; padding: 20px;}
+</style>
+<div class = "blue">
 1. What does Philadelphia's tree canopy look like?
 2. Where are neighborhoods at with achieving the 30% goal?
 3. How does tree canopy change vary by demographic?
 4. How do current patterns of tree canopy coverage and loss reflect disinvestment as a result of redlining and older planning practices?   
-
+</div>
 ## 1. Existing tree canopy and tree canopy change  
   
   
@@ -1047,32 +1055,33 @@ HydrologyNet$HydrologyAreaCat <- cut(HydrologyNet$HydrologyArea,
                        labels = c("None", "Little hydrology", "Some hydrology", "High hydrology", "Most hydrology"), 
                        right = FALSE)
 
-hydro <- ggmap(base_map) +
-  geom_sf(data = ll(HydrologyNet), aes(fill = HydrologyAreaCat), colour = "white", inherit.aes = FALSE, alpha = 0.75) +
-  labs(title = "Weighted Proximity to Water", subtitle = "Philadelphia, PA") +
-  theme(plot.title = element_text(size = 30, face = "bold"), 
-        legend.title = element_text(size = 12)) +  mapTheme()
-
-hydro + scale_fill_brewer(palette = "YlGnBu", name = "Amount of Water", direction = 1, aesthetics = c("colour", "fill"), guide = guide_legend(reverse = TRUE))
-```
-
-```{r Hydrology and Loss, fig.height = 12,fig.width = 12, message=FALSE, warning=FALSE, include=TRUE, results='hide', cache=TRUE}
-
-hydroPlot <- ggplot(HydrologyNet, aes(y = LogPctLoss, x = HydrologyPct))+
-  stat_density2d(aes(fill = ..level..), geom = "polygon", bins = 20) +
-  scale_fill_gradient(low="light green", high="magenta", name="Distribution") +
-  #geom_point(alpha = 0.5)+
-  labs(title = "Relationship between Tree Canopy Loss and \n Hydrology",
-       subtitle = "Philadelphia, PA \n 2018 \n aggregated by fishnet") +
-  xlab("Proximity to Hydrological Features") +
-  ylab("Log Percent of Tree Canopy Loss from 2008-2018") +
-  theme(plot.title = element_text(hjust = 0.3, size = 12), plot.subtitle = element_text(hjust = 0.3, size = 8)) +
-  plotTheme()
 
 FinalFishnet <-
    HydrologyNet %>%
    st_drop_geometry() %>%
    left_join(FinalFishnet, .)
+
+
+hydro <- ggmap(base_map) +
+  geom_sf(data = ll(HydrologyNet), aes(fill = HydrologyAreaCat), colour = "white", inherit.aes = FALSE, alpha = 0.75) +
+  labs(title = "Weighted Proximity to Water", subtitle = "Philadelphia, PA") +
+  theme(plot.title = element_text(size = 30, face = "bold"), 
+        legend.title = element_text(size = 12)) +  mapTheme()
+```
+
+```{r Hydrology and Loss, fig.height = 12,fig.width = 12, message=FALSE, warning=FALSE, include=TRUE, results='hide', cache=TRUE}
+
+# hydroPlot <- ggplot(HydrologyNet, aes(y = LogPctLoss, x = HydrologyPct))+
+#   stat_density2d(aes(fill = ..level..), geom = "polygon", bins = 20) +
+#   scale_fill_gradient(low="light green", high="magenta", name="Distribution") +
+#   #geom_point(alpha = 0.5)+
+#   labs(title = "Relationship between Tree Canopy Loss and \n Hydrology",
+#        subtitle = "Philadelphia, PA \n 2018 \n aggregated by fishnet") +
+#   xlab("Proximity to Hydrological Features") +
+#   ylab("Log Percent of Tree Canopy Loss from 2008-2018") +
+#   theme(plot.title = element_text(hjust = 0.3, size = 12), plot.subtitle = element_text(hjust = 0.3, size = 8)) +
+#   plotTheme()
+
 ```
 
 Next, we look at parcel size. Here, it appears that bigger parcels experience less tree canopy loss.  
@@ -1210,7 +1219,7 @@ LandUseLong<-
 
 ```
 
-```{r Residential density, message=FALSE, warning=FALSE, include=TRUE, results='hide', fig.height = 10, fig.width = 5, cache=TRUE}
+```{r Residential density, message=FALSE, warning=FALSE, include=TRUE, results='hide', fig.height = 6, fig.width = 10, cache=TRUE}
 
 LandUse2 <-
   LandUse1%>%
@@ -1248,7 +1257,6 @@ resDensity <- ggplot(LandUse2, aes(y=C_DIG2DESC, x=pctChange))+
 grid.arrange(LandUse, resDensity, ncol = 2, top = "Land Use and Tree Canopy Change")
 
 ```
-
 
 ```{r E911 Trees, fig.height = 12,fig.width = 12, message=FALSE, warning=FALSE, include=TRUE, results='hide', cache=TRUE}
 
@@ -1292,7 +1300,6 @@ FinalFishnet <-
 #   plotTheme()
 ```
 
-
 ```{r Const_Permit, message=FALSE, warning=FALSE, include=TRUE, results='hide', fig.height = 7, fig.width = 8, cache=TRUE}
   
 const_spatial2 <-
@@ -1327,22 +1334,18 @@ const_net$countConstCat <- cut(const_net$countConst,
                        labels = c("Least permits", "Some permits", "Moderate permits", "Most permits"), 
                        right = FALSE)
 
-ggplot() +
+constructionPlot <- ggplot() +
    geom_sf(data = const_net, aes(fill = as.factor(countConstCat)), color = NA) + scale_fill_brewer(palette = "Greys", direction = 1, aesthetics = c("fill"), guide = guide_legend(reverse = TRUE), name = "Permit Count") +
    #scale_fill_viridis() +
    labs(title = "Construction Permits by Neighborhood, 2020", subtitle = "Philadelphia, PA") +
   theme(plot.title = element_text(size = 30, face = "bold"), 
         legend.title = element_text(size = 12)) +  mapTheme()
 
-
 FinalFishnet <-
    const_net_fish %>%
    st_drop_geometry() %>%
    left_join(FinalFishnet, .)%>%
    mutate(countConst = replace_na(countConst, 0))
-
-
-
 ```
 
 ```{r Const Permits neigh, message=FALSE, warning=FALSE, include=TRUE, results='hide', fig.height = 5, fig.width = 10, cache=TRUE}
@@ -1410,10 +1413,6 @@ urNeigh <- ggmap(base_mapUR, darken = c(0.3, "white")) +
    scale_fill_manual(values = paletteJ, name = "Canopy Change") +
    labs(title = "Upper Roxborough", subtitle = "Philadelphia, PA") +
      mapTheme()
-
-grid.arrange(pbNeigh, urNeigh, rmNeigh, ncol = 3, top = "Construction and Canopy Loss in 3 Neighborhoods")
-
-
 ```
 
 
@@ -1732,36 +1731,6 @@ FinalFishnet <- FinalFishnet2
 
 ```{r Poles, message=FALSE, warning=FALSE, results='hide', fig.height =  8, fig.width =8,cache=TRUE}
 
-# Intersection performed in ArcGIS to conserve time 
- 
-# imperviousness <- st_read("C:/Users/Kyle McCarthy/Documents/CPLN 675/Midterm/Impervious_Surfaces_2004.shp")%>% 
-# st_transform('ESRI:102728')%>% 
-# st_make_valid()%>%
-# st_intersection(fishnet) 
-
-
-#imperviousness <- st_read("C:/Users/Kyle McCarthy/Documents/Practicum/Data/impervious_intersect.shp")%>%
-#imperviousness <-
-#imperviousness%>%
-#st_transform('ESRI:102728')%>%
-#mutate(Area = as.numeric(st_area(.)))%>%
-#st_drop_geometry()%>%
-#group_by(uniqueID)%>%
-#summarise(ImperviousArea = sum(Area))%>%
-#mutate(pctImpervious = ImperviousArea / 2608225 )%>%
-#left_join(FinalFishnet, .)
-
-#ggplot(imperviousness, aes(y = LogPctLoss , x = ImperviousArea))+
- # geom_point()+
-#  labs(title = "Percent Change vs Construction nn1",
- #      subtilte = "Aggregated by Fishnet") +
-#  xlab("Average Percent Change ") +
-#  ylab("Log Percent Loss") +
-#  theme(plot.title = element_text(hjust = 0.5, size = 15, face = "bold"), plot.subtitle = element_text(hjust = 0.5, size = 8)) +
-#  plotTheme()
-
-# parks 
-
 poles <- st_read('http://data.phl.opendata.arcgis.com/datasets/9059a7546b6a4d658bef9ce9c84e4b03_0.geojson') %>% 
 st_transform('ESRI:102728')%>% 
 st_centroid()
@@ -1791,7 +1760,7 @@ geom_sf(data = ll(FinalFishnet), aes(fill = q5(LogPole)), colour = "white", inhe
   theme(plot.title = element_text(size = 30, face = "bold"), 
         legend.title = element_text(size = 12)) +  mapTheme()
 
-poles + scale_fill_brewer(palette = "YlGnBu", name = "Amount of Poles", direction = 1, aesthetics = c("colour", "fill"), guide = guide_legend(reverse = TRUE))
+polePlot <- poles + scale_fill_brewer(palette = "YlGnBu", name = "Amount of Poles", direction = 1, aesthetics = c("colour", "fill"), guide = guide_legend(reverse = TRUE))
 
 # ggplot(FinalFishnet, aes(y = LogPctLoss , x = LogPole))+
 #   geom_point()+
@@ -1804,6 +1773,22 @@ poles + scale_fill_brewer(palette = "YlGnBu", name = "Amount of Poles", directio
 #   
 
 ```
+
+
+
+```{r factor maps, fig.height = 12,fig.width = 12, message=FALSE, warning=FALSE, include=TRUE, results='hide', cache=TRUE}
+
+hydro + scale_fill_brewer(palette = "YlGnBu", name = "Amount of Water", direction = 1, aesthetics = c("colour", "fill"), guide = guide_legend(reverse = TRUE))
+
+
+polePlot
+
+constructionPlot
+
+grid.arrange(pbNeigh, urNeigh, rmNeigh, ncol = 3, top = "Construction and Canopy Loss in 3 Neighborhoods")
+
+```
+
 
 ### Correlation Plot  
 To select a set of variables for our model, we make a correlation plot. 
@@ -2194,11 +2179,9 @@ ggmap(base_map) +
         plot.title = element_text(hjust = 0.5))+
   theme(plot.title = element_text(size = 30, face = "bold"), 
         legend.title = element_text(size = 12)) +  mapTheme()
-
-
 ```
 
-```{r Construction_scenarios, message=FALSE, warning=FALSE, fig.height = 6, fig.width = 6, cache=TRUE}
+```{r Construction_scenarios, message=FALSE, warning=FALSE, fig.height = 15, fig.width = 10, cache=TRUE}
 
 FinalFishnet5$countConst1 <- FinalFishnet5$countConst * 0.75       #25 less
 FinalFishnet5$countConst2 <- FinalFishnet5$countConst * 0.50       #50 less
@@ -2223,6 +2206,7 @@ testProbs_const1 <- testProbs_const1 %>% mutate(Risk_Cat=
                                                    Probs >= 0.4 & Probs < .6 ~ "Moderate",
                                                    Probs >=.6 & Probs < .80 ~ "High",
                                                    Probs >=.80 ~ "Severe"))
+testProbs_const1$Risk_Cat <- factor(testProbs_const1$Risk_Cat, levels = c("Very Low", "Low", "Moderate", "High", "Severe"))
 FinalFishnet2$uniqueID <- seq.int(nrow(FinalFishnet5))
 testProbs_const1$uniqueID <- seq.int(nrow(FinalFishnet5))
 construction1 <- left_join(FinalFishnet2, testProbs_const1)
@@ -2248,6 +2232,7 @@ testProbs_const2 <- testProbs_const2 %>% mutate(Risk_Cat=
                                                    Probs >= 0.4 & Probs < .6 ~ "Moderate",
                                                    Probs >=.6 & Probs < .80 ~ "High",
                                                    Probs >=.8 ~ "Severe"))
+testProbs_const2$Risk_Cat <- factor(testProbs_const2$Risk_Cat, levels = c("Very Low", "Low", "Moderate", "High", "Severe"))
 FinalFishnet2$uniqueID <- seq.int(nrow(FinalFishnet5))
 testProbs_const2$uniqueID <- seq.int(nrow(FinalFishnet5))
 construction2 <- left_join(FinalFishnet2, testProbs_const2)
@@ -2273,6 +2258,7 @@ testProbs_const3 <- testProbs_const3 %>% mutate(Risk_Cat=
                                                    Probs >= 0.4 & Probs < .6 ~ "Moderate",
                                                    Probs >=.6 & Probs < .80 ~ "High",
                                                    Probs >=.8 ~ "Severe"))
+testProbs_const3$Risk_Cat <- factor(testProbs_const3$Risk_Cat, levels = c("Very Low", "Low", "Moderate", "High", "Severe"))
 FinalFishnet2$uniqueID <- seq.int(nrow(FinalFishnet5))
 testProbs_const3$uniqueID <- seq.int(nrow(FinalFishnet5))
 construction3 <- left_join(FinalFishnet2, testProbs_const3)
@@ -2298,6 +2284,7 @@ testProbs_const4 <- testProbs_const4 %>% mutate(Risk_Cat=
                                                    Probs >= 0.4 & Probs < .6 ~ "Moderate",
                                                    Probs >=.6 & Probs < .80 ~ "High",
                                                    Probs >=.8 ~ "Severe"))
+testProbs_const4$Risk_Cat <- factor(testProbs_const4$Risk_Cat, levels = c("Very Low", "Low", "Moderate", "High", "Severe"))
 FinalFishnet2$uniqueID <- seq.int(nrow(FinalFishnet5))
 testProbs_const4$uniqueID <- seq.int(nrow(FinalFishnet5))
 construction4 <- left_join(FinalFishnet2, testProbs_const4)
@@ -2323,6 +2310,7 @@ testProbs_const5 <- testProbs_const5 %>% mutate(Risk_Cat=
                                                    Probs >= 0.4 & Probs < .6 ~ "Moderate",
                                                    Probs >=.6 & Probs < .80 ~ "High",
                                                    Probs >=.8 ~ "Severe"))
+testProbs_const5$Risk_Cat <- factor(testProbs_const5$Risk_Cat, levels = c("Very Low", "Low", "Moderate", "High", "Severe"))
 FinalFishnet2$uniqueID <- seq.int(nrow(FinalFishnet5))
 testProbs_const5$uniqueID <- seq.int(nrow(FinalFishnet5))
 construction5 <- left_join(FinalFishnet2, testProbs_const5)
@@ -2338,20 +2326,20 @@ const_scenarios <- rbind(construction1, construction2, construction3, constructi
 #SCENARIO 1
 less25 <- ggmap(base_map) +
   geom_sf(data = ll(fishnet), fill = "white", inherit.aes = FALSE)+
-  geom_sf(data=ll(construction1), aes(fill=Risk_Cat), color="white", inherit.aes = FALSE)+
-  labs(title="Construction reduced by 25%")+
+  geom_sf(data=ll(construction1), aes(fill=Risk_Cat), color="transparent", inherit.aes = FALSE)+
+  labs(title="25% Lower")+
   theme(plot.title = element_text(size = 30, face = "bold"), 
         legend.title = element_text(size = 12)) +  mapTheme() +
-  scale_fill_brewer(palette = "PiYG", name = "Risk Score", direction = 1, aesthetics = c("colour", "fill"))
+  scale_fill_brewer(palette = "PiYG", name = "Risk Score", direction = -1, aesthetics = c("colour", "fill"))
 
 
 less50 <- ggmap(base_map) +
   geom_sf(data = ll(fishnet), fill = "white", inherit.aes = FALSE)+
-  geom_sf(data=ll(construction2), aes(fill=Risk_Cat), color="white", inherit.aes = FALSE)+
+  geom_sf(data=ll(construction2), aes(fill=Risk_Cat), color="transparent", inherit.aes = FALSE)+
   labs(title="50% Lower")+
   theme(plot.title = element_text(size = 30, face = "bold"), 
         legend.title = element_text(size = 12)) +  mapTheme() +
-  scale_fill_brewer(palette = "PiYG", name = "Risk Score", direction = 1, aesthetics = c("colour", "fill"))
+  scale_fill_brewer(palette = "PiYG", name = "Risk Score", direction = -1, aesthetics = c("colour", "fill"))
 
 
 more50 <- ggmap(base_map) +
@@ -2360,7 +2348,7 @@ more50 <- ggmap(base_map) +
   labs(title="50% Higher")+
   theme(plot.title = element_text(size = 30, face = "bold"), 
         legend.title = element_text(size = 12)) +  mapTheme() +
-  scale_fill_brewer(palette = "PiYG", name = "Risk Score", direction = 1, aesthetics = c("colour", "fill"))
+  scale_fill_brewer(palette = "PiYG", name = "Risk Score", direction = -1, aesthetics = c("colour", "fill"))
 
 more100 <- ggmap(base_map) +
   geom_sf(data = ll(fishnet), fill = "white", inherit.aes = FALSE)+
@@ -2368,7 +2356,7 @@ more100 <- ggmap(base_map) +
   labs(title="100% Higher")+
   theme(plot.title = element_text(size = 30, face = "bold"), 
         legend.title = element_text(size = 12)) +  mapTheme() +
-  scale_fill_brewer(palette = "PiYG", name = "Risk Score", direction = 1, aesthetics = c("colour", "fill"))
+  scale_fill_brewer(palette = "PiYG", name = "Risk Score", direction = -1, aesthetics = c("colour", "fill"))
 
 original <- ggmap(base_map) +
   geom_sf(data = ll(fishnet), fill = "white", colour = "transparent", inherit.aes = FALSE)+
@@ -2376,13 +2364,8 @@ original <- ggmap(base_map) +
   labs(title="Original")+
   theme(plot.title = element_text(size = 30, face = "bold"), 
         legend.title = element_text(size = 12)) +  mapTheme() +
-  scale_fill_brewer(palette = "PiYG", name = "Risk Score", direction = 1, aesthetics = c("colour", "fill"))
+  scale_fill_brewer(palette = "PiYG", name = "Risk Score", direction = -1, aesthetics = c("colour", "fill"))
 
-less50
-less25 
-original
-more50
-more100
 
 mylegend<-g_legend(original)
 grid.arrange(arrangeGrob(less50 + theme(legend.position="none"), less25 + theme(legend.position="none"), original + theme(legend.position="none"), more50 + theme(legend.position="none"), more100 + theme(legend.position="none"), ncol = 2, top = "Canopy Change Under 5 Construction Scenarios", mylegend))

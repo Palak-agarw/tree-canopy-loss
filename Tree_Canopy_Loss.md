@@ -234,9 +234,14 @@ ll <- function(dat, proj4 = 4326){
   st_transform(dat, proj4)
 }
 
-base_map <- get_map(location = unname(st_bbox(ll(st_buffer(st_centroid(Philadelphia),60000)))), 
-                    source = "stamen",
-                    maptype = "toner") 
+# base_map <- get_map(location = unname(st_bbox(ll(st_buffer(st_centroid(Philadelphia),60000)))), 
+#                     source = "stamen",
+#                     maptype = "toner") 
+
+base_map <- get_stamenmap(c(left = -75.34937, bottom= 39.84524, right = -74.92109, top = 40.17457),
+                           maptype = "toner-background")
+
+#ggmap(base_map)
 
  RMBound <- Neighborhood %>%  
    dplyr::filter(NAME=="RICHMOND")
@@ -562,12 +567,15 @@ FinalFishnet$pctLossCat <- cut(FinalFishnet$pctLoss,
 # Exploratory Analysis  
 
 Our analysis in the following sections is guided by the following questions:
-
+<style>
+div.blue { background-color:#e6f0ff; border-radius: 5px; padding: 20px;}
+</style>
+<div class = "blue">
 1. What does Philadelphia's tree canopy look like?
 2. Where are neighborhoods at with achieving the 30% goal?
 3. How does tree canopy change vary by demographic?
 4. How do current patterns of tree canopy coverage and loss reflect disinvestment as a result of redlining and older planning practices?   
-
+</div>
 ## 1. Existing tree canopy and tree canopy change  
   
   
@@ -2243,6 +2251,7 @@ testProbs_const1 <- testProbs_const1 %>% mutate(Risk_Cat=
                                                    Probs >= 0.4 & Probs < .6 ~ "Moderate",
                                                    Probs >=.6 & Probs < .80 ~ "High",
                                                    Probs >=.80 ~ "Severe"))
+testProbs_const1$Risk_Cat <- factor(testProbs_const1$Risk_Cat, levels = c("Very Low", "Low", "Moderate", "High", "Severe"))
 FinalFishnet2$uniqueID <- seq.int(nrow(FinalFishnet5))
 testProbs_const1$uniqueID <- seq.int(nrow(FinalFishnet5))
 construction1 <- left_join(FinalFishnet2, testProbs_const1)
@@ -2268,6 +2277,7 @@ testProbs_const2 <- testProbs_const2 %>% mutate(Risk_Cat=
                                                    Probs >= 0.4 & Probs < .6 ~ "Moderate",
                                                    Probs >=.6 & Probs < .80 ~ "High",
                                                    Probs >=.8 ~ "Severe"))
+testProbs_const2$Risk_Cat <- factor(testProbs_const2$Risk_Cat, levels = c("Very Low", "Low", "Moderate", "High", "Severe"))
 FinalFishnet2$uniqueID <- seq.int(nrow(FinalFishnet5))
 testProbs_const2$uniqueID <- seq.int(nrow(FinalFishnet5))
 construction2 <- left_join(FinalFishnet2, testProbs_const2)
@@ -2293,6 +2303,7 @@ testProbs_const3 <- testProbs_const3 %>% mutate(Risk_Cat=
                                                    Probs >= 0.4 & Probs < .6 ~ "Moderate",
                                                    Probs >=.6 & Probs < .80 ~ "High",
                                                    Probs >=.8 ~ "Severe"))
+testProbs_const3$Risk_Cat <- factor(testProbs_const3$Risk_Cat, levels = c("Very Low", "Low", "Moderate", "High", "Severe"))
 FinalFishnet2$uniqueID <- seq.int(nrow(FinalFishnet5))
 testProbs_const3$uniqueID <- seq.int(nrow(FinalFishnet5))
 construction3 <- left_join(FinalFishnet2, testProbs_const3)
@@ -2318,6 +2329,7 @@ testProbs_const4 <- testProbs_const4 %>% mutate(Risk_Cat=
                                                    Probs >= 0.4 & Probs < .6 ~ "Moderate",
                                                    Probs >=.6 & Probs < .80 ~ "High",
                                                    Probs >=.8 ~ "Severe"))
+testProbs_const4$Risk_Cat <- factor(testProbs_const4$Risk_Cat, levels = c("Very Low", "Low", "Moderate", "High", "Severe"))
 FinalFishnet2$uniqueID <- seq.int(nrow(FinalFishnet5))
 testProbs_const4$uniqueID <- seq.int(nrow(FinalFishnet5))
 construction4 <- left_join(FinalFishnet2, testProbs_const4)
@@ -2343,6 +2355,7 @@ testProbs_const5 <- testProbs_const5 %>% mutate(Risk_Cat=
                                                    Probs >= 0.4 & Probs < .6 ~ "Moderate",
                                                    Probs >=.6 & Probs < .80 ~ "High",
                                                    Probs >=.8 ~ "Severe"))
+testProbs_const5$Risk_Cat <- factor(testProbs_const5$Risk_Cat, levels = c("Very Low", "Low", "Moderate", "High", "Severe"))
 FinalFishnet2$uniqueID <- seq.int(nrow(FinalFishnet5))
 testProbs_const5$uniqueID <- seq.int(nrow(FinalFishnet5))
 construction5 <- left_join(FinalFishnet2, testProbs_const5)
@@ -2358,20 +2371,20 @@ const_scenarios <- rbind(construction1, construction2, construction3, constructi
 #SCENARIO 1
 less25 <- ggmap(base_map) +
   geom_sf(data = ll(fishnet), fill = "white", inherit.aes = FALSE)+
-  geom_sf(data=ll(construction1), aes(fill=Risk_Cat), color="white", inherit.aes = FALSE)+
-  labs(title="Construction reduced by 25%")+
+  geom_sf(data=ll(construction1), aes(fill=Risk_Cat), color="transparent", inherit.aes = FALSE)+
+  labs(title="25% Lower")+
   theme(plot.title = element_text(size = 30, face = "bold"), 
         legend.title = element_text(size = 12)) +  mapTheme() +
-  scale_fill_brewer(palette = "PiYG", name = "Risk Score", direction = 1, aesthetics = c("colour", "fill"))
+  scale_fill_brewer(palette = "PiYG", name = "Risk Score", direction = -1, aesthetics = c("colour", "fill"))
 
 
 less50 <- ggmap(base_map) +
   geom_sf(data = ll(fishnet), fill = "white", inherit.aes = FALSE)+
-  geom_sf(data=ll(construction2), aes(fill=Risk_Cat), color="white", inherit.aes = FALSE)+
+  geom_sf(data=ll(construction2), aes(fill=Risk_Cat), color="transparent", inherit.aes = FALSE)+
   labs(title="50% Lower")+
   theme(plot.title = element_text(size = 30, face = "bold"), 
         legend.title = element_text(size = 12)) +  mapTheme() +
-  scale_fill_brewer(palette = "PiYG", name = "Risk Score", direction = 1, aesthetics = c("colour", "fill"))
+  scale_fill_brewer(palette = "PiYG", name = "Risk Score", direction = -1, aesthetics = c("colour", "fill"))
 
 
 more50 <- ggmap(base_map) +
@@ -2380,7 +2393,7 @@ more50 <- ggmap(base_map) +
   labs(title="50% Higher")+
   theme(plot.title = element_text(size = 30, face = "bold"), 
         legend.title = element_text(size = 12)) +  mapTheme() +
-  scale_fill_brewer(palette = "PiYG", name = "Risk Score", direction = 1, aesthetics = c("colour", "fill"))
+  scale_fill_brewer(palette = "PiYG", name = "Risk Score", direction = -1, aesthetics = c("colour", "fill"))
 
 more100 <- ggmap(base_map) +
   geom_sf(data = ll(fishnet), fill = "white", inherit.aes = FALSE)+
@@ -2388,7 +2401,7 @@ more100 <- ggmap(base_map) +
   labs(title="100% Higher")+
   theme(plot.title = element_text(size = 30, face = "bold"), 
         legend.title = element_text(size = 12)) +  mapTheme() +
-  scale_fill_brewer(palette = "PiYG", name = "Risk Score", direction = 1, aesthetics = c("colour", "fill"))
+  scale_fill_brewer(palette = "PiYG", name = "Risk Score", direction = -1, aesthetics = c("colour", "fill"))
 
 original <- ggmap(base_map) +
   geom_sf(data = ll(fishnet), fill = "white", colour = "transparent", inherit.aes = FALSE)+
@@ -2396,43 +2409,14 @@ original <- ggmap(base_map) +
   labs(title="Original")+
   theme(plot.title = element_text(size = 30, face = "bold"), 
         legend.title = element_text(size = 12)) +  mapTheme() +
-  scale_fill_brewer(palette = "PiYG", name = "Risk Score", direction = 1, aesthetics = c("colour", "fill"))
+  scale_fill_brewer(palette = "PiYG", name = "Risk Score", direction = -1, aesthetics = c("colour", "fill"))
 
-less50
-```
 
-![](Tree_Canopy_Loss_files/figure-html/Construction_scenarios-1.png)<!-- -->
-
-```r
-less25 
-```
-
-![](Tree_Canopy_Loss_files/figure-html/Construction_scenarios-2.png)<!-- -->
-
-```r
-original
-```
-
-![](Tree_Canopy_Loss_files/figure-html/Construction_scenarios-3.png)<!-- -->
-
-```r
-more50
-```
-
-![](Tree_Canopy_Loss_files/figure-html/Construction_scenarios-4.png)<!-- -->
-
-```r
-more100
-```
-
-![](Tree_Canopy_Loss_files/figure-html/Construction_scenarios-5.png)<!-- -->
-
-```r
 mylegend<-g_legend(original)
 grid.arrange(arrangeGrob(less50 + theme(legend.position="none"), less25 + theme(legend.position="none"), original + theme(legend.position="none"), more50 + theme(legend.position="none"), more100 + theme(legend.position="none"), ncol = 2, top = "Canopy Change Under 5 Construction Scenarios", mylegend))
 ```
 
-![](Tree_Canopy_Loss_files/figure-html/Construction_scenarios-6.png)<!-- -->
+![](Tree_Canopy_Loss_files/figure-html/Construction_scenarios-1.png)<!-- -->
 
 
 
