@@ -1369,14 +1369,16 @@ FinalFishnet <-
   na.omit() %>%
   summarize(mean_loss = mean(pctLoss)) %>%
   ggplot() +
-  geom_histogram(aes(y = mean_loss), binwidth = 1, fill = "magenta", center = 0) +
+  geom_histogram(aes(y = mean_loss), binwidth = 1, fill = "magenta") +
   labs(title="Loss by HOLC Grade, 2008-2018 (%)",
        subtitle="Philadelphia, PA",
        x="HOLC Rating", 
        y="% Loss")+
   facet_wrap(~holc_grade, nrow = 1)+
     theme(plot.title = element_text(size = 30, face = "bold"), 
-        legend.title = element_text(size = 12)) +
+        legend.title = element_text(size = 12),
+        axis.text.x=element_blank(),
+        axis.ticks.x=element_blank()) +
   plotTheme()
   
   
@@ -1387,14 +1389,16 @@ FinalFishnet <-
   na.omit() %>%
   summarize(mean_cov = mean(pctCoverage18)) %>%
   ggplot() +
-  geom_histogram(aes(y = mean_cov), binwidth = 1, fill = "green", center = 0) +
+  geom_histogram(aes(y = mean_cov), binwidth = 1, fill = "green") +
   labs(title="Coverage by HOLC Grade, 2018 (%)",
        subtitle="Philadelphia, PA",
        x="HOLC Rating", 
        y="% Tree Canopy")+
   facet_wrap(~holc_grade, nrow = 1)+
     theme(plot.title = element_text(size = 30, face = "bold"), 
-        legend.title = element_text(size = 12)) +
+        legend.title = element_text(size = 12),
+        axis.text.x=element_blank(),
+        axis.ticks.x=element_blank()) +
   plotTheme()
 ```
 
@@ -1726,6 +1730,23 @@ final_net.localMorans <-
                     Morans_P_Value = `Pr(z > 0)`) %>%
       mutate(Sig_Hotspots = ifelse(Morans_P_Value <= 0.0000001, 1, 0)) %>% #change P value
       gather(Variable, Value, -geometry)
+
+#get unique values for mapping
+vars <- unique(final_net.localMorans$Variable)
+varList <- list()
+
+#map moran's I and P Value
+for(i in vars){
+  varList[[i]] <- 
+    ggplot() +
+      geom_sf(data = filter(final_net.localMorans, Variable == i), 
+              aes(fill = Value), colour=NA) +
+      scale_fill_viridis(name="", option = "B") +
+      labs(title=i) +
+    theme(plot.title = element_text(size = 30, face = "bold"), 
+          legend.title = element_text(size = 12)) +  mapTheme()}
+
+do.call(grid.arrange,c(varList, ncol = 4, top = "Figure 5: Local Moran's I Statistics, Observed Arrests"))
 
 ```
 

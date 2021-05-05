@@ -13,7 +13,9 @@ output:
 ---
 
 [Return to MUSA 801 Projects Page](https://pennmusa.github.io/MUSA_801.io/)  
-This project was completed as part of the Master in Urban Spatial Analytics Spring 2021 Practicum instructed by Ken Steif, Michael Fichman, and Matt Harris. We thank our instructors as well as Dexter Locke and Lara Roman from the United States Forest Service for their feedback and help navigating the data. 
+
+# Introduction
+This project was completed as part of the Master in Urban Spatial Analytics Spring 2021 Practicum instructed by Ken Steif, Michael Fichman, and Matt Harris. We thank our instructors as well as Dexter Locke and Lara Roman from the United States Forest Service for their help navigating the data and for their feedback. 
 
 This document is intended to help other researchers replicate a study of tree canopy loss linked to spatial risk factors. We first introduce our motivation, followed by data exploration and analysis, and finally predictive modeling. We include hyperlinks thorough our document and in the appendix for reproducibility. Our hope is that this document and our policy tool can help tree planting agencies, tree advocates, and the interested public understand the forces contributing to tree canopy loss in Philadelphia and imagine different scenarios for our tree canopy based on construction.  
 
@@ -21,7 +23,7 @@ This document is intended to help other researchers replicate a study of tree ca
 ![ ](FrontPage.png)  
 
 
-# Introduction   
+# Motivation 
 
 **Between 2008 and 2018, Philadelphia lost more than 1000 football fields’ worth of tree canopy.**  
 
@@ -37,13 +39,19 @@ Tree canopy is defined as the area of land which, viewed from a bird's eye view,
 **Philadelphia's Tree Canopy Goals** 
 
 1: 30% Tree Canopy in each neighborhood by 2025  
-
+<style>
+div.blue { background-color:#e6f0ff; border-radius: 5px; padding: 10px;}
+</style>
+<div class = "blue">
 Philadelphia (under a previous mayoral administration) set the goal of achieving 30% tree canopy coverage in all neighborhoods by 2025. Currently, the citywide average is 20%, although this is highly uneven. More affluent neighborhoods in the northwest that have many parks and large lawns have much higher tree canopy than industrial neighborhoods in south and north Philadelphia which are full of impervious surfaces. The neighborhoods which have lower canopy coverage tend to be historically disenfranchised, lower income, and predominantly communities of color. This is an environmental justice problem. Neighborhoods like Philadelphia’s Hunting Park have a much lower ratio of tree canopy to impervious surfaces than the citywide average, resulting in higher temperatures during summertime heat waves and poorer air quality.  
-
+</div>
 2: 1 acre of tree canopy within a 10 minute walk for all residents 
-
+<style>
+div.blue { background-color:#e6f0ff; border-radius: 5px; padding: 10px;}
+</style>
+<div class = "blue">
 13% of Philadelphia's residents are considered under-served by green space, meaning that they live more than a 10 minute walk away from at least 1 acre of green space. The city has therefore set a goal of ensuring that all residents are no more than 10 minutes away from at least 1 acre of green space by 2035. To this end, the city is prioritizing adding green space in historically disenfranchised neighborhoods and making efforts to green spaces in schools and recreation centers.     
-
+</div>
 # Planning Tool: Canopy View  
 
 Using this information, we created a predictive scenario policy tool which displays future tree canopy loss under three construction scenarios. The general population and tree advocates can use our tool to understand the potential impact of construction on the tree canopy.    
@@ -1307,7 +1315,7 @@ LogPctResTrans = log10(pctTransRes))
 
 We also look at redlining boundaries from the Homeowner’s Loan Corporation (HOLC). As trees take decades to grow, the spatial configuration of tree canopy and likely their change is influenced by historical planning decisions. In 1937, HOLC created “redlining” maps which rated neighborhoods’ desirability in four categories. They rated neighborhoods with residents of color as the least desirable and majority-white neighborhoods as the most desirable. As a result, the low-ranked neighborhoods experienced disinvestment and greater difficulty attracting investment. 
 
-```{r HOLC Areas, fig.height=8, fig.width=12, message=FALSE, warning=FALSE, cache=TRUE, results='hide'}
+```{r HOLC Areas, message=FALSE, warning=FALSE, include=TRUE, results='hide', fig.height =  7, fig.width = 7, cache=TRUE'}
 
 HOLC2 <- HOLC %>%
   st_intersection(st_make_valid(Philadelphia), HOLC) %>%  
@@ -1359,7 +1367,9 @@ FinalFishnet <-
        y="% Loss")+
   facet_wrap(~holc_grade, nrow = 1)+
     theme(plot.title = element_text(size = 30, face = "bold"), 
-        legend.title = element_text(size = 12)) +
+        legend.title = element_text(size = 12),
+        axis.text.x=element_blank(),
+        axis.ticks.x=element_blank()) +
   plotTheme()
   
   
@@ -1377,7 +1387,9 @@ FinalFishnet <-
        y="% Tree Canopy")+
   facet_wrap(~holc_grade, nrow = 1)+
     theme(plot.title = element_text(size = 30, face = "bold"), 
-        legend.title = element_text(size = 12)) +
+        legend.title = element_text(size = 12),
+        axis.text.x=element_blank(),
+        axis.ticks.x=element_blank()) +
   plotTheme()
 ```
 
@@ -1680,7 +1692,7 @@ do.call(grid.arrange,c(mapList, ncol = 3, top = "Risk Factors by Fishnet"))
 grid.arrange(pbNeigh, urNeigh, rmNeigh, ncol = 1, top = "Construction and Canopy Loss in 3 Neighborhoods")
 ```
 
-```{morans i, message=FALSE, warning=FALSE, results='hide', fig.height =  8, fig.width =8,cache=TRUE}
+```{morans i, message=FALSE, warning=FALSE, results='hide',cache=TRUE}
 library(spdep)
 library(FNN)
 library(spatstat)
@@ -1702,6 +1714,23 @@ final_net.localMorans <-
                     Morans_P_Value = `Pr(z > 0)`) %>%
       mutate(Sig_Hotspots = ifelse(Morans_P_Value <= 0.0000001, 1, 0)) %>% #change P value
       gather(Variable, Value, -geometry)
+
+#get unique values for mapping
+vars <- unique(final_net.localMorans$Variable)
+varList <- list()
+
+#map moran's I and P Value
+for(i in vars){
+  varList[[i]] <- 
+    ggplot() +
+      geom_sf(data = filter(final_net.localMorans, Variable == i), 
+              aes(fill = Value), colour=NA) +
+      scale_fill_viridis(name="", option = "B") +
+      labs(title=i) +
+    theme(plot.title = element_text(size = 30, face = "bold"), 
+          legend.title = element_text(size = 12)) +  mapTheme()}
+
+do.call(grid.arrange,c(varList, ncol = 4, top = "Figure 5: Local Moran's I Statistics, Observed Arrests"))
 
 
 ```
