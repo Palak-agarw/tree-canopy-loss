@@ -776,6 +776,8 @@ $('#MapOn').on('click', function(e) {
 
 
 
+
+
 ajaxfunc = function(dataset, myStyle, myFilter, oneach){ 
   return $.ajax(dataset).done(function(data) {
   var parsedData = JSON.parse(data);
@@ -1046,8 +1048,15 @@ var countCat = function (feature) {
 
 
 function onEachFeatureStats2(feature, layer) { 
-  layer.bindPopup("Probaility of Substantial Tree Loss: " + feature.properties.Probs.toFixed(2) + "%" + "<br>" + 
-  "Tree Loss Severity: " + feature.properties.Risk_Cat + "<br>") ; 
+  if (feature.properties.Risk_Cat != "Severe"){ 
+  layer.bindPopup(
+    "Subtantial Tree Loss Risk: " + feature.properties.Probs.toFixed(2) + "%" + "<br>" + 
+  "Tree Loss Severity: " + feature.properties.Risk_Cat + "<br>") ; } 
+  else { 
+    layer.bindPopup(
+      "Probaility of Substantial Tree Loss: " + feature.properties.Probs.toFixed(2) + "%" + "<br>" + 
+    "Subtantial Tree Loss Risk: " + "Very High"+ "<br>") ; 
+  }
   countCat(feature)
 }
 
