@@ -16,9 +16,8 @@ var Stamen_TonerLite = L.tileLayer('http://{s}.basemaps.cartocdn.com/light_all/{
 
 
 var PhiladelphiaBounds = "https://raw.githubusercontent.com/kylepmccarthy/675Final/6db840912b63a5cbd5a97d1fc553ec31cfa84e84/Data/City_Limits.geojson"
-var CanopyPoly = "https://raw.githubusercontent.com/kylepmccarthy/675Final/main/Data/allkyle.geojson"
-var Neighborhood = "https://raw.githubusercontent.com/kylepmccarthy/675Final/main/Data/Neighborhoods2.geojson"
-var Grid = "https://raw.githubusercontent.com/kylepmccarthy/675Final/main/Data/gridFinal2.geojson"
+var Neighborhood = "https://raw.githubusercontent.com/palakagr/tree-canopy-loss/main/WebAppData/Neighborhoods2.geojson"
+var Grid = "https://raw.githubusercontent.com/palakagr/tree-canopy-loss/main/WebAppData/gridFinal2.geojson"
 
 var electric = "https://raw.githubusercontent.com/kylepmccarthy/675Final/main/Data/electricRPRE2.geojson"
 var alteration = "https://raw.githubusercontent.com/kylepmccarthy/675Final/6db840912b63a5cbd5a97d1fc553ec31cfa84e84/Data/alterationRPRE2.geojson"
