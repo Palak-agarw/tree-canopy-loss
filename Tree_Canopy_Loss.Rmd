@@ -239,7 +239,7 @@ ll <- function(dat, proj4 = 4326){
 #                     maptype = "toner") 
 
 base_map <- get_stamenmap(c(left = -75.34937, bottom = 39.84524, right = -74.92109, top = 40.17457),
-                           maptype = "toner-lines")
+                           maptype = "toner")
 
 #ggmap(base_map)
 
