@@ -860,9 +860,9 @@ paletteChange <- c("green", "orange", "purple")
 
 #reference map
 refmap <- ggmap(base_map) +
-  geom_sf(data = ll(Neighborhood), fill = "green", colour = "gray", inherit.aes = FALSE) +
-  geom_sf(data = ll(RMBound), colour = "gray", fill = "black", inherit.aes = FALSE) +
-    geom_sf(data = ll(URBound), colour = "gray", fill = "black", inherit.aes = FALSE) +
+  geom_sf(data = ll(Neighborhood), fill = "black", colour = "white", inherit.aes = FALSE) +
+  geom_sf(data = ll(RMBound), colour = "white", fill = "green", inherit.aes = FALSE) +
+    geom_sf(data = ll(URBound), colour = "white", fill = "green", inherit.aes = FALSE) +
   labs(title = "Richmond and Upper Roxborough Neighborhoods") +
   theme(plot.title = element_text(size = 30, face = "bold"), 
         legend.title = element_text(size = 12)) +  mapTheme()
@@ -1014,9 +1014,7 @@ grid.arrange(ncol=2, top=textGrob("Neighborhood Attributes and Tree Canopy 2008-
 ```
 
 ## 4. What other factors influence tree canopy loss?    
-Based on our analysis of the spatial distribution of tree canopy loss, we look at a few more variables: hydrology, parcel size, construction, land use, redlining, and health outcomes. 
-
-We first examine hydrology because of the potential relationship between proximity to water and tree canopy loss.
+Based on our analysis of the spatial distribution of tree canopy loss, we look at a few more variables: land use, redlining, hydrology, construction, and health outcomes for potential features.
 
 ```{r Hydrology, fig.height = 12,fig.width = 12, message=FALSE, warning=FALSE, include=TRUE, results='hide', cache=TRUE}
 
@@ -1067,7 +1065,6 @@ hydro <- ggmap(base_map) +
 
 ```
 
-Next, we look at parcel size. Here, it appears that bigger parcels experience less tree canopy loss.  
 ```{r Parcel size, fig.height = 12,fig.width = 12, message=FALSE, warning=FALSE, include=TRUE, results='hide', cache=TRUE}
 # Parcels make little difference, except if you are looking at total net change (looks like a normal distribution). Im commenting it out, but feel free to play around with the data. 
 
@@ -1089,21 +1086,23 @@ FinalFishnet1 %>%
   mutate(LogAvgParcelSize = log10(avgParcelSize), 
          LogPctLoss = log10(pctLoss))
 
-parcelPlot <- ggplot(FinalFishnet, aes(y = LogPctLoss, x = LogAvgParcelSize))+
-    stat_density2d(aes(fill = ..level..), geom = "polygon", bins = 20) +
-  scale_fill_gradient(low="light green", high="magenta", name="Distribution") +
-#  geom_point(colour = "dark green", size = .8)+
-  labs(title = "Percent Tree Canopy Loss (2008 - 2018) vs. \n Avg Parcel Size ",
-       subtitle = "Aggregated by Fishnet") +
-  xlab("Log-transformed Avg Parcel Size") +
-  ylab("Log-transformed Percent of Tree Canopy Lost (2008 - 2018)") +
-  theme(plot.title = element_text(hjust = 0.3, size = 12), plot.subtitle = element_text(hjust = 0.3, size = 8)) +
-  plotTheme()
+# 
+# parcelPlot <- ggplot(FinalFishnet, aes(y = LogPctLoss, x = LogAvgParcelSize))+
+#     stat_density2d(aes(fill = ..level..), geom = "polygon", bins = 20) +
+#   scale_fill_gradient(low="light green", high="magenta", name="Distribution") +
+# #  geom_point(colour = "dark green", size = .8)+
+#   labs(title = "Percent Tree Canopy Loss (2008 - 2018) vs. \n Avg Parcel Size ",
+#        subtitle = "Aggregated by Fishnet") +
+#   xlab("Log-transformed Avg Parcel Size") +
+#   ylab("Log-transformed Percent of Tree Canopy Lost (2008 - 2018)") +
+#   theme(plot.title = element_text(hjust = 0.3, size = 12), plot.subtitle = element_text(hjust = 0.3, size = 8)) +
+#   plotTheme()
 
 ```
 
-As previously mentioned, land use appears to have a correlation with tree canopy. A 2019 report suggests that the most trees were removed next to streets and on residential property. This proves true in our analysis: the top two land use types that experienced tree canopy change are residential and transportation.  
-```{r land use, message=FALSE, warning=FALSE, include=TRUE, results='hide', fig.height = 7, fig.width = 8, cache=TRUE}
+As previously mentioned, land use appears to have a correlation with tree canopy. A 2019 report suggests that the most trees were removed next to streets and on residential property. This proves true in our analysis: the top two land use types that experienced tree canopy change are residential and transportation.   
+
+```{r land use, message=FALSE, warning=FALSE, include=TRUE, results='hide', fig.height = 5, fig.width = 8, cache=TRUE}
 
 
 # Analysis completed in ArcGIS -- Processing time to long in R. 500,000 Parcels and 614,000 Tree Canopy Polygons aggregated in this analysis. I plan on writing out what the code would be for reproducability purposes. 
@@ -1141,7 +1140,7 @@ LandUseLong<-
 LandUse <- ggplot(LandUseLong, aes(fill = variable, y=Descriptio, x=value))+
   geom_bar(stat='identity', position = "stack", width = .75)+
  scale_fill_manual(values = c("light green", "magenta"), name = "Area Gain or Loss")+
-  labs(title = "Total Area Lost or Gained by Land Use Type",
+  labs(title = "Loss and Gain",
        subtitle = "Philadelphia, 2008-2018")+
   xlab("        Total Area Lost                Total Area Gained")+
   ylab("Land Use Type") +
@@ -1202,7 +1201,7 @@ LandUseLong<-
 
 ```
 
-```{r Residential density, message=FALSE, warning=FALSE, include=TRUE, results='hide', fig.height = 6, fig.width = 10, cache=TRUE}
+```{r Residential density, message=FALSE, warning=FALSE, include=TRUE, results='hide', fig.height = 5, fig.width = 12, cache=TRUE}
 
 LandUse2 <-
   LandUse1%>%
@@ -1229,7 +1228,7 @@ LandUse2 <-
 
 resDensity <- ggplot(LandUse2, aes(y=C_DIG2DESC, x=pctChange))+
   geom_bar(stat='identity', fill="light green", width = 0.75)+
-  labs(title = "Change in Residential Land Use Parcels",
+  labs(title = "Change on Residential Land",
        subtitle = "('18 Canopy - '08 Canopy) / ('18 Canopy) * 100 ")+
   ylab("Residential Land Use Type")+
   xlab("Percent Tree Canopy Change")+
@@ -1445,7 +1444,7 @@ LogPctResTrans = log10(pctTransRes))
 
 We also look at redlining boundaries from the Homeowner’s Loan Corporation (HOLC). As trees take decades to grow, the spatial configuration of tree canopy and likely their change is influenced by historical planning decisions. In 1937, HOLC created “redlining” maps which rated neighborhoods’ desirability in four categories. They rated neighborhoods with residents of color as the least desirable and majority-white neighborhoods as the most desirable. As a result, the low-ranked neighborhoods experienced disinvestment and greater difficulty attracting investment. Based on our analysis, it appears that tree canopy loss is correlated with a neighborhood’s HOLC grade. Areas with the most desirable grade, A, experienced the least percentage loss, while areas ranked D experienced the most.  
 
-```{r HOLC Areas, message=FALSE, warning=FALSE, results='hide', cache=TRUE}
+```{r HOLC Areas, fig.height=8, fig.width=12, message=FALSE, warning=FALSE, cache=TRUE, results='hide'}
 
 HOLC2 <- HOLC %>%
   st_intersection(st_make_valid(Philadelphia), HOLC) %>%  
@@ -1493,8 +1492,8 @@ HOLC_plot <- full_join(as.data.frame(HOLC), as.data.frame(HOLC2)) %>%
 
 ggmap(base_map) +
    geom_sf(data = ll(Philadelphia), colour = "gray90", fill = "gray90", inherit.aes = FALSE) +
-  scale_fill_brewer(palette = "Spectral", name = "HOLC Grade", direction = -1, aesthetics = c("colour", "fill"), guide = guide_legend(reverse = TRUE)) +
-   geom_sf(data = ll(HOLC_plot), aes(fill = holc_grade), alpha = 0.6, colour = "white", inherit.aes = FALSE) +
+  scale_fill_brewer(palette = "PiYG", name = "HOLC Grade", direction = -1, aesthetics = c("colour", "fill"), guide = guide_legend(reverse = TRUE)) +
+   geom_sf(data = ll(HOLC_plot), aes(fill = holc_grade), colour = "white", inherit.aes = FALSE) +
    labs(title = "1937 HOLC Redlining Boundaries", subtitle = "Philadelphia, PA") +
   theme(plot.title = element_text(size = 30, face = "bold"), 
         legend.title = element_text(size = 12)) +  mapTheme()
@@ -1519,6 +1518,43 @@ FinalFishnet <-
    left_join(FinalFishnet, .)%>%
    mutate(holc_grade = replace_na(holc_grade, "unclassified"))
   
+
+ holcLoss <- FinalFishnet %>%
+  dplyr::select(holc_grade, pctLoss) %>%
+  group_by(holc_grade) %>%
+  na.omit() %>%
+  summarize(mean_loss = mean(pctLoss)) %>%
+  ggplot() +
+  geom_histogram(aes(y = mean_loss), binwidth = 1, fill = "magenta") +
+  labs(title="Loss by HOLC Grade, 2008-2018 (%)",
+       subtitle="Philadelphia, PA",
+       x="HOLC Rating", 
+       y="% Loss")+
+  facet_wrap(~holc_grade, nrow = 1)+
+    theme(plot.title = element_text(size = 30, face = "bold"), 
+        legend.title = element_text(size = 12)) +
+  plotTheme()
+  
+  
+  
+  holcCanopy <- FinalFishnet %>%
+  dplyr::select(holc_grade, pctCoverage18) %>%
+  group_by(holc_grade) %>%
+  na.omit() %>%
+  summarize(mean_cov = mean(pctCoverage18)) %>%
+  ggplot() +
+  geom_histogram(aes(y = mean_cov), binwidth = 1, fill = "green") +
+  labs(title="Coverage by HOLC Grade, 2018 (%)",
+       subtitle="Philadelphia, PA",
+       x="HOLC Rating", 
+       y="% Tree Canopy")+
+  facet_wrap(~holc_grade, nrow = 1)+
+    theme(plot.title = element_text(size = 30, face = "bold"), 
+        legend.title = element_text(size = 12)) +
+  plotTheme()
+  
+grid.arrange(ncol = 2, holcLoss, holcCanopy, top = "1937 HOLC Rating and Tree Canopy")
+
 
 ```
 
@@ -1816,15 +1852,21 @@ ggcorrplot(
 
 Based on this plot, we select the following variables for our model:    
   
+<style>
+div.blue { background-color:#e6f0ff; border-radius: 5px; padding: 20px;}
+</style>                     
 * Percent tree canopy coverage 2018    
 * Parcel size (Log average)    
-* Construction distance (Average nearest neighbor)   
+* Construction distance (Average nearest neighbor)  
 * Poles (Log)   
-* Construction density    
+* Neighborhood name
+* Construction permits (Count)  
 * 311 Requests (Log)  
 * Percent residential land use (Log)  
-* HOLC grade    
+* Percent transportation land use (Log)  
+* HOLC redlining grade    
 * Hydrology (%)  
+</div>
 
 ```{r Logit model, message=FALSE, warning=FALSE, cache=TRUE}
 

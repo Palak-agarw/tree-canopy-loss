@@ -869,9 +869,9 @@ paletteChange <- c("green", "orange", "purple")
 
 #reference map
 refmap <- ggmap(base_map) +
-  geom_sf(data = ll(Neighborhood), fill = "green", colour = "gray", inherit.aes = FALSE) +
-  geom_sf(data = ll(RMBound), colour = "gray", fill = "black", inherit.aes = FALSE) +
-    geom_sf(data = ll(URBound), colour = "gray", fill = "black", inherit.aes = FALSE) +
+  geom_sf(data = ll(Neighborhood), fill = "black", colour = "white", inherit.aes = FALSE) +
+  geom_sf(data = ll(RMBound), colour = "white", fill = "green", inherit.aes = FALSE) +
+    geom_sf(data = ll(URBound), colour = "white", fill = "green", inherit.aes = FALSE) +
   labs(title = "Richmond and Upper Roxborough Neighborhoods") +
   theme(plot.title = element_text(size = 30, face = "bold"), 
         legend.title = element_text(size = 12)) +  mapTheme()
@@ -901,7 +901,7 @@ grid.arrange(ncol=2, UR, refmap, RM)
 
 ## 3.  How does tree canopy change vary by demographic?  
 
-Tree canopy loss, like other urban environmental issues, is has deep equity implications. Low income communities and communities of color are more likely to be in places with less tree canopy. Therefore, we explore demographics variables' correlation with tree canopy gain, loss, net change, and coverage. Surprisingly, demographic variables have little correlation with existing tree canopy or tree canopy change. This is likely because they are accounted for by neighborhood fixed effects.     
+Tree canopy loss, like other urban environmental issues, has deep implications for equity. Low income communities and communities of color are more likely to be in places with less tree canopy. Therefore, we explore demographics variables' correlation with tree canopy gain, loss, net change, and coverage. Surprisingly, demographic variables have little correlation with existing tree canopy or tree canopy change. This is likely because they are accounted for by neighborhood fixed effects.     
 
 ```r
 library(grid)
@@ -1026,9 +1026,7 @@ grid.arrange(ncol=2, top=textGrob("Neighborhood Attributes and Tree Canopy 2008-
 ```
 
 ## 4. What other factors influence tree canopy loss?    
-Based on our analysis of the spatial distribution of tree canopy loss, we look at a few more variables: hydrology, parcel size, construction, land use, redlining, and health outcomes. 
-
-We first examine hydrology because of the potential relationship between proximity to water and tree canopy loss.
+Based on our analysis of the spatial distribution of tree canopy loss, we look at a few more variables: hydrology, construction, land use, redlining, and health outcomes for potential features.
 
 
 ```r
@@ -1501,8 +1499,8 @@ HOLC_plot <- full_join(as.data.frame(HOLC), as.data.frame(HOLC2)) %>%
 
 ggmap(base_map) +
    geom_sf(data = ll(Philadelphia), colour = "gray90", fill = "gray90", inherit.aes = FALSE) +
-  scale_fill_brewer(palette = "Spectral", name = "HOLC Grade", direction = -1, aesthetics = c("colour", "fill"), guide = guide_legend(reverse = TRUE)) +
-   geom_sf(data = ll(HOLC_plot), aes(fill = holc_grade), alpha = 0.6, colour = "white", inherit.aes = FALSE) +
+  scale_fill_brewer(palette = "PiYG", name = "HOLC Grade", direction = -1, aesthetics = c("colour", "fill"), guide = guide_legend(reverse = TRUE)) +
+   geom_sf(data = ll(HOLC_plot), aes(fill = holc_grade), colour = "white", inherit.aes = FALSE) +
    labs(title = "1937 HOLC Redlining Boundaries", subtitle = "Philadelphia, PA") +
   theme(plot.title = element_text(size = 30, face = "bold"), 
         legend.title = element_text(size = 12)) +  mapTheme()
@@ -1530,7 +1528,46 @@ FinalFishnet <-
    st_drop_geometry() %>%
    left_join(FinalFishnet, .)%>%
    mutate(holc_grade = replace_na(holc_grade, "unclassified"))
+  
+
+ holcLoss <- FinalFishnet %>%
+  dplyr::select(holc_grade, pctLoss) %>%
+  group_by(holc_grade) %>%
+  na.omit() %>%
+  summarize(mean_loss = mean(pctLoss)) %>%
+  ggplot() +
+  geom_histogram(aes(y = mean_loss), binwidth = 1, fill = "magenta") +
+  labs(title="Loss by HOLC Grade, 2008-2018 (%)",
+       subtitle="Philadelphia, PA",
+       x="HOLC Rating", 
+       y="% Loss")+
+  facet_wrap(~holc_grade, nrow = 1)+
+    theme(plot.title = element_text(size = 30, face = "bold"), 
+        legend.title = element_text(size = 12)) +
+  plotTheme()
+  
+  
+  
+  holcCanopy <- FinalFishnet %>%
+  dplyr::select(holc_grade, pctCoverage18) %>%
+  group_by(holc_grade) %>%
+  na.omit() %>%
+  summarize(mean_cov = mean(pctCoverage18)) %>%
+  ggplot() +
+  geom_histogram(aes(y = mean_cov), binwidth = 1, fill = "green") +
+  labs(title="Coverage by HOLC Grade, 2018 (%)",
+       subtitle="Philadelphia, PA",
+       x="HOLC Rating", 
+       y="% Tree Canopy")+
+  facet_wrap(~holc_grade, nrow = 1)+
+    theme(plot.title = element_text(size = 30, face = "bold"), 
+        legend.title = element_text(size = 12)) +
+  plotTheme()
+  
+grid.arrange(ncol = 2, holcLoss, holcCanopy, top = "1937 HOLC Rating and Tree Canopy")
 ```
+
+![](Tree_Canopy_Loss_files/figure-html/HOLC Areas-2.png)<!-- -->
 
 
 ```r
@@ -1839,15 +1876,21 @@ ggcorrplot(
 
 Based on this plot, we select the following variables for our model:    
   
+<style>
+div.blue { background-color:#e6f0ff; border-radius: 5px; padding: 20px;}
+</style>                     
 * Percent tree canopy coverage 2018    
 * Parcel size (Log average)    
-* Construction distance (Average nearest neighbor)   
+* Construction distance (Average nearest neighbor)  
 * Poles (Log)   
-* Construction density    
+* Neighborhood name
+* Construction permits (Count)  
 * 311 Requests (Log)  
 * Percent residential land use (Log)  
-* HOLC grade    
+* Percent transportation land use (Log)  
+* HOLC redlining grade    
 * Hydrology (%)  
+</div>
 
 
 ```r
