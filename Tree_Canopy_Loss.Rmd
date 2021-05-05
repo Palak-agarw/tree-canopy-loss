@@ -1352,7 +1352,7 @@ FinalFishnet <-
   na.omit() %>%
   summarize(mean_loss = mean(pctLoss)) %>%
   ggplot() +
-  geom_histogram(aes(y = mean_loss), binwidth = 1, fill = "magenta", center = 0) +
+  geom_histogram(aes(y = mean_loss), binwidth = 1, fill = "magenta") +
   labs(title="Loss by HOLC Grade, 2008-2018 (%)",
        subtitle="Philadelphia, PA",
        x="HOLC Rating", 
@@ -1370,7 +1370,7 @@ FinalFishnet <-
   na.omit() %>%
   summarize(mean_cov = mean(pctCoverage18)) %>%
   ggplot() +
-  geom_histogram(aes(y = mean_cov), binwidth = 1, fill = "green", center = 0) +
+  geom_histogram(aes(y = mean_cov), binwidth = 1, fill = "green") +
   labs(title="Coverage by HOLC Grade, 2018 (%)",
        subtitle="Philadelphia, PA",
        x="HOLC Rating", 
