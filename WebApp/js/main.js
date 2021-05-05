@@ -19,18 +19,18 @@ var PhiladelphiaBounds = "https://raw.githubusercontent.com/kylepmccarthy/675Fin
 var Neighborhood = "https://raw.githubusercontent.com/palakagr/tree-canopy-loss/main/WebAppData/Neighborhoods2.geojson"
 var Grid = "https://raw.githubusercontent.com/palakagr/tree-canopy-loss/main/WebAppData/gridFinal2.geojson"
 
-var electric = "https://raw.githubusercontent.com/kylepmccarthy/675Final/main/Data/electricRPRE2.geojson"
-var alteration = "https://raw.githubusercontent.com/kylepmccarthy/675Final/6db840912b63a5cbd5a97d1fc553ec31cfa84e84/Data/alterationRPRE2.geojson"
-var plum = "https://raw.githubusercontent.com/kylepmccarthy/675Final/main/Data/PlumPre.geojson"
-var newconst = "https://raw.githubusercontent.com/kylepmccarthy/675Final/main/Data/NC3.geojson"
-var addition = "https://raw.githubusercontent.com/kylepmccarthy/675Final/main/Data/AddR4.geojson"
-var demolition = "https://raw.githubusercontent.com/kylepmccarthy/675Final/main/Data/DemoR5.geojson"
-var electric1 = "https://raw.githubusercontent.com/kylepmccarthy/675Final/main/Data/electricRPOST2.geojson"
-var alteration1 = "https://raw.githubusercontent.com/kylepmccarthy/675Final/main/Data/alterationRPOST2.geojson"
-var plum2 = "https://raw.githubusercontent.com/kylepmccarthy/675Final/main/Data/PlumPost2.geojson "
-var Mechanical = "https://raw.githubusercontent.com/kylepmccarthy/675Final/main/Data/Mechanical.geojson"
+var electric = "https://raw.githubusercontent.com/palakagr/tree-canopy-loss/main/WebAppData/electricRPRE2.geojson"
+var electric1 = "https://raw.githubusercontent.com/palakagr/tree-canopy-loss/main/WebAppData/electricRPOST2.geojson"
+var alteration = "https://raw.githubusercontent.com/palakagr/tree-canopy-loss/main/WebAppData/alterationRPRE.geojson"
+var plum = "https://raw.githubusercontent.com/palakagr/tree-canopy-loss/main/WebAppData/PlumPre.geojson"
+var newconst = "https://raw.githubusercontent.com/palakagr/tree-canopy-loss/main/WebAppData/NC3.geojson"
+var addition = "https://raw.githubusercontent.com/palakagr/tree-canopy-loss/main/WebAppData/AddR4.geojson"
+var demolition = "https://raw.githubusercontent.com/palakagr/tree-canopy-loss/main/WebAppData/DemoR5.geojson"
+var alteration1 = "https://raw.githubusercontent.com/palakagr/tree-canopy-loss/main/WebAppData/alterationRPOST2.geojson"
+var plum2 = "https://raw.githubusercontent.com/palakagr/tree-canopy-loss/main/WebAppData/PlumPost2.geojson "
+var Mechanical = "https://raw.githubusercontent.com/palakagr/tree-canopy-loss/main/WebAppData/Mechanical.geojson"
 
-var results = "https://raw.githubusercontent.com/kylepmccarthy/675Final/main/Data/ScenA1.geojson"
+var results = "https://raw.githubusercontent.com/palakagr/tree-canopy-loss/main/WebAppData/ScenA1.geojson"
 
 var featureGroups; 
 var featureEL;
