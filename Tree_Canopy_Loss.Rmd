@@ -234,12 +234,9 @@ ll <- function(dat, proj4 = 4326){
   st_transform(dat, proj4)
 }
 
-# base_map <- get_map(location = unname(st_bbox(ll(st_buffer(st_centroid(Philadelphia),60000)))), 
-#                     source = "stamen",
-#                     maptype = "toner") 
 
 base_map <- get_stamenmap(c(left = -75.34937, bottom = 39.84524, right = -74.92109, top = 40.17457),
-                           maptype = "toner")
+                           maptype = "terrain-lines")
 
 #ggmap(base_map)
 
@@ -389,7 +386,7 @@ ConservationNParks <- rbind(Parks, Conservation)
 ## Unit of analysis: the fishnet cell
 We use fishnet grid cells as our unit of analysis to take advantage of high resolution spatial data such as 311 service requests. Below, we create a fishnet cells of 1615 feet, or around the size of a city block. We then subtract fishnet cells that are more than 20% [conservation easement](https://www.conservationeasement.us/what-is-a-conservation-easement/) and/or park space to isolate land that may be protected and experience different tree canopy loss processes. All in all, we have 1411 fishnet cells representing Philadelphia.  
 
-```{r Fishnet, cache=TRUE, message=FALSE, warning=FALSE, include=TRUE, results='hide'}
+```{r Fish net, cache=TRUE, message=FALSE, warning=FALSE, include=TRUE, results='hide'}
 
 #make fishnet
 fishnet2 <- 
@@ -573,7 +570,7 @@ div.blue { background-color:#e6f0ff; border-radius: 5px; padding: 20px;}
 ### Philadelphia's 2018 Canopy 
 Northwest, West, and Northeast Philadelphia have the most tree canopy. In North and South Philadelphia as well as Center City, tree canopy is more sparse.  
 
-```{r Existing Tree Canopy, cache=TRUE, message=FALSE, warning=FALSE, include=TRUE, results='hide'}
+```{r Existing Canopy, cache=TRUE, message=FALSE, warning=FALSE, include=TRUE, results='hide'}
 ggmap(base_map) +
   geom_sf(data = ll(FinalFishnet), colour = "transparent", inherit.aes = FALSE, aes(fill = pctCoverage18Cat))+ 
      scale_fill_manual(values = palette7, 
@@ -586,7 +583,7 @@ subtitle = "Tree Canopy Area / Gridcell Area") +
 
 ### Tree Canopy Change
 Surprisingly, tree canopy loss and gain exhibit similar spatial patterns. Both percent gain and loss are highest in a few neighborhoods in South Philadelphia and in the Northeast. While this seems counter-intuitive, this is because these neighborhoods have the least tree canopy, therefore each individual tree gained or lost has a greater overall impact.   
-```{r Tree canopy change, message=FALSE, warning=FALSE, results='hide', fig.height = 12, fig.width = 20, cache=TRUE}
+```{r Canopy change, message=FALSE, warning=FALSE, results='hide', fig.height = 12, fig.width = 20, cache=TRUE}
 
 v <- ggmap(base_map) +
   geom_sf(data = ll(FinalFishnet), colour = "transparent", aes(fill = pctLoss), inherit.aes = FALSE)+
@@ -619,7 +616,7 @@ FinalFishnet$PctChangeCat <- cut(FinalFishnet$pctChange,
 
 This is confirmed when we plot the log-transformed percent tree canopy and percent tree canopy gained/lost for each fishnet cell. We see a negative relationship, meaning that fishnet cells with more trees experience less percentage change.  
 
-```{r Comparing Tree Canopy Area to Loss/Gain2, message=FALSE, warning=FALSE, results='hide', fig.height = 8, fig.width = 12,  cache=TRUE}
+```{r Comparing Canopy Area to Loss/Gain2, message=FALSE, warning=FALSE, results='hide', fig.height = 8, fig.width = 12,  cache=TRUE}
 
 gain <- ggplot(FinalFishnet %>% filter(pctCoverage18 > 0.01 & pctGain > 1), aes(x = pctGain, y = pctCoverage18))+
     stat_density2d(aes(fill = ..level..), geom = "polygon", bins = 20) +
@@ -667,15 +664,13 @@ change <- ggplot(pctChangeGraph, aes(x = pctChange, y = pctCoverage18))+
 
 
 grid.arrange(gain, loss, change, top = "Tree Canopy Change and Existing Tree Canopy", ncol = 2)
-
-
 ```
 
 
 Looking at the city as a whole, we see that the majority of fishnet cells experienced low net loss, while a similar amount of cells experienced either substantial loss or gain.    
 
  
-```{r Net Canopy Change,  message=FALSE, warning=FALSE, results='hide', fig.height = 8, fig.width = 8, cache=TRUE}
+```{r Net Canopy change,  message=FALSE, warning=FALSE, results='hide', fig.height = 8, fig.width = 8, cache=TRUE}
 
 b <- ggmap(base_map) +
   geom_sf(data = ll(FinalFishnet), inherit.aes = FALSE, colour = "transparent", aes(fill = PctChangeCat))+ 
@@ -829,7 +824,7 @@ Below, we see that the neighborhoods farthest from 30% tree canopy are in South 
   
 We also see that most neighborhoods experienced a net loss in tree canopy. Interestingly, most tree gain was experienced in South Philadelphia and Center City, in neighborhoods which have low existing canopy.  
 
-```{r Neighborhood Canopy Maps, message=FALSE, warning=FALSE, results='hide', fig.height = 10, fig.width = 20, cache=TRUE}
+```{r Neighborhood Canopy Mapss, message=FALSE, warning=FALSE, results='hide', fig.height = 10, fig.width = 20, cache=TRUE}
 
 goalProg <- ggmap(base_map) +
   geom_sf(data = ll(FinalNeighborhood), aes(fill = GoalCat), color = "white", inherit.aes = FALSE) +
@@ -1007,7 +1002,7 @@ mutate(HydrologyPct = HydrologyArea /2608225 * 100)
 
 HydrologyNet$HydrologyAreaCat <- cut(HydrologyNet$HydrologyArea, 
                       breaks = c(-Inf, 0, 382, 85305, 1637508, Inf), 
-                       labels = c("None", "Little hydrology", "Some hydrology", "High hydrology", "Most hydrology"), 
+                       labels = c("None", "Little", "Some", "High", "Most"), 
                        right = FALSE)
 
 
@@ -1357,7 +1352,7 @@ FinalFishnet <-
   na.omit() %>%
   summarize(mean_loss = mean(pctLoss)) %>%
   ggplot() +
-  geom_histogram(aes(y = mean_loss), binwidth = 1, fill = "magenta") +
+  geom_histogram(aes(y = mean_loss), binwidth = 1, fill = "magenta", center = 0) +
   labs(title="Loss by HOLC Grade, 2008-2018 (%)",
        subtitle="Philadelphia, PA",
        x="HOLC Rating", 
@@ -1375,7 +1370,7 @@ FinalFishnet <-
   na.omit() %>%
   summarize(mean_cov = mean(pctCoverage18)) %>%
   ggplot() +
-  geom_histogram(aes(y = mean_cov), binwidth = 1, fill = "green") +
+  geom_histogram(aes(y = mean_cov), binwidth = 1, fill = "green", center = 0) +
   labs(title="Coverage by HOLC Grade, 2018 (%)",
        subtitle="Philadelphia, PA",
        x="HOLC Rating", 
@@ -1599,67 +1594,120 @@ FinalFishnet<-
   LogPctGain = log10(pctGain))
 ```
 
-
+Below, we plot the spatial density of selected risk factors.
 ```{r factor maps, fig.height = 12,fig.width = 12, message=FALSE, warning=FALSE, include=TRUE, results='hide', cache=TRUE}
+vars_net <- FinalFishnet %>%
+  dplyr::select(pctCoverage08, HydrologyArea, avgParcelSize, e311Count, countConst, pctTransRes, pctRes, pctTrans)
 
-polePlot <-
-  ggmap(base_map) +
-  scale_fill_brewer(palette = "PiYG", name = "Nearest Neighbor", direction = 1, aesthetics = c("colour", "fill"), guide = guide_legend(reverse = TRUE)) +
-geom_sf(data = ll(FinalFishnet), aes(fill = q5(avg_nnPole)), colour = "transparent", inherit.aes = FALSE) +
-  labs(title = "Poles (Nearest Neighbor)", subtitle = "Philadelphia, PA") +
+#make vars_net.long to use for mapping
+vars_net.long <-
+   gather(vars_net, Variable, value, -geometry)
+
+#make list of unique variables
+vars <- unique(vars_net.long$Variable)
+mapList <- list()
+
+#map risk factors
+for(i in vars){
+  mapList[[i]] <- 
+    ggplot() +
+      geom_sf(data = filter(vars_net.long, Variable == i), aes(fill=value), colour=NA) +
+      scale_fill_viridis(option = "A", name="") +
+      labs(title=i) +
   theme(plot.title = element_text(size = 30, face = "bold"), 
         legend.title = element_text(size = 12)) +  mapTheme()
+  }
 
-
-parcelPlot <- 
-  ggmap(base_map) +
-  scale_fill_brewer(palette = "PiYG", name = "Area (ft^2)", direction = 1, aesthetics = c("colour", "fill"), guide = guide_legend(reverse = TRUE)) +
-  geom_sf(data = ll(FinalFishnet), aes(fill = q5(avgParcelSize)), colour = "transparent", inherit.aes = FALSE, alpha = 0.75) +
-  labs(title = "Average Parcel Size", subtitle = "Philadelphia, PA") +
-  theme(plot.title = element_text(size = 30, face = "bold"), 
-        legend.title = element_text(size = 12)) +  mapTheme()
-
-hydroPlot <- 
-  ggmap(base_map) +
-  scale_fill_brewer(palette = "PiYG", name = "Area (ft^2)", direction = 1, aesthetics = c("colour", "fill"), guide = guide_legend(reverse = TRUE)) +
-  geom_sf(data = ll(HydrologyNet), aes(fill = HydrologyAreaCat), colour = "transparent", inherit.aes = FALSE, alpha = 0.75) +
-  labs(title = "Proximity to water", subtitle = "Philadelphia, PA") +
-  theme(plot.title = element_text(size = 30, face = "bold"), 
-        legend.title = element_text(size = 12)) +  mapTheme()
-
-constructPlot <-
-  ggmap(base_map) +
-  scale_fill_brewer(palette = "PiYG", name = "Permit Count", direction = 1, aesthetics = c("colour", "fill"), guide = guide_legend(reverse = TRUE)) +
-geom_sf(data = ll(FinalFishnet), aes(fill = q5(countConst)), colour = "transparent", inherit.aes = FALSE) +
-  labs(title = "Construction Permits", subtitle = "Philadelphia, PA") +
-  theme(plot.title = element_text(size = 30, face = "bold"), 
-        legend.title = element_text(size = 12)) +  mapTheme()
-
-transPlot <-
-  ggmap(base_map) +
-  scale_fill_brewer(palette = "PiYG", name = "% of total parcels", direction = 1, aesthetics = c("colour", "fill"), guide = guide_legend(reverse = TRUE)) +
-geom_sf(data = ll(FinalFishnet), aes(fill = q5(pctTrans)), colour = "transparent", inherit.aes = FALSE) +
-  labs(title = "Transportation Land Use Parcels", subtitle = "Philadelphia, PA") +
-  theme(plot.title = element_text(size = 30, face = "bold"), 
-        legend.title = element_text(size = 12)) +  mapTheme()
-
-resPlot <-
-  ggmap(base_map) +
-  scale_fill_brewer(palette = "PiYG", name = "% of total parcels", direction = 1, aesthetics = c("colour", "fill"), guide = guide_legend(reverse = TRUE)) +
-geom_sf(data = ll(FinalFishnet), aes(fill = q5(pctRes)), colour = "transparent", inherit.aes = FALSE) +
-  labs(title = "Residential Land Use Parcels", subtitle = "Philadelphia, PA") +
-  theme(plot.title = element_text(size = 30, face = "bold"), 
-        legend.title = element_text(size = 12)) +  mapTheme()
+do.call(grid.arrange,c(mapList, ncol = 3, top = "Risk Factors by Fishnet"))
 
 
 
-grid.arrange(hydroPlot, parcelPlot, polePlot, transPlot, resPlot, constructPlot, ncol = 3, top = "Canopy Loss Risk Factors by Fishnet")
 
-grid.arrange(pbNeigh, urNeigh, rmNeigh, ncol = 3, top = "Construction and Canopy Loss in 3 Neighborhoods")
+# #########
+# polePlot <-
+#   ggmap(base_map) +
+#   scale_fill_brewer(palette = "PiYG", name = "Distance", direction = 1, aesthetics = c("colour", "fill"), guide = guide_legend(reverse = TRUE)) +
+# geom_sf(data = ll(FinalFishnet), aes(fill = q5(avg_nnPole)), colour = "transparent", inherit.aes = FALSE) +
+#   labs(title = "Poles (Nearest Neighbor)", subtitle = "Philadelphia, PA") +
+#   theme(plot.title = element_text(size = 30, face = "bold"), 
+#         legend.title = element_text(size = 12)) +  mapTheme()
+# 
+# 
+# parcelPlot <- 
+#   ggmap(base_map) +
+#   scale_fill_brewer(palette = "PiYG", name = "Area (ft^2)", direction = 1, aesthetics = c("colour", "fill"), guide = guide_legend(reverse = TRUE)) +
+#   geom_sf(data = ll(FinalFishnet), aes(fill = q5(avgParcelSize)), colour = "transparent", inherit.aes = FALSE, alpha = 0.75) +
+#   labs(title = "Average Parcel Size", subtitle = "Philadelphia, PA") +
+#   theme(plot.title = element_text(size = 30, face = "bold"), 
+#         legend.title = element_text(size = 12)) +  mapTheme()
+# 
+# hydroPlot <- 
+#   ggmap(base_map) +
+#   scale_fill_brewer(palette = "PiYG", name = "Area (ft^2)", direction = 1, aesthetics = c("colour", "fill"), guide = guide_legend(reverse = TRUE)) +
+#   geom_sf(data = ll(HydrologyNet), aes(fill = HydrologyAreaCat), colour = "transparent", inherit.aes = FALSE, alpha = 0.75) +
+#   labs(title = "Proximity to water", subtitle = "Philadelphia, PA") +
+#   theme(plot.title = element_text(size = 30, face = "bold"), 
+#         legend.title = element_text(size = 12)) +  mapTheme()
+# 
+# constructPlot <-
+#   ggmap(base_map) +
+#   scale_fill_brewer(palette = "PiYG", name = "Count", direction = 1, aesthetics = c("colour", "fill"), guide = guide_legend(reverse = TRUE)) +
+# geom_sf(data = ll(FinalFishnet), aes(fill = q5(countConst)), colour = "transparent", inherit.aes = FALSE) +
+#   labs(title = "Construction Permits", subtitle = "Philadelphia, PA") +
+#   theme(plot.title = element_text(size = 30, face = "bold"), 
+#         legend.title = element_text(size = 12)) +  mapTheme()
+# 
+# transPlot <-
+#   ggmap(base_map) +
+#   scale_fill_brewer(palette = "PiYG", name = "%", direction = 1, aesthetics = c("colour", "fill"), guide = guide_legend(reverse = TRUE)) +
+# geom_sf(data = ll(FinalFishnet), aes(fill = q5(pctTrans)), colour = "transparent", inherit.aes = FALSE) +
+#   labs(title = "Transportation Land Use Parcels", subtitle = "Philadelphia, PA") +
+#   theme(plot.title = element_text(size = 30, face = "bold"), 
+#         legend.title = element_text(size = 12)) +  mapTheme()
+# 
+# resPlot <-
+#   ggmap(base_map) +
+#   scale_fill_brewer(palette = "PiYG", name = "%", direction = 1, aesthetics = c("colour", "fill"), guide = guide_legend(reverse = TRUE)) +
+# geom_sf(data = ll(FinalFishnet), aes(fill = q5(pctRes)), colour = "transparent", inherit.aes = FALSE) +
+#   labs(title = "Residential Land Use Parcels", subtitle = "Philadelphia, PA") +
+#   theme(plot.title = element_text(size = 30, face = "bold"), 
+#         legend.title = element_text(size = 12)) +  mapTheme()
+# 
+# grid.arrange(hydroPlot, parcelPlot, polePlot, transPlot, resPlot, constructPlot, ncol = 2, top = "Canopy Loss Risk Factors by Fishnet")
+```
+
+```{construction in 3 neighborhoods, fig.height = 12,fig.width = 12, message=FALSE, warning=FALSE, include=TRUE, results='hide', cache=TRUE}
+grid.arrange(pbNeigh, urNeigh, rmNeigh, ncol = 1, top = "Construction and Canopy Loss in 3 Neighborhoods")
+```
+
+```{morans i, message=FALSE, warning=FALSE, results='hide', fig.height =  8, fig.width =8,cache=TRUE}
+library(spdep)
+library(FNN)
+library(spatstat)
+#assign weights at the grid cell level
+final_net.nb <- poly2nb(as_Spatial(FinalFishnet), queen=TRUE)
+final_net.weights <- nb2listw(final_net.nb, style="W", zero.policy=TRUE)
+
+FinalFishnet <- FinalFishnet %>%
+  na.exclude()
+
+#add Moran's I and P value to final_net
+final_net.localMorans <- 
+  cbind(
+    as.data.frame(localmoran(FinalFishnet$pctLoss, final_net.weights)),
+    as.data.frame(FinalFishnet)) %>% 
+    st_sf() %>%
+      dplyr::select(Percent_Loss = pctLoss, 
+                    Local_Morans_I = Ii, 
+                    Morans_P_Value = `Pr(z > 0)`) %>%
+      mutate(Sig_Hotspots = ifelse(Morans_P_Value <= 0.0000001, 1, 0)) %>% #change P value
+      gather(Variable, Value, -geometry)
+
 
 ```
 
 
+## Modelling and Validation
 ### Correlation Plot  
 To select a set of variables for our model, we make a correlation plot. 
 
@@ -1690,7 +1738,7 @@ numericVars <-
 ggcorrplot(
   round(cor(numericVars), 1),
   p.mat = cor_pmat(numericVars),
-  colors = c("magenta", "purple","blue"),
+  colors = c("pink", "purple","blue"),
   type="upper",
   insig = "blank", 
   outline.color = "white") +  
@@ -1705,7 +1753,8 @@ Based on this plot, we select the following variables for our model:
   
 <style>
 div.blue { background-color:#e6f0ff; border-radius: 5px; padding: 20px;}
-</style>                     
+</style>
+<div class = "blue">
 * Percent tree canopy coverage 2018    
 * Parcel size (Log average)    
 * Construction distance (Average nearest neighbor)  
