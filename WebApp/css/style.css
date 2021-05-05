@@ -67,7 +67,19 @@ p.main {
 
 .break { 
   font-weight : bold ;
+  position: relative; 
+  right: 4px; 
+  
 }
+
+.break1 { 
+  font-weight : bold ;
+  position: relative; 
+  left: 7px;
+  
+}
+
+
 
 
 

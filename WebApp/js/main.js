@@ -327,37 +327,37 @@ var NetChangeF = function(feature) {
 };
 
 var pctLossN = function(feature) {
-  if(feature.properties.pctLoss < 15){
+  if(feature.properties.pctLoss < 13){
     return { fillColor: '#f7f7f7', weight: .5, opacity: 1, color: 'red'};
   }
-  if(feature.properties.pctLoss > 15 & feature.properties.pctLoss < 21){ 
+  if(feature.properties.pctLoss > 13 & feature.properties.pctLoss < 20){ 
     return { fillColor: '#cccccc', weight: .5, opacity: 1, color: 'red'};
   }
-  if(feature.properties.pctLoss> 21 & feature.properties.pctLoss < 27){ 
+  if(feature.properties.pctLoss> 20 & feature.properties.pctLoss < 25){ 
     return { fillColor: '#969696', weight: .5, opacity: 1, color: 'red'};
   }
-  if(feature.properties.pctLoss > 27 & feature.properties.pctLoss < 36){ 
+  if(feature.properties.pctLoss > 25 & feature.properties.pctLoss < 32){ 
     return { fillColor: '#636363', weight: .5, opacity: 1, color: 'red'};
   }
-  if(feature.properties.pctLoss > 36){
+  if(feature.properties.pctLoss > 32){
     return { fillColor: '#252525', weight: .5, opacity: 1, color: 'red'};
     }
 };
 
 var pctLossF = function(feature) {
-  if(feature.properties.pctLoss < 10){
+  if(feature.properties.pctLoss < 13){
     return { fillColor: '#f7f7f7', weight: .5, opacity: 1, color: 'red'};
   }
-  if(feature.properties.pctLoss > 10 & feature.properties.pctLoss < 22){ 
+  if(feature.properties.pctLoss > 13 & feature.properties.pctLoss < 20){ 
     return { fillColor: '#cccccc', weight: .5, opacity: 1, color: 'red'};
   }
-  if(feature.properties.pctLoss> 22 & feature.properties.pctLoss < 34){ 
+  if(feature.properties.pctLoss> 20 & feature.properties.pctLoss <= 25){ 
     return { fillColor: '#969696', weight: .5, opacity: 1, color: 'red'};
   }
-  if(feature.properties.pctLoss > 34 & feature.properties.pctLoss < 52){ 
+  if(feature.properties.pctLoss > 25 & feature.properties.pctLoss < 37){ 
     return { fillColor: '#636363', weight: .5, opacity: 1, color: 'red'};
   }
-  if(feature.properties.pctLoss > 52){
+  if(feature.properties.pctLoss > 37){
     return { fillColor: '#252525', weight: .5, opacity: 1, color: 'red'};
     }
 };
@@ -372,7 +372,7 @@ var pctGainN = function(feature) {
   if(feature.properties.pctGain> 16 & feature.properties.pctGain < 22){ 
     return { fillColor: '#969696', weight: .5, opacity: 1, color: 'red'};
   }
-  if(feature.properties.pcGain > 22 & feature.properties.pctGain < 30){ 
+  if(feature.properties.pctGain > 22 & feature.properties.pctGain < 30){ 
     return { fillColor: '#636363', weight: .5, opacity: 1, color: 'red'};
   }
   if(feature.properties.pctGain > 30){
@@ -381,19 +381,19 @@ var pctGainN = function(feature) {
 };
 
 var pctGainF = function(feature) {
-  if(feature.properties.pctGain < 8){
+  if(feature.properties.pctGain < 10){
     return { fillColor: '#f7f7f7', weight: .5, opacity: 1, color: 'red'};
   }
-  if(feature.properties.pctGain > 8 & feature.properties.pctGain < 18){ 
+  if(feature.properties.pctGain > 10 & feature.properties.pctGain <= 16){ 
     return { fillColor: '#cccccc', weight: .5, opacity: 1, color: 'red'};
   }
-  if(feature.properties.pctGain> 18 & feature.properties.pctGain < 31){ 
+  if(feature.properties.pctGain> 16 & feature.properties.pctGain < 22){ 
     return { fillColor: '#969696', weight: .5, opacity: 1, color: 'red'};
   }
-  if(feature.properties.pcGain > 31 & feature.properties.pctGain < 52){ 
+  if(feature.properties.pctGain > 22 & feature.properties.pctGain < 30){ 
     return { fillColor: '#636363', weight: .5, opacity: 1, color: 'red'};
   }
-  if(feature.properties.pctGain > 52){
+  if(feature.properties.pctGain > 30){
     return { fillColor: '#252525', weight: .5, opacity: 1, color: 'red'};
     }
 };
@@ -683,8 +683,8 @@ NDropDown1("#lostTrees", AreaLossN, Neighborhood, FilterMain, onEachFeatureStats
 NDropDown1("#gainedTrees", AreaGainN, Neighborhood, FilterMain, onEachFeatureStats)
 NDropDown1("#NetChange", NetChangeN, Neighborhood, FilterMain, onEachFeatureStats)
 NDropDown1("#pctLoss", pctLossN, Neighborhood, FilterMain, onEachFeatureStats)
-NDropDown1("#pctGain", pctLossN, Neighborhood, FilterMain, onEachFeatureStats)
-NDropDown1("#pctChange", pctLossN, Neighborhood, FilterMain, onEachFeatureStats)
+NDropDown1("#pctGain", pctGainN, Neighborhood, FilterMain, onEachFeatureStats)
+NDropDown1("#pctChange", pctChangeN, Neighborhood, FilterMain, onEachFeatureStats)
 
 
 
@@ -696,8 +696,8 @@ NDropDown1("#lostTreesF", AreaLossF, Grid, FilterMain, onEachFeatureStats1)
 NDropDown1("#gainedTreesF", AreaGainF, Grid, FilterMain, onEachFeatureStats1)
 NDropDown1("#NetChangeF", NetChangeF, Grid, FilterMain, onEachFeatureStats1)
 NDropDown1("#pctLossF", pctLossF, Grid, FilterMain, onEachFeatureStats1)
-NDropDown1("#pctGainF", pctLossF, Grid, FilterMain, onEachFeatureStats1)
-NDropDown1("#pctChangeF", pctLossF, Grid, FilterMain, onEachFeatureStats1)
+NDropDown1("#pctGainF", pctGainF, Grid, FilterMain, onEachFeatureStats1)
+NDropDown1("#pctChangeF", pctChangeF, Grid, FilterMain, onEachFeatureStats1)
 
 NDropDown2Bar("#S1", ResultStyle, results, FilterResults1, onEachFeatureStats2)
 NDropDown2Bar("#S2", ResultStyle, results, FilterResults2, onEachFeatureStats2)
