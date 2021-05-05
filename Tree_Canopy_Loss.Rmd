@@ -410,7 +410,7 @@ FishnetIntersect <- st_intersection(fishnet2, ConservationNParks )%>%
   filter(ConservationPct <= 20)
 
 ggmap(base_map) +
-  geom_sf(data = ll(FishnetIntersect), fill = "light green", colour = "transparent", inherit.aes = FALSE) +
+  geom_sf(data = ll(FishnetIntersect), fill = "green", colour = "transparent", inherit.aes = FALSE) +
   labs(title = "Philadelphia Fishnet Grid", 
        subtitle = "1 cell = 1615 ft ^2, roughly 1 block") +
   mapTheme()
@@ -624,6 +624,7 @@ This is confirmed when we plot the log-transformed percent tree canopy and perce
 gain <- ggplot(FinalFishnet %>% filter(pctCoverage18 > 0.01 & pctGain > 1), aes(x = pctGain, y = pctCoverage18))+
     stat_density2d(aes(fill = ..level..), geom = "polygon", bins = 20) +
   scale_fill_gradient(low="light green", high="magenta", name="Distribution") +
+    geom_smooth(method = "lm", se = FALSE, colour = "black") +
  # geom_point(colour = "black", alpha = 0.3, size = 4)+ 
       scale_x_log10() + scale_y_log10() +
   labs(title = "Gain vs. 2018 Tree Canopy (%)", 
@@ -637,6 +638,7 @@ gain <- ggplot(FinalFishnet %>% filter(pctCoverage18 > 0.01 & pctGain > 1), aes(
 loss <- ggplot(FinalFishnet %>% filter(pctCoverage18 > 0.01 & pctGain > 1), aes(x = pctLoss, y = pctCoverage18))+
     stat_density2d(aes(fill = ..level..), geom = "polygon", bins = 20) +
   scale_fill_gradient(low="light green", high="magenta", name="Distribution") +
+    geom_smooth(method = "lm", se = FALSE, colour = "black") +
  # geom_point(colour = "black", alpha = 0.3, size = 4)+ 
       scale_x_log10() + scale_y_log10() +
   labs(title = "Loss vs. 2018 Tree Canopy (%)", 
@@ -654,8 +656,9 @@ pctChangeGraph <-
 change <- ggplot(pctChangeGraph, aes(x = pctChange, y = pctCoverage18))+
   stat_density2d(aes(fill = ..level..), geom = "polygon", bins = 20) +
   scale_fill_gradient(low="light green", high="magenta", name="Distribution") +
+    geom_smooth(method = "lm", se = FALSE, colour = "black") +
  # geom_point(colour = "black", alpha = 0.3, size = 4)+ 
-  labs(title = "Change \n vs. Tree Canopy Coverage (2018)") + 
+  labs(title = "Change vs. 2018 Tree Canopy (%)") + 
   xlab("% Change in Tree Canopy from 2008-2018 ") + 
   ylab("2018 Tree Canopy") + 
   theme(plot.title = element_text(size = 30, face = "bold"), 
@@ -668,9 +671,11 @@ grid.arrange(gain, loss, change, top = "Tree Canopy Change and Existing Tree Can
 
 ```
 
-Looking at the city as a whole, we see that the majority of fishnet cells experienced low net loss, while a similar amount of cells experienced either substantial loss or gain.   
 
-```{r Net Canopy Change,  message=FALSE, warning=FALSE, results='hide', fig.height = 5, fig.width = 5, cache=TRUE}
+Looking at the city as a whole, we see that the majority of fishnet cells experienced low net loss, while a similar amount of cells experienced either substantial loss or gain.    
+
+ 
+```{r Net Canopy Change,  message=FALSE, warning=FALSE, results='hide', fig.height = 8, fig.width = 8, cache=TRUE}
 
 b <- ggmap(base_map) +
   geom_sf(data = ll(FinalFishnet), inherit.aes = FALSE, colour = "transparent", aes(fill = PctChangeCat))+ 
@@ -822,7 +827,7 @@ FinalNeighborhood$GainMinusLossCat <- cut(FinalNeighborhood$GainMinusLoss,
 
 Below, we see that the neighborhoods farthest from 30% tree canopy are in South Philadelphia and parts of Center City. These neighborhoods are all along the Delaware River. This may mean that waterways and hydrology are a risk factor. The neighborhoods which meet this goal are largely in Northwest Philadelphia.  
   
-We also can see that most neighborhoods experienced a net loss in tree canopy. Interestingly, most tree gain was experienced in South Philadelphia and Center City, in neighborhoods which have low existing canopy.  
+We also see that most neighborhoods experienced a net loss in tree canopy. Interestingly, most tree gain was experienced in South Philadelphia and Center City, in neighborhoods which have low existing canopy.  
 
 ```{r Neighborhood Canopy Maps, message=FALSE, warning=FALSE, results='hide', fig.height = 10, fig.width = 20, cache=TRUE}
 
@@ -855,7 +860,7 @@ paletteChange <- c("green", "orange", "purple")
 
 #reference map
 refmap <- ggmap(base_map) +
-  geom_sf(data = ll(Neighborhood), fill = "white", colour = "gray", inherit.aes = FALSE) +
+  geom_sf(data = ll(Neighborhood), fill = "green", colour = "gray", inherit.aes = FALSE) +
   geom_sf(data = ll(RMBound), colour = "gray", fill = "black", inherit.aes = FALSE) +
     geom_sf(data = ll(URBound), colour = "gray", fill = "black", inherit.aes = FALSE) +
   labs(title = "Richmond and Upper Roxborough Neighborhoods") +
@@ -885,7 +890,7 @@ grid.arrange(ncol=2, UR, refmap, RM)
 
 ## 3.  How does tree canopy change vary by demographic?  
 
-Tree canopy loss, like other urban environmental issues, is has deep equity implications. Low income communities and communities of color are more likely to be in places with less tree canopy. Therefore, we explore demographics variables' correlation with tree canopy gain, loss, net change, and coverage. Surprisingly, demographic variables have little correlation with existing tree canopy or tree canopy change. This is likely because they are accounted for by neighborhood fixed effects.     
+Tree canopy loss, like other urban environmental issues, has deep implications for equity. Low income communities and communities of color are more likely to be in places with less tree canopy. Therefore, we explore demographics variables' correlation with tree canopy gain, loss, net change, and coverage. Surprisingly, demographic variables have little correlation with existing tree canopy or tree canopy change. This is likely because they are accounted for by neighborhood fixed effects.     
 ```{r Demographics, message=FALSE, warning=FALSE, results='hide', fig.height = 10, fig.width = 13,  cache=TRUE}
 
 library(grid)

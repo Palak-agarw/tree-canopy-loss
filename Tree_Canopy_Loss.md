@@ -409,7 +409,7 @@ FishnetIntersect <- st_intersection(fishnet2, ConservationNParks )%>%
   filter(ConservationPct <= 20)
 
 ggmap(base_map) +
-  geom_sf(data = ll(FishnetIntersect), fill = "light green", colour = "transparent", inherit.aes = FALSE) +
+  geom_sf(data = ll(FishnetIntersect), fill = "green", colour = "transparent", inherit.aes = FALSE) +
   labs(title = "Philadelphia Fishnet Grid", 
        subtitle = "1 cell = 1615 ft ^2, roughly 1 block") +
   mapTheme()
@@ -631,6 +631,7 @@ This is confirmed when we plot the log-transformed percent tree canopy and perce
 gain <- ggplot(FinalFishnet %>% filter(pctCoverage18 > 0.01 & pctGain > 1), aes(x = pctGain, y = pctCoverage18))+
     stat_density2d(aes(fill = ..level..), geom = "polygon", bins = 20) +
   scale_fill_gradient(low="light green", high="magenta", name="Distribution") +
+    geom_smooth(method = "lm", se = FALSE, colour = "black") +
  # geom_point(colour = "black", alpha = 0.3, size = 4)+ 
       scale_x_log10() + scale_y_log10() +
   labs(title = "Gain vs. 2018 Tree Canopy (%)", 
@@ -644,6 +645,7 @@ gain <- ggplot(FinalFishnet %>% filter(pctCoverage18 > 0.01 & pctGain > 1), aes(
 loss <- ggplot(FinalFishnet %>% filter(pctCoverage18 > 0.01 & pctGain > 1), aes(x = pctLoss, y = pctCoverage18))+
     stat_density2d(aes(fill = ..level..), geom = "polygon", bins = 20) +
   scale_fill_gradient(low="light green", high="magenta", name="Distribution") +
+    geom_smooth(method = "lm", se = FALSE, colour = "black") +
  # geom_point(colour = "black", alpha = 0.3, size = 4)+ 
       scale_x_log10() + scale_y_log10() +
   labs(title = "Loss vs. 2018 Tree Canopy (%)", 
@@ -661,8 +663,9 @@ pctChangeGraph <-
 change <- ggplot(pctChangeGraph, aes(x = pctChange, y = pctCoverage18))+
   stat_density2d(aes(fill = ..level..), geom = "polygon", bins = 20) +
   scale_fill_gradient(low="light green", high="magenta", name="Distribution") +
+    geom_smooth(method = "lm", se = FALSE, colour = "black") +
  # geom_point(colour = "black", alpha = 0.3, size = 4)+ 
-  labs(title = "Change \n vs. Tree Canopy Coverage (2018)") + 
+  labs(title = "Change vs. 2018 Tree Canopy (%)") + 
   xlab("% Change in Tree Canopy from 2008-2018 ") + 
   ylab("2018 Tree Canopy") + 
   theme(plot.title = element_text(size = 30, face = "bold"), 
@@ -675,8 +678,10 @@ grid.arrange(gain, loss, change, top = "Tree Canopy Change and Existing Tree Can
 
 ![](Tree_Canopy_Loss_files/figure-html/Comparing Tree Canopy Area to Loss/Gain2-1.png)<!-- -->
 
-Looking at the city as a whole, we see that the majority of fishnet cells experienced low net loss, while a similar amount of cells experienced either substantial loss or gain.   
 
+Looking at the city as a whole, we see that the majority of fishnet cells experienced low net loss, while a similar amount of cells experienced either substantial loss or gain.    
+
+ 
 
 ```r
 b <- ggmap(base_map) +
@@ -829,7 +834,7 @@ FinalNeighborhood$GainMinusLossCat <- cut(FinalNeighborhood$GainMinusLoss,
 
 Below, we see that the neighborhoods farthest from 30% tree canopy are in South Philadelphia and parts of Center City. These neighborhoods are all along the Delaware River. This may mean that waterways and hydrology are a risk factor. The neighborhoods which meet this goal are largely in Northwest Philadelphia.  
   
-We also can see that most neighborhoods experienced a net loss in tree canopy. Interestingly, most tree gain was experienced in South Philadelphia and Center City, in neighborhoods which have low existing canopy.  
+We also see that most neighborhoods experienced a net loss in tree canopy. Interestingly, most tree gain was experienced in South Philadelphia and Center City, in neighborhoods which have low existing canopy.  
 
 
 ```r
@@ -864,7 +869,7 @@ paletteChange <- c("green", "orange", "purple")
 
 #reference map
 refmap <- ggmap(base_map) +
-  geom_sf(data = ll(Neighborhood), fill = "white", colour = "gray", inherit.aes = FALSE) +
+  geom_sf(data = ll(Neighborhood), fill = "green", colour = "gray", inherit.aes = FALSE) +
   geom_sf(data = ll(RMBound), colour = "gray", fill = "black", inherit.aes = FALSE) +
     geom_sf(data = ll(URBound), colour = "gray", fill = "black", inherit.aes = FALSE) +
   labs(title = "Richmond and Upper Roxborough Neighborhoods") +
@@ -2200,20 +2205,28 @@ ggmap(base_map) +
 
 
 ```r
-FinalFishnet5$countConst1 <- FinalFishnet5$countConst * 0.75       #25 less
-FinalFishnet5$countConst2 <- FinalFishnet5$countConst * 0.50       #50 less
-FinalFishnet5$countConst3 <- FinalFishnet5$countConst * 1.50       #50 more
-FinalFishnet5$countConst4 <- FinalFishnet5$countConst * 2          #100 more
+FinalFishnet5$countConst1 <- FinalFishnet5$countConst * 0.50      #75 less
+FinalFishnet5$countConst2 <- FinalFishnet5$countConst * 0.75       #50 less
+FinalFishnet5$countConst3 <- FinalFishnet5$countConst * 1.25      #50 more
+FinalFishnet5$countConst4 <- FinalFishnet5$countConst * 1.5       #100 more
 
 
+FinalFishnet5$avg_nnConst1 <- FinalFishnet5$avg_nnConst * 1.5 
+
+FinalFishnet5$avg_nnConst2 <- FinalFishnet5$avg_nnConst * 1.25
+
+FinalFishnet5$avg_nnConst3 <- FinalFishnet5$avg_nnConst * .75
+
+FinalFishnet5$avg_nnConst4 <- FinalFishnet5$avg_nnConst * .5
 
 
+set.seed(77) 
 
 ##SCENARIO 1: 25 less
 rf1 <- randomForest(
   FinalFishnet5$Variable ~ .,
   data=st_drop_geometry(FinalFishnet5) %>% 
-                     dplyr::select(pctCoverage18, LogAvgParcelSize, avg_nnConst,LogPctTrans, LogPole, NAME,
+                     dplyr::select(pctCoverage18, LogAvgParcelSize, avg_nnConst1,LogPctTrans, LogPole, NAME,
                                     countConst1, Loge311Count,pctTrans, LogPctRes, holc_grade, HydrologyPct))
 testProbs_const1 <- data.frame(Outcome = as.factor(FinalFishnet5$Variable),       ## Prediction
                         Probs = predict(rf1, FinalFishnet5, type= "response"))
@@ -2239,7 +2252,7 @@ construction1 <- construction1 %>%
 rf2 <- randomForest(
   FinalFishnet5$Variable ~ .,
   data=st_drop_geometry(FinalFishnet5) %>% 
-                     dplyr::select(pctCoverage18, LogAvgParcelSize, avg_nnConst,LogPctTrans, LogPole, NAME,
+                     dplyr::select(pctCoverage18, LogAvgParcelSize, avg_nnConst2,LogPctTrans, LogPole, NAME,
                                     countConst2, Loge311Count,pctTrans, LogPctRes, holc_grade, HydrologyPct))
 testProbs_const2 <- data.frame(Outcome = as.factor(FinalFishnet5$Variable),             #prediction   
                         Probs = predict(rf2, FinalFishnet5, type= "response"))
@@ -2265,7 +2278,7 @@ construction2 <- construction2 %>%
 rf3 <- randomForest(
   FinalFishnet5$Variable ~ .,
   data=st_drop_geometry(FinalFishnet5) %>% 
-                     dplyr::select(pctCoverage18, LogAvgParcelSize, avg_nnConst,LogPctTrans, LogPole, NAME,
+                     dplyr::select(pctCoverage18, LogAvgParcelSize, avg_nnConst3,LogPctTrans, LogPole, NAME,
                                     countConst3, Loge311Count,pctTrans, LogPctRes, holc_grade, HydrologyPct))
 testProbs_const3 <- data.frame(Outcome = as.factor(FinalFishnet5$Variable),      # Prediction
                         Probs = predict(rf3, FinalFishnet5, type= "response"))
@@ -2291,7 +2304,7 @@ construction3 <- construction3 %>%
 rf4 <- randomForest(
   FinalFishnet5$Variable ~ .,
   data=st_drop_geometry(FinalFishnet5) %>% 
-                     dplyr::select(pctCoverage18, LogAvgParcelSize, avg_nnConst,LogPctTrans, LogPole, NAME,
+                     dplyr::select(pctCoverage18, LogAvgParcelSize, avg_nnConst4,LogPctTrans, LogPole, NAME,
                                     countConst4, Loge311Count,pctTrans, LogPctRes, holc_grade, HydrologyPct))
 testProbs_const4 <- data.frame(Outcome = as.factor(FinalFishnet5$Variable),     #Prediction
                         Probs = predict(rf4, FinalFishnet5, type= "response"))
