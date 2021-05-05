@@ -1000,31 +1000,6 @@ grid.arrange(ncol=2, top=textGrob("Neighborhood Attributes and Tree Canopy 2008-
 
 ![](Tree_Canopy_Loss_files/figure-html/Demographics-1.png)<!-- -->
 
-
-```r
-# # race context
-# race_context <- ACS %>%
-#   dplyr::select(pctWhite) %>%
-#   mutate(Race_Context = ifelse(pctWhite > .5, "Majority_White", "Majority_Non_White"))
-# 
-# ggplot() +
-#   geom_sf(data = race_context, aes(fill = Race_Context)) +
-#   scale_fill_viridis(option = "B", discrete = TRUE, name = "Race Context") +
-#   labs(title = "Neighborhood Racial Context", subtitle = "Philadelphia, PA") +
-#   mapTheme()
-# 
-# # income context
-# income_context <- ACS %>%
-#   dplyr::select(medHHInc) %>%
-#   mutate(Income_Context = ifelse(medHHInc > 42614, "Higher", "Lower"))
-#   
-# ggplot() +
-#   geom_sf(data = income_context, aes(fill = Income_Context)) +
-#   scale_fill_viridis(option = "B", discrete = TRUE, name = "Income Context") +
-#   labs(title = "Neighborhood Income Context", subtitle = "Philadelphia, PA") +
-#   mapTheme()
-```
-
 ## 4. What other factors influence tree canopy loss?    
 Based on our analysis of the spatial distribution of tree canopy loss, we look at a few more variables: land use, redlining, hydrology, construction, and health outcomes for potential features.
 
@@ -1053,13 +1028,6 @@ FinalFishnet <-
    HydrologyNet %>%
    st_drop_geometry() %>%
    left_join(FinalFishnet, .)
-
-
-hydro <- ggmap(base_map) +
-  geom_sf(data = ll(HydrologyNet), aes(fill = HydrologyAreaCat), colour = "white", inherit.aes = FALSE, alpha = 0.75) +
-  labs(title = "Weighted Proximity to Water", subtitle = "Philadelphia, PA") +
-  theme(plot.title = element_text(size = 30, face = "bold"), 
-        legend.title = element_text(size = 12)) +  mapTheme()
 ```
 
 
@@ -1084,13 +1052,6 @@ FinalFishnet1 %>%
   left_join(FinalFishnet, .)%>%
   mutate(LogAvgParcelSize = log10(avgParcelSize), 
          LogPctLoss = log10(pctLoss))
-
-
-parcelPlot <- ggmap(base_map) +
-  geom_sf(data = ll(FinalFishnet), aes(fill = q5(avgParcelSize)), colour = "white", inherit.aes = FALSE, alpha = 0.75) +
-  labs(title = "Average Parcel Size", subtitle = "Philadelphia, PA") +
-  theme(plot.title = element_text(size = 30, face = "bold"), 
-        legend.title = element_text(size = 12)) +  mapTheme()
 ```
 
 
@@ -1247,15 +1208,6 @@ FinalFishnet <-
    st_drop_geometry() %>%
    left_join(FinalFishnet, .)%>%
    mutate(countConst = replace_na(countConst, 0))
-
-constructPlot <-
-  ggmap(base_map) +
-geom_sf(data = ll(FinalFishnet), aes(fill = q5(countConst)), colour = "white", inherit.aes = FALSE) +
-  labs(title = "Construction Permits", subtitle = "Philadelphia, PA") +
-  theme(plot.title = element_text(size = 30, face = "bold"), 
-        legend.title = element_text(size = 12)) +  mapTheme()
-
-constructPlot <- constructPlot + scale_fill_brewer(palette = "YlGnBu", name = "%", direction = 1, aesthetics = c("colour", "fill"), guide = guide_legend(reverse = TRUE))
 ```
 
 
@@ -1368,24 +1320,6 @@ mutate_all(~replace(., is.na(.), 0))%>%
 left_join(FinalFishnet, .)%>% 
 mutate(LogPctRes = log10(pctRes), 
 LogPctResTrans = log10(pctTransRes))
-
-transPlot <-
-  ggmap(base_map) +
-geom_sf(data = ll(FinalFishnet), aes(fill = q5(pctTrans)), colour = "white", inherit.aes = FALSE) +
-  labs(title = "Transportation Land Use Parcels", subtitle = "Philadelphia, PA") +
-  theme(plot.title = element_text(size = 30, face = "bold"), 
-        legend.title = element_text(size = 12)) +  mapTheme()
-
-transPlot <- transPlot + scale_fill_brewer(palette = "YlGnBu", name = "%", direction = 1, aesthetics = c("colour", "fill"), guide = guide_legend(reverse = TRUE))
-
-resPlot <-
-  ggmap(base_map) +
-geom_sf(data = ll(FinalFishnet), aes(fill = q5(pctRes)), colour = "white", inherit.aes = FALSE) +
-  labs(title = "Residential Land Use Parcels", subtitle = "Philadelphia, PA") +
-  theme(plot.title = element_text(size = 30, face = "bold"), 
-        legend.title = element_text(size = 12)) +  mapTheme()
-
-transPlot <- transPlot + scale_fill_brewer(palette = "YlGnBu", name = "%", direction = 1, aesthetics = c("colour", "fill"), guide = guide_legend(reverse = TRUE))
 ```
 
 We also look at redlining boundaries from the Homeowner’s Loan Corporation (HOLC). As trees take decades to grow, the spatial configuration of tree canopy and likely their change is influenced by historical planning decisions. In 1937, HOLC created “redlining” maps which rated neighborhoods’ desirability in four categories. They rated neighborhoods with residents of color as the least desirable and majority-white neighborhoods as the most desirable. As a result, the low-ranked neighborhoods experienced disinvestment and greater difficulty attracting investment. 
@@ -1681,26 +1615,63 @@ FinalFishnet<-
   left_join(FinalFishnet, .)%>% 
   mutate(LogPole = log10(avg_nnPole), 
   LogPctGain = log10(pctGain))
-  
-poles <-
-  ggmap(base_map) +
-geom_sf(data = ll(FinalFishnet), aes(fill = q5(avg_nnPole)), colour = "white", inherit.aes = FALSE) +
-  labs(title = "Poles (Nearest Neighbor)", subtitle = "Philadelphia, PA") +
-  theme(plot.title = element_text(size = 30, face = "bold"), 
-        legend.title = element_text(size = 12)) +  mapTheme()
-
-polePlot <- poles + scale_fill_brewer(palette = "YlGnBu", name = "Nearest Neighbor", direction = 1, aesthetics = c("colour", "fill"), guide = guide_legend(reverse = TRUE))
 ```
 
 
 
 ```r
-hydro <- hydro + scale_fill_brewer(palette = "YlGnBu", name = "Amount of Water", direction = 1, aesthetics = c("colour", "fill"), guide = guide_legend(reverse = TRUE))
+polePlot <-
+  ggmap(base_map) +
+  scale_fill_brewer(palette = "PiYG", name = "Nearest Neighbor", direction = 1, aesthetics = c("colour", "fill"), guide = guide_legend(reverse = TRUE)) +
+geom_sf(data = ll(FinalFishnet), aes(fill = q5(avg_nnPole)), colour = "transparent", inherit.aes = FALSE) +
+  labs(title = "Poles (Nearest Neighbor)", subtitle = "Philadelphia, PA") +
+  theme(plot.title = element_text(size = 30, face = "bold"), 
+        legend.title = element_text(size = 12)) +  mapTheme()
 
-parcelPlot <- parcelPlot + scale_fill_brewer(palette = "YlGnBu", name = "Amount of Water", direction = 1, aesthetics = c("colour", "fill"), guide = guide_legend(reverse = TRUE))
+
+parcelPlot <- 
+  ggmap(base_map) +
+  scale_fill_brewer(palette = "PiYG", name = "Average Parcel Size", direction = 1, aesthetics = c("colour", "fill"), guide = guide_legend(reverse = TRUE)) +
+  geom_sf(data = ll(FinalFishnet), aes(fill = q5(avgParcelSize)), colour = "transparent", inherit.aes = FALSE, alpha = 0.75) +
+  labs(title = "Area (ft^2)", subtitle = "Philadelphia, PA") +
+  theme(plot.title = element_text(size = 30, face = "bold"), 
+        legend.title = element_text(size = 12)) +  mapTheme()
+
+hydroPlot <- 
+  ggmap(base_map) +
+  scale_fill_brewer(palette = "PiYG", name = "Hydrological Features", direction = 1, aesthetics = c("colour", "fill"), guide = guide_legend(reverse = TRUE)) +
+  geom_sf(data = ll(HydrologyNet), aes(fill = HydrologyAreaCat), colour = "transparent", inherit.aes = FALSE, alpha = 0.75) +
+  labs(title = "Proximity to water", subtitle = "Philadelphia, PA") +
+  theme(plot.title = element_text(size = 30, face = "bold"), 
+        legend.title = element_text(size = 12)) +  mapTheme()
+
+constructPlot <-
+  ggmap(base_map) +
+  scale_fill_brewer(palette = "PiYG", name = "Permit Count", direction = 1, aesthetics = c("colour", "fill"), guide = guide_legend(reverse = TRUE)) +
+geom_sf(data = ll(FinalFishnet), aes(fill = q5(countConst)), colour = "transparent", inherit.aes = FALSE) +
+  labs(title = "Construction Permits", subtitle = "Philadelphia, PA") +
+  theme(plot.title = element_text(size = 30, face = "bold"), 
+        legend.title = element_text(size = 12)) +  mapTheme()
+
+transPlot <-
+  ggmap(base_map) +
+  scale_fill_brewer(palette = "PiYG", name = "% of total parcels", direction = 1, aesthetics = c("colour", "fill"), guide = guide_legend(reverse = TRUE)) +
+geom_sf(data = ll(FinalFishnet), aes(fill = q5(pctTrans)), colour = "transparent", inherit.aes = FALSE) +
+  labs(title = "Transportation Land Use Parcels", subtitle = "Philadelphia, PA") +
+  theme(plot.title = element_text(size = 30, face = "bold"), 
+        legend.title = element_text(size = 12)) +  mapTheme()
+
+resPlot <-
+  ggmap(base_map) +
+  scale_fill_brewer(palette = "PiYG", name = "% of total parcels", direction = 1, aesthetics = c("colour", "fill"), guide = guide_legend(reverse = TRUE)) +
+geom_sf(data = ll(FinalFishnet), aes(fill = q5(pctRes)), colour = "transparent", inherit.aes = FALSE) +
+  labs(title = "Residential Land Use Parcels", subtitle = "Philadelphia, PA") +
+  theme(plot.title = element_text(size = 30, face = "bold"), 
+        legend.title = element_text(size = 12)) +  mapTheme()
 
 
-grid.arrange(hydro, parcelPlot, polePlot, transPlot, resPlot, constructPlot, ncol = 3, top = "Canopy Loss Risk Factors by Fishnet")
+
+grid.arrange(hydroPlot, parcelPlot, polePlot, transPlot, resPlot, constructPlot, ncol = 3, top = "Canopy Loss Risk Factors by Fishnet")
 ```
 
 ![](Tree_Canopy_Loss_files/figure-html/factor maps-1.png)<!-- -->

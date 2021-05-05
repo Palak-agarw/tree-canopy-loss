@@ -1605,7 +1605,7 @@ FinalFishnet<-
 polePlot <-
   ggmap(base_map) +
   scale_fill_brewer(palette = "PiYG", name = "Nearest Neighbor", direction = 1, aesthetics = c("colour", "fill"), guide = guide_legend(reverse = TRUE)) +
-geom_sf(data = ll(FinalFishnet), aes(fill = q5(avg_nnPole)), colour = "white", inherit.aes = FALSE) +
+geom_sf(data = ll(FinalFishnet), aes(fill = q5(avg_nnPole)), colour = "transparent", inherit.aes = FALSE) +
   labs(title = "Poles (Nearest Neighbor)", subtitle = "Philadelphia, PA") +
   theme(plot.title = element_text(size = 30, face = "bold"), 
         legend.title = element_text(size = 12)) +  mapTheme()
@@ -1613,16 +1613,16 @@ geom_sf(data = ll(FinalFishnet), aes(fill = q5(avg_nnPole)), colour = "white", i
 
 parcelPlot <- 
   ggmap(base_map) +
-  scale_fill_brewer(palette = "PiYG", name = "Average Parcel Size", direction = 1, aesthetics = c("colour", "fill"), guide = guide_legend(reverse = TRUE)) +
-  geom_sf(data = ll(FinalFishnet), aes(fill = q5(avgParcelSize)), colour = "white", inherit.aes = FALSE, alpha = 0.75) +
-  labs(title = "Area (ft^2)", subtitle = "Philadelphia, PA") +
+  scale_fill_brewer(palette = "PiYG", name = "Area (ft^2)", direction = 1, aesthetics = c("colour", "fill"), guide = guide_legend(reverse = TRUE)) +
+  geom_sf(data = ll(FinalFishnet), aes(fill = q5(avgParcelSize)), colour = "transparent", inherit.aes = FALSE, alpha = 0.75) +
+  labs(title = "Average Parcel Size", subtitle = "Philadelphia, PA") +
   theme(plot.title = element_text(size = 30, face = "bold"), 
         legend.title = element_text(size = 12)) +  mapTheme()
 
 hydroPlot <- 
   ggmap(base_map) +
-  scale_fill_brewer(palette = "PiYG", name = "Hydrological Features", direction = 1, aesthetics = c("colour", "fill"), guide = guide_legend(reverse = TRUE)) +
-  geom_sf(data = ll(HydrologyNet), aes(fill = HydrologyAreaCat), colour = "white", inherit.aes = FALSE, alpha = 0.75) +
+  scale_fill_brewer(palette = "PiYG", name = "Area (ft^2)", direction = 1, aesthetics = c("colour", "fill"), guide = guide_legend(reverse = TRUE)) +
+  geom_sf(data = ll(HydrologyNet), aes(fill = HydrologyAreaCat), colour = "transparent", inherit.aes = FALSE, alpha = 0.75) +
   labs(title = "Proximity to water", subtitle = "Philadelphia, PA") +
   theme(plot.title = element_text(size = 30, face = "bold"), 
         legend.title = element_text(size = 12)) +  mapTheme()
@@ -1630,7 +1630,7 @@ hydroPlot <-
 constructPlot <-
   ggmap(base_map) +
   scale_fill_brewer(palette = "PiYG", name = "Permit Count", direction = 1, aesthetics = c("colour", "fill"), guide = guide_legend(reverse = TRUE)) +
-geom_sf(data = ll(FinalFishnet), aes(fill = q5(countConst)), colour = "white", inherit.aes = FALSE) +
+geom_sf(data = ll(FinalFishnet), aes(fill = q5(countConst)), colour = "transparent", inherit.aes = FALSE) +
   labs(title = "Construction Permits", subtitle = "Philadelphia, PA") +
   theme(plot.title = element_text(size = 30, face = "bold"), 
         legend.title = element_text(size = 12)) +  mapTheme()
@@ -1638,7 +1638,7 @@ geom_sf(data = ll(FinalFishnet), aes(fill = q5(countConst)), colour = "white", i
 transPlot <-
   ggmap(base_map) +
   scale_fill_brewer(palette = "PiYG", name = "% of total parcels", direction = 1, aesthetics = c("colour", "fill"), guide = guide_legend(reverse = TRUE)) +
-geom_sf(data = ll(FinalFishnet), aes(fill = q5(pctTrans)), colour = "white", inherit.aes = FALSE) +
+geom_sf(data = ll(FinalFishnet), aes(fill = q5(pctTrans)), colour = "transparent", inherit.aes = FALSE) +
   labs(title = "Transportation Land Use Parcels", subtitle = "Philadelphia, PA") +
   theme(plot.title = element_text(size = 30, face = "bold"), 
         legend.title = element_text(size = 12)) +  mapTheme()
@@ -1646,14 +1646,14 @@ geom_sf(data = ll(FinalFishnet), aes(fill = q5(pctTrans)), colour = "white", inh
 resPlot <-
   ggmap(base_map) +
   scale_fill_brewer(palette = "PiYG", name = "% of total parcels", direction = 1, aesthetics = c("colour", "fill"), guide = guide_legend(reverse = TRUE)) +
-geom_sf(data = ll(FinalFishnet), aes(fill = q5(pctRes)), colour = "white", inherit.aes = FALSE) +
+geom_sf(data = ll(FinalFishnet), aes(fill = q5(pctRes)), colour = "transparent", inherit.aes = FALSE) +
   labs(title = "Residential Land Use Parcels", subtitle = "Philadelphia, PA") +
   theme(plot.title = element_text(size = 30, face = "bold"), 
         legend.title = element_text(size = 12)) +  mapTheme()
 
 
 
-grid.arrange(hydro, parcelPlot, polePlot, transPlot, resPlot, constructPlot, ncol = 3, top = "Canopy Loss Risk Factors by Fishnet")
+grid.arrange(hydroPlot, parcelPlot, polePlot, transPlot, resPlot, constructPlot, ncol = 3, top = "Canopy Loss Risk Factors by Fishnet")
 
 grid.arrange(pbNeigh, urNeigh, rmNeigh, ncol = 3, top = "Construction and Canopy Loss in 3 Neighborhoods")
 
