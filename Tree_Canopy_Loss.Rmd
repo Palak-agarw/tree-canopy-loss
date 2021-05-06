@@ -314,6 +314,9 @@ Conservation <-
    dplyr::select(geometry)
 
 ConservationNParks <- rbind(Parks, Conservation)
+
+ConservationNParks <- ConservationNParks %>%
+  mutate(color = "   ")
 ```
 
 # Motivation 
@@ -324,7 +327,7 @@ Most of this loss occurred in historically disenfranchised communities. In respo
 
 ```{r Study boundaries, cache=TRUE, message=FALSE, warning=FALSE, include=TRUE, results='hide'}
 ggmap(base_map) +
-  geom_sf(data = ll(Philadelphia), colour = "black", fill = "gray", alpha = 0.5) +
+  geom_sf(data = ll(Philadelphia), colour = "black", fill = "gray", alpha = 0.5, inherit.aes = FALSE) +
   labs(title = "Study Area Boundaries",
        subtitle = "Philadelphia, PA") +
     theme(plot.title = element_text(size = 30, face = "bold"), 
@@ -407,7 +410,9 @@ FishnetIntersect <- st_intersection(fishnet2, ConservationNParks )%>%
   filter(ConservationPct <= 20)
 
 ggmap(base_map) +
-  geom_sf(data = ll(ConservationNParks), fill = "magenta", colour = "transparent", inherit.aes = FALSE) +
+  geom_sf(data = ll(ConservationNParks), aes(fill = color), colour = "transparent", inherit.aes = FALSE, name = "Omitted areas") +
+  scale_fill_manual(values = "magenta", 
+                    name = "Omitted Areas")+ 
   geom_sf(data = ll(FishnetIntersect), fill = "transparent", colour = "black", inherit.aes = FALSE) +
   labs(title = "Study Area Fishnet", 
        subtitle = "Philadelphia, PA") +
@@ -981,7 +986,7 @@ grid.arrange(ncol=2, top=textGrob("Neighborhood Attributes and Tree Canopy 2008-
 
 ## 4. How do historical disinvestment and segregation relate to tree canopy loss?
 Next, we examine redlining boundaries from the Homeowner’s Loan Corporation (HOLC). As trees take decades to grow, the spatial configuration of tree canopy and their change is influenced by historical planning decisions. In 1937, HOLC created “redlining” maps which rated neighborhoods’ desirability in four categories. They rated neighborhoods with residents of color as the least desirable and majority-white neighborhoods as the most desirable. As a result, the low-ranked neighborhoods experienced disinvestment and greater difficulty attracting investment.   
-```{r HOLC Areas, message=FALSE, warning=FALSE, include=TRUE, results='hide', fig.height =  7, fig.width = 7, cache='TRUE'}
+```{r HOLC Rated Areas, message=FALSE, warning=FALSE, include=TRUE, results='hide', fig.height =  7, fig.width = 7, cache='TRUE'}
 
 HOLC2 <- HOLC %>%
   st_intersection(st_make_valid(Philadelphia), HOLC) %>%  
@@ -1682,7 +1687,7 @@ do.call(grid.arrange,c(mapList, ncol = 3, top = "Risk Factors by Fishnet"))
 grid.arrange(pbNeigh, urNeigh, rmNeigh, ncol = 1, top = "Construction and Canopy Loss in 3 Neighborhoods")
 ```
 
-```{morans i, message=FALSE, warning=FALSE, results='hide',cache=TRUE}
+```{morans i, message=FALSE, warning=FALSE, include=TRUE, results='hide'}
 library(spdep)
 library(FNN)
 library(spatstat)
@@ -2032,96 +2037,7 @@ whichThreshold %>%
 
 ```
  
-# Validation 
-## How accurate is our model? 
-```{r Confusion metrics, message=FALSE, warning=FALSE, fig.height = 6, fig.width = 6, cache=TRUE}  
-
-
-testProbs2$predClass  = ifelse(testProbs2$Probs > 0.35 , 1,0)
-
-confusion <- caret::confusionMatrix(reference = as.factor(testProbs2$Outcome),
-                        data = as.factor(testProbs2$predClass),
-                        positive = "1")
-
-
- draw_confusion_matrix <- function(cm) {
-
-   layout(matrix(c(1,1,2)))
-   par(mar=c(2,2,2,2))
-   plot(c(100, 345), c(300, 450), type = "n", xlab="", ylab="", xaxt='n', yaxt='n')
-   title('CONFUSION MATRIX', cex.main=2)
-
-   # create the matrix
-   rect(150, 430, 240, 370, col='#3F97D0')
-   text(195, 435, 'Low Loss', cex=1.2)
-   rect(250, 430, 340, 370, col='#F7AD50')
-   text(295, 435, 'Moderate - High Loss', cex=1.2)
-   text(125, 370, 'Predicted', cex=1.3, srt=90, font=2)
-   text(245, 450, 'Actual', cex=1.3, font=2)
-   rect(150, 305, 240, 365, col='#F7AD50')
-   rect(250, 305, 340, 365, col='#3F97D0')
-   text(140, 400, 'Low Loss', cex=1.2, srt=90)
-   text(140, 335, 'Moderate - High Loss', cex=1.2, srt=90)
-
-   # add in the cm results
-   res <- as.numeric(cm$table)
-   text(195, 400, res[1], cex=1.6, font=2, col='white')
-   text(195, 335, res[2], cex=1.6, font=2, col='white')
-   text(295, 400, res[3], cex=1.6, font=2, col='white')
-   text(295, 335, res[4], cex=1.6, font=2, col='white')
-
-   # add in the specifics
-   plot(c(100, 0), c(100, 0), type = "n", xlab="", ylab="", main = "DETAILS", xaxt='n', yaxt='n')
-   text(10, 85, names(cm$byClass[1]), cex=1.2, font=2)
-   text(10, 70, round(as.numeric(cm$byClass[1]), 3), cex=1.2)
-   text(30, 85, names(cm$byClass[2]), cex=1.2, font=2)
-   text(30, 70, round(as.numeric(cm$byClass[2]), 3), cex=1.2)
-   text(50, 85, names(cm$byClass[5]), cex=1.2, font=2)
-   text(50, 70, round(as.numeric(cm$byClass[5]), 3), cex=1.2)
-   text(70, 85, names(cm$byClass[6]), cex=1.2, font=2)
-   text(70, 70, round(as.numeric(cm$byClass[6]), 3), cex=1.2)
-   text(90, 85, names(cm$byClass[7]), cex=1.2, font=2)
-   text(90, 70, round(as.numeric(cm$byClass[7]), 3), cex=1.2)
-
-   # add in the accuracy information
-   text(30, 35, names(cm$overall[1]), cex=1.5, font=2)
-   text(30, 20, round(as.numeric(cm$overall[1]), 3), cex=1.4)
-   text(70, 35, names(cm$overall[2]), cex=1.5, font=2)
-   text(70, 20, round(as.numeric(cm$overall[2]), 3), cex=1.4)
- }
-
-draw_confusion_matrix(confusion)
-#
-#
-finalTest2$uniqueID <- seq.int(nrow(finalTest))
-
-testProbs2$uniqueID <- seq.int(nrow(finalTest))
-
-try <- left_join(finalTest2, testProbs2)
-
-try <-
-  try%>%
-  mutate(result = "0")%>%
-  mutate(result = ifelse(Outcome == 0 & predClass == 0, "True Negative", result))%>%
-  mutate(result = ifelse(Outcome == 1 & predClass == 1, "True Positive", result))%>%
-  mutate(result = ifelse(Outcome == 0 & predClass == 1, "False Positive", result))%>%
-  mutate(result = ifelse(Outcome == 1 & predClass == 0, "False Negative", result))
-
-
-palette3 <- c("magenta",  "blue", "purple", "green")
-
-ggmap(base_map) +
-  geom_sf(data = ll(fishnet), fill = "white", colour = "transparent", inherit.aes = FALSE)+
-  geom_sf(data = ll(try), aes(fill = result), colour = "transparent", inherit.aes = FALSE)+
-  labs(title = "Mapped Correlation Matrix")+
-  scale_fill_manual(values = palette3, name = "Model Metric",
-                  guide = guide_legend(reverse = TRUE))+
-  theme(legend.position = "bottom",
-        legend.title = element_blank(),
-        plot.title = element_text(hjust = 0.5))+
-  theme(plot.title = element_text(size = 30, face = "bold"), 
-        legend.title = element_text(size = 12)) +  mapTheme()
-```
+# Results
 
 ```{r Construction_scenarios, message=FALSE, warning=FALSE, fig.height = 15, fig.width = 10, cache=TRUE}
 
@@ -2321,10 +2237,99 @@ mylegend<-g_legend(original)
 grid.arrange(arrangeGrob(less50 + theme(legend.position="none"), less25 + theme(legend.position="none"), original + theme(legend.position="none"), more50 + theme(legend.position="none"), more100 + theme(legend.position="none"), ncol = 2, top = "Canopy Change Under 5 Construction Scenarios", mylegend))
 ```
 
+# Validation 
+## How accurate is our model? 
+```{r Confusion metrics, message=FALSE, warning=FALSE, fig.height = 6, fig.width = 6, cache=TRUE}  
 
+
+testProbs2$predClass  = ifelse(testProbs2$Probs > 0.35 , 1,0)
+
+confusion <- caret::confusionMatrix(reference = as.factor(testProbs2$Outcome),
+                        data = as.factor(testProbs2$predClass),
+                        positive = "1")
+
+
+ draw_confusion_matrix <- function(cm) {
+
+   layout(matrix(c(1,1,2)))
+   par(mar=c(2,2,2,2))
+   plot(c(100, 345), c(300, 450), type = "n", xlab="", ylab="", xaxt='n', yaxt='n')
+   title('CONFUSION MATRIX', cex.main=2)
+
+   # create the matrix
+   rect(150, 430, 240, 370, col='#3F97D0')
+   text(195, 435, 'Low Loss', cex=1.2)
+   rect(250, 430, 340, 370, col='#F7AD50')
+   text(295, 435, 'Moderate - High Loss', cex=1.2)
+   text(125, 370, 'Predicted', cex=1.3, srt=90, font=2)
+   text(245, 450, 'Actual', cex=1.3, font=2)
+   rect(150, 305, 240, 365, col='#F7AD50')
+   rect(250, 305, 340, 365, col='#3F97D0')
+   text(140, 400, 'Low Loss', cex=1.2, srt=90)
+   text(140, 335, 'Moderate - High Loss', cex=1.2, srt=90)
+
+   # add in the cm results
+   res <- as.numeric(cm$table)
+   text(195, 400, res[1], cex=1.6, font=2, col='white')
+   text(195, 335, res[2], cex=1.6, font=2, col='white')
+   text(295, 400, res[3], cex=1.6, font=2, col='white')
+   text(295, 335, res[4], cex=1.6, font=2, col='white')
+
+   # add in the specifics
+   plot(c(100, 0), c(100, 0), type = "n", xlab="", ylab="", main = "DETAILS", xaxt='n', yaxt='n')
+   text(10, 85, names(cm$byClass[1]), cex=1.2, font=2)
+   text(10, 70, round(as.numeric(cm$byClass[1]), 3), cex=1.2)
+   text(30, 85, names(cm$byClass[2]), cex=1.2, font=2)
+   text(30, 70, round(as.numeric(cm$byClass[2]), 3), cex=1.2)
+   text(50, 85, names(cm$byClass[5]), cex=1.2, font=2)
+   text(50, 70, round(as.numeric(cm$byClass[5]), 3), cex=1.2)
+   text(70, 85, names(cm$byClass[6]), cex=1.2, font=2)
+   text(70, 70, round(as.numeric(cm$byClass[6]), 3), cex=1.2)
+   text(90, 85, names(cm$byClass[7]), cex=1.2, font=2)
+   text(90, 70, round(as.numeric(cm$byClass[7]), 3), cex=1.2)
+
+   # add in the accuracy information
+   text(30, 35, names(cm$overall[1]), cex=1.5, font=2)
+   text(30, 20, round(as.numeric(cm$overall[1]), 3), cex=1.4)
+   text(70, 35, names(cm$overall[2]), cex=1.5, font=2)
+   text(70, 20, round(as.numeric(cm$overall[2]), 3), cex=1.4)
+ }
+
+draw_confusion_matrix(confusion)
+#
+#
+finalTest2$uniqueID <- seq.int(nrow(finalTest))
+
+testProbs2$uniqueID <- seq.int(nrow(finalTest))
+
+try <- left_join(finalTest2, testProbs2)
+
+try <-
+  try%>%
+  mutate(result = "0")%>%
+  mutate(result = ifelse(Outcome == 0 & predClass == 0, "True Negative", result))%>%
+  mutate(result = ifelse(Outcome == 1 & predClass == 1, "True Positive", result))%>%
+  mutate(result = ifelse(Outcome == 0 & predClass == 1, "False Positive", result))%>%
+  mutate(result = ifelse(Outcome == 1 & predClass == 0, "False Negative", result))
+
+
+palette3 <- c("magenta",  "blue", "purple", "green")
+
+ggmap(base_map) +
+  geom_sf(data = ll(fishnet), fill = "white", colour = "transparent", inherit.aes = FALSE)+
+  geom_sf(data = ll(try), aes(fill = result), colour = "transparent", inherit.aes = FALSE)+
+  labs(title = "Mapped Correlation Matrix")+
+  scale_fill_manual(values = palette3, name = "Model Metric",
+                  guide = guide_legend(reverse = TRUE))+
+  theme(legend.position = "bottom",
+        legend.title = element_blank(),
+        plot.title = element_text(hjust = 0.5))+
+  theme(plot.title = element_text(size = 30, face = "bold"), 
+        legend.title = element_text(size = 12)) +  mapTheme()
+```
+
+## How generalizable is our model?
 ``````{r CV, message=FALSE, warning=FALSE, fig.height = 6, fig.width = 6, include=TRUE, results='hide', cache=TRUE}  
-
-
 ## Cross validation
 ctrl <- trainControl(method = "cv", number = 10, classProbs=TRUE,savePredictions = TRUE,verboseIter = TRUE)
 
@@ -2386,7 +2391,7 @@ dplyr::select(reg.cv$resample, -Resample) %>%
 
 ```
 
-## Spatial Correlation
+## How well does our model predict across space?
 To further test our model's generalizability, we conducted a spatial cross validation. By leaving out one neighborhood at a time, we were able to see how well our model predicts across space.
 ```{r spatial_cv, message=FALSE, warning=FALSE, cache=TRUE, results=FALSE}
 # Model Validation
@@ -2443,7 +2448,6 @@ ggplot() +
   mapTheme()
 
 ```
-## Team Roles
 
-![Gantt Chart](Gantt.png)
+# Conclusion
 
