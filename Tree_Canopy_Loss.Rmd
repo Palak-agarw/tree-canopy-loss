@@ -410,7 +410,7 @@ FishnetIntersect <- st_intersection(fishnet2, ConservationNParks )%>%
   filter(ConservationPct <= 20)
 
 ggmap(base_map) +
-  geom_sf(data = ll(ConservationNParks), aes(fill = color), colour = "transparent", inherit.aes = FALSE, name = "Omitted areas") +
+  geom_sf(data = ll(ConservationNParks), aes(fill = color), colour = "transparent", inherit.aes = FALSE) +
   scale_fill_manual(values = "magenta", 
                     name = "Omitted Areas")+ 
   geom_sf(data = ll(FishnetIntersect), fill = "transparent", colour = "black", inherit.aes = FALSE) +
