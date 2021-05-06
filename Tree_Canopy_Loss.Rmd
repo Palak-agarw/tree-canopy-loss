@@ -2035,8 +2035,25 @@ whichThreshold %>%
   guides(colour=guide_legend(title = "Confusion Metric")) 
 
 ```
- 
+
+The random forest predicts the probability of tree canopy loss occuring in a given grid cell from 0 to 1. To validate our model, we chose a probability threshold above which tree canopy loss is most substanial. By looking at the plot of threshold with the probabilities, we chose 0.25 to be our threshold as that maximized true positives while reducing false negatives. The graph above visualizes confusion metrics for every possible threshold from 0 to 1. At .25, the true positive rate is high and the false negative rate is relatively low. A lower threshold would increase the true positive rate and decrease the false negative rate, but the false positive rate would also increase. This could lead to distrust in the application's predictions, which may reduce compliance.
+
+The receiver operating characteristic (ROC) curve visualizes trade-offs for different thresholds. As true positives in the model increase, the number of false positives also increase. For the Canopy view app, we are more interested in increasing the true positive rate than in decreasing the false positive rate. And, also interested in reducing false negatives as we want the limited resources to be distributed and used in the most severe locations.
+
+An area under the curve (AUC) of .5 would be a coin toss, meaning the true positive rate and false positive rate are equal. An AUC of 100% would be a perfect fit with 100% true negatives and 0 false positives. Here, we have an AUC of about .82, which indicates that the model has a high goodness of fit.
+
 # Results
+
+Below are the plots of all the construction scenarios played out. We chose 4 different scenarios :
+<style>
+div.blue { background-color:#e6f0ff; border-radius: 5px; padding: 10px;}
+</style>
+<div class = "blue">
+* 25% decrease in construction permits   
+* 50% decrease in construction permits
+* 50% increase in construction permits
+* 100% increase in construction permits
+</div>  
 
 ```{r Construction_scenarios, message=FALSE, warning=FALSE, fig.height = 15, fig.width = 10, cache=TRUE}
 
@@ -2238,6 +2255,10 @@ grid.arrange(arrangeGrob(less50 + theme(legend.position="none"), less25 + theme(
 
 # Validation 
 ## How accurate is our model? 
+
+The plots below show the distribution of predicted probabilities for tree canopy loss.Given the distribution of predicted probabilities for grid cells that have substantial tree canopy loss, the default threshold of .5 does not make sense. We would prefer to over predict tree canopy loss than to underpredict. Finally, we generated a confusion matrix for each iteration of our model.The confusion matrix tells us the number of true positives, true negatives, false positives, and false negatives for the model. A true positive here indicates that at a given threshold, the model correctly predicted that a tree canopy loss would occur in a given grid cell. A true negative means that our model correctly predicted that a tree canopy loss would not occur. False positive means the model predicted tree canopy loss, but no substanial tree canopy loss occured. False negative indicates that the model predicted no substantial tree canopy loss, but there was tree canopy loss. The confusion matrix output also shows the sensitivity, or true positive rate, and specificity, or true negative rate, for the model.
+
+Given the distribution of predicted probabilities and our desire to overpredict rather than underpredict tree canopy loss, we used a threshold of just .25 when comparing models.The final model has a sensitivity of about 80%.
 ```{r Confusion metrics, message=FALSE, warning=FALSE, fig.height = 6, fig.width = 6, cache=TRUE}  
 
 
@@ -2328,6 +2349,9 @@ ggmap(base_map) +
 ```
 
 ## How generalizable is our model?
+
+We performed other validation tests to judge the generalizability of our model. First, cross validation with 100 k folds was performed. The graphs below visualize the accuracy and kappa of the final model across folds. Each of these plots are clustered around the mean, indicating our model has decent generalizability. 
+
 ``````{r CV, message=FALSE, warning=FALSE, fig.height = 6, fig.width = 6, include=TRUE, results='hide', cache=TRUE}  
 ## Cross validation
 ctrl <- trainControl(method = "cv", number = 10, classProbs=TRUE,savePredictions = TRUE,verboseIter = TRUE)
@@ -2391,7 +2415,7 @@ dplyr::select(reg.cv$resample, -Resample) %>%
 ```
 
 ## How well does our model predict across space?
-To further test our model's generalizability, we conducted a spatial cross validation. By leaving out one neighborhood at a time, we were able to see how well our model predicts across space.
+To further test our model's generalizability, we conducted a spatial cross validation. By leaving out one neighborhood at a time, we were able to see how well our model predicts across space. This was done to make sure that theere is no bias in the model and the plot shows that the predicted probabilities are well distributed through out Philadelphia and not clustered at any neighborhood.
 ```{r spatial_cv, message=FALSE, warning=FALSE, cache=TRUE, results=FALSE}
 # Model Validation
 crossValidate <- function(dataset, id, dependentVariable, indVariables) {
