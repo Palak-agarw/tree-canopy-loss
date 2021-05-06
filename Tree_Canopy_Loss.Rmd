@@ -316,7 +316,7 @@ Conservation <-
 ConservationNParks <- rbind(Parks, Conservation)
 
 ConservationNParks <- ConservationNParks %>%
-  mutate(color = "   ")
+  mutate(color = "Omitted Areas")
 ```
 
 # Motivation 
@@ -412,7 +412,7 @@ FishnetIntersect <- st_intersection(fishnet2, ConservationNParks )%>%
 ggmap(base_map) +
   geom_sf(data = ll(ConservationNParks), aes(fill = color), colour = "transparent", inherit.aes = FALSE) +
   scale_fill_manual(values = "magenta", 
-                    name = "Omitted Areas")+ 
+                    name = " ")+ 
   geom_sf(data = ll(FishnetIntersect), fill = "transparent", colour = "black", inherit.aes = FALSE) +
   labs(title = "Study Area Fishnet", 
        subtitle = "Philadelphia, PA") +
@@ -986,7 +986,7 @@ grid.arrange(ncol=2, top=textGrob("Neighborhood Attributes and Tree Canopy 2008-
 
 ## 4. How do historical disinvestment and segregation relate to tree canopy loss?
 Next, we examine redlining boundaries from the Homeowner’s Loan Corporation (HOLC). As trees take decades to grow, the spatial configuration of tree canopy and their change is influenced by historical planning decisions. In 1937, HOLC created “redlining” maps which rated neighborhoods’ desirability in four categories. They rated neighborhoods with residents of color as the least desirable and majority-white neighborhoods as the most desirable. As a result, the low-ranked neighborhoods experienced disinvestment and greater difficulty attracting investment.   
-```{r HOLC Rated Areas, message=FALSE, warning=FALSE, include=TRUE, results='hide', fig.height =  7, fig.width = 7, cache='TRUE'}
+```{r HOLC Areas, message=FALSE, warning=FALSE, include=TRUE, results='hide', fig.height =  7, fig.width = 7, cache='TRUE'}
 
 HOLC2 <- HOLC %>%
   st_intersection(st_make_valid(Philadelphia), HOLC) %>%  
@@ -1024,7 +1024,6 @@ FinalFishnet <-
    left_join(FinalFishnet, .)%>%
    mutate(holc_grade = replace_na(holc_grade, "unclassified"))
   
-
  holcLoss <- FinalFishnet %>%
   dplyr::select(holc_grade, pctLoss) %>%
   group_by(holc_grade) %>%

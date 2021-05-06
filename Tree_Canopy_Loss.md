@@ -314,6 +314,9 @@ Conservation <-
    dplyr::select(geometry)
 
 ConservationNParks <- rbind(Parks, Conservation)
+
+ConservationNParks <- ConservationNParks %>%
+  mutate(color = "Omitted Areas")
 ```
 
 # Motivation 
@@ -410,7 +413,9 @@ FishnetIntersect <- st_intersection(fishnet2, ConservationNParks )%>%
   filter(ConservationPct <= 20)
 
 ggmap(base_map) +
-  geom_sf(data = ll(ConservationNParks), fill = "magenta", colour = "transparent", inherit.aes = FALSE) +
+  geom_sf(data = ll(ConservationNParks), aes(fill = color), colour = "transparent", inherit.aes = FALSE) +
+  scale_fill_manual(values = "magenta", 
+                    name = " ")+ 
   geom_sf(data = ll(FishnetIntersect), fill = "transparent", colour = "black", inherit.aes = FALSE) +
   labs(title = "Study Area Fishnet", 
        subtitle = "Philadelphia, PA") +
@@ -1031,7 +1036,7 @@ ggmap(base_map) +
         legend.title = element_text(size = 12)) +  mapTheme()
 ```
 
-![](Tree_Canopy_Loss_files/figure-html/HOLC Rated Areas-1.png)<!-- -->
+![](Tree_Canopy_Loss_files/figure-html/HOLC Areas-1.png)<!-- -->
 
 ```r
  holc_net <- st_intersection(fishnet_centroid, HOLC) %>%
@@ -1044,7 +1049,6 @@ FinalFishnet <-
    left_join(FinalFishnet, .)%>%
    mutate(holc_grade = replace_na(holc_grade, "unclassified"))
   
-
  holcLoss <- FinalFishnet %>%
   dplyr::select(holc_grade, pctLoss) %>%
   group_by(holc_grade) %>%
