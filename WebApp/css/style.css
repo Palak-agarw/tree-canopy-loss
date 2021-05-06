@@ -120,7 +120,7 @@ p.main {
 
 
   .subtitle1 { 
-    font-size: 16px; 
+    font-size: 15px; 
     font-weight: bold;
     padding: 10px; 
     position: relative; 
@@ -128,7 +128,7 @@ p.main {
   }
 
   .subtitle2 { 
-    font-size: 16px; 
+    font-size: 15px; 
     font-weight: bold;
     padding: 5px; 
     position: relative; 
@@ -136,7 +136,7 @@ p.main {
   }
 
   .subtitle3 { 
-    font-size: 16x; 
+    font-size: 14.5px; 
     font-weight: bold;
     padding: 10px; 
     position: relative; 
@@ -157,9 +157,9 @@ p.main {
 
   .chart-container { 
     position: relative; 
-    padding: 9px; 
-    top: 15px; 
     height: 5000px; 
+    padding-left: 9px;;
+    top: 3px; 
   }
 
 
