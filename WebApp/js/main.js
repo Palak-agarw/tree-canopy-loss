@@ -1050,11 +1050,11 @@ var countCat = function (feature) {
 function onEachFeatureStats2(feature, layer) { 
   if (feature.properties.Risk_Cat != "Severe"){ 
   layer.bindPopup(
-    "Subtantial Tree Loss Risk: " + feature.properties.Probs.toFixed(2) + "%" + "<br>" + 
+    "Subtantial Tree Loss Risk: " + feature.properties.Probs.toFixed(2) * 100 + "%" + "<br>" + 
   "Tree Loss Severity: " + feature.properties.Risk_Cat + "<br>") ; } 
   else { 
     layer.bindPopup(
-      "Probaility of Substantial Tree Loss: " + feature.properties.Probs.toFixed(2) + "%" + "<br>" + 
+      "Probaility of Substantial Tree Loss: " + feature.properties.Probs.toFixed(2) * 100 + "%" + "<br>" + 
     "Subtantial Tree Loss Risk: " + "Very High"+ "<br>") ; 
   }
   countCat(feature)
