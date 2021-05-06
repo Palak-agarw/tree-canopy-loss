@@ -155,10 +155,13 @@ p.main {
 
 
 
-  .chart-container { 
+  #BenFrank { 
     position: relative; 
-    height: 5000px; 
-    padding-left: 9px;;
+    padding-left: 9px;
+  }
+
+  #myChart { 
+    position: relative; 
     top: 3px; 
   }
 
