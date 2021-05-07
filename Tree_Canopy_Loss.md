@@ -356,13 +356,13 @@ In this analysis, we use the following data:
 div.blue { background-color:#e6f0ff; border-radius: 5px; padding: 10px;}
 </style>
 <div class = "blue">
-* **Independent variable:**  
+**Independent variable:**  
 * Tree Canopy LiDAR data consisting of canopy polygons marked as loss, gain, or no change from 2008-2018     [OpenDataPhilly](https://www.opendataphilly.org/dataset/ppr-tree-canopy)    
 
-* **Neighborhood social attributes:**   
+**Neighborhood social attributes:**   
 * 2018 [American Community Survey data](https://api.census.gov/data/2018/acs/acs5/variables.html) from the U.S. Census Bureau   
 
-* **Neighborhoood level risk factors:**    
+**Neighborhoood level risk factors:**    
 * Construction   
 * Parcels   
 * Streets   
@@ -374,7 +374,7 @@ div.blue { background-color:#e6f0ff; border-radius: 5px; padding: 10px;}
 </div>  
   
 ## Unit of analysis: the fishnet cell
-Below, we visualize the study area for this analysis. We use fishnet grid cells as our unit of analysis to take advantage of high-resolution spatial data such as 311 service requests. Below, Philadelphia is visualized as fishnet cells of 1615 feet, roughly the size of a city block. Roughly ____ % of Philadelphia's total area consists of [conservation easement](https://www.conservationeasement.us/what-is-a-conservation-easement/), hydrology, and parks. We omit fishnet cells which consist of more than 20% of these categories, to isolate land that may be protected or experience different tree canopy change processes. All in all, we have 1411 fishnet cells representing Philadelphia.  
+Below, we visualize the study area for this analysis. We use fishnet grid cells as our unit of analysis to take advantage of high-resolution spatial data such as 311 service requests. Below, Philadelphia is visualized as fishnet cells of 1615 feet, roughly the size of a city block. Around 16% of Philadelphia's total area consists of [conservation easement](https://www.conservationeasement.us/what-is-a-conservation-easement/), hydrology, and parks. We omit fishnet cells which consist of more than 20% of these categories, to isolate land that may be protected or experience different tree canopy change processes. All in all, we have 1411 fishnet cells representing Philadelphia.  
 
 
 ```r
@@ -694,7 +694,7 @@ b + scale_fill_brewer(palette = "PiYG", name = "Percent Change", direction = 1, 
 
 ![](Tree_Canopy_Loss_files/figure-html/Net Canopy change-1.png)<!-- -->
 
-## 2. How close are neighborhoods to the 30% tree canopy goal?
+## How close are neighborhoods to the 30% tree canopy goal?
 
 ```r
 # Tree Loss by Neighborhood
@@ -860,12 +860,20 @@ grid.arrange(ncol=2, UR, refmap, RM)
 
 ![](Tree_Canopy_Loss_files/figure-html/Neighborhood Level Loss-1.png)<!-- -->
   
-## 3.  How does tree canopy change vary by demographic?  
+## How does tree canopy change vary by demographic?  
 Tree canopy loss, like other urban environmental issues, has deep implications for equity. Low-income communities and communities of color are more likely to be in places with less tree canopy. Therefore, we explore demographics variables' correlation with tree canopy gain, loss, net change, and coverage. We use data from the U.S. Census Bureau's American Community Survey, which is provided at the census tract level.
 
 ```r
+ACS_select <- ACS %>%
+  dplyr::select(-GEOID, -italian, -year) %>%
+  rename(median_income = medHHInc,
+         rent = Rent,
+         percent_bachelors_degree = pctBach,
+         percent_white = pctWhite,
+         percent_no_vehicle = pctNoVehicle)
+
 ACS.long <-
-   gather(ACS, Variable, value, -geometry)
+   gather(ACS_select, Variable, value, -geometry)
 
 #make list of unique variables
 vars <- unique(ACS.long$Variable)
@@ -876,7 +884,7 @@ for(i in vars){
   mapList[[i]] <- 
     ggplot() +
       geom_sf(data = filter(ACS.long, Variable == i), aes(fill=value), colour=NA) +
-   #   scale_fill_viridis(option = "A", name="") +
+  scale_fill_distiller(palette = "PuRd", name = "Value", direction = 1, aesthetics = c("colour", "fill"), guide = guide_legend(reverse = TRUE)) +
       labs(title=i) +
   theme(plot.title = element_text(size = 30, face = "bold"), 
         legend.title = element_text(size = 12)) +  mapTheme()
@@ -930,18 +938,19 @@ FinalFishnet <-
 
 ```r
 library(grid)
+
+#NET CHANGE
 correlation.long <-
   st_drop_geometry(FinalFishnet) %>%
      dplyr::select(population, medHHInc, housing_units, Rent, pctBach, pctWhite, pctNoVehicle, netChange) %>%
     gather(Variable, Value, -netChange)
-
 
 correlation.cor <-
   correlation.long %>%
     group_by(Variable) %>%
     summarize(correlation = cor(Value, netChange, use = "complete.obs"))
 
-
+# LOSS
 correlation.long1 <-
   st_drop_geometry(FinalFishnet) %>%
      dplyr::select(population, medHHInc, housing_units, Rent, pctBach, pctWhite, pctNoVehicle, pctLoss) %>%
@@ -952,8 +961,7 @@ correlation.cor1 <-
     group_by(Variable) %>%
     summarize(correlation = cor(Value, pctLoss, use = "complete.obs"))
 
-
-
+# GAIN
 correlation.long2 <-
   st_drop_geometry(FinalFishnet) %>%
      dplyr::select(population, medHHInc, housing_units, Rent, pctBach, pctWhite, pctNoVehicle, pctGain) %>%
@@ -964,8 +972,7 @@ correlation.cor2 <-
     group_by(Variable) %>%
     summarize(correlation = cor(Value, pctGain, use = "complete.obs"))
 
-
-
+#COVERAGE
 correlation.long3 <-
   st_drop_geometry(FinalFishnet) %>%
      dplyr::select(population, medHHInc, housing_units, Rent, pctBach, pctWhite, pctNoVehicle, pctCoverage18) %>%
@@ -979,54 +986,51 @@ correlation.cor3 <-
 
 #plots
 netChange <- ggplot(correlation.long, aes(Value, netChange)) +
- stat_density2d(aes(fill = ..level..), geom = "polygon", bins = 20) +
-  scale_fill_gradient(low="light green", high="magenta", name="Distribution") +
+    geom_point(colour = "black", alpha = 0.3, size = .5) +
   geom_text(data = correlation.cor, aes(label = paste("r =", round(correlation, 2))),
             x=-Inf, y=Inf, vjust = 1.5, hjust = -.1) +
-  geom_smooth(method = "lm", se = FALSE, colour = "black") +
+  geom_smooth(method = "lm", se = FALSE, colour = "purple") +
   facet_wrap(~Variable, ncol = 2, scales = "free") +
   labs(title = "Net Tree Canopy Change") +
   plotTheme()
   
-  # ggplot(correlation.long1, aes(Value, pctLoss)) +
-  # geom_point(colour = "black", alpha = 0.3, size = .5) +
-  # scale_y_log10() +
-  # geom_text(data = correlation.cor1, aes(label = paste("r =", round(correlation, 2))),
-  #           x=-Inf, y=Inf, vjust = 1.5, hjust = -.1) +
-  # geom_smooth(method = "lm", se = FALSE, colour = "dark green") +
-  # facet_wrap(~Variable, ncol = 2, scales = "free") +
-  # labs(title = "Tree Canopy Loss") +
-  # plotTheme(), 
+pctLoss <- ggplot(correlation.long1, aes(Value, pctLoss)) +
+  geom_point(colour = "black", alpha = 0.3, size = .5) +
+  geom_text(data = correlation.cor1, aes(label = paste("r =", round(correlation, 2))),
+            x=-Inf, y=Inf, vjust = 1.5, hjust = -.1) +
+  geom_smooth(method = "lm", se = FALSE, colour = "magenta") +
+  facet_wrap(~Variable, ncol = 2, scales = "free") +
+  labs(title = "Tree Canopy Loss") +
+  plotTheme()
   
 pctGain <- ggplot(correlation.long2, aes(Value, pctGain)) +
-stat_density2d(aes(fill = ..level..), geom = "polygon", bins = 20) +
-  scale_fill_gradient(low="light green", high="magenta", name="Distribution") +
+#stat_density2d(aes(fill = ..level..), geom = "polygon", bins = 20) +
+ # scale_fill_gradient(low="light green", high="magenta", name="Distribution") +
+    geom_point(colour = "black", alpha = 0.3, size = .5) +
     geom_text(data = correlation.cor2, aes(label = paste("r =", round(correlation, 2))),
             x=-Inf, y=Inf, vjust = 1.5, hjust = -.1) +
-  geom_smooth(method = "lm", se = FALSE, colour = "dark green") +
+  geom_smooth(method = "lm", se = FALSE, colour = "green") +
   facet_wrap(~Variable, ncol = 2, scales = "free") +
   labs(title = "Tree Canopy Gain") +
    plotTheme()
 
-  # ggplot(correlation.long3, aes(Value, pctCoverage18)) +
-  # geom_point(colour = "black", alpha = 0.3, size = .5) +
-  # scale_y_log10() +
-  # geom_text(data = correlation.cor3, aes(label = paste("r =", round(correlation, 2))),
-  #           x=-Inf, y=Inf, vjust = 1.5, hjust = -.1) +
-  # geom_smooth(method = "lm", se = FALSE, colour = "dark green") +
-  # facet_wrap(~Variable, ncol = 2, scales = "free") +
-  # labs(title = "Current Tree Canopy") + 
-  # plotTheme()
+  current <- ggplot(correlation.long3, aes(Value, pctCoverage18)) +
+  geom_point(colour = "black", alpha = 0.3, size = .5) +
+  geom_text(data = correlation.cor3, aes(label = paste("r =", round(correlation, 2))),
+            x=-Inf, y=Inf, vjust = 1.5, hjust = -.1) +
+  geom_smooth(method = "lm", se = FALSE, colour = "forest green") +
+  facet_wrap(~Variable, ncol = 2, scales = "free") +
+  labs(title = "Current Tree Canopy") +
+  plotTheme()
 
 
-
-grid.arrange(ncol=2, top=textGrob("Neighborhood Attributes and Tree Canopy 2008-2018"),netChange,pctGain) 
+grid.arrange(ncol=2, top=textGrob("Neighborhood Attributes and Tree Canopy 2008-2018"),netChange,pctGain, pctLoss, current) 
 ```
 
 ![](Tree_Canopy_Loss_files/figure-html/Demographics-1.png)<!-- -->
 
-## 4. How do historical disinvestment and segregation relate to tree canopy loss?
-Next, we examine redlining boundaries from the Homeowner’s Loan Corporation (HOLC). As trees take decades to grow, historical planning decisions influence the spatial configuration of tree canopy and their change.  In 1937, HOLC created “redlining” maps that rated neighborhoods’ desirability in four categories. They rated neighborhoods with residents of color as the least desirable and majority-white neighborhoods as the most desirable. As a result, the low-ranked neighborhoods experienced disinvestment and greater difficulty attracting investment.   
+## How do historical disinvestment and segregation relate to tree canopy loss?
+Next, we examine redlining boundaries from the Homeowner’s Loan Corporation (HOLC). As trees take decades to grow, historical planning decisions influence the spatial configuration of tree canopy and their change.  In 1937, HOLC created “redlining” maps that rated neighborhoods’ desirability in four categories. They rated neighborhoods with residents of color as the least desirable and majority-white neighborhoods as the most desirable. As a result, the low-ranked neighborhoods experienced disinvestment and greater difficulty attracting investment.  
 
 ```r
 HOLC2 <- HOLC %>%
@@ -1054,7 +1058,7 @@ ggmap(base_map) +
         legend.title = element_text(size = 12)) +  mapTheme()
 ```
 
-![](Tree_Canopy_Loss_files/figure-html/HOLC Areas-1.png)<!-- -->
+![](Tree_Canopy_Loss_files/figure-html/HOLC Grades Areas-1.png)<!-- -->
 
 ```r
  holc_net <- st_intersection(fishnet_centroid, HOLC) %>%
@@ -1113,7 +1117,7 @@ grid.arrange(holcLoss, holcCanopy, top = "1937 HOLC Rating and Tree Canopy", nco
 ![](Tree_Canopy_Loss_files/figure-html/HOLC plot-1.png)<!-- -->
 
 
-## 5. What other factors influence tree canopy loss?    
+## What other factors influence tree canopy loss?    
 Based on our analysis of the spatial distribution of tree canopy loss, we consider a few more variables: land use, redlining, hydrology, construction, and health outcomes for potential features.  
 
 
@@ -1228,7 +1232,7 @@ LandUse2 <-
 LandUse <- ggplot(LandUseLong, aes(fill = variable, y=Descriptio, x=value))+
   geom_bar(stat='identity', position = "stack", width = .75)+
  scale_fill_manual(values = c("light green", "magenta"), name = "Area Gain or Loss")+
-  labs(title = "Loss and Gain",
+  labs(title = "Land Use Type and Canopy Change",
        subtitle = "Philadelphia, 2008-2018")+
   xlab("        Total Area Lost                Total Area Gained")+
   ylab("Land Use Type") +
@@ -1238,7 +1242,7 @@ LandUse <- ggplot(LandUseLong, aes(fill = variable, y=Descriptio, x=value))+
 
 resDensity <- ggplot(LandUse2, aes(y=C_DIG2DESC, x=pctChange))+
   geom_bar(stat='identity', fill="light green", width = 0.75)+
-  labs(title = "Change on Residential Land",
+  labs(title = "Residential Density and Canopy Change",
        subtitle = "('18 Canopy - '08 Canopy) / ('18 Canopy) * 100 ")+
   ylab("Residential Land Use Type")+
   xlab("Percent Tree Canopy Change")+
@@ -1246,10 +1250,18 @@ resDensity <- ggplot(LandUse2, aes(y=C_DIG2DESC, x=pctChange))+
         legend.title = element_text(size = 12)) +  plotTheme()
 # )
 
-grid.arrange(LandUse, resDensity, ncol = 2, top = "Land Use and Tree Canopy Change")
+LandUse
 ```
 
-![](Tree_Canopy_Loss_files/figure-html/Residential density-1.png)<!-- -->
+![](Tree_Canopy_Loss_files/figure-html/Residential and transportation-1.png)<!-- -->
+
+Within residential land use parcels, low density residential land experienced the most change.  
+
+```r
+resDensity
+```
+
+![](Tree_Canopy_Loss_files/figure-html/residential density-1.png)<!-- -->
 
 ### Health outcomes
 We also check for a correlation between tree canopy loss and negative health outcomes. Contrary to our expectations, tree canopy loss has a weak correlation with asthma, leisure time used for physical activity, obesity, stroke, and self-related physical and mental health.   
@@ -1343,12 +1355,13 @@ correlation.cor4 <-
     summarize(correlation = cor(Value, pctLoss, use = "complete.obs"))
 
 ggplot(correlation.long4, aes(Value, pctLoss)) +
-  stat_density2d(aes(fill = ..level..), geom = "polygon", bins = 20) +
-  scale_fill_gradient(low="light green", high="magenta", name="Distribution") +
-    scale_x_log10() + scale_y_log10() +
+  # stat_density2d(aes(fill = ..level..), geom = "polygon", bins = 20) +
+  # scale_fill_gradient(low="light green", high="magenta", name="Distribution") +
+ #   scale_x_log10() + scale_y_log10() +
+      geom_point(colour = "black", alpha = 0.3, size = .5) +
   geom_text(data = correlation.cor4, aes(label = paste("r =", round(correlation, 2))),
             x=-Inf, y=Inf, vjust = 1.5, hjust = -.1) +
-  geom_smooth(method = "lm", se = FALSE, colour = "black") +
+  geom_smooth(method = "lm", se = FALSE, colour = "magenta") +
   facet_wrap(~Variable, ncol = 2, scales = "free") +
   labs(title = "Tree Canopy Loss and Census Tract Health Outcomes") +
   plotTheme()
@@ -1662,7 +1675,7 @@ for(i in vars){
   mapList[[i]] <- 
     ggplot() +
       geom_sf(data = filter(vars_net.long, Variable == i), aes(fill=value), colour=NA) +
-      scale_fill_viridis(option = "A", name="") +
+  scale_fill_distiller(palette = "PuRd", name = "Value", direction = 1, aesthetics = c("colour", "fill"), guide = guide_legend(reverse = TRUE)) +
       labs(title=i) +
   theme(plot.title = element_text(size = 30, face = "bold"), 
         legend.title = element_text(size = 12)) +  mapTheme()
