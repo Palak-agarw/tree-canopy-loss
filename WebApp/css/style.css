@@ -72,6 +72,18 @@ p.main {
   
 }
 
+.modalList{
+  counter-reset: item;
+}
+
+.modalList li { display: block }
+
+.modalList li:before {
+  content: counter(item) ". ";
+  counter-increment: item;
+  font-weight: bold;
+}
+
 .break1 { 
   font-weight : bold ;
   position: relative; 
