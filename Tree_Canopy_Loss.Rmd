@@ -2351,7 +2351,7 @@ ggmap(base_map) +
 
 ## How generalizable is our model?
 
-We performed other validation tests to judge the generalizability of our model. First, cross validation with 100 k folds was performed. The graphs below visualize the accuracy and kappa of the final model across folds. Each of these plots are clustered around the mean, indicating our model has decent generalizability. 
+We performed other validation tests to judge the generalizability of our model. First, cross validation with 100 k folds was performed. The graphs below visualize the accuracy and kappa of the final model across folds. Each of these plots are clustered around the mean, indicating our model has decent generalizability. Accuracy is the percentage of correctly classifies instances out of all instances and kappa is is a metric that compares an Observed Accuracy with an Expected Accuracy (random chance).
 
 ``````{r CV, message=FALSE, warning=FALSE, fig.height = 6, fig.width = 6, include=TRUE, results='hide', cache=TRUE}  
 ## Cross validation
