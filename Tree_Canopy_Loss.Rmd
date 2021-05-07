@@ -2254,7 +2254,7 @@ original <- ggmap(base_map) +
 
 
 mylegend<-g_legend(original)
-grid.arrange(arrangeGrob(less50 + theme(legend.position="none"), less25 + theme(legend.position="none"), original + theme(legend.position="none"), more50 + theme(legend.position="none"), more100 + theme(legend.position="none"), ncol = 2, top = "Canopy Change Under 5 Construction Scenarios", mylegend))
+grid.arrange(arrangeGrob(less50 + theme(legend.position="none"), less25 + theme(legend.position="none"), original + theme(legend.position="none"), more25 + theme(legend.position="none"), more50 + theme(legend.position="none"), ncol = 2, top = "Canopy Change Under 5 Construction Scenarios", mylegend))
 ```
 
 # Validation 
