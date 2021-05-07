@@ -16,15 +16,24 @@ p.main {
     top: 0;
 }
 
+.warning { 
+  display: flex;
+  text-align: center; 
+}
+
 .sidebar {
     position: absolute;
     left: 0px;
-    width: 400px;
+    width: 425px;
     top: 0;
     bottom: 0; 
     padding: 15px;
     font-size: 16px;
+    overflow-y: auto;
+    overflow-x: hidden; 
 }
+
+
 
 
 
@@ -123,6 +132,7 @@ p.main {
   height:15px;
   }
 
+
 .btn-toolbar { 
   padding-top: 13px; 
 }
@@ -178,6 +188,7 @@ p.main {
   #myChart { 
     position: relative; 
     top: 3px; 
+    right: 5px; 
   }
 
 
