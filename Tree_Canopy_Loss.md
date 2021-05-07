@@ -420,15 +420,15 @@ Our analysis addresses the following questions:
 div.blue { background-color:#e6f0ff; border-radius: 5px; padding: 20px;}
 </style>
 <div class = "blue">
-**1. What does Philadelphia's tree canopy look like today?**    
+1. What does Philadelphia's tree canopy look like today?    
   
-**2. How close are neighborhoods to achieving the 30% goal?**    
+2. How close are neighborhoods to achieving the 30% goal?    
   
-**3. How does tree canopy change vary by demographic?**    
+3. How does tree canopy change vary by demographic?    
   
-**4. How do current patterns of tree canopy coverage and loss reflect disinvestment as a result of redlining and older planning practices?**    
+4. How do current patterns of tree canopy coverage and loss reflect disinvestment as a result of redlining and older planning practices?    
   
-**5. What other factors are associated with the tree canopy?**  
+5. What other factors are associated with the tree canopy?  
 </div>
 
 ## What does Philadelphia's tree canopy look like today?
@@ -1067,7 +1067,7 @@ ggmap(base_map) +
         legend.title = element_text(size = 12)) +  mapTheme()
 ```
 
-![](Tree_Canopy_Loss_files/figure-html/HOLC rate communities-1.png)<!-- -->
+![](Tree_Canopy_Loss_files/figure-html/HOLC rating Communities-1.png)<!-- -->
 
 ```r
  holc_net <- st_intersection(fishnet_centroid, HOLC) %>%
@@ -1079,32 +1079,6 @@ FinalFishnet <-
    left_join(FinalFishnet, .)%>%
    mutate(holc_grade = replace_na(holc_grade, "unclassified"))
   
- # holcLoss <- FinalFishnet %>%
- #  dplyr::select(holc_grade, pctLoss) %>%
- #  group_by(holc_grade) %>%
- #  na.omit() %>%
- #  summarize(mean_loss = mean(pctLoss)) %>%
- #  ggplot() +
- #  geom_bar(aes(y = mean_loss), binwidth = 1, fill = "magenta") +
- #  labs(title="Loss by HOLC Grade, 2008-2018 (%)",
- #       subtitle="Philadelphia, PA",
- #       x="HOLC Rating",
- #       y="% Loss")+
- #  facet_wrap(~holc_grade, nrow = 1)+
- #    theme(plot.title = element_text(size = 30, face = "bold"),
- #        legend.title = element_text(size = 12),
- #        axis.text.x=element_blank(),
- #        axis.ticks.x=element_blank()) +
- #  plotTheme()
-# 
-# resDensity <- ggplot(LandUse2, aes(y=C_DIG2DESC, x=pctChange))+
-#   geom_bar(stat='identity', fill="light green", width = 0.75)+
-#   labs(title = "Residential Density and Canopy Change",
-#        subtitle = "('18 Canopy - '08 Canopy) / ('18 Canopy) * 100 ")+
-#   ylab("Residential Land Use Type")+
-#   xlab("Percent Tree Canopy Change")+
-#     theme(plot.title = element_text(size = 30, face = "bold"), 
-#         legend.title = element_text(size = 12)) +  plotTheme()
 
  holcLoss <- FinalFishnet %>%
   dplyr::select(holc_grade, pctLoss) %>%
@@ -1112,7 +1086,7 @@ FinalFishnet <-
   na.omit() %>%
   summarize(mean_loss = mean(pctLoss)) %>%
   ggplot() +
- geom_bar(aes(y = mean_loss), binwidth = 1, fill = "magenta") +
+ geom_col(aes(y = mean_loss), binwidth = 1, fill = "magenta") +
   labs(title="Loss by HOLC Grade, 2008-2018 (%)",
        subtitle="Philadelphia, PA",
        x="HOLC Rating",
@@ -1131,7 +1105,7 @@ FinalFishnet <-
   na.omit() %>%
   summarize(mean_cov = mean(pctCoverage18)) %>%
   ggplot() +
-  geom_bar(aes(y = mean_cov), binwidth = 1, fill = "green") +
+  geom_col(aes(y = mean_cov), binwidth = 1, fill = "green") +
   labs(title="Coverage by HOLC Grade, 2018 (%)",
        subtitle="Philadelphia, PA",
        x="HOLC Rating", 
@@ -1145,15 +1119,13 @@ FinalFishnet <-
   plotTheme()
 ```
 
-The plots below illustrate a correlation between tree canopy loss and HOLC ratings. Fishnet cells in highly-rated areas experienced less percentage loss between 2008 and 2018, and they had more tree canopy to begin with.   
+The plots below illustrate a correlation between tree canopy loss and HOLC ratings. Fishnet cells in highly-rated areas experienced less percentage loss between 2008 and 2018, and they had more tree canopy to begin with.
 
 ```r
-library(grid)
-grid.arrange(holcLoss, holcCanopy, top = "1937 HOLC Rating and Tree Canopy", ncol = 2)
+# library(grid)
+# grid.arrange(holcLoss, holcCanopy, top = "1937 HOLC Rating and Tree Canopy", ncol = 2)
 ```
-
-![](Tree_Canopy_Loss_files/figure-html/HOLC plot-1.png)<!-- -->
-
+![ ](holcCanopy.png)  
 
 ## What other factors influence tree canopy loss?    
 Based on our analysis of the spatial distribution of tree canopy loss, we consider a few more variables: land use, redlining, hydrology, construction, and health outcomes for potential features.  
@@ -1784,49 +1756,7 @@ grid.arrange(pbNeigh, urNeigh, rmNeigh, ncol = 1, top = "Construction and Canopy
 ```
 
 
-```morans
-# library(spdep)
-# library(FNN)
-# library(spatstat)
-# #assign weights at the grid cell level
-# final_net.nb <- poly2nb(as_Spatial(FinalFishnet), queen=TRUE)
-# final_net.weights <- nb2listw(final_net.nb, style="W", zero.policy=TRUE)
-# 
-# FinalFishnet <- FinalFishnet %>%
-#   na.exclude()
-# 
-# #add Moran's I and P value to final_net
-# final_net.localMorans <- 
-#   cbind(
-#     as.data.frame(localmoran(FinalFishnet$pctLoss, final_net.weights)),
-#     as.data.frame(FinalFishnet)) %>% 
-#     st_sf() %>%
-#       dplyr::select(Percent_Loss = pctLoss, 
-#                     Local_Morans_I = Ii, 
-#                     Morans_P_Value = `Pr(z > 0)`) %>%
-#       mutate(Sig_Hotspots = ifelse(Morans_P_Value <= 0.0000001, 1, 0)) %>% #change P value
-#       gather(Variable, Value, -geometry)
-# 
-# #get unique values for mapping
-# vars <- unique(final_net.localMorans$Variable)
-# varList <- list()
-# 
-# #map moran's I and P Value
-# for(i in vars){
-#   varList[[i]] <- 
-#     ggplot() +
-#       geom_sf(data = filter(final_net.localMorans, Variable == i), 
-#               aes(fill = Value), colour=NA) +
-#       scale_fill_viridis(name="", option = "B") +
-#       labs(title=i) +
-#     theme(plot.title = element_text(size = 30, face = "bold"), 
-#           legend.title = element_text(size = 12)) +  mapTheme()}
-# 
-# do.call(grid.arrange,c(varList, ncol = 4, top = "Figure 5: Local Moran's I Statistics, Observed Arrests"))
-```
-
-
-# Random Forest modelling
+# Random Forest Modeling
 ### Pairwise correlations
 The following plot visualizes correlations between numeric risk factors and tree canopy loss.
 
@@ -1868,7 +1798,7 @@ ggcorrplot(
 
 ![](Tree_Canopy_Loss_files/figure-html/corr plot-1.png)<!-- -->
 
-Based on this plot, we select the following variables to test in our model:     
+**Based on this plot, we select the following variables to test in our model:**       
   
 <style>
 div.blue { background-color:#e6f0ff; border-radius: 5px; padding: 20px;}
@@ -1886,6 +1816,8 @@ div.blue { background-color:#e6f0ff; border-radius: 5px; padding: 20px;}
 * HOLC redlining grade    
 * Hydrology (%)  
 </div>
+
+The random forest predicts the probability of tree canopy loss occurring in a given grid cell from 0 to 1. To validate our model, we chose a probability threshold above which tree canopy loss is most substantial. By looking at the threshold with the probabilities, we chose 0.25 to be our threshold as that maximized true positives while reducing false negatives. The graph above visualizes confusion metrics for every possible threshold from 0 to 1. At .25, the true positive rate is high, and the false-negative rate is relatively low. A lower point would increase the true positive rate and decrease the false-negative rate, but the false positive rate would also increase. This could lead to distrust in the application's predictions, which may reduce compliance.
 
 
 ```r
@@ -1951,35 +1883,6 @@ FinalFishnet5 <-
 FinalFishnet5$Variable <- ifelse(FinalFishnet5$pctLoss > 25,1, 0)
 
 
-# FinalFishnet5 <-
-#   FinalFishnet5%>%
-#   mutate(pctCoverage18 = ifelse(pctCoverage18 > 25, 1, 0))
-# 
-# FinalFishnet5 <-
-#   FinalFishnet5%>%
-#   mutate(pctWhite = ifelse(pctWhite > 66.67, 1, 0))
-# 
-# FinalFishnet5 <-
-#   FinalFishnet5%>%
-#   mutate(pctBach = ifelse(pctBach > 66.67, 1, 0))
-# 
-# FinalFishnet5 <-
-#   FinalFishnet5%>%
-#   mutate(pctRes = ifelse(pctRes > 66.67, 1, 0))
-# 
-# FinalFishnet5 <-
-#   FinalFishnet5%>%
-#   mutate(pctTransRes = ifelse(pctTransRes > 50, 1, 0))
-# 
-# FinalFishnet5 <-
-#   FinalFishnet5%>%
-#   mutate(pctTrans = ifelse(pctTrans > 66.67, 1, 0))
-
-
-# ggplot() +
-#   geom_sf(data = FinalFishnet, aes(fill = holc_grade)) +
-#   mapTheme()
-
 
 # RANDOM FOREST MODEL
 set.seed(1214)
@@ -2037,17 +1940,15 @@ rf <- randomForest(
 ## Prediction
 testProbs2 <- data.frame(Outcome = as.factor(finalTest$Variable),
                         Probs = predict(rf, finalTest, type= "response"))
+```
 
+The receiver operating characteristic (ROC) curve visualizes trade-offs for different thresholds. As true positives in the model increase, the number of false positives also increases. For the Canopy view app, we are more interested in improving the true positive rate than in decreasing the false positive rate. And, also interested in reducing false negatives as we want the limited resources to be distributed and used in the most severe locations.  
+
+```r
 # ROC Curve
 ## This us a goodness of fit measure, 1 would be a perfect fit, .5 is a coin toss
 auc(testProbs2$Outcome, testProbs2$Probs)
-```
 
-```
-## Area under the curve: 0.8048
-```
-
-```r
 ggplot(testProbs2, aes(d = as.numeric(testProbs2$Outcome), m = Probs)) +
   geom_roc(n.cuts = 50, labels = FALSE, colour = "magenta") +
   style_roc(theme = theme_grey) +
@@ -2056,7 +1957,7 @@ ggplot(testProbs2, aes(d = as.numeric(testProbs2$Outcome), m = Probs)) +
   plotTheme()
 ```
 
-![](Tree_Canopy_Loss_files/figure-html/Random forest model-1.png)<!-- -->
+![](Tree_Canopy_Loss_files/figure-html/roc curve-1.png)<!-- -->
 
 ```r
 ## optimizing threshold
@@ -2142,11 +2043,7 @@ whichThreshold %>%
   guides(colour=guide_legend(title = "Confusion Metric")) 
 ```
 
-![](Tree_Canopy_Loss_files/figure-html/Random forest model-2.png)<!-- -->
-
-The random forest predicts the probability of tree canopy loss occurring in a given grid cell from 0 to 1. To validate our model, we chose a probability threshold above which tree canopy loss is most substantial. By looking at the threshold with the probabilities, we chose 0.25 to be our threshold as that maximized true positives while reducing false negatives. The graph above visualizes confusion metrics for every possible threshold from 0 to 1. At .25, the true positive rate is high, and the false-negative rate is relatively low. A lower point would increase the true positive rate and decrease the false-negative rate, but the false positive rate would also increase. This could lead to distrust in the application's predictions, which may reduce compliance.
-
-The receiver operating characteristic (ROC) curve visualizes trade-offs for different thresholds. As true positives in the model increase, the number of false positives also increases. For the Canopy view app, we are more interested in improving the true positive rate than in decreasing the false positive rate. And, also interested in reducing false negatives as we want the limited resources to be distributed and used in the most severe locations.
+![](Tree_Canopy_Loss_files/figure-html/roc curve-2.png)<!-- -->
 
 An area under the curve (AUC) of .5 would be a coin toss, meaning the true positive and false positive rates are equal. An AUC of 100% would be a perfect fit with 100% true negatives and 0 false positives. Here, we have an AUC of about .82, which indicates that the model has high goodness of fit.
 
@@ -2462,9 +2359,6 @@ ggmap(base_map) +
   labs(title = "Mapped Correlation Matrix")+
   scale_fill_manual(values = palette3, name = "Model Metric",
                   guide = guide_legend(reverse = TRUE))+
-  theme(legend.position = "bottom",
-        legend.title = element_blank(),
-        plot.title = element_text(hjust = 0.5))+
   theme(plot.title = element_text(size = 30, face = "bold"), 
         legend.title = element_text(size = 12)) +  mapTheme()
 ```
@@ -2595,14 +2489,19 @@ reg.spatialcv <-
   reg.spatialCV %>%
   dplyr::select(cvID = NAME, Variable2, Prediction, geometry)
 
-ggplot() +
-  geom_sf(data = reg.spatialcv, aes(fill = Prediction), color = "transparent")+
-  geom_sf(data = FinalFishnet5, fill = "transparent", color = "white", size=.5)+
-  labs(title="Predicted Probabilities")+
-  mapTheme()
+ggmap(base_map) +
+  geom_sf(data = ll(reg.spatialcv), aes(fill = Prediction), color = "transparent", inherit.aes=FALSE)+
+  geom_sf(data = ll(FinalFishnet5), fill = "transparent", color = "white", size=.5, inherit.aes=FALSE)+
+  labs(title="Predicted Probabilities Cross Validation")+
+  scale_fill_distiller(palette = "PuRd", direction = 1, name = "Predicted Risk")
 ```
 
 ![](Tree_Canopy_Loss_files/figure-html/spatial_cv-1.png)<!-- -->
+
+```r
+  theme(plot.title = element_text(size = 30, face = "bold"), 
+        legend.title = element_text(size = 12)) +  mapTheme()
+```
 
 # Conclusion
 
@@ -2613,13 +2512,21 @@ ggplot() +
 
 # Planning Tool: Canopy View  
 
-Using this information, we created a predictive scenario planning policy tool that displays future tree canopy loss under five construction scenarios. The general population and tree planting agencies can use our tool to understand the potential impact of construction on the tree canopy and prioritize tree planting efforts.
- 
-This application was designed to help prioritize tree planting initatives in Philadelphia. The web application has 3 distinct features:
+Using this information, we created a predictive scenario planning policy tool that displays future tree canopy loss under five construction scenarios. The general population and tree planting agencies can use our tool to understand the potential impact of construction on the tree canopy and prioritize tree planting efforts.  
+![Canopy View web application](WebApp.png)     
+   
+The web application has 3 distinct features:
 
-    This application allows you to view the current state of the tree canopy in Philadelphia! Users can view 10 distinct tree canopy statistics by clicking on our interactive dropdown menus. Users can view these statistics in either neighborhood or grid cell (150m x 150m) form. This feature allows the user to understand the current state of the tree canopy in a given area. Click on a neighborhood or grid cell to view all statistics for that location!
-    This application allows users to view where construction permits are located! By overlaying completed construction permits with our tree canopy statistics/ tree canopy loss risk predictions, users will notice that construction is very much related to tree canopy loss! Users can toggle the statistics or predictions on and off to view exactly where construction has occurred. Tree planters should prioritize streets with high construction rates located in high-risk tree canopy loss regions. Users can either view construction permits from 2008-2018 or 2019- April 2021. Note: The more construction permit categories selected, the slower the web application will be due to the large size of the construction data.
-    Most importantly, this application allows users to view areas that are at high risk for substantial tree canopy loss! Each grid cell is assigned a "probability score", which is the probability that the given grid cell will experience substantial tree canopy loss in the future. Substantial tree canopy loss is defined as a grid cell losing 25% of their tree canopy loss over a ten year period. Click on the grid cell to view the probability score of a location! The results are based on a model predicting where tree loss will most likely occur based on attributes associated with regions with significant tree loss. Users can view the substantial tree canopy loss risk in differing construction scenarios. You will notice through our interactive bar graph that as construction permits increase, the risk of tree canopy also generally increases.
+**1. View the current state of the tree canopy in Philadelphia**  
+* Users can view 10 distinct tree canopy statistics by clicking on our interactive dropdown menus. Users can view these statistics in either neighborhood or grid cell (150m x 150m) form. This feature allows the user to understand the current state of the tree canopy in a given area. Click on a neighborhood or grid cell to view all statistics for that location!     
+![Neighborhood Statistics](neighbStat.png)   
+  
+**2. View where construction permits are located**      
+* By overlaying completed construction permits with our tree canopy statistics/ tree canopy loss risk predictions, users will notice that construction is very much related to tree canopy loss. Users can toggle the statistics or predictions on and off to view exactly where construction has occurred. Tree planters should prioritize streets with high construction rates located in high-risk tree canopy loss regions. Users can either view construction permits from 2008-2018 or 2019- April 2021. Note: The more construction permit categories selected, the slower the web application will be due to the large size of the construction data.   
+![Construction Permits](permits.png)  
+  
+**3. View areas that are at high risk for substantial tree canopy loss**   
+* Each grid cell is assigned a "probability score", which is the probability that the given grid cell will experience substantial tree canopy loss in the future. Substantial tree canopy loss is defined as a grid cell losing 25% of their tree canopy loss over a ten year period. Click on the grid cell to view the probability score of a location! The results are based on a model predicting where tree loss will most likely occur based on attributes associated with regions with significant tree loss. Users can view the substantial tree canopy loss risk in differing construction scenarios. You will notice through our interactive bar graph that as construction permits increase, the risk of tree canopy also generally increases.
+![Canopy View web application](risk.png)  
 
 
-![Canopy View web application](WebApp.png)   
