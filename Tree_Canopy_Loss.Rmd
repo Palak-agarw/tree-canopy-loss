@@ -2228,7 +2228,7 @@ less50 <- ggmap(base_map) +
   scale_fill_brewer(palette = "PiYG", name = "Risk Score", direction = -1, aesthetics = c("colour", "fill"))
 
 
-more50 <- ggmap(base_map) +
+more25 <- ggmap(base_map) +
   geom_sf(data = ll(fishnet), fill = "white", inherit.aes = FALSE)+
   geom_sf(data= ll(construction3), aes(fill=Risk_Cat), color="transparent", inherit.aes = FALSE)+
   labs(title="25% Higher")+
@@ -2236,7 +2236,7 @@ more50 <- ggmap(base_map) +
         legend.title = element_text(size = 12)) +  mapTheme() +
   scale_fill_brewer(palette = "PiYG", name = "Risk Score", direction = -1, aesthetics = c("colour", "fill"))
 
-more100 <- ggmap(base_map) +
+more50 <- ggmap(base_map) +
   geom_sf(data = ll(fishnet), fill = "white", inherit.aes = FALSE)+
   geom_sf(data= ll(construction4), aes(fill=Risk_Cat), color="transparent", inherit.aes = FALSE)+
   labs(title="50% Higher")+
