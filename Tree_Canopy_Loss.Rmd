@@ -2375,7 +2375,7 @@ dplyr::select(reg.cv$resample, -Resample) %>%
 ```
 
 ## How well does our model predict across space?
-To further test our model's generalizability, we conducted a spatial cross validation. By leaving out one neighborhood at a time, we were able to see how well our model predicts across space. This was done to make sure that theere is no bias in the model and the plot shows that the predicted probabilities are well distributed through out Philadelphia and not clustered at any neighborhood.
+To further test our model's generalizability, we conducted a spatial cross validation. By leaving out one neighborhood at a time, we were able to see how well our model predicts across space. This was done to make sure that there is no bias in the model and the plot shows that the predicted probabilities are well distributed through out Philadelphia and not clustered at any neighborhood.
 ```{r spatial_cv, message=FALSE, warning=FALSE, cache=TRUE, results=FALSE}
 # Model Validation
 crossValidate <- function(dataset, id, dependentVariable, indVariables) {
@@ -2434,11 +2434,10 @@ ggmap(base_map) +
 
 ```
 
-# Conclusion
 
-
-- South philly and north east need attention
-- construction is strongly correlated
+# Going Forward  
+We recommend that tree planting initiatives target South and Northeast Philadelphia, as our model predicted high risk of substantial tree loss in these areas. Many of the areas where we predicted high risk also currently have high construction rates. Focusing on neighborhoods with high construction rates can be a good way to prioritize efforts.
+ 
 - the model tends to target areas of high conversation as loss will be higher in places which has many trees - so remove parks and conversation areas
 
 # Planning Tool: Canopy View  
