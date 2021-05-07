@@ -1688,45 +1688,45 @@ grid.arrange(pbNeigh, urNeigh, rmNeigh, ncol = 1, top = "Construction and Canopy
 ```
 
 ```{morans i, message=FALSE, warning=FALSE, include=TRUE, results='hide'}
-library(spdep)
-library(FNN)
-library(spatstat)
-#assign weights at the grid cell level
-final_net.nb <- poly2nb(as_Spatial(FinalFishnet), queen=TRUE)
-final_net.weights <- nb2listw(final_net.nb, style="W", zero.policy=TRUE)
-
-FinalFishnet <- FinalFishnet %>%
-  na.exclude()
-
-#add Moran's I and P value to final_net
-final_net.localMorans <- 
-  cbind(
-    as.data.frame(localmoran(FinalFishnet$pctLoss, final_net.weights)),
-    as.data.frame(FinalFishnet)) %>% 
-    st_sf() %>%
-      dplyr::select(Percent_Loss = pctLoss, 
-                    Local_Morans_I = Ii, 
-                    Morans_P_Value = `Pr(z > 0)`) %>%
-      mutate(Sig_Hotspots = ifelse(Morans_P_Value <= 0.0000001, 1, 0)) %>% #change P value
-      gather(Variable, Value, -geometry)
-
-#get unique values for mapping
-vars <- unique(final_net.localMorans$Variable)
-varList <- list()
-
-#map moran's I and P Value
-for(i in vars){
-  varList[[i]] <- 
-    ggplot() +
-      geom_sf(data = filter(final_net.localMorans, Variable == i), 
-              aes(fill = Value), colour=NA) +
-      scale_fill_viridis(name="", option = "B") +
-      labs(title=i) +
-    theme(plot.title = element_text(size = 30, face = "bold"), 
-          legend.title = element_text(size = 12)) +  mapTheme()}
-
-do.call(grid.arrange,c(varList, ncol = 4, top = "Figure 5: Local Moran's I Statistics, Observed Arrests"))
-
+# library(spdep)
+# library(FNN)
+# library(spatstat)
+# #assign weights at the grid cell level
+# final_net.nb <- poly2nb(as_Spatial(FinalFishnet), queen=TRUE)
+# final_net.weights <- nb2listw(final_net.nb, style="W", zero.policy=TRUE)
+# 
+# FinalFishnet <- FinalFishnet %>%
+#   na.exclude()
+# 
+# #add Moran's I and P value to final_net
+# final_net.localMorans <- 
+#   cbind(
+#     as.data.frame(localmoran(FinalFishnet$pctLoss, final_net.weights)),
+#     as.data.frame(FinalFishnet)) %>% 
+#     st_sf() %>%
+#       dplyr::select(Percent_Loss = pctLoss, 
+#                     Local_Morans_I = Ii, 
+#                     Morans_P_Value = `Pr(z > 0)`) %>%
+#       mutate(Sig_Hotspots = ifelse(Morans_P_Value <= 0.0000001, 1, 0)) %>% #change P value
+#       gather(Variable, Value, -geometry)
+# 
+# #get unique values for mapping
+# vars <- unique(final_net.localMorans$Variable)
+# varList <- list()
+# 
+# #map moran's I and P Value
+# for(i in vars){
+#   varList[[i]] <- 
+#     ggplot() +
+#       geom_sf(data = filter(final_net.localMorans, Variable == i), 
+#               aes(fill = Value), colour=NA) +
+#       scale_fill_viridis(name="", option = "B") +
+#       labs(title=i) +
+#     theme(plot.title = element_text(size = 30, face = "bold"), 
+#           legend.title = element_text(size = 12)) +  mapTheme()}
+# 
+# do.call(grid.arrange,c(varList, ncol = 4, top = "Figure 5: Local Moran's I Statistics, Observed Arrests"))
+# 
 
 ```
 
