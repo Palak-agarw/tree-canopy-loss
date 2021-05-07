@@ -151,9 +151,6 @@ st_read("/Users/annaduan/Desktop/Y3S2/Practicum/Data/TreeCanopyChange_2008_2018-
   st_transform('ESRI:102728') 
 
 TreeCanopy$SHAPE_Area <- as.numeric(st_area(TreeCanopy))
-github
-# Loss <- TreeCanopy %>%
-#   filter(CLASS_NAME == "Loss")
 
 # Philadelphia Base Map
 Philadelphia <- st_read("http://data.phl.opendata.arcgis.com/datasets/405ec3da942d4e20869d4e1449a2be48_0.geojson")%>%
@@ -266,9 +263,7 @@ const_permits[const_permits==""]<-NA
 const <- const_permits %>% drop_na(X,Y)
 const_spatial <- st_as_sf(const, coords = c("X","Y"), crs = 6565, agr = "constant")
 const_spatial <- const_spatial %>% st_transform('ESRI:102728')
-# const <- const_spatial %>%
-#   filter(permitissuedate <= '30/06/2017 00:00')
-
+ 
 const_spatial$permit_issue <- mdy_hm(const$permitissuedate)
 const_spatial$year <- year(const_spatial$permit_issue)
 
@@ -431,16 +426,16 @@ div.blue { background-color:#e6f0ff; border-radius: 5px; padding: 20px;}
 ### Philadelphia's 2018 Canopy 
 Philadelphia's tree canopy dataset has almost 700,000 polygons labeled as loss, gain, and no change between 2008 and 2018.  
 ```{r Existing Canopy, cache=TRUE, message=FALSE, warning=FALSE, include=TRUE, results='hide'}
-CanopyPlot <- TreeCanopy %>%
-  filter(CLASS_NAME != "Loss") %>%
-  st_union()
-
-ggmap(base_map) +
-  geom_sf(data = ll(CanopyPlot), colour = "forest green", inherit.aes = FALSE, fill = "forest green")+ 
-  labs(title = "Tree Canopy, 2018", 
-subtitle = "Philadelphia, PA") + 
-  theme(plot.title = element_text(size = 30, face = "bold"), 
-        legend.title = element_text(size = 12)) +  mapTheme()
+# CanopyPlot <- TreeCanopy %>%
+#   filter(CLASS_NAME != "Loss") %>%
+#   st_union()
+# 
+# ggmap(base_map) +
+#   geom_sf(data = ll(CanopyPlot), colour = "forest green", inherit.aes = FALSE, fill = "forest green")+ 
+#   labs(title = "Tree Canopy, 2018", 
+# subtitle = "Philadelphia, PA") + 
+#   theme(plot.title = element_text(size = 30, face = "bold"), 
+#         legend.title = element_text(size = 12)) +  mapTheme()
 ```
   
 Our first data wrangling task is to aggregate this data to the fishnet level. Now, we see that Northwest, West, and Northeast Philadelphia have the most tree canopy. In North Philadelphia, South Philadelphia, and Center City, the tree canopy coverage is more sparse.    
@@ -859,8 +854,8 @@ mapList <- list()
 for(i in vars){
   mapList[[i]] <- 
     ggplot() +
-      geom_sf(data = filter(vars_net.long, Variable == i), aes(fill=value), colour=NA) +
-      scale_fill_viridis(option = "A", name="") +
+      geom_sf(data = filter(ACS.long, Variable == i), aes(fill=value), colour=NA) +
+   #   scale_fill_viridis(option = "A", name="") +
       labs(title=i) +
   theme(plot.title = element_text(size = 30, face = "bold"), 
         legend.title = element_text(size = 12)) +  mapTheme()
@@ -1007,7 +1002,7 @@ grid.arrange(ncol=2, top=textGrob("Neighborhood Attributes and Tree Canopy 2008-
 
 ## 4. How do historical disinvestment and segregation relate to tree canopy loss?
 Next, we examine redlining boundaries from the Homeowner’s Loan Corporation (HOLC). As trees take decades to grow, historical planning decisions influence the spatial configuration of tree canopy and their change.  In 1937, HOLC created “redlining” maps that rated neighborhoods’ desirability in four categories. They rated neighborhoods with residents of color as the least desirable and majority-white neighborhoods as the most desirable. As a result, the low-ranked neighborhoods experienced disinvestment and greater difficulty attracting investment.   
-```{r HOLC rated Areas, message=FALSE, warning=FALSE, include=TRUE, results='hide', fig.height =  7, fig.width = 7, cache='TRUE'}
+```{r HOLC Areas, message=FALSE, warning=FALSE, include=TRUE, results='hide', fig.height =  7, fig.width = 7, cache='TRUE'}
 
 HOLC2 <- HOLC %>%
   st_intersection(st_make_valid(Philadelphia), HOLC) %>%  
@@ -1025,7 +1020,6 @@ HOLC2 <- HOLC2 %>%
 HOLC_plot <- full_join(as.data.frame(HOLC), as.data.frame(HOLC2)) %>%
   st_as_sf()
 
-
 ggmap(base_map) +
    geom_sf(data = ll(Philadelphia), colour = "gray90", fill = "gray90", inherit.aes = FALSE) +
   scale_fill_brewer(palette = "PiYG", name = "HOLC Grade", direction = -1, aesthetics = c("colour", "fill"), guide = guide_legend(reverse = TRUE)) +
@@ -1034,10 +1028,8 @@ ggmap(base_map) +
   theme(plot.title = element_text(size = 30, face = "bold"), 
         legend.title = element_text(size = 12)) +  mapTheme()
 
-
  holc_net <- st_intersection(fishnet_centroid, HOLC) %>%
    dplyr::select(uniqueID, holc_grade)
-   
 
 FinalFishnet <-
    holc_net %>%
@@ -1062,8 +1054,6 @@ FinalFishnet <-
         axis.text.x=element_blank(),
         axis.ticks.x=element_blank()) +
   plotTheme()
-  
-  
   
   holcCanopy <- FinalFishnet %>%
   dplyr::select(holc_grade, pctCoverage18) %>%
