@@ -2035,11 +2035,11 @@ whichThreshold %>%
 
 ```
 
-The random forest predicts the probability of tree canopy loss occuring in a given grid cell from 0 to 1. To validate our model, we chose a probability threshold above which tree canopy loss is most substanial. By looking at the plot of threshold with the probabilities, we chose 0.25 to be our threshold as that maximized true positives while reducing false negatives. The graph above visualizes confusion metrics for every possible threshold from 0 to 1. At .25, the true positive rate is high and the false negative rate is relatively low. A lower threshold would increase the true positive rate and decrease the false negative rate, but the false positive rate would also increase. This could lead to distrust in the application's predictions, which may reduce compliance.
+The random forest predicts the probability of tree canopy loss occurring in a given grid cell from 0 to 1. To validate our model, we chose a probability threshold above which tree canopy loss is most substantial. By looking at the threshold with the probabilities, we chose 0.25 to be our threshold as that maximized true positives while reducing false negatives. The graph above visualizes confusion metrics for every possible threshold from 0 to 1. At .25, the true positive rate is high, and the false-negative rate is relatively low. A lower point would increase the true positive rate and decrease the false-negative rate, but the false positive rate would also increase. This could lead to distrust in the application's predictions, which may reduce compliance.
 
-The receiver operating characteristic (ROC) curve visualizes trade-offs for different thresholds. As true positives in the model increase, the number of false positives also increase. For the Canopy view app, we are more interested in increasing the true positive rate than in decreasing the false positive rate. And, also interested in reducing false negatives as we want the limited resources to be distributed and used in the most severe locations.
+The receiver operating characteristic (ROC) curve visualizes trade-offs for different thresholds. As true positives in the model increase, the number of false positives also increases. For the Canopy view app, we are more interested in improving the true positive rate than in decreasing the false positive rate. And, also interested in reducing false negatives as we want the limited resources to be distributed and used in the most severe locations.
 
-An area under the curve (AUC) of .5 would be a coin toss, meaning the true positive rate and false positive rate are equal. An AUC of 100% would be a perfect fit with 100% true negatives and 0 false positives. Here, we have an AUC of about .82, which indicates that the model has a high goodness of fit.
+An area under the curve (AUC) of .5 would be a coin toss, meaning the true positive and false positive rates are equal. An AUC of 100% would be a perfect fit with 100% true negatives and 0 false positives. Here, we have an AUC of about .82, which indicates that the model has high goodness of fit.
 
 # Results
 
@@ -2050,8 +2050,11 @@ div.blue { background-color:#e6f0ff; border-radius: 5px; padding: 10px;}
 <div class = "blue">
 * 25% decrease in construction permits   
 * 50% decrease in construction permits
+* 25% increase in construction permits
 * 50% increase in construction permits
-* 100% increase in construction permits
+
+Although the difference in scenario outcome are slight, generally as construction rates increase, the risk for substantial tree canopy loss also increases. Likewise, as the construction rates decrease, the risk for tree canopy loss in a given area generally decreases. 
+
 </div>  
 
 ```{r Construction_scenarios, message=FALSE, warning=FALSE, fig.height = 15, fig.width = 10, cache=TRUE}
@@ -2073,7 +2076,7 @@ FinalFishnet5$avg_nnConst4 <- FinalFishnet5$avg_nnConst * .5
 
 set.seed(77) 
 
-##SCENARIO 1: 25 less
+##SCENARIO 1: 50 less
 rf1 <- randomForest(
   FinalFishnet5$Variable ~ .,
   data=st_drop_geometry(FinalFishnet5) %>% 
@@ -2092,7 +2095,7 @@ FinalFishnet2$uniqueID <- seq.int(nrow(FinalFishnet5))
 testProbs_const1$uniqueID <- seq.int(nrow(FinalFishnet5))
 construction1 <- left_join(FinalFishnet2, testProbs_const1)
 construction1 <- construction1 %>%
-  mutate(Scenario = "const_25less") %>%
+  mutate(Scenario = "const_50less") %>%
   dplyr::select (Outcome,Probs,Risk_Cat,geometry,Scenario)
 
 
@@ -2118,7 +2121,7 @@ FinalFishnet2$uniqueID <- seq.int(nrow(FinalFishnet5))
 testProbs_const2$uniqueID <- seq.int(nrow(FinalFishnet5))
 construction2 <- left_join(FinalFishnet2, testProbs_const2)
 construction2 <- construction2 %>%
-  mutate(Scenario = "const_50less") %>%
+  mutate(Scenario = "const_25less") %>%
   dplyr::select (Outcome,Probs,Risk_Cat,geometry,Scenario)
 
 
@@ -2144,7 +2147,7 @@ FinalFishnet2$uniqueID <- seq.int(nrow(FinalFishnet5))
 testProbs_const3$uniqueID <- seq.int(nrow(FinalFishnet5))
 construction3 <- left_join(FinalFishnet2, testProbs_const3)
 construction3 <- construction3 %>%
-  mutate(Scenario = "const_50more") %>%
+  mutate(Scenario = "const_25more") %>%
   dplyr::select (Outcome,Probs,Risk_Cat,geometry,Scenario)
 
 
@@ -2170,7 +2173,7 @@ FinalFishnet2$uniqueID <- seq.int(nrow(FinalFishnet5))
 testProbs_const4$uniqueID <- seq.int(nrow(FinalFishnet5))
 construction4 <- left_join(FinalFishnet2, testProbs_const4)
 construction4 <- construction4 %>%
-  mutate(Scenario = "const_100more") %>%
+  mutate(Scenario = "const_50more") %>%
   dplyr::select (Outcome,Probs,Risk_Cat,geometry,Scenario)
 
 
@@ -2208,7 +2211,7 @@ const_scenarios <- rbind(construction1, construction2, construction3, constructi
 less25 <- ggmap(base_map) +
   geom_sf(data = ll(fishnet), fill = "white", inherit.aes = FALSE)+
   geom_sf(data=ll(construction1), aes(fill=Risk_Cat), color="transparent", inherit.aes = FALSE)+
-  labs(title="25% Lower")+
+  labs(title="50% Lower")+
   theme(plot.title = element_text(size = 30, face = "bold"), 
         legend.title = element_text(size = 12)) +  mapTheme() +
   scale_fill_brewer(palette = "PiYG", name = "Risk Score", direction = -1, aesthetics = c("colour", "fill"))
@@ -2217,24 +2220,24 @@ less25 <- ggmap(base_map) +
 less50 <- ggmap(base_map) +
   geom_sf(data = ll(fishnet), fill = "white", inherit.aes = FALSE)+
   geom_sf(data=ll(construction2), aes(fill=Risk_Cat), color="transparent", inherit.aes = FALSE)+
-  labs(title="50% Lower")+
+  labs(title="25% Lower")+
   theme(plot.title = element_text(size = 30, face = "bold"), 
         legend.title = element_text(size = 12)) +  mapTheme() +
   scale_fill_brewer(palette = "PiYG", name = "Risk Score", direction = -1, aesthetics = c("colour", "fill"))
 
+
+more25 <- ggmap(base_map) +
+  geom_sf(data = ll(fishnet), fill = "white", inherit.aes = FALSE)+
+  geom_sf(data= ll(construction3), aes(fill=Risk_Cat), color="transparent", inherit.aes = FALSE)+
+  labs(title="25% Higher")+
+  theme(plot.title = element_text(size = 30, face = "bold"), 
+        legend.title = element_text(size = 12)) +  mapTheme() +
+  scale_fill_brewer(palette = "PiYG", name = "Risk Score", direction = -1, aesthetics = c("colour", "fill"))
 
 more50 <- ggmap(base_map) +
   geom_sf(data = ll(fishnet), fill = "white", inherit.aes = FALSE)+
-  geom_sf(data= ll(construction3), aes(fill=Risk_Cat), color="transparent", inherit.aes = FALSE)+
-  labs(title="50% Higher")+
-  theme(plot.title = element_text(size = 30, face = "bold"), 
-        legend.title = element_text(size = 12)) +  mapTheme() +
-  scale_fill_brewer(palette = "PiYG", name = "Risk Score", direction = -1, aesthetics = c("colour", "fill"))
-
-more100 <- ggmap(base_map) +
-  geom_sf(data = ll(fishnet), fill = "white", inherit.aes = FALSE)+
   geom_sf(data= ll(construction4), aes(fill=Risk_Cat), color="transparent", inherit.aes = FALSE)+
-  labs(title="100% Higher")+
+  labs(title="50% Higher")+
   theme(plot.title = element_text(size = 30, face = "bold"), 
         legend.title = element_text(size = 12)) +  mapTheme() +
   scale_fill_brewer(palette = "PiYG", name = "Risk Score", direction = -1, aesthetics = c("colour", "fill"))
@@ -2249,15 +2252,16 @@ original <- ggmap(base_map) +
 
 
 mylegend<-g_legend(original)
-grid.arrange(arrangeGrob(less50 + theme(legend.position="none"), less25 + theme(legend.position="none"), original + theme(legend.position="none"), more50 + theme(legend.position="none"), more100 + theme(legend.position="none"), ncol = 2, top = "Canopy Change Under 5 Construction Scenarios", mylegend))
+grid.arrange(arrangeGrob(less50 + theme(legend.position="none"), less25 + theme(legend.position="none"), original + theme(legend.position="none"), more25 + theme(legend.position="none"), more50 + theme(legend.position="none"), ncol = 2, top = "Canopy Change Under 5 Construction Scenarios", mylegend))
 ```
 
 # Validation 
 ## How accurate is our model? 
 
-The plots below show the distribution of predicted probabilities for tree canopy loss.Given the distribution of predicted probabilities for grid cells that have substantial tree canopy loss, the default threshold of .5 does not make sense. We would prefer to over predict tree canopy loss than to underpredict. Finally, we generated a confusion matrix for each iteration of our model.The confusion matrix tells us the number of true positives, true negatives, false positives, and false negatives for the model. A true positive here indicates that at a given threshold, the model correctly predicted that a tree canopy loss would occur in a given grid cell. A true negative means that our model correctly predicted that a tree canopy loss would not occur. False positive means the model predicted tree canopy loss, but no substanial tree canopy loss occured. False negative indicates that the model predicted no substantial tree canopy loss, but there was tree canopy loss. The confusion matrix output also shows the sensitivity, or true positive rate, and specificity, or true negative rate, for the model.
+The plots below show the distribution of predicted probabilities for tree canopy loss. Given the distribution of predicted probabilities for grid cells with substantial tree canopy loss, the default threshold of .5 does not make sense. We would prefer to over-predict tree canopy loss than to underpredict. In other words, we would prefer to serve a region where tree planting initiatives are not needed than disregard a region where tree planting initiatives are required. Finally, we generated a confusion matrix for each iteration of our model. The confusion matrix tells us the number of true positives, true negatives, false positives, and false negatives. A true positive here indicates that the model correctly predicted that a tree canopy loss would occur in a given grid cell at a given threshold. A true negative means that our model correctly predicted that a tree canopy loss would not occur. False-positive means the model predicted tree canopy loss, but no substantial tree canopy loss occurred. False-negative indicates that the model predicted no substantial tree canopy loss, but there was tree canopy loss. The confusion matrix output also shows the sensitivity, or true positive rate, and specificity, or true negative rate, for the model.
 
-Given the distribution of predicted probabilities and our desire to overpredict rather than underpredict tree canopy loss, we used a threshold of just .25 when comparing models.The final model has a sensitivity of about 80%.
+Given the distribution of predicted probabilities and our desire to overpredict rather than underpredict tree canopy loss, we used a threshold of just .25 when comparing models. The final model has a sensitivity of about 80%. 
+
 ```{r Confusion metrics, message=FALSE, warning=FALSE, fig.height = 6, fig.width = 6, cache=TRUE}  
 
 
@@ -2349,7 +2353,7 @@ ggmap(base_map) +
 
 ## How generalizable is our model?
 
-We performed other validation tests to judge the generalizability of our model. First, cross validation with 100 k folds was performed. The graphs below visualize the accuracy and kappa of the final model across folds. Each of these plots are clustered around the mean, indicating our model has decent generalizability. Accuracy is the percentage of correctly classifies instances out of all instances and kappa is is a metric that compares an Observed Accuracy with an Expected Accuracy (random chance).
+We performed other validation tests to judge the generalizability of our model. First, cross-validation with 100 k-folds was performed. The graphs below visualize the accuracy and kappa of the final model across folds. Each of these plots is clustered around the mean, indicating our model has decent generalizability. Accuracy is the percentage of correctly classifies instances out of all instances, and kappa is a metric that compares an Observed Accuracy with an Expected Accuracy (random chance).
 
 ``````{r CV, message=FALSE, warning=FALSE, fig.height = 6, fig.width = 6, include=TRUE, results='hide', cache=TRUE}  
 ## Cross validation
