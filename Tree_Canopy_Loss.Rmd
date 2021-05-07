@@ -2437,9 +2437,7 @@ ggmap(base_map) +
 
 # Going Forward  
 We recommend that tree planting initiatives target South and Northeast Philadelphia, as our model predicted high risk of substantial tree loss in these areas. Many of the areas where we predicted high risk also currently have high construction rates. Focusing on neighborhoods with high construction rates can be a good way to prioritize efforts.
- 
-- the model tends to target areas of high conversation as loss will be higher in places which has many trees - so remove parks and conversation areas
-
+  
 # Planning Tool: Canopy View  
 
 Using this information, we created a predictive scenario planning policy tool that displays future tree canopy loss under five construction scenarios. The general population and tree planting agencies can use our tool to understand the potential impact of construction on the tree canopy and prioritize tree planting efforts.  
