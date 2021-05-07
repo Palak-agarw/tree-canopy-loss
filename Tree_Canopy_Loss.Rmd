@@ -15,11 +15,11 @@ output:
 [Return to MUSA 801 Projects Page](https://pennmusa.github.io/MUSA_801.io/)  
 
 # Introduction
-This project was completed as part of the Master in Urban Spatial Analytics Spring 2021 Practicum instructed by Ken Steif, Michael Fichman, and Matt Harris. We thank our instructors as well as Dexter Locke and Lara Roman from the United States Forest Service for their help navigating the data and for their feedback. 
+This project was completed as part of the Master in Urban Spatial Analytics Spring 2021 Practicum instructed by Ken Steif, Michael Fichman, and Matt Harris. We thank our instructors and Dexter Locke and Lara Roman from the United States Forest Service, for their help navigating the data and for their feedback. 
 
-This document is intended to help other researchers replicate a study of tree canopy loss linked to spatial risk factors. We present three primary outcomes: an analysis of the spatial attributes of tree canopy loss, a model to predict future tree canopy loss risk, and a policy tool which visualizes future tree canopy loss under various construction scenarios. We include hyperlinks thorough our document and in the appendix for reproducibility.   
+This document is intended to help other researchers replicate a study of tree canopy loss linked to spatial risk factors. We present three primary outcomes: an analysis of the spatial attributes of tree canopy loss, a model to predict future tree canopy loss risk, and a policy tool that visualizes future tree canopy loss under various construction scenarios. We include hyperlinks thorough our document and in the appendix for reproducibility.   
 
-Our hope is that this document and our policy tool can help tree planting agencies, tree advocates, and the interested public understand the forces contributing to tree canopy loss in Philadelphia and envision different future scenarios for our tree canopy.
+We hope that this document and our web application can help tree planting agencies, tree advocates, and the interested public understand the forces contributing to tree canopy loss in Philadelphia and envision different future scenarios for our tree canopy.
 
 
 ![ ](FrontPage.png)  
@@ -323,7 +323,7 @@ ConservationNParks <- ConservationNParks %>%
 
 **Between 2008 and 2018, Philadelphia experienced a net loss of more than 1000 football fields’ worth of tree canopy.**  
 
-Most of this loss occurred in historically disenfranchised communities. In response, the City of Philadelphia has set important milestones for conserving and increasing the current tree canopy in the city. In this analysis, we model tree canopy loss in Philadelphia and identify risk factors. We additionally assess the city’s progress on the goals and how this varies across neighborhoods.  
+Most of the tree canopy loss occurred in historically disenfranchised communities. In response, the City of Philadelphia has set essential milestones for conserving and increasing the current tree canopy in the city. In this analysis, we model tree canopy loss in Philadelphia and identify risk factors. We additionally assess the city’s progress on the goals and how this varies across neighborhoods.  
 
 ```{r Study boundaries, cache=TRUE, message=FALSE, warning=FALSE, include=TRUE, results='hide'}
 ggmap(base_map) +
@@ -336,7 +336,7 @@ ggmap(base_map) +
   
 **Why does the tree canopy matter?**  
 
-Tree canopy is defined as the area of land which, viewed from a bird's eye view, is covered by trees. Trees offer important benefits to cities including mitigating the urban heat island effect, absorbing stormwater runoff, a habitat for wildlife, and aesthetic and recreational benefits. In addition, trees are a preventative public health measure which improves mental health, increases social interactions and activity, and reduces crime, violence, and stress. A 2020 study published in The Lancet found that if Philadelphia reaches 30% tree canopy in all of its neighborhoods, the city would see [403 fewer premature deaths](https://www.fs.fed.us/nrs/pubs/jrnl/2020/nrs_2020_kondo_001.pdf) per year. However, despite the importance of trees to the city's health, appearance, and ecology, trees are regularly removed for reasons ranging from construction to homeowners' personal preference.  
+Tree canopy is defined as the area of land which, viewed from a bird's eye view, is covered by trees. Trees offer essential benefits to cities, including mitigating the urban heat island effect, absorbing stormwater runoff, a habitat for wildlife, and aesthetic and recreational benefits. In addition, trees are a preventative public health measure that improves mental health, increases social interactions and activity, and reduces crime, violence, and stress. A 2020 study published in The Lancet found that if Philadelphia reaches 30% tree canopy in all of its neighborhoods, the city would see [403 fewer premature deaths](https://www.fs.fed.us/nrs/pubs/jrnl/2020/nrs_2020_kondo_001.pdf) per year. However, despite the importance of trees to the city's health, appearance, and ecology, trees are regularly removed for reasons ranging from construction to homeowners' personal preference.  
 
 ![Cherry blossom trees in Philadelphia's Fairmount Park](CherryBlossoms.png)   
 
@@ -347,18 +347,19 @@ Tree canopy is defined as the area of land which, viewed from a bird's eye view,
 div.blue { background-color:#e6f0ff; border-radius: 5px; padding: 10px;}
 </style>
 <div class = "blue">
-Philadelphia under a previous mayoral administration set the [goal](https://treephilly.org/about/) of achieving 30% tree canopy coverage in all neighborhoods by 2025. Currently, the citywide average is 20%, although this is highly uneven. More affluent neighborhoods in the northwest that have many parks and large lawns have much higher tree canopy than industrial neighborhoods in south and north Philadelphia which are full of impervious surfaces. The neighborhoods which have lower canopy coverage tend to be historically disenfranchised, lower income, and predominantly communities of color. This is an environmental justice problem. Neighborhoods like Philadelphia’s Hunting Park have a much lower ratio of tree canopy to impervious surfaces than the citywide average, resulting in higher temperatures during summertime heat waves and poorer air quality.  
+Under a previous mayoral administration, the city of Philadelphia set the [goal](https://treephilly.org/about/) of achieving 30% tree canopy coverage in all neighborhoods by 2025. Currently, the citywide average is 20%, although this is highly uneven. More affluent neighborhoods in the northwest with many parks and large lawns have much higher tree canopy than industrial neighborhoods in south and north Philadelphia. The neighborhoods with lower canopy coverage tend to be historically disenfranchised, lower-income, and predominantly communities of color. This is an environmental justice problem. Neighborhoods like Philadelphia’s Hunting Park have a much lower ratio of the tree canopy to impervious surfaces than the citywide average, resulting in higher temperatures during summertime heat waves and more inferior air quality.  
 </div>
 1 acre of tree canopy within a 10 minute walk for all residents 
 <style>
 div.blue { background-color:#e6f0ff; border-radius: 5px; padding: 10px;}
 </style>
 <div class = "blue">
-13% of Philadelphia's residents are considered under-served by green space, meaning that they live more than a 10 minute walk away from at least 1 acre of green space. The city has therefore set a goal of ensuring that all residents are no more than 10 minutes away from at least 1 acre of green space by 2035. To this end, the city is prioritizing adding green space in historically disenfranchised neighborhoods and making efforts to green spaces in schools and recreation centers.     
+13% of Philadelphia's residents are considered under-served by green space, meaning that they live more than a 10-minute walk away from at least 1 acre of green space. The city has set a goal of ensuring that all residents are no more than 10 minutes away from at least 1 acre of green space by 2035. To this end, the city prioritizes adding green space in historically disenfranchised neighborhoods and making efforts to green spaces in schools and recreation centers.   
+
 </div>
 # Planning Tool: Canopy View  
 
-Using this information, we created a predictive scenario planning policy tool which displays future tree canopy loss under three construction scenarios. The general population and tree planting agencies can use our tool to understand the potential impact of construction on the tree canopy and to prioritize tree planting efforts.
+Using this information, we created a predictive scenario planning policy tool that displays future tree canopy loss under five construction scenarios. The general population and tree planting agencies can use our tool to understand the potential impact of construction on the tree canopy and prioritize tree planting efforts.
 
 ![Canopy View web application](WebApp.png)   
 
@@ -387,7 +388,7 @@ div.blue { background-color:#e6f0ff; border-radius: 5px; padding: 10px;}
 </div>  
 
 ## Unit of analysis: the fishnet cell
-Below, we visualize the study area for this analysis. We use fishnet grid cells as our unit of analysis to take advantage of high resolution spatial data such as 311 service requests. Below, Philadelphia is visualized as fishnet cells of 1615 feet, roughly the size of a city block. Roughly ____ % of Philadelphia's total area consists of [conservation easement](https://www.conservationeasement.us/what-is-a-conservation-easement/), hydrology, and parks. We omit fishnet cells which consist of more than 20% of these categories to isolate land that may be protected or experience different tree canopy change processes. All in all, we have 1411 fishnet cells representing Philadelphia.  
+Below, we visualize the study area for this analysis. We use fishnet grid cells as our unit of analysis to take advantage of high-resolution spatial data such as 311 service requests. Below, Philadelphia is visualized as fishnet cells of 1615 feet, roughly the size of a city block. Roughly ____ % of Philadelphia's total area consists of [conservation easement](https://www.conservationeasement.us/what-is-a-conservation-easement/), hydrology, and parks. We omit fishnet cells which consist of more than 20% of these categories, to isolate land that may be protected or experience different tree canopy change processes. All in all, we have 1411 fishnet cells representing Philadelphia.  
 
 ```{r Fishnet, cache=TRUE, message=FALSE, warning=FALSE, include=TRUE, results='hide'}
 
@@ -440,7 +441,7 @@ div.blue { background-color:#e6f0ff; border-radius: 5px; padding: 20px;}
 ## 1. What does Philadelphia's tree canopy look like today?
   
 ### Philadelphia's 2018 Canopy 
-First, we aggregate our tree canopy data to the fishnet so that we have gain, loss, and total canopy area for each cell. Northwest, West, and Northeast Philadelphia have the most tree canopy. In North and South Philadelphia as well as Center City, tree canopy is more sparse. 
+First, we aggregate our tree canopy data to the fishnet to gain, lose, and total canopy area for each cell. Northwest, West, and Northeast Philadelphia have the most tree canopy. In North Philadelphia, South Philadelphia, and Center City, the tree canopy coverage is more sparse. 
 
 ```{r Fishnet Aggregation, cache=TRUE, message=FALSE, warning=FALSE, include=TRUE, results='hide'}
 
@@ -588,7 +589,7 @@ subtitle = "Tree Canopy Area / Gridcell Area") +
 ```
 
 ### Tree Canopy Change
-Surprisingly, tree canopy loss and gain exhibit similar spatial patterns. Both percent gain and loss are highest in a few neighborhoods in South Philadelphia and in the Northeast. While this seems counter-intuitive, this is because these neighborhoods have the least tree canopy, therefore each individual tree gained or lost has a greater overall impact.   
+Surprisingly, tree canopy loss and gain exhibit similar spatial patterns. Percent loss is the tree canopy lost from 2008 - 2018 divided by the total tree canopy area in 2008. Percent gain is the tree canopy lost from 2008 - 2018 divided by the total tree canopy area in 2018. Both percent gain and loss are highest in a few neighborhoods in South Philadelphia and in the Northeast. While this seems counter-intuitive, this is because these neighborhoods have the least tree canopy. Therefore each individual tree gained or lost has a greater overall impact.   
 
 ```{r Canopy change, message=FALSE, warning=FALSE, results='hide', fig.height = 12, fig.width = 20, cache=TRUE}
 
@@ -674,7 +675,7 @@ grid.arrange(gain, loss, change, top = "Tree Canopy Change and Existing Tree Can
 ```
 
 
-Citywide, the majority of fishnet cells experienced low net loss, while a similar amount of cells experienced either substantial loss or gain.    
+Citywide, the majority of fishnet cells experienced a low net loss. A similar amount of cells experienced either substantial loss or gain.     
 ```{r Net Canopy change,  message=FALSE, warning=FALSE, results='hide', fig.height = 8, fig.width = 8, cache=TRUE}
 
 b <- ggmap(base_map) +
@@ -835,7 +836,7 @@ goalProg <- ggmap(base_map) +
   scale_fill_brewer(palette = "PiYG", name = "Canopy Status", direction = -1, aesthetics = c("colour", "fill"), guide = guide_legend(reverse = TRUE))
 goalProg 
 ```
-Most neighborhoods experienced a net loss in tree canopy. Interestingly, most tree gain was experienced in South Philadelphia and Center City, in neighborhoods which have low existing canopy.    
+Most neighborhoods experienced a net loss in tree canopy. Interestingly, most tree gains were experienced in South Philadelphia and Center City, in neighborhoods that have low existing canopy.    
 ```{r Neighborhood canopy change, message=FALSE, warning=FALSE, results='hide', fig.height = 10, fig.width = 20, cache=TRUE}
 netChange <- ggmap(base_map) +
   geom_sf(data = ll(FinalNeighborhood), aes(fill = GainMinusLossCat), inherit.aes = FALSE, color = "white") +
@@ -849,7 +850,7 @@ netChange
 
 
 ### A closer look: neighborhood-level tree canopy change   
-To better understand tree canopy change patterns in neighborhoods, we analyze more closely a neighborhood that has reached the goal and one that is substantially below the goal. In both, the bulk of the tree canopy did not change between 2008 and 2018. However, when we look closer, we see that tree canopy loss and gain are much more clustered in Upper Roxborough, which meets the goal. Here, it appears that some of the loss is related to tree removal along an entire street or throughout a property, whereas in Richmond, tree canopy change has been more piecemeal and scattered. This suggests land use and streets as potential risk factor variables related to tree canopy loss.   
+To better understand tree canopy change patterns in neighborhoods, we analyze more closely a neighborhood that has reached the goal and one that is substantially below the goal. In both, the bulk of the tree canopy did not change between 2008 and 2018. However, when we look closer, we see that tree canopy loss and gain are much more clustered in Upper Roxborough, which meets the goal. Here, it appears that some of the loss is related to tree removal along an entire street or throughout a property, whereas, in Richmond, tree canopy change has been more piecemeal and scattered. This suggests land use and streets as potential risk factor variables related to tree canopy loss.     
 
 ```{r Neighborhood Level Loss, message=FALSE, warning=FALSE, results='hide', fig.height = 13, fig.width = 13, cache = TRUE}
 
@@ -887,7 +888,7 @@ grid.arrange(ncol=2, UR, refmap, RM)
   
 ## 3.  How does tree canopy change vary by demographic?  
 
-Tree canopy loss, like other urban environmental issues, has deep implications for equity. Low income communities and communities of color are more likely to be in places with less tree canopy. Therefore, we explore demographics variables' correlation with tree canopy gain, loss, net change, and coverage. Surprisingly, demographic variables have little correlation with existing tree canopy or tree canopy change. This is likely because they are accounted for by neighborhood fixed effects.     
+Tree canopy loss, like other urban environmental issues, has deep implications for equity. Low-income communities and communities of color are more likely to be in places with less tree canopy. Therefore, we explore demographics variables' correlation with tree canopy gain, loss, net change, and coverage. Surprisingly, demographic variables have little correlation with existing tree canopy or tree canopy change. This is likely because they are accounted for by neighborhood fixed effects.     
 ```{r Demographics, message=FALSE, warning=FALSE, results='hide', fig.height = 10, fig.width = 13,  cache=TRUE}
 
 library(grid)
@@ -985,7 +986,7 @@ grid.arrange(ncol=2, top=textGrob("Neighborhood Attributes and Tree Canopy 2008-
 ```
 
 ## 4. How do historical disinvestment and segregation relate to tree canopy loss?
-Next, we examine redlining boundaries from the Homeowner’s Loan Corporation (HOLC). As trees take decades to grow, the spatial configuration of tree canopy and their change is influenced by historical planning decisions. In 1937, HOLC created “redlining” maps which rated neighborhoods’ desirability in four categories. They rated neighborhoods with residents of color as the least desirable and majority-white neighborhoods as the most desirable. As a result, the low-ranked neighborhoods experienced disinvestment and greater difficulty attracting investment.   
+Next, we examine redlining boundaries from the Homeowner’s Loan Corporation (HOLC). As trees take decades to grow, historical planning decisions influence the spatial configuration of tree canopy and their change.  In 1937, HOLC created “redlining” maps that rated neighborhoods’ desirability in four categories. They rated neighborhoods with residents of color as the least desirable and majority-white neighborhoods as the most desirable. As a result, the low-ranked neighborhoods experienced disinvestment and greater difficulty attracting investment.   
 ```{r HOLC Areas, message=FALSE, warning=FALSE, include=TRUE, results='hide', fig.height =  7, fig.width = 7, cache='TRUE'}
 
 HOLC2 <- HOLC %>%
@@ -1063,7 +1064,7 @@ FinalFishnet <-
   plotTheme()
 ```
 
-The plots below illustrate a correlation between tree canopy loss and HOLC ratings. Fishnet cells in highly rated areas experienced less percentage loss between 2008 and 2018, and they had more tree canopy to begin with.   
+The plots below illustrate a correlation between tree canopy loss and HOLC ratings. Fishnet cells in highly-rated areas experienced less percentage loss between 2008 and 2018, and they had more tree canopy to begin with.   
 ```{r HOLC plot, fig.height=8, fig.width=12, message=FALSE, warning=FALSE, cache=TRUE, results='hide'}
 library(grid)
 grid.arrange(holcLoss, holcCanopy, top = "1937 HOLC Rating and Tree Canopy", ncol = 2)
@@ -1166,7 +1167,7 @@ LandUseLong<-
 ```
 
 ### Land use
-As previously mentioned, land use appears to be correlated with tree canopy. A [2018 report](https://treephilly.org/wp-content/uploads/2019/12/Tree-Canopy-Assessment-Report-Philadelphia-2018.pdf) showed that the most trees were removed next to streets and on residential property. This proves true in our analysis: the top two land use types that experienced tree canopy change are residential and transportation.    
+As previously mentioned, land-use appears to be correlate with tree canopy. A [2018 report](https://treephilly.org/wp-content/uploads/2019/12/Tree-Canopy-Assessment-Report-Philadelphia-2018.pdf) showed that most trees were removed next to streets and on residential property. This proves true in our analysis: the top two land-use types that experienced tree canopy change are residential and transportation.   
 
 ```{r Residential density, message=FALSE, warning=FALSE, include=TRUE, results='hide', fig.height = 4, fig.width = 10, cache=TRUE}
 
