@@ -9,14 +9,14 @@ output:
     theme: cosmo
     toc_float: true
     code_folding: hide
-    number_sections: FALSE
+    number_sections: TRUE
 ---
 
 [Return to MUSA 801 Projects Page](https://pennmusa.github.io/MUSA_801.io/)  
-This project was completed for the MUSA/Smart Cities Practicum course (MUSA 801) instructed by Ken Steif, Michael Fichman, and Matt Harris. We are grateful to our instructors for their continued support and feedback as well as their flexibility and understanding in the face of a global pandemic. We also thank Dexter Locke and Lara Roman from the United States Forest Service for their generosity with their time and their eagerness to provide feedback on our project and share their expertise. Finally, we would like to acknowledge our classmates this semester for their feedback on our project and for inspiring us with their work.  
+This project was completed for the MUSA/Smart Cities Practicum course (MUSA 801) instructed by Ken Steif, Michael Fichman, and Matthew Harris. We are grateful to our instructors for their continued support and feedback as well as their flexibility and understanding in the face of a global pandemic. We also thank Dexter Locke and Lara Roman from the United States Forest Service for their generosity with their time and their eagerness to provide feedback on our project and share their expertise. Finally, we would like to acknowledge our classmates this semester for their feedback on our project and for inspiring us with their work.  
 
 # Introduction  
-This document is intended to help other researchers replicate a study of tree canopy loss linked to spatial risk factors. We present three primary outcomes: an analysis of the spatial attributes of tree canopy loss, a model to predict future tree canopy loss risk, and a policy tool that visualizes future tree canopy loss under various construction scenarios. We include hyperlinks thorough our document and in the appendix for reproducibility.   
+This document is intended to help other researchers replicate a study of tree canopy loss linked to spatial risk factors. We present three primary outcomes: an analysis of the spatial attributes of tree canopy loss, a model to predict future tree canopy loss risk, and a policy tool that visualizes future tree canopy loss under various construction scenarios. We include hyperlinks throughout our document for reproducibility.   
 
 We hope that this document and our web application can help tree planting agencies, tree advocates, and the interested public understand the forces contributing to tree canopy loss in Philadelphia and envision different future scenarios for our tree canopy.  
 
@@ -314,7 +314,7 @@ ConservationNParks <- ConservationNParks %>%
 
 # Motivation 
   
-**Between 2008 and 2018, Philadelphia experienced a net loss of more than 1000 football fields’ worth of tree canopy.**  
+**Between 2008 and 2018, Philadelphia experienced a net loss of [more than 1000 football fields’ worth](https://treephilly.org/wp-content/uploads/2019/12/Tree-Canopy-Assessment-Report-Philadelphia-2018.pdf) of tree canopy.**  
 
 Most of the tree canopy loss occurred in historically disenfranchised communities. In response, the City of Philadelphia has set essential milestones for conserving and increasing the current tree canopy in the city. In this analysis, we model tree canopy loss in Philadelphia and identify risk factors. We additionally assess the city’s progress on the goals and how this varies across neighborhoods.  
 
@@ -374,7 +374,7 @@ div.blue { background-color:#e6f0ff; border-radius: 5px; padding: 10px;}
 </div>  
   
 ## Unit of analysis: the fishnet cell
-Below, we visualize the study area for this analysis. We use fishnet grid cells as our unit of analysis to take advantage of high-resolution spatial data such as 311 service requests. Below, Philadelphia is visualized as fishnet cells of 1615 feet, roughly the size of a city block. Around 16% of Philadelphia's total area consists of [conservation easement](https://www.conservationeasement.us/what-is-a-conservation-easement/), hydrology, and parks. We omit fishnet cells which consist of more than 20% of these categories, to isolate land that may be protected or experience different tree canopy change processes. All in all, we have 1411 fishnet cells representing Philadelphia.  
+Below, we visualize the study area for this analysis. We use fishnet grid cells as our unit of analysis to take advantage of high-resolution spatial data such as 311 service requests. Below, Philadelphia is visualized as fishnet cells of 1615 feet, roughly the size of a city block. Around 16% of Philadelphia's total area consists of [conservation easements](https://www.conservationeasement.us/what-is-a-conservation-easement/), hydrology, and parks. We omit fishnet cells which consist of more than 20% of these categories, to isolate land that may be protected or experience different tree canopy change processes. All in all, we have 1411 fishnet cells representing Philadelphia.  
 
 
 ```r
@@ -420,10 +420,14 @@ Our analysis addresses the following questions:
 div.blue { background-color:#e6f0ff; border-radius: 5px; padding: 20px;}
 </style>
 <div class = "blue">
-**1. What does Philadelphia's tree canopy look like today?**  
-**2. How close are neighborhoods to achieving the 30% goal?**  
-**3. How does tree canopy change vary by demographic?**  
-**4. How do current patterns of tree canopy coverage and loss reflect disinvestment as a result of redlining and older planning practices?**  
+**1. What does Philadelphia's tree canopy look like today?**    
+  
+**2. How close are neighborhoods to achieving the 30% goal?**    
+  
+**3. How does tree canopy change vary by demographic?**    
+  
+**4. How do current patterns of tree canopy coverage and loss reflect disinvestment as a result of redlining and older planning practices?**    
+  
 **5. What other factors are associated with the tree canopy?**  
 </div>
 
@@ -433,10 +437,6 @@ div.blue { background-color:#e6f0ff; border-radius: 5px; padding: 20px;}
 Philadelphia's tree canopy dataset has almost 700,000 polygons labeled as loss, gain, and no change between 2008 and 2018.  
 
 ```r
-# CanopyPlot <- TreeCanopy %>%
-#   filter(CLASS_NAME != "Loss") %>%
-#   st_union()
-# 
 # ggmap(base_map) +
 #   geom_sf(data = ll(CanopyPlot), colour = "forest green", inherit.aes = FALSE, fill = "forest green")+ 
 #   labs(title = "Tree Canopy, 2018", 
@@ -592,6 +592,7 @@ subtitle = "Philadelphia, PA") +
 ```
 
 ![](Tree_Canopy_Loss_files/figure-html/Existing Canopy fishnet-1.png)<!-- -->
+  
 ### Tree Canopy Change
 Surprisingly, tree canopy loss and gain exhibit similar spatial patterns. Percent loss is the tree canopy lost from 2008 to 2018 divided by the total tree canopy area in 2008. Percent gain is the tree canopy lost from 2008 to 2018 divided by the total tree canopy area in 2018. Both percent gain and loss are highest in a few neighborhoods in South Philadelphia and in the Northeast. While this seems counter-intuitive, this is because these neighborhoods have the least tree canopy. Therefore each individual tree gained or lost has a greater overall impact.
 
@@ -612,20 +613,26 @@ Z <- ggmap(base_map) +
   theme(plot.title = element_text(size = 30, face = "bold"), 
         legend.title = element_text(size = 12)) +  mapTheme()
 
-grid.arrange(ncol=2,
-v + scale_fill_distiller(palette = "YlOrRd", direction = 1, name = "% Loss"),
-Z + scale_fill_distiller(palette = "YlGr", direction = 1, name = "% Gain"))
+
+v + scale_fill_distiller(palette = "YlOrRd", direction = 1, name = "% Loss")
 ```
 
 ![](Tree_Canopy_Loss_files/figure-html/Canopy change-1.png)<!-- -->
 
 ```r
+Z + scale_fill_distiller(palette = "YlGr", direction = 1, name = "% Gain")
+```
+
+![](Tree_Canopy_Loss_files/figure-html/Canopy change-2.png)<!-- -->
+
+
+```r
 FinalFishnet$PctChangeCat <- cut(FinalFishnet$pctChange, 
                        breaks = c(-Inf,  -30, -10, 0, 10, 20, Inf), 
-                       labels = c("Significant Net Loss", "Moderate Net Loss", "Low Net Loss", "Low Net Gain", "Moderate Net Gain", "Significant Net Gain"), 
+                       labels = c("Substantial Net Loss", "Moderate Net Loss", "Low Net Loss", "Low Net Gain", "Moderate Net Gain", "Substantial Net Gain"), 
                        right = FALSE)
 ```
-When we plot the log-transformed percent tree canopy and percent tree canopy gain, loss, and change for each fishnet cell, we see a negative relationship, meaning that fishnet cells with more trees experience less percentage change.  
+When we plot the percent tree canopy and percent tree canopy gain, loss, and change for each fishnet cell, we see a very low correlation. However, we found that a log-transformation creates a greater negative correlation. This suggests that fishnet cells with more trees experience less percentage change.  
 
 ```r
 gain <- ggplot(FinalFishnet %>% filter(pctCoverage18 > 0.01 & pctGain > 1), aes(x = pctGain, y = pctCoverage18))+
@@ -663,7 +670,7 @@ pctChangeGraph <-
 change <- ggplot(pctChangeGraph, aes(x = pctChange, y = pctCoverage18))+
   stat_density2d(aes(fill = ..level..), geom = "polygon", bins = 20) +
   scale_fill_gradient(low="light green", high="magenta", name="Distribution") +
-    geom_smooth(method = "lm", se = FALSE, colour = "black") +
+   # geom_smooth(method = "glm", se = FALSE, colour = "black") +
  # geom_point(colour = "black", alpha = 0.3, size = 4)+ 
   labs(title = "Change vs. 2018 Tree Canopy (%)",
        subtitle = "Density of fishnet cells") + 
@@ -689,7 +696,7 @@ b <- ggmap(base_map) +
   theme(plot.title = element_text(size = 30, face = "bold"), 
         legend.title = element_text(size = 12)) +  mapTheme()
 
-b + scale_fill_brewer(palette = "PiYG", name = "Percent Change", direction = 1, aesthetics = c("colour", "fill"), guide = guide_legend(reverse = TRUE))
+b + scale_fill_brewer(palette = "PiYG", name = "Tree Canopy Change", direction = 1, aesthetics = c("colour", "fill"), guide = guide_legend(reverse = TRUE))
 ```
 
 ![](Tree_Canopy_Loss_files/figure-html/Net Canopy change-1.png)<!-- -->
@@ -796,10 +803,10 @@ The neighborhoods farthest from 30% tree canopy are in South Philadelphia and pa
 goalProg <- ggmap(base_map) +
   geom_sf(data = ll(FinalNeighborhood), aes(fill = GoalCat), color = "white", inherit.aes = FALSE) +
   labs(title = "30% Canopy Goal by Neighborhood, 2018",
-       subtitle = "% Away from 30% tree canopy") +
+       subtitle = "Philadelphia, PA") +
   theme(plot.title = element_text(size = 30, face = "bold"), 
         legend.title = element_text(size = 12)) +  mapTheme() +
-  scale_fill_brewer(palette = "PiYG", name = "Canopy Status", direction = -1, aesthetics = c("colour", "fill"), guide = guide_legend(reverse = TRUE))
+  scale_fill_brewer(palette = "PiYG", name = "Distance from 30% Canopy", direction = -1, aesthetics = c("colour", "fill"), guide = guide_legend(reverse = TRUE))
 goalProg 
 ```
 
@@ -809,10 +816,11 @@ Most neighborhoods experienced a net loss in tree canopy. Interestingly, most tr
 ```r
 netChange <- ggmap(base_map) +
   geom_sf(data = ll(FinalNeighborhood), aes(fill = GainMinusLossCat), inherit.aes = FALSE, color = "white") +
-  labs(title = "Tree Canopy Net Change by Neighborhood, 2008-2018") +
+  labs(title = "Tree Canopy Net Change by Neighborhood, 2008-2018",
+       subtitle = "Philadelphia, PA") +
   theme(plot.title = element_text(size = 30, face = "bold"), 
         legend.title = element_text(size = 12)) +  mapTheme()+ 
-  scale_fill_brewer(palette = "PiYG", name = "Net Change", direction = 1, aesthetics = c("colour", "fill"), guide = guide_legend(reverse = TRUE))
+  scale_fill_brewer(palette = "PiYG", name = "Tree Canopy Change", direction = 1, aesthetics = c("colour", "fill"), guide = guide_legend(reverse = TRUE))
 
 netChange
 ```
@@ -821,7 +829,7 @@ netChange
 
 
 ### A closer look: neighborhood-level tree canopy change   
-To better understand tree canopy change patterns in neighborhoods, we analyze more closely a neighborhood that has reached the goal and one that is substantially below the goal. In both, the bulk of the tree canopy did not change between 2008 and 2018. However, when we look closer, we see that tree canopy loss and gain are much more clustered in Upper Roxborough, which meets the goal. Here, it appears that some of the loss is related to tree removal along an entire street or throughout a property, whereas, in Richmond, tree canopy change has been more piecemeal and scattered. This suggests land use and streets as potential risk factor variables related to tree canopy loss.     
+To better understand tree canopy change patterns, we analyze a neighborhood that has reached the 30% goal and one that is substantially below the goal. In both, the bulk of the tree canopy did not change between 2008 and 2018. However, when we look closer, we see that tree canopy loss and gain are much more clustered in Upper Roxborough, which meets the goal. Here, it appears that some of the loss is related to tree removal along an entire street or throughout a property, whereas, in Richmond, tree canopy change has been more piecemeal and scattered. This suggests land use and streets as potential risk factor variables related to tree canopy loss.     
 
 ```r
 paletteChange <- c("green", "orange", "purple")
@@ -834,7 +842,8 @@ refmap <- ggmap(base_map2) +
   geom_sf(data = ll(Neighborhood), fill = "black", colour = "white", inherit.aes = FALSE) +
   geom_sf(data = ll(RMBound), colour = "white", fill = "green", inherit.aes = FALSE) +
     geom_sf(data = ll(URBound), colour = "white", fill = "green", inherit.aes = FALSE) +
-  labs(title = "Richmond and Upper Roxborough Neighborhoods") +
+  labs(title = "Richmond and Upper Roxborough Neighborhoods",
+       subtitle = "Philadelphia, PA") +
   theme(plot.title = element_text(size = 30, face = "bold"), 
         legend.title = element_text(size = 12)) +  mapTheme()
  
@@ -1030,7 +1039,7 @@ grid.arrange(ncol=2, top=textGrob("Neighborhood Attributes and Tree Canopy 2008-
 ![](Tree_Canopy_Loss_files/figure-html/Demographics-1.png)<!-- -->
 
 ## How do historical disinvestment and segregation relate to tree canopy loss?
-Next, we examine redlining boundaries from the Homeowner’s Loan Corporation (HOLC). As trees take decades to grow, historical planning decisions influence the spatial configuration of tree canopy and their change.  In 1937, HOLC created “redlining” maps that rated neighborhoods’ desirability in four categories. They rated neighborhoods with residents of color as the least desirable and majority-white neighborhoods as the most desirable. As a result, the low-ranked neighborhoods experienced disinvestment and greater difficulty attracting investment.  
+Next, we examine redlining boundaries from the Homeowner’s Loan Corporation (HOLC). As trees take decades to grow, historical planning decisions can determine the spatial configuration of today's tree canopy.  In 1937, HOLC created “redlining” maps that rated neighborhoods’ desirability in four categories. They rated neighborhoods with residents of color as the least desirable(D) and majority-white neighborhoods as the most desirable(A). As a result, the low-ranked neighborhoods experienced disinvestment and greater difficulty attracting investment.  
 
 ```r
 HOLC2 <- HOLC %>%
@@ -1058,7 +1067,7 @@ ggmap(base_map) +
         legend.title = element_text(size = 12)) +  mapTheme()
 ```
 
-![](Tree_Canopy_Loss_files/figure-html/HOLC Grades Areas-1.png)<!-- -->
+![](Tree_Canopy_Loss_files/figure-html/HOLC rate communities-1.png)<!-- -->
 
 ```r
  holc_net <- st_intersection(fishnet_centroid, HOLC) %>%
@@ -1070,19 +1079,47 @@ FinalFishnet <-
    left_join(FinalFishnet, .)%>%
    mutate(holc_grade = replace_na(holc_grade, "unclassified"))
   
+ # holcLoss <- FinalFishnet %>%
+ #  dplyr::select(holc_grade, pctLoss) %>%
+ #  group_by(holc_grade) %>%
+ #  na.omit() %>%
+ #  summarize(mean_loss = mean(pctLoss)) %>%
+ #  ggplot() +
+ #  geom_bar(aes(y = mean_loss), binwidth = 1, fill = "magenta") +
+ #  labs(title="Loss by HOLC Grade, 2008-2018 (%)",
+ #       subtitle="Philadelphia, PA",
+ #       x="HOLC Rating",
+ #       y="% Loss")+
+ #  facet_wrap(~holc_grade, nrow = 1)+
+ #    theme(plot.title = element_text(size = 30, face = "bold"),
+ #        legend.title = element_text(size = 12),
+ #        axis.text.x=element_blank(),
+ #        axis.ticks.x=element_blank()) +
+ #  plotTheme()
+# 
+# resDensity <- ggplot(LandUse2, aes(y=C_DIG2DESC, x=pctChange))+
+#   geom_bar(stat='identity', fill="light green", width = 0.75)+
+#   labs(title = "Residential Density and Canopy Change",
+#        subtitle = "('18 Canopy - '08 Canopy) / ('18 Canopy) * 100 ")+
+#   ylab("Residential Land Use Type")+
+#   xlab("Percent Tree Canopy Change")+
+#     theme(plot.title = element_text(size = 30, face = "bold"), 
+#         legend.title = element_text(size = 12)) +  plotTheme()
+
  holcLoss <- FinalFishnet %>%
   dplyr::select(holc_grade, pctLoss) %>%
   group_by(holc_grade) %>%
   na.omit() %>%
   summarize(mean_loss = mean(pctLoss)) %>%
   ggplot() +
-  geom_bar(aes(y = mean_loss), binwidth = 1, fill = "magenta") +
+ geom_bar(aes(y = mean_loss), binwidth = 1, fill = "magenta") +
   labs(title="Loss by HOLC Grade, 2008-2018 (%)",
        subtitle="Philadelphia, PA",
-       x="HOLC Rating", 
+       x="HOLC Rating",
        y="% Loss")+
+   scale_y_continuous(limits = c(0, 35), breaks = seq(0, 35, by = 5)) +
   facet_wrap(~holc_grade, nrow = 1)+
-    theme(plot.title = element_text(size = 30, face = "bold"), 
+    theme(plot.title = element_text(size = 30, face = "bold"),
         legend.title = element_text(size = 12),
         axis.text.x=element_blank(),
         axis.ticks.x=element_blank()) +
@@ -1094,11 +1131,12 @@ FinalFishnet <-
   na.omit() %>%
   summarize(mean_cov = mean(pctCoverage18)) %>%
   ggplot() +
-  geom_histogram(aes(y = mean_cov), binwidth = 1, fill = "green") +
+  geom_bar(aes(y = mean_cov), binwidth = 1, fill = "green") +
   labs(title="Coverage by HOLC Grade, 2018 (%)",
        subtitle="Philadelphia, PA",
        x="HOLC Rating", 
        y="% Tree Canopy")+
+       scale_y_continuous(limits = c(0, 35), breaks = seq(0, 35, by = 5)) +
   facet_wrap(~holc_grade, nrow = 1)+
     theme(plot.title = element_text(size = 30, face = "bold"), 
         legend.title = element_text(size = 12),
@@ -1230,7 +1268,7 @@ LandUse2 <-
 
 
 LandUse <- ggplot(LandUseLong, aes(fill = variable, y=Descriptio, x=value))+
-  geom_bar(stat='identity', position = "stack", width = .75)+
+  geom_bar(stat='identity', position = "stack", width = .75) +
  scale_fill_manual(values = c("light green", "magenta"), name = "Area Gain or Loss")+
   labs(title = "Land Use Type and Canopy Change",
        subtitle = "Philadelphia, 2008-2018")+
@@ -2124,8 +2162,7 @@ div.blue { background-color:#e6f0ff; border-radius: 5px; padding: 10px;}
 * 25% increase in construction permits
 * 50% increase in construction permits
 
-Although the difference in scenario outcome are slight, generally as construction rates increase, the risk for substantial tree canopy loss also increases. Likewise, as the construction rates decrease, the risk for tree canopy loss in a given area generally decreases. 
-
+Although the difference in scenario outcome are slight, generally as construction rates increase, the risk for substantial tree canopy loss also increases. Likewise, as the construction rates decrease, the risk for tree canopy loss in a given area generally decreases.
 </div>  
 
 
@@ -2285,7 +2322,8 @@ less25 <- ggmap(base_map) +
   labs(title="50% Lower")+
   theme(plot.title = element_text(size = 30, face = "bold"), 
         legend.title = element_text(size = 12)) +  mapTheme() +
-  scale_fill_brewer(palette = "PiYG", name = "Risk Score", direction = -1, aesthetics = c("colour", "fill"))
+  # scale_fill_brewer(palette = "PiYG", name = "Risk Score", direction = -1, aesthetics = c("colour", "fill"))
+  scale_fill_brewer(palette = "PuRd", name = "Value", direction = 1, aesthetics = c("colour", "fill"), guide = guide_legend(reverse = TRUE))
 
 
 less50 <- ggmap(base_map) +
@@ -2294,8 +2332,8 @@ less50 <- ggmap(base_map) +
   labs(title="25% Lower")+
   theme(plot.title = element_text(size = 30, face = "bold"), 
         legend.title = element_text(size = 12)) +  mapTheme() +
-  scale_fill_brewer(palette = "PiYG", name = "Risk Score", direction = -1, aesthetics = c("colour", "fill"))
-
+ # scale_fill_brewer(palette = "PiYG", name = "Risk Score", direction = -1, aesthetics = c("colour", "fill"))
+  scale_fill_brewer(palette = "PuRd", name = "Value", direction = 1, aesthetics = c("colour", "fill"), guide = guide_legend(reverse = TRUE))
 
 more25 <- ggmap(base_map) +
   geom_sf(data = ll(fishnet), fill = "white", inherit.aes = FALSE)+
@@ -2303,7 +2341,8 @@ more25 <- ggmap(base_map) +
   labs(title="25% Higher")+
   theme(plot.title = element_text(size = 30, face = "bold"), 
         legend.title = element_text(size = 12)) +  mapTheme() +
-  scale_fill_brewer(palette = "PiYG", name = "Risk Score", direction = -1, aesthetics = c("colour", "fill"))
+  #scale_fill_brewer(palette = "PiYG", name = "Risk Score", direction = -1, aesthetics = c("colour", "fill"))
+  scale_fill_brewer(palette = "PuRd", name = "Value", direction = 1, aesthetics = c("colour", "fill"), guide = guide_legend(reverse = TRUE))
 
 more50 <- ggmap(base_map) +
   geom_sf(data = ll(fishnet), fill = "white", inherit.aes = FALSE)+
@@ -2311,7 +2350,9 @@ more50 <- ggmap(base_map) +
   labs(title="50% Higher")+
   theme(plot.title = element_text(size = 30, face = "bold"), 
         legend.title = element_text(size = 12)) +  mapTheme() +
-  scale_fill_brewer(palette = "PiYG", name = "Risk Score", direction = -1, aesthetics = c("colour", "fill"))
+  #scale_fill_brewer(palette = "PiYG", name = "Risk Score", direction = -1, aesthetics = c("colour", "fill"))
+  scale_fill_brewer(palette = "PuRd", name = "Value", direction = 1, aesthetics = c("colour", "fill"), guide = guide_legend(reverse = TRUE))
+
 
 original <- ggmap(base_map) +
   geom_sf(data = ll(fishnet), fill = "white", colour = "transparent", inherit.aes = FALSE)+
@@ -2319,8 +2360,8 @@ original <- ggmap(base_map) +
   labs(title="Original")+
   theme(plot.title = element_text(size = 30, face = "bold"), 
         legend.title = element_text(size = 12)) +  mapTheme() +
-  scale_fill_brewer(palette = "PiYG", name = "Risk Score", direction = -1, aesthetics = c("colour", "fill"))
-
+ # scale_fill_brewer(palette = "PiYG", name = "Risk Score", direction = -1, aesthetics = c("colour", "fill"))
+  scale_fill_brewer(palette = "PuRd", name = "Value", direction = 1, aesthetics = c("colour", "fill"), guide = guide_legend(reverse = TRUE))
 
 mylegend<-g_legend(original)
 grid.arrange(arrangeGrob(less50 + theme(legend.position="none"), less25 + theme(legend.position="none"), original + theme(legend.position="none"), more25 + theme(legend.position="none"), more50 + theme(legend.position="none"), ncol = 2, top = "Canopy Change Under 5 Construction Scenarios", mylegend))
@@ -2573,5 +2614,12 @@ ggplot() +
 # Planning Tool: Canopy View  
 
 Using this information, we created a predictive scenario planning policy tool that displays future tree canopy loss under five construction scenarios. The general population and tree planting agencies can use our tool to understand the potential impact of construction on the tree canopy and prioritize tree planting efforts.
+ 
+This application was designed to help prioritize tree planting initatives in Philadelphia. The web application has 3 distinct features:
+
+    This application allows you to view the current state of the tree canopy in Philadelphia! Users can view 10 distinct tree canopy statistics by clicking on our interactive dropdown menus. Users can view these statistics in either neighborhood or grid cell (150m x 150m) form. This feature allows the user to understand the current state of the tree canopy in a given area. Click on a neighborhood or grid cell to view all statistics for that location!
+    This application allows users to view where construction permits are located! By overlaying completed construction permits with our tree canopy statistics/ tree canopy loss risk predictions, users will notice that construction is very much related to tree canopy loss! Users can toggle the statistics or predictions on and off to view exactly where construction has occurred. Tree planters should prioritize streets with high construction rates located in high-risk tree canopy loss regions. Users can either view construction permits from 2008-2018 or 2019- April 2021. Note: The more construction permit categories selected, the slower the web application will be due to the large size of the construction data.
+    Most importantly, this application allows users to view areas that are at high risk for substantial tree canopy loss! Each grid cell is assigned a "probability score", which is the probability that the given grid cell will experience substantial tree canopy loss in the future. Substantial tree canopy loss is defined as a grid cell losing 25% of their tree canopy loss over a ten year period. Click on the grid cell to view the probability score of a location! The results are based on a model predicting where tree loss will most likely occur based on attributes associated with regions with significant tree loss. Users can view the substantial tree canopy loss risk in differing construction scenarios. You will notice through our interactive bar graph that as construction permits increase, the risk of tree canopy also generally increases.
+
 
 ![Canopy View web application](WebApp.png)   
