@@ -2476,3 +2476,6 @@ ggplot() +
 # Conclusion
 
 
+- South philly and north east need attention
+- construction is strongly correlated
+- the model tends to target areas of high conversation as loss will be higher in places which has many trees - so remove parks and conversation areas
