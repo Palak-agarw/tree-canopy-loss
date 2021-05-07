@@ -2055,7 +2055,7 @@ whichThreshold %>%
 
 ```
 
-The random forest predicts the probability of tree canopy loss occurring in a given grid cell from 0 to 1. To validate our model, we chose a probability threshold above which tree canopy loss is most substantial. By looking at the threshold with the probabilities, we chose 0.25 to be our threshold as that maximized true positives while reducing false negatives. The graph above visualizes confusion metrics for every possible threshold from 0 to 1. At .25, the true positive rate is high, and the false-negative rate is relatively low. A lower point would increase the true positive rate and decrease the false-negative rate, but the false positive rate would also increase. This could lead to distrust in the application's predictions, which may reduce compliance.
+The random forest predicts the probability of tree canopy loss occurring in a given grid cell from 0 to 1. To validate our model, we chose a probability threshold above which tree canopy loss is most substantial. We chose to predict on a binary variable rather than a continuous variable because we were not interested in how much tree canopy each grid cell will lose --- but interested in whether or not a grid cell will experience substantial loss. By looking at the threshold with the probabilities, we chose 0.25 to be our threshold as that maximized true positives while reducing false negatives. 25% also represented a clear break in the data on a histogram. The graph above visualizes confusion metrics for every possible threshold from 0 to 1. At .25, the true positive rate is high, and the false-negative rate is relatively low. A lower point would increase the true positive rate and decrease the false-negative rate, but the false positive rate would also increase. This could lead to distrust in the application's predictions, which may reduce compliance.
 
 The receiver operating characteristic (ROC) curve visualizes trade-offs for different thresholds. As true positives in the model increase, the number of false positives also increases. For the Canopy view app, we are more interested in improving the true positive rate than in decreasing the false positive rate. And, also interested in reducing false negatives as we want the limited resources to be distributed and used in the most severe locations.
 
@@ -2122,7 +2122,7 @@ construction1 <- construction1 %>%
 
 
 
-##SCENARIO 2: 50 less
+##SCENARIO 2: 25 less
 rf2 <- randomForest(
   FinalFishnet5$Variable ~ .,
   data=st_drop_geometry(FinalFishnet5) %>% 
@@ -2148,7 +2148,7 @@ construction2 <- construction2 %>%
 
 
 
-##SCENARIO 3: 50 more
+##SCENARIO 3: 25 more
 rf3 <- randomForest(
   FinalFishnet5$Variable ~ .,
   data=st_drop_geometry(FinalFishnet5) %>% 
@@ -2174,7 +2174,7 @@ construction3 <- construction3 %>%
 
 
 
-##SCENARIO 4: 100 more
+##SCENARIO 4: 50 more
 rf4 <- randomForest(
   FinalFishnet5$Variable ~ .,
   data=st_drop_geometry(FinalFishnet5) %>% 
