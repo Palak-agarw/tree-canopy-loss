@@ -1773,7 +1773,17 @@ div.blue { background-color:#e6f0ff; border-radius: 5px; padding: 20px;}
 * Hydrology (%)  
 </div>
 
-The random forest predicts the probability of tree canopy loss occurring in a given grid cell from 0 to 1. To validate our model, we chose a probability threshold above which tree canopy loss is most substantial. By looking at the threshold with the probabilities, we chose 0.25 to be our threshold as that maximized true positives while reducing false negatives. The graph above visualizes confusion metrics for every possible threshold from 0 to 1. At .25, the true positive rate is high, and the false-negative rate is relatively low. A lower point would increase the true positive rate and decrease the false-negative rate, but the false positive rate would also increase. This could lead to distrust in the application's predictions, which may reduce compliance.
+The random forest predicts the probability of tree canopy loss occurring in a given grid cell from 0 to 1.To run our model we randomly split the data into a test set and a training set. Our training set is the data we "trained" our model on. Based on the training set, our model predicted if substantial tree canopy loss occurred in each grid within the test set. There are four potential outcomes to the model: 
+
+1. True Positive - Indicates that the model correctly predicted that a tree canopy loss would occur in a given grid cell at a given threshold. 
+
+2. True negative - Our model correctly predicted that a tree canopy loss would not occur. 
+
+3. False Positive - The model predicted tree canopy loss, but no substantial tree canopy loss occurred.
+
+4. False Negative- Indicates that the model predicted no substantial tree canopy loss, but there was tree canopy loss.
+
+To validate our model, we chose a probability threshold above which tree canopy loss is most substantial. By looking at the threshold with the probabilities, we chose 25% percent tree canopy loss to be our threshold as that maximized true positives while reducing false negatives. The graph above visualizes confusion metrics for every possible threshold from 0 to 1. At .25, the true positive rate is high, and the false-negative rate is relatively low. A lower point would increase the true positive rate and decrease the false-negative rate, but the false positive rate would also increase. This could lead to distrust in the application's predictions, which may reduce compliance.
 
 ```{r Random forest model, message=FALSE, warning=FALSE, cache=TRUE}
 
@@ -2218,7 +2228,7 @@ grid.arrange(arrangeGrob(less50 + theme(legend.position="none"), less25 + theme(
 # Validation 
 ## How accurate is our model? 
 
-The plots below show the distribution of predicted probabilities for tree canopy loss. Given the distribution of predicted probabilities for grid cells with substantial tree canopy loss, the default threshold of .5 does not make sense. We would prefer to over-predict tree canopy loss than to underpredict. In other words, we would prefer to serve a region where tree planting initiatives are not needed than disregard a region where tree planting initiatives are required. Finally, we generated a confusion matrix for each iteration of our model. The confusion matrix tells us the number of true positives, true negatives, false positives, and false negatives. A true positive here indicates that the model correctly predicted that a tree canopy loss would occur in a given grid cell at a given threshold. A true negative means that our model correctly predicted that a tree canopy loss would not occur. False-positive means the model predicted tree canopy loss, but no substantial tree canopy loss occurred. False-negative indicates that the model predicted no substantial tree canopy loss, but there was tree canopy loss. The confusion matrix output also shows the sensitivity, or true positive rate, and specificity, or true negative rate, for the model.
+The plots below show the distribution of predicted probabilities for tree canopy loss. Given the distribution of predicted probabilities for grid cells with substantial tree canopy loss, the default threshold of .5 does not make sense. We would prefer to over-predict tree canopy loss than to underpredict. In other words, we would prefer to serve a region where tree planting initiatives are not needed than disregard a region where tree planting initiatives are required. Finally, we generated a confusion matrix for each iteration of our model. The confusion matrix tells us the number of true positives, true negatives, false positives, and false negatives. The confusion matrix output also shows the sensitivity, or true positive rate, and specificity, or true negative rate, for the model.
 
 Given the distribution of predicted probabilities and our desire to overpredict rather than underpredict tree canopy loss, we used a threshold of just .25 when comparing models. The final model has a sensitivity of about 80%. 
 
@@ -2435,9 +2445,6 @@ ggmap(base_map) +
 ```
 
 
-# Going Forward  
-We recommend that tree planting initiatives target South and Northeast Philadelphia, as our model predicted high risk of substantial tree loss in these areas. Many of the areas where we predicted high risk also currently have high construction rates. Focusing on neighborhoods with high construction rates can be a good way to prioritize efforts.
-  
 # Planning Tool: Canopy View  
 
 Using this information, we created a predictive scenario planning policy tool that displays future tree canopy loss under five construction scenarios. The general population and tree planting agencies can use our tool to understand the potential impact of construction on the tree canopy and prioritize tree planting efforts.  
@@ -2456,5 +2463,16 @@ The web application has 3 distinct features:
 **3. View areas that are at high risk for substantial tree canopy loss**   
 * Each grid cell is assigned a "probability score", which is the probability that the given grid cell will experience substantial tree canopy loss in the future. Substantial tree canopy loss is defined as a grid cell losing 25% of their tree canopy loss over a ten year period. Click on the grid cell to view the probability score of a location! The results are based on a model predicting where tree loss will most likely occur based on attributes associated with regions with significant tree loss. Users can view the substantial tree canopy loss risk in differing construction scenarios. You will notice through our interactive bar graph that as construction permits increase, the risk of tree canopy also generally increases.
 ![Canopy View web application](risk.png)  
+
+
+# Going Forward  
+
+We recommend that tree planting initiatives target South and Northeast Philadelphia since our model predicted a high risk of substantial tree loss in these areas. Many of the areas where we predicted high risk also currently have high construction rates. Construction rates are highly correlated to tree canopy loss in a given region. As construction rates increase, the risk of tree canopy loss increases as well.  
+
+In the future, tree-planting organizations may consider targeting their tree-planting efforts in regions experiencing high construction rates. As discussed, when construction or demolition occurs on the property, trees are often removed to meet the construction goals. Unfortunately, trees in Philadelphia do not plant themselves. The majority of the time, tree gain only occurs if someone actively plants a tree. Consequently, for tree canopy 'net gain' to occur in a given community, tree planting initiates must keep pace with the rate of construction. Understanding where construction is happening will be very beneficial to future tree planting initiatives. 
+
+Although construction is a significant factor, construction is not the only variable significantly affecting tree loss. Many low-income communities still endure the effects of unjust policies from past generations. Areas with fewer trees are often associated with previously red-lined neighborhoods. Additionally, we found that grid cells with fewer trees are more likely to experience high percentages of gain or loss. Although seemingly contradictory, the phenomenon results from having fewer trees to begin with, meaning that every change that occurs in the tree canopy makes a more significant difference in the overall tree canopy structure. Other factors affecting tree canopy loss include land-use type, distance to water bodies, and 311 calls. 
+
+We hope that the model serves as a tool to encourage tree planting initiates in regions where the increased tree canopy is most needed. Our model accuracy is around 70%, and metrics indicate that the model generalizes well. Previously, Philadelphia has stated the goal to reach 30% tree canopy coverage in each neighborhood. Despite this goal, most neighborhoods experienced a net loss in tree canopy from 2008-2018. This indicates that tree planting organizations are currently not keeping up with the current tree loss rate. By prioritizing tree canopy in certain regions with high tree loss risk, we believe that our model can help neighborhoods achieve 30% tree canopy coverage. 
 
 
