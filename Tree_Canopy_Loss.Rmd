@@ -1031,7 +1031,7 @@ FinalFishnet <-
   na.omit() %>%
   summarize(mean_loss = mean(pctLoss)) %>%
   ggplot() +
-  geoom_bar(aes(y = mean_loss), binwidth = 1, fill = "magenta") +
+  geom_bar(aes(y = mean_loss), binwidth = 1, fill = "magenta") +
   labs(title="Loss by HOLC Grade, 2008-2018 (%)",
        subtitle="Philadelphia, PA",
        x="HOLC Rating", 
@@ -1726,8 +1726,6 @@ grid.arrange(pbNeigh, urNeigh, rmNeigh, ncol = 1, top = "Construction and Canopy
 #           legend.title = element_text(size = 12)) +  mapTheme()}
 # 
 # do.call(grid.arrange,c(varList, ncol = 4, top = "Figure 5: Local Moran's I Statistics, Observed Arrests"))
-# 
-
 ```
 
 
