@@ -26,7 +26,7 @@ We hope that this document and our web application can help tree planting agenci
 ```r
 #Reload
 knitr::opts_chunk$set(message = FALSE, warning = FALSE)
-options(scipen=100000000)
+options(scipen=1000000000)
 library(knitr)
 library(MLeval)
 library(magrittr)
@@ -58,38 +58,29 @@ library(RANN)
 root.dir = "https://raw.githubusercontent.com/urbanSpatial/Public-Policy-Analytics-Landing/master/DATA/"
 source("https://raw.githubusercontent.com/urbanSpatial/Public-Policy-Analytics-Landing/master/functions.r")
 
-paletteGray <- c("gray90", "gray70", "gray50", "gray30", "gray10")
-
-palette1 <- c("#d2f2d4","#7be382","#26cc00","#22b600","#009c1a")
-
-palette2 <- c("#ffffff","#c7ffd5","#81d4ac","#329D9C","#205072", "#0B0138")
-
-palette3 <- c("#2C5F2D","#97BC62FF")
-
-palette4 <- c("#007F5F", '#EEEF20', '#AACC00')
+# paletteGray <- c("gray90", "gray70", "gray50", "gray30", "gray10")
+# 
+# palette1 <- c("#d2f2d4","#7be382","#26cc00","#22b600","#009c1a")
+# 
+# palette2 <- c("#ffffff","#c7ffd5","#81d4ac","#329D9C","#205072", "#0B0138")
+# 
+# palette3 <- c("#2C5F2D","#97BC62FF")
+# 
+# palette4 <- c("#007F5F", '#EEEF20', '#AACC00')
 
 paletteHolc <- c("light green", "light blue", "yellow", "pink")
 
-palette5 <- c("#205072", "#329D9C", "#56C596", "#7BE495", "#CFF4D2", "#05001c")
-
-palette6 <- c("#D8F3DC", "#B7E4C7", "#95D5B2", "#74C69D", "#52B788", "#40916C", "#2D6A4F", "#1B4332", "#123024", "#081C15")
-
-GoalPalette <- c("light blue", "#D8F3DC",  "#95D5B2",  "#52B788",  "#2D6A4F", "#1B4332")
-GainPalette <- c("#D8F3DC",  "#95D5B2",  "#52B788",  "#2D6A4F","light blue")
-
-palette7 <- c("#D8F3DC", "#95D5B2", "#52B788", "#2D6A4F", "#1B4332", "#123024")
-
-GoalPalette2 <- c("#95D5B2", "#52B788", "#2D6A4F", "#1B4332", "#123024", "blue")
+# palette5 <- c("#205072", "#329D9C", "#56C596", "#7BE495", "#CFF4D2", "#05001c")
 # 
-# palette8 <- c("#2D6A4F", "#52B788", "#B7E4C7", "#ADE8F4", "#00B4D8", "#023E8A")
+# palette6 <- c("#D8F3DC", "#B7E4C7", "#95D5B2", "#74C69D", "#52B788", "#40916C", "#2D6A4F", "#1B4332", "#123024", "#081C15")
 # 
-# paletteJ <- c("green", "red", "yellow")
+# GoalPalette <- c("light blue", "#D8F3DC",  "#95D5B2",  "#52B788",  "#2D6A4F", "#1B4332")
+# GainPalette <- c("#D8F3DC",  "#95D5B2",  "#52B788",  "#2D6A4F","light blue")
 # 
-# paletteLG <- c("#1B4332","#2D6A4F", "#52B788","#D8F3DC", "blue")
+# palette7 <- c("#D8F3DC", "#95D5B2", "#52B788", "#2D6A4F", "#1B4332", "#123024")
 # 
-# landusepal <- c("green", "dark green" )
-
-paletteDiverge <- c("red", "orange", "yellow", "blue", "green")
+# 
+# paletteDiverge <- c("red", "orange", "yellow", "blue", "green")
 
 mapTheme <- function(base_size = 12) {
   theme(
@@ -430,7 +421,7 @@ div.blue { background-color:#e6f0ff; border-radius: 5px; padding: 20px;}
 5. What other factors are associated with tree canopy change?   
 </div>
 
-## What does Philadelphia's tree canopy look like today?
+## What does Philadelphia's tree canopy look like today? 
   
 ### Philadelphia's 2018 Canopy 
 Philadelphia's tree canopy dataset has almost 700,000 polygons labeled as loss, gain, and no change between 2008 and 2018.  
@@ -600,16 +591,16 @@ Surprisingly, tree canopy loss and gain exhibit similar spatial patterns. Percen
 v <- ggmap(base_map) +
   geom_sf(data = ll(FinalFishnet), colour = "transparent", aes(fill = pctLoss), inherit.aes = FALSE)+
  # scale_fill_manual(values = palette7,name = "Percent Loss")+
-  labs(title= "Tree Canopy Loss", 
-       subtitle = "Tree Canopy Lost From 2008 - 2018 / Total Tree Canopy Coverage in 2008")+
+  labs(title= "Tree Canopy Loss 2008-2018", 
+       subtitle = "Philadelphia, PA")+
   theme(plot.title = element_text(size = 30, face = "bold"), 
         legend.title = element_text(size = 12)) +  mapTheme()
 
 Z <- ggmap(base_map) +
   geom_sf(data = ll(FinalFishnet),  colour = "transparent", aes(fill = pctGain), inherit.aes = FALSE)+ 
  # scale_fill_manual(values = palette7,name = "Percent Gain")+
-  labs(title= "Tree Canopy Gain", 
-       subtitle = "Tree Canopy Gained From 2008 - 2018 / Total Tree Canopy Coverage in 2018")+
+  labs(title= "Tree Canopy Gain 2008-2018", 
+       subtitle = "Philadelphia, PA")+
   theme(plot.title = element_text(size = 30, face = "bold"), 
         legend.title = element_text(size = 12)) +  mapTheme()
 
@@ -706,7 +697,7 @@ b + scale_fill_brewer(palette = "PiYG", name = "Tree Canopy Change", direction =
 
 ![](Tree_Canopy_Loss_files/figure-html/Net Canopy change-1.png)<!-- -->
 
-## How close are neighborhoods to the 30% tree canopy goal?
+## How close are neighborhoods to achieving the 30% goal? 
 
 ```r
 # Tree Loss by Neighborhood
@@ -888,7 +879,7 @@ grid.arrange(ncol = 2, UR, RM, top = "Neighborhood Level Tree Canopy Change 2008
 ![](Tree_Canopy_Loss_files/figure-html/UR and RM Map-1.png)<!-- -->
 
   
-## How does tree canopy change vary by demographic?  
+## How does tree canopy change vary by demographic context?   
 Tree canopy loss, like other urban environmental issues, has deep equity implications. Low-income communities and communities of color are more likely to be in places with [less tree canopy](https://www.nytimes.com/interactive/2020/08/24/climate/racism-redlining-cities-global-warming.html). Therefore, we explore demographic variables' correlation with tree canopy gain, loss, net change, and coverage. We use data from the U.S. Census Bureau's 2018 American Community Survey, which is provided at the census tract level.
 
 ```r
@@ -1057,7 +1048,7 @@ grid.arrange(ncol=2, top=textGrob("Neighborhood Attributes and Tree Canopy 2008-
 
 ![](Tree_Canopy_Loss_files/figure-html/Demographics-1.png)<!-- -->
 
-## How do historical disinvestment and segregation relate to tree canopy loss?
+## How do current patterns of tree canopy change reflect disinvestment as a result of redlining and older planning practices?  
 Next, we examine redlining boundaries from the Homeowner’s Loan Corporation (HOLC). As trees take decades to grow, historical planning decisions can determine the spatial configuration of today's tree canopy.  In 1937, HOLC created “redlining” maps that rated neighborhoods’ desirability in four categories. It rated neighborhoods with residents of color as the least desirable (D) and majority-white neighborhoods as the most desirable (A). As a result, the low-ranked neighborhoods experienced disinvestment.    
 
 ```r
@@ -1086,7 +1077,7 @@ ggmap(base_map) +
         legend.title = element_text(size = 12)) +  mapTheme()
 ```
 
-![](Tree_Canopy_Loss_files/figure-html/HOLC Grades zones-1.png)<!-- -->
+![](Tree_Canopy_Loss_files/figure-html/HOLC ratings neigh-1.png)<!-- -->
 
 ```r
  holc_net <- st_intersection(fishnet_centroid, HOLC) %>%
@@ -1146,7 +1137,7 @@ The plots below illustrate a correlation between tree canopy loss and HOLC ratin
 ```
 ![ ](holcCanopy.png)  
 
-## What other factors influence tree canopy loss?    
+## What other factors are associated with tree canopy change?   
 Based on our analysis of the spatial distribution of tree canopy loss, we consider a few more variables for potential features: land use, hydrology, parcel size, street poles, construction, and health outcomes. 
 
 
@@ -2021,6 +2012,8 @@ confusionMetric <- whichThreshold %>%
   scale_colour_manual(values = c("magenta", "lavender", "turquoise", "light green")) +    
   labs(title = "Confusion Metric Rates at Different Thresholds",
        y = "Count") +
+  theme(plot.title = element_text(size = 30, face = "bold"), 
+        legend.title = element_text(size = 12)) +
   plotTheme() +
   guides(colour=guide_legend(title = "Confusion Metric")) 
 
@@ -2039,6 +2032,8 @@ ggplot(testProbs2, aes(d = as.numeric(testProbs2$Outcome), m = Probs)) +
   style_roc(theme = theme_grey) +
   geom_abline(slope = 1, intercept = 0, size = 1.5, color = 'black') +
   labs(title = "ROC Curve") +
+      theme(plot.title = element_text(size = 30, face = "bold"), 
+        legend.title = element_text(size = 12)) +
   plotTheme()
 ```
 
@@ -2251,7 +2246,7 @@ predictionPlot <- ggmap(base_map) +
   theme(plot.title = element_text(size = 30, face = "bold"), 
         legend.title = element_text(size = 12)) +  mapTheme() +
  # scale_fill_brewer(palette = "PiYG", name = "Risk Score", direction = -1, aesthetics = c("colour", "fill"))
-  scale_fill_brewer(palette = "PuRd", name = "Predicted Risk", direction = 1, aesthetics = c("colour", "fill"), guide = guide_legend(reverse = TRUE))
+  scale_fill_brewer(palette = "PuRd", name = "Random Forest Predicted Risk", direction = 1, aesthetics = c("colour", "fill"), guide = guide_legend(reverse = TRUE))
 
 mylegend<-g_legend(original)
 ```
@@ -2277,7 +2272,7 @@ div.blue { background-color:#e6f0ff; border-radius: 5px; padding: 10px;}
 
 
 ```r
-grid.arrange(arrangeGrob(less50 + theme(legend.position="none"), less25 + theme(legend.position="none"), original + theme(legend.position="none"), more25 + theme(legend.position="none"), more50 + theme(legend.position="none"), ncol = 2, top = "Canopy Change Under 5 Construction Scenarios", mylegend))
+grid.arrange(arrangeGrob(less50 + theme(legend.position="none"), less25 + theme(legend.position="none"), original + theme(legend.position="none"), more25 + theme(legend.position="none"), more50 + theme(legend.position="none"), ncol = 2, top = "Canopy Change Under 4 Construction Scenarios", mylegend))
 ```
 
 ![](Tree_Canopy_Loss_files/figure-html/multiple scenarios-1.png)<!-- -->
@@ -2365,11 +2360,11 @@ try <-
   mutate(result = ifelse(Outcome == 1 & predClass == 0, "False Negative", result))
 ```
 
-Below, we plot the spatial distribution of our model's confusion metrics. We see that ______ in ______ and ______ in _____.
+Below, we plot the spatial distribution of our model's confusion metrics. We see that error is higher in South and Northeast Philadelphia as there is a higher density of false negatives and false positives.  
 
 
 ```r
-palette3 <- c("magenta",  "blue", "purple", "green")
+palette3 <- c("magenta",  "purple", "blue", "green")
 ggmap(base_map) +
   geom_sf(data = ll(fishnet), fill = "white", colour = "transparent", inherit.aes = FALSE)+
   geom_sf(data = ll(try), aes(fill = result), colour = "transparent", inherit.aes = FALSE)+
@@ -2511,13 +2506,13 @@ logoPlot <- ggmap(base_map) +
   theme(plot.title = element_text(size = 30, face = "bold"), 
         legend.title = element_text(size = 12)) +  mapTheme()
 
-original
+logoPlot
 ```
 
 ![](Tree_Canopy_Loss_files/figure-html/Spatial Cross Validation-1.png)<!-- -->
 
 ```r
-grid.arrange(ncol = 2, top = "LOGO Cross Validation vs Random Forest Risk Predictions", logoPlot, original)
+predictionPlot
 ```
 
 ![](Tree_Canopy_Loss_files/figure-html/Spatial Cross Validation-2.png)<!-- -->
@@ -2525,32 +2520,53 @@ grid.arrange(ncol = 2, top = "LOGO Cross Validation vs Random Forest Risk Predic
 
 # Planning Tool: Canopy View  
 
-Using this information, we created a predictive planning tool that displays predictions for future tree canopy loss under five construction scenarios. The general population and tree planting agencies can use our tool to understand the potential impact of construction on the tree canopy and prioritize tree planting efforts.  
+Using this information, we created a predictive planning tool that displays predictions for future tree canopy loss under five construction scenarios. The general population and tree planting agencies can use our tool to understand the potential impact of construction on tree canopy and optimally allocate tree planting resources.  
+  
+    
+  
 ![Canopy View web application](WebApp.png)     
-   
-The web application has 3 distinct features:
+       
+         
+           
+       
+**The web application has 3 distinct features:**    
+  
+    
+      
+      
 
-**1. View the current state of the tree canopy in Philadelphia**  
-* Users can view 10 distinct tree canopy statistics by clicking on our interactive dropdown menus. Users can view these statistics in either neighborhood or grid cell (150m x 150m) form. This feature allows the user to understand the current state of the tree canopy in a given area. Click on a neighborhood or grid cell to view all statistics for that location!     
+**1. View the current state of the tree canopy in Philadelphia**    
+Users can view 10 distinct tree canopy statistics by clicking on our interactive drop-down menus. Users can view these statistics in either neighborhood or grid cell (150m x 150m) form. This feature allows the user to understand the current state of the tree canopy in a given area. Click on a neighborhood or grid cell to view all statistics for that location!       
+  
+  
 ![Neighborhood Statistics](neighbStat.png)   
-  
+      
+      
 **2. View where construction permits are located**      
-* By overlaying completed construction permits with our tree canopy statistics/ tree canopy loss risk predictions, users will notice that construction is very much related to tree canopy loss. Users can toggle the statistics or predictions on and off to view exactly where construction has occurred. Tree planters should prioritize streets with high construction rates located in high-risk tree canopy loss regions. Users can either view construction permits from 2008-2018 or 2019- April 2021. Note: The more construction permit categories selected, the slower the web application will be due to the large size of the construction data.   
-![Construction Permits](permits.png)  
+By overlaying completed construction permits with our tree canopy statistics/ tree canopy loss risk predictions, users will notice that construction is very much related to tree canopy loss. Users can toggle the statistics or predictions on and off to view exactly where construction has occurred. Tree planters should prioritize streets with high construction rates located in high-risk tree canopy loss regions. Users can either view construction permits from 2008-2018 or 2019- April 2021. Note: The more construction permit categories selected, the slower the web application will be due to the large size of the construction data.   
   
+  
+![Construction Permits](permits.png)  
+    
+      
 **3. View areas that are at high risk for substantial tree canopy loss**   
-* Each grid cell is assigned a "probability score", which is the probability that the given grid cell will experience substantial tree canopy loss in the future. Substantial tree canopy loss is defined as a grid cell losing 25% of their tree canopy loss over a ten year period. Click on the grid cell to view the probability score of a location! The results are based on a model predicting where tree loss will most likely occur based on attributes associated with regions with significant tree loss. Users can view the substantial tree canopy loss risk in differing construction scenarios. You will notice through our interactive bar graph that as construction permits increase, the risk of tree canopy also generally increases.
+Each grid cell is assigned a "probability score", which is the probability that the given grid cell will experience substantial tree canopy loss in the future. Substantial tree canopy loss is defined as a grid cell losing 25% of their tree canopy loss over a ten year period. Click on the grid cell to view the probability score of a location! The results are based on a model predicting where tree loss will most likely occur based on attributes associated with regions with significant tree loss. Users can view the substantial tree canopy loss risk in different construction scenarios. You will notice through our interactive bar graph that as construction permits increase, the risk of tree canopy also generally increases.  
+  
+  
 ![Canopy View web application](risk.png)  
-
+  
+    
+      
+      
 
 # Going Forward  
 
-We recommend that tree planting initiatives target South and Northeast Philadelphia since our model predicted a high risk of substantial tree loss in these areas.  
+We recommend that tree planting initiatives target South and Northeast Philadelphia since our model predicted a high risk of substantial tree canopy loss in these areas.  
 
-Many of the areas where we predicted substantial risk also have high construction rates. Construction is highly correlated with tree canopy loss in a given region. As construction rates increase, the risk of substantial canopy loss increases as well. In the future, tree-planting organizations may consider targeting their tree-planting efforts in regions experiencing high construction rates. As discussed, when construction or demolition occurs on the property, trees are often removed to meet the construction goals. Unfortunately, trees in Philadelphia do not plant themselves. The majority of the time, tree gain only occurs if someone actively plants a tree. Consequently, for tree canopy 'net gain' to occur in a given community, tree planting initiates must keep pace with the rate of construction. Understanding where construction is happening will be very beneficial to future tree planting initiatives. 
+Many of the areas where we predicted substantial risk also have high construction rates. Construction is highly correlated with tree canopy loss in a given region. As construction rates increase, the risk of substantial canopy loss increases as well. In the future, tree-planting organizations may consider targeting their tree-planting efforts in regions experiencing high construction rates. As discussed, when construction or demolition occurs on a property, trees are often removed to meet the construction goals. Unfortunately, city trees do not plant themselves. The majority of the time, tree canopy gain only occurs if someone actively plants a tree. Consequently, for tree canopy 'net gain' to occur in a given community, tree planting initiatives must keep pace with the rate of construction. Understanding where construction is happening will be very beneficial to future tree planting initiatives. 
 
-Although construction is a significant factor, construction is not the only variable significantly affecting tree loss. Many low-income communities still endure the effects of unjust policies from past generations. Areas with fewer trees are often associated with former redlining boundaries. Additionally, we found that grid cells with fewer trees are more likely to experience high percentages of gain or loss. Although seemingly contradictory, the phenomenon results from having fewer trees to begin with, meaning that every change that occurs in the tree canopy makes a more significant difference in the overall tree canopy structure. Other factors affecting tree canopy loss include land-use type, distance to water bodies, and 311 calls. 
+Although construction is a significant factor, construction is not the only variable significantly affecting tree canopy loss. Many low-income communities still endure the effects of unjust policies from past generations. Areas with fewer trees are often associated with former redlining boundaries. Additionally, we found that grid cells with fewer trees are more likely to experience high percentages of gain or loss. Although counter-intuitive, this phenomenon results from having fewer trees to begin with, meaning that every change that occurs in the tree canopy makes a more significant difference in the overall tree canopy coverage. Other factors affecting tree canopy loss include land-use type, distance to water bodies, and 311 calls. 
 
-We hope that the model serves as a tool to encourage tree planting initiates in regions where the increased tree canopy is most needed. Our model accuracy is around 70%, and metrics indicate that the model generalizes well. Previously, Philadelphia has stated the goal to reach 30% tree canopy coverage in each neighborhood. Despite this goal, most neighborhoods experienced a net loss in tree canopy from 2008-2018. This indicates that tree planting organizations are currently not keeping up with the current tree loss rate. By allocating tree planting resources to regions with a combination of substantial tree loss risk and high construction rates, we believe that our model can help neighborhoods achieve 30% tree canopy coverage. 
+We hope that the model serves as a tool to encourage tree planting initiatives in regions where tree canopy is most lacking. Our model accuracy is around 70%, and metrics indicate that it generalizes well. Previously, Philadelphia has set a goal to reach 30% tree canopy coverage in each neighborhood. Despite this goal, most neighborhoods experienced a net loss in tree canopy from 2008-2018. This indicates that tree planting organizations are not keeping up with the current rate of tree canopy loss. By allocating tree planting resources to regions with a combination of substantial tree loss risk and high construction rates, we believe that our model can help Philadelphia grow and protect tree canopy across its neighborhoods.
 
 
