@@ -16,13 +16,13 @@ output:
 This project was completed for the MUSA/Smart Cities Practicum course (MUSA 801) instructed by Ken Steif, Michael Fichman, and Matthew Harris. We are grateful to our instructors for their continued support and feedback as well as their flexibility and understanding in the face of a global pandemic. We also thank Dexter Locke and Lara Roman from the United States Forest Service for their generosity with their time and their eagerness to provide feedback on our project and share their expertise. Finally, we would like to acknowledge our classmates this semester for their feedback on our project and for inspiring us with their work.  
 
 # Introduction  
-This document is intended to help other researchers replicate a study of tree canopy loss linked to spatial risk factors. We present three primary outcomes: an analysis of the spatial attributes of tree canopy loss, a model to predict future tree canopy loss risk, and a policy tool that visualizes future tree canopy loss under various construction scenarios. We include hyperlinks throughout our document for reproducibility.   
+This document is intended to help other researchers replicate a study of tree canopy loss linked to spatial risk factors. We present three primary outcomes: an analysis of the spatial attributes of tree canopy loss, a model to predict future tree canopy loss risk, and a policy tool that visualizes future tree canopy loss under various construction scenarios. We include hyperlinks throughout our document for reproducibility. Our full code base can be accessed on Github [here](https://github.com/palakagr/tree-canopy-loss). 
 
 We hope that this document and our web application can help tree planting agencies, tree advocates, and the interested public understand the forces contributing to tree canopy loss in Philadelphia and envision different future scenarios for our tree canopy.  
 
 ![ ](FrontPage.png)  
   
-```{r SetUp, message=FALSE, warning=FALSE, include=TRUE, results='hide', cache=TRUE}
+```{r SetUp, message=FALSE, warning=FALSE, cache=TRUE, include=FALSE, results='hide'}
 #Reload
 knitr::opts_chunk$set(message = FALSE, warning = FALSE)
 options(scipen=1000000000)
@@ -104,7 +104,7 @@ g_legend<-function(a.gplot){
 
 ```
 
-```{r Data Wrangling, cache=TRUE, message=FALSE, warning=FALSE, include=TRUE, results='hide'}
+```{r Data Wrangling, cache=TRUE, message=FALSE, warning=FALSE, include=FALSE, results='hide'}
 
 # Tree Canopy
 TreeCanopy <-
@@ -114,6 +114,7 @@ st_read("/Users/annaduan/Desktop/Y3S2/Practicum/Data/TreeCanopyChange_2008_2018-
 #st_read("C:/Users/Prince/Desktop/Tree Canopy Data/TreeCanopyChange_2008_2018.shp") %>%
   st_transform('ESRI:102728') 
 
+#
 TreeCanopy$SHAPE_Area <- as.numeric(st_area(TreeCanopy))
 
 # Philadelphia Base Map
@@ -282,7 +283,7 @@ ConservationNParks <- ConservationNParks %>%
 
 Most of the tree canopy loss occurred in historically disenfranchised communities. In response, the City of Philadelphia has set essential milestones for conserving and increasing the current tree canopy in the city. In this analysis, we model tree canopy loss in Philadelphia and identify risk factors. We additionally assess the city’s progress on the goals and how this varies across neighborhoods.  
 
-```{r Study boundaries, cache=TRUE, message=FALSE, warning=FALSE, include=TRUE, results='hide'}
+```{r Study boundaries, cache=TRUE, message=FALSE, warning=FALSE, include=FALSE, results='hide'}
 ggmap(base_map) +
   geom_sf(data = ll(Philadelphia), colour = "black", fill = "gray", alpha = 0.5, inherit.aes = FALSE) +
   labs(title = "Study Area Boundaries",
@@ -336,7 +337,7 @@ div.blue { background-color:#e6f0ff; border-radius: 5px; padding: 10px;}
 ## Unit of analysis: the fishnet cell
 Below, we visualize the study area for this analysis. We use fishnet grid cells as our unit of analysis to take advantage of high-resolution spatial data such as 311 service requests. Philadelphia is represented by fishnet cells of 1615 feet, roughly the size of a city block. Around 16% of Philadelphia's total area consists of [conservation easements](https://www.conservationeasement.us/what-is-a-conservation-easement/), hydrology, and parks. We omit fishnet cells which consist of more than 20% of these categories because they are protected and therefore are not vulnerable to the same external processes that cause tree canopy change (e.g. construction or street tree removal). All in all, we have 1411 fishnet cells representing Philadelphia.  
 
-```{r Fishnet, cache=TRUE, message=FALSE, warning=FALSE, include=TRUE, results='hide'}
+```{r Fishnet, cache=TRUE, message=FALSE, warning=FALSE, include=FALSE, results='hide'}
 
 #make fishnet
 fishnet2 <- 
@@ -392,7 +393,7 @@ div.blue { background-color:#e6f0ff; border-radius: 5px; padding: 20px;}
   
 ### Philadelphia's 2018 Canopy 
 Philadelphia's tree canopy dataset has almost 700,000 polygons labeled as loss, gain, and no change between 2008 and 2018.  
-```{r Existing Canopy, cache=TRUE, message=FALSE, warning=FALSE, include=TRUE, results='hide'}
+```{r Existing Canopy, cache=TRUE, message=FALSE, warning=FALSE, include=FALSE, results='hide'}
 
 # ggmap(base_map) +
 #   geom_sf(data = ll(CanopyPlot), colour = "forest green", inherit.aes = FALSE, fill = "forest green")+ 
@@ -403,7 +404,7 @@ Philadelphia's tree canopy dataset has almost 700,000 polygons labeled as loss, 
 ```
   
 Our first data wrangling task is to aggregate this data to the fishnet level. Now, we see that Northwest, West, and Northeast Philadelphia have the most tree canopy. In North Philadelphia, South Philadelphia, and Center City, the tree canopy coverage is more sparse.    
-```{r Fishnet Aggregation, cache=TRUE, message=FALSE, warning=FALSE, include=TRUE, results='hide'}
+```{r Fishnet Aggregation, cache=TRUE, message=FALSE, warning=FALSE, include=FALSE, results='hide'}
 
 # Make canopy loss layers
 TreeCanopyAll<- 
@@ -537,7 +538,7 @@ FinalFishnet$pctLossCat <- cut(FinalFishnet$pctLoss,
                        right = FALSE)
 ```
 
-```{r Existing Canopy fishnet, cache=TRUE, message=FALSE, warning=FALSE, include=TRUE, results='hide'}
+```{r Existing Canopy fishnet, cache=TRUE, message=FALSE, warning=FALSE, include=FALSE, results='hide'}
 ggmap(base_map) +
   geom_sf(data = ll(FinalFishnet), colour = "transparent", inherit.aes = FALSE, aes(fill = pctCoverage18Cat))+ 
      scale_fill_manual(values = palette7, 
@@ -989,7 +990,7 @@ grid.arrange(ncol=2, top=textGrob("Neighborhood Attributes and Tree Canopy 2008-
 
 ## How do current patterns of tree canopy change reflect disinvestment as a result of redlining and older planning practices?  
 Next, we examine redlining boundaries from the Homeowner’s Loan Corporation (HOLC). As trees take decades to grow, historical planning decisions can determine the spatial configuration of today's tree canopy.  In 1937, HOLC created “redlining” maps that rated neighborhoods’ desirability in four categories. It rated neighborhoods with residents of color as the least desirable (D) and majority-white neighborhoods as the most desirable (A). As a result, the low-ranked neighborhoods experienced disinvestment.    
-```{r Redlining Neighbs, message=FALSE, warning=FALSE, include=TRUE, results='hide', cache='TRUE'}
+```{r Redlining Neighborhoods, message=FALSE, warning=FALSE, include=FALSE, results='hide', cache='TRUE'}
 
 HOLC2 <- HOLC %>%
   st_intersection(st_make_valid(Philadelphia), HOLC) %>%  
@@ -1074,7 +1075,7 @@ The plots below illustrate a correlation between tree canopy loss and HOLC ratin
 ## What other factors are associated with tree canopy change?   
 Based on our analysis of the spatial distribution of tree canopy loss, we consider a few more variables for potential features: land use, hydrology, parcel size, street poles, construction, and health outcomes. 
 
-```{r Hydrology, fig.height = 12,fig.width = 12, message=FALSE, warning=FALSE, include=TRUE, results='hide', cache=TRUE}
+```{r Hydrology, fig.height = 12,fig.width = 12, message=FALSE, warning=FALSE, include=FALSE, results='hide', cache=TRUE}
 
 Hydrology <- Hydrology %>%
    dplyr::select(geometry) 
@@ -1101,7 +1102,7 @@ FinalFishnet <-
    left_join(FinalFishnet, .)
 ```
 
-```{r Parcel size, fig.height = 12,fig.width = 12, message=FALSE, warning=FALSE, include=TRUE, results='hide', cache=TRUE}
+```{r Parcel size, fig.height = 12,fig.width = 12, message=FALSE, warning=FALSE, include=FALSE, results='hide', cache=TRUE}
 
 #Parcels
 parcels <-
@@ -1122,7 +1123,7 @@ FinalFishnet1 %>%
          LogPctLoss = log10(pctLoss))
 ```
 
-```{r land use, message=FALSE, warning=FALSE, include=TRUE, results='hide', fig.height = 5, fig.width = 8, cache=TRUE}
+```{r land use, message=FALSE, warning=FALSE, include=FALSE, results='hide', fig.height = 5, fig.width = 8, cache=TRUE}
 
 LandUse1 <-
   #st_read("C:/Users/Kyle McCarthy/Documents/Practicum/Data/LandUse/landu.csv")%>%
@@ -1168,7 +1169,7 @@ LandUseLong<-
 ### Land use  
 As previously mentioned, land-use appears to be correlated with tree canopy. A [2018 report](https://treephilly.org/wp-content/uploads/2019/12/Tree-Canopy-Assessment-Report-Philadelphia-2018.pdf) showed that most trees were removed next to streets and on residential property. This proves true in our analysis: the top two land-use types that experienced tree canopy change are residential and transportation.   
 
-```{r Residential and transportation, message=FALSE, warning=FALSE, include=TRUE, results='hide', fig.height = 4, fig.width = 10, cache=TRUE}
+```{r Residential and transportation, message=FALSE, warning=FALSE, include=FALSE, results='hide', fig.height = 4, fig.width = 10, cache=TRUE}
 
 LandUse2 <-
   LandUse1%>%
@@ -1210,7 +1211,7 @@ LandUse
 
 Within residential land use parcels, low density residential land experienced the most change.    
   
-```{r residential density, message=FALSE, warning=FALSE, include=TRUE, results='hide', cache=TRUE}
+```{r residential density, message=FALSE, warning=FALSE, include=FALSE, results='hide', cache=TRUE}
 resDensity
 ```
 
@@ -1319,7 +1320,7 @@ ggplot(correlation.long4, aes(Value, pctLoss)) +
   plotTheme()
 
 ```
-```{r tree removal and const, fig.height = 12,fig.width = 12, message=FALSE, warning=FALSE, include=TRUE, results='hide', cache=TRUE}
+```{r tree removal and const, fig.height = 12,fig.width = 12, message=FALSE, warning=FALSE, include=FALSE, results='hide', cache=TRUE}
 
 e311Trees <-
  # st_read('C:/Users/Kyle McCarthy/Documents/Practicum/e311.csv') 
@@ -1458,7 +1459,7 @@ urNeigh <- ggmap(base_mapUR, darken = c(0.3, "white")) +
      mapTheme()
 
 ```
-```{r Land Use to Fishnet, message=FALSE, warning=FALSE, include=TRUE, results='hide', fig.height =  7, fig.width = 7, cache=TRUE}
+```{r Land Use to Fishnet, message=FALSE, warning=FALSE, include=FALSE, results='hide', fig.height =  7, fig.width = 7, cache=TRUE}
 
 LandUseFishnet_ResTrans<- 
 LandUseFishnet%>% 
@@ -1603,7 +1604,7 @@ FinalFishnet<-
 ```
 
 Finally, we visualize the spatial density of additional selected risk factors below.  
-```{r factor maps, fig.height = 12,fig.width = 12, message=FALSE, warning=FALSE, include=TRUE, results='hide', cache=TRUE}
+```{r factor maps, fig.height = 12,fig.width = 12, message=FALSE, warning=FALSE, include=FALSE, results='hide', cache=TRUE}
 vars_net <- FinalFishnet %>%
   dplyr::select(pctCoverage08, HydrologyArea, avgParcelSize, e311Count, countConst, pctTransRes, pctRes, pctTrans)
 
@@ -2282,7 +2283,7 @@ Below, we plot the spatial distribution of our model's confusion metrics. We see
 
 To further judge our model's performance, we need to understand its generalisability. That is, we want to know how the model performs across different groups of fishnet cells. To do this, we cross validate our data with 100 k-folds, meaning that we split the data into 100 random groups and test the model on each group to see if its performance is consistent. In the plot below, we see a new metric: kappa. This metric is the difference between observed accuracy and expected accuracy (occurring by random chance). Our cross validation results are clustered closely around the mean (of all 100 groups). This indicates that our model has high generalisability.  
 
-```{r CV, message=FALSE, warning=FALSE, fig.height = 4, fig.width = 6, include=TRUE, results='hide', cache=TRUE}  
+```{r CV, message=FALSE, warning=FALSE, fig.height = 4, fig.width = 6, include=FALSE, results='hide', cache=TRUE}  
 ## Cross validation
 ctrl <- trainControl(method = "cv", number = 10, classProbs=TRUE,savePredictions = TRUE,verboseIter = TRUE)
 
