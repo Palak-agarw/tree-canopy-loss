@@ -25,7 +25,7 @@ We hope that this document and our web application can help tree planting agenci
 ```{r Set Up, message=FALSE, warning=FALSE, include=TRUE, results='hide', cache=TRUE}
 #Reload
 knitr::opts_chunk$set(message = FALSE, warning = FALSE)
-options(scipen=10000000)
+options(scipen=100000000)
 library(knitr)
 library(MLeval)
 library(magrittr)
@@ -1023,7 +1023,7 @@ grid.arrange(ncol=2, top=textGrob("Neighborhood Attributes and Tree Canopy 2008-
 
 ## How do historical disinvestment and segregation relate to tree canopy loss?
 Next, we examine redlining boundaries from the Homeowner’s Loan Corporation (HOLC). As trees take decades to grow, historical planning decisions can determine the spatial configuration of today's tree canopy.  In 1937, HOLC created “redlining” maps that rated neighborhoods’ desirability in four categories. They rated neighborhoods with residents of color as the least desirable (D) and majority-white neighborhoods as the most desirable (A). As a result, the low-ranked neighborhoods experienced disinvestment and greater difficulty attracting investment.  
-```{r HOLC Grades for Neighborhoods, message=FALSE, warning=FALSE, include=TRUE, results='hide', cache='TRUE'}
+```{r HOLC Grades Neighborhoods, message=FALSE, warning=FALSE, include=TRUE, results='hide', cache='TRUE'}
 
 HOLC2 <- HOLC %>%
   st_intersection(st_make_valid(Philadelphia), HOLC) %>%  

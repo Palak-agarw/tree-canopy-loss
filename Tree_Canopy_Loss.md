@@ -26,7 +26,7 @@ We hope that this document and our web application can help tree planting agenci
 ```r
 #Reload
 knitr::opts_chunk$set(message = FALSE, warning = FALSE)
-options(scipen=10000000)
+options(scipen=100000000)
 library(knitr)
 library(MLeval)
 library(magrittr)
@@ -1083,7 +1083,7 @@ ggmap(base_map) +
         legend.title = element_text(size = 12)) +  mapTheme()
 ```
 
-![](Tree_Canopy_Loss_files/figure-html/HOLC Rates Communities-1.png)<!-- -->
+![](Tree_Canopy_Loss_files/figure-html/HOLC Grades Neighborhoods-1.png)<!-- -->
 
 ```r
  holc_net <- st_intersection(fishnet_centroid, HOLC) %>%
@@ -2235,7 +2235,7 @@ original <- ggmap(base_map) +
   theme(plot.title = element_text(size = 30, face = "bold"), 
         legend.title = element_text(size = 12)) +  mapTheme() +
  # scale_fill_brewer(palette = "PiYG", name = "Risk Score", direction = -1, aesthetics = c("colour", "fill"))
-  scale_fill_brewer(palette = "PuRd", name = "Value", direction = 1, aesthetics = c("colour", "fill"), guide = guide_legend(reverse = TRUE))
+  scale_fill_brewer(palette = "PuRd", name = "Predicted Risk", direction = 1, aesthetics = c("colour", "fill"), guide = guide_legend(reverse = TRUE))
 
 mylegend<-g_legend(original)
 scenarioPlots <- grid.arrange(arrangeGrob(less50 + theme(legend.position="none"), less25 + theme(legend.position="none"), more25 + theme(legend.position="none"), more50 + theme(legend.position="none"), ncol = 2, top = "Canopy Change Under 5 Construction Scenarios", mylegend))
@@ -2369,7 +2369,7 @@ confusionPlot <- ggmap(base_map) +
 
 ## How generalizable is our model?
 
-We performed other validation tests to judge the generalizability of our model. First, cross-validation with 100 k-folds was performed. The graphs below visualize the accuracy and kappa of the final model across folds. Each of these plots is clustered around the mean, indicating our model has decent generalizability. Accuracy is the percentage of correctly classifies instances out of all instances, and kappa is a metric that compares an Observed Accuracy with an Expected Accuracy (random chance).
+To further judge our model's performance, we need to understand its generalisability. That is, we want to know how the model performs across different groups of fishnet cells. To do this, we cross validate our data with 100 k-folds, meaning that we split the data into 100 random groups and test the model on each group to see if its performance is consistent. In the plot below, we see a new metric: kappa. This metric is the difference between observed accuracy and expected accuracy (occurring by random chance). Our cross validation results are clustered closely around the mean (of all 100 groups). This indicates that our model has high generalisability.  
 
 
 ```r
@@ -2436,7 +2436,8 @@ dplyr::select(reg.cv$resample, -Resample) %>%
 ![](Tree_Canopy_Loss_files/figure-html/CV-1.png)<!-- -->
 
 ## How well does our model predict across space?
-To further test our model's generalizability, we conducted a spatial cross validation. By leaving out one neighborhood at a time, we were able to see how well our model predicts across space. This was done to make sure that there is no bias in the model and the plot shows that the predicted probabilities are well distributed through out Philadelphia and not clustered at any neighborhood.  
+To test our model's generalisability across space, we conduct a spatial leave-one-group-out (LOGO) cross validation. Here, we test generalisablity across neighborhoods by iteratively testing the model, leaving one neighborhood out each time. Below, we see that the result of LOGO cross validation is similar to our model's original prediction, meaning that our model performs consistently across neighborhoods and is fit for use in allocating limited tree planting resources across Philadelphia.
+
 
 ```r
 # Model Validation
@@ -2486,21 +2487,29 @@ reg.spatialcv <-
   reg.spatialCV %>%
   dplyr::select(cvID = NAME, Variable2, Prediction, geometry)
 
-ggmap(base_map) +
+logoPlot <- ggmap(base_map) +
   geom_sf(data = ll(reg.spatialcv), aes(fill = Prediction), color = "transparent", inherit.aes=FALSE)+
   geom_sf(data = ll(FinalFishnet5), fill = "transparent", color = "transparent", size=.5, inherit.aes=FALSE)+
-  labs(title="Predicted Probabilities Cross Validation")+
-  scale_fill_distiller(palette = "PuRd", direction = 1, name = "Predicted Risk") +
+  labs(title="Leave One Group Out Cross Validation")+
+  scale_fill_distiller(palette = "PuRd", direction = 1, name = "LOGO Predicted Risk") +
   theme(plot.title = element_text(size = 30, face = "bold"), 
         legend.title = element_text(size = 12)) +  mapTheme()
+
+original
 ```
 
-![](Tree_Canopy_Loss_files/figure-html/spatial_cv-1.png)<!-- -->
+![](Tree_Canopy_Loss_files/figure-html/Spatial Cross Validation-1.png)<!-- -->
+
+```r
+grid.arrange(ncol = 2, top = "LOGO Cross Validation vs Random Forest Risk Predictions", logoPlot, original)
+```
+
+![](Tree_Canopy_Loss_files/figure-html/Spatial Cross Validation-2.png)<!-- -->
 
 
 # Planning Tool: Canopy View  
 
-Using this information, we created a predictive scenario planning policy tool that displays future tree canopy loss under five construction scenarios. The general population and tree planting agencies can use our tool to understand the potential impact of construction on the tree canopy and prioritize tree planting efforts.  
+Using this information, we created a predictive planning tool that displays predictions for future tree canopy loss under five construction scenarios. The general population and tree planting agencies can use our tool to understand the potential impact of construction on the tree canopy and prioritize tree planting efforts.  
 ![Canopy View web application](WebApp.png)     
    
 The web application has 3 distinct features:
@@ -2520,12 +2529,12 @@ The web application has 3 distinct features:
 
 # Going Forward  
 
-We recommend that tree planting initiatives target South and Northeast Philadelphia since our model predicted a high risk of substantial tree loss in these areas. Many of the areas where we predicted high risk also currently have high construction rates. Construction rates are highly correlated to tree canopy loss in a given region. As construction rates increase, the risk of tree canopy loss increases as well.  
+We recommend that tree planting initiatives target South and Northeast Philadelphia since our model predicted a high risk of substantial tree loss in these areas.  
 
-In the future, tree-planting organizations may consider targeting their tree-planting efforts in regions experiencing high construction rates. As discussed, when construction or demolition occurs on the property, trees are often removed to meet the construction goals. Unfortunately, trees in Philadelphia do not plant themselves. The majority of the time, tree gain only occurs if someone actively plants a tree. Consequently, for tree canopy 'net gain' to occur in a given community, tree planting initiates must keep pace with the rate of construction. Understanding where construction is happening will be very beneficial to future tree planting initiatives. 
+Many of the areas where we predicted substantial risk also have high construction rates. Construction is highly correlated with tree canopy loss in a given region. As construction rates increase, the risk of substantial canopy loss increases as well. In the future, tree-planting organizations may consider targeting their tree-planting efforts in regions experiencing high construction rates. As discussed, when construction or demolition occurs on the property, trees are often removed to meet the construction goals. Unfortunately, trees in Philadelphia do not plant themselves. The majority of the time, tree gain only occurs if someone actively plants a tree. Consequently, for tree canopy 'net gain' to occur in a given community, tree planting initiates must keep pace with the rate of construction. Understanding where construction is happening will be very beneficial to future tree planting initiatives. 
 
-Although construction is a significant factor, construction is not the only variable significantly affecting tree loss. Many low-income communities still endure the effects of unjust policies from past generations. Areas with fewer trees are often associated with previously red-lined neighborhoods. Additionally, we found that grid cells with fewer trees are more likely to experience high percentages of gain or loss. Although seemingly contradictory, the phenomenon results from having fewer trees to begin with, meaning that every change that occurs in the tree canopy makes a more significant difference in the overall tree canopy structure. Other factors affecting tree canopy loss include land-use type, distance to water bodies, and 311 calls. 
+Although construction is a significant factor, construction is not the only variable significantly affecting tree loss. Many low-income communities still endure the effects of unjust policies from past generations. Areas with fewer trees are often associated with former redlining boundaries. Additionally, we found that grid cells with fewer trees are more likely to experience high percentages of gain or loss. Although seemingly contradictory, the phenomenon results from having fewer trees to begin with, meaning that every change that occurs in the tree canopy makes a more significant difference in the overall tree canopy structure. Other factors affecting tree canopy loss include land-use type, distance to water bodies, and 311 calls. 
 
-We hope that the model serves as a tool to encourage tree planting initiates in regions where the increased tree canopy is most needed. Our model accuracy is around 70%, and metrics indicate that the model generalizes well. Previously, Philadelphia has stated the goal to reach 30% tree canopy coverage in each neighborhood. Despite this goal, most neighborhoods experienced a net loss in tree canopy from 2008-2018. This indicates that tree planting organizations are currently not keeping up with the current tree loss rate. By prioritizing tree canopy in certain regions with high tree loss risk, we believe that our model can help neighborhoods achieve 30% tree canopy coverage. 
+We hope that the model serves as a tool to encourage tree planting initiates in regions where the increased tree canopy is most needed. Our model accuracy is around 70%, and metrics indicate that the model generalizes well. Previously, Philadelphia has stated the goal to reach 30% tree canopy coverage in each neighborhood. Despite this goal, most neighborhoods experienced a net loss in tree canopy from 2008-2018. This indicates that tree planting organizations are currently not keeping up with the current tree loss rate. By allocating tree planting resources to regions with a combination of substantial tree loss risk and high construction rates, we believe that our model can help neighborhoods achieve 30% tree canopy coverage. 
 
 
