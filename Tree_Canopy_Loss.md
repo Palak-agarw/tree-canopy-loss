@@ -2,7 +2,7 @@
 title: "Tree Canopy Loss in Philadelphia"
 author: "Anna, Palak, Kyle"
 date: "5/7/2021"
-output:
+output: 
   html_document:
     keep_md: true
     toc: true
@@ -53,34 +53,9 @@ library(FNN)
 library(pROC)
 library(plotROC)
 library(RANN)
-
-
+#
 root.dir = "https://raw.githubusercontent.com/urbanSpatial/Public-Policy-Analytics-Landing/master/DATA/"
 source("https://raw.githubusercontent.com/urbanSpatial/Public-Policy-Analytics-Landing/master/functions.r")
-
-# paletteGray <- c("gray90", "gray70", "gray50", "gray30", "gray10")
-# 
-# palette1 <- c("#d2f2d4","#7be382","#26cc00","#22b600","#009c1a")
-# 
-# palette2 <- c("#ffffff","#c7ffd5","#81d4ac","#329D9C","#205072", "#0B0138")
-# 
-# palette3 <- c("#2C5F2D","#97BC62FF")
-# 
-# palette4 <- c("#007F5F", '#EEEF20', '#AACC00')
-
-paletteHolc <- c("light green", "light blue", "yellow", "pink")
-
-# palette5 <- c("#205072", "#329D9C", "#56C596", "#7BE495", "#CFF4D2", "#05001c")
-# 
-# palette6 <- c("#D8F3DC", "#B7E4C7", "#95D5B2", "#74C69D", "#52B788", "#40916C", "#2D6A4F", "#1B4332", "#123024", "#081C15")
-# 
-# GoalPalette <- c("light blue", "#D8F3DC",  "#95D5B2",  "#52B788",  "#2D6A4F", "#1B4332")
-# GainPalette <- c("#D8F3DC",  "#95D5B2",  "#52B788",  "#2D6A4F","light blue")
-# 
-# palette7 <- c("#D8F3DC", "#95D5B2", "#52B788", "#2D6A4F", "#1B4332", "#123024")
-# 
-# 
-# paletteDiverge <- c("red", "orange", "yellow", "blue", "green")
 
 mapTheme <- function(base_size = 12) {
   theme(
@@ -97,7 +72,6 @@ mapTheme <- function(base_size = 12) {
     panel.border = element_rect(colour = "white", fill=NA, size=2)
   )
 }
-
 
 plotTheme <- function(base_size = 12) {
   theme(
@@ -121,7 +95,6 @@ plotTheme <- function(base_size = 12) {
     strip.text.x = element_text(size = 14)
   )
 }
-
 
 #for shared legends
 g_legend<-function(a.gplot){
@@ -871,8 +844,6 @@ In both neighborhoods, the bulk of the tree canopy did not change between 2008 a
 
 
 ```r
-library(grid)
-
 grid.arrange(ncol = 2, UR, RM, top = "Neighborhood Level Tree Canopy Change 2008 - 2018")
 ```
 
@@ -1077,7 +1048,7 @@ ggmap(base_map) +
         legend.title = element_text(size = 12)) +  mapTheme()
 ```
 
-![](Tree_Canopy_Loss_files/figure-html/HOLC ratings neigh-1.png)<!-- -->
+![](Tree_Canopy_Loss_files/figure-html/Redlining Neighbs-1.png)<!-- -->
 
 ```r
  holc_net <- st_intersection(fishnet_centroid, HOLC) %>%
@@ -1932,11 +1903,8 @@ To validate our model, we choose a probability threshold above which the model p
 ## This us a goodness of fit measure, 1 would be a perfect fit, .5 is a coin toss
 auc(testProbs2$Outcome, testProbs2$Probs)
 
-
 ## optimizing threshold
-
 iterateThresholds <- function(data, observedClass, predictedProbs, group) {
-#This function takes as its inputs, a data frame with an observed binomial class (1 or 0); a vector of predicted probabilities; and optionally a group indicator like race. It returns accuracy plus counts and rates of confusion matrix outcomes. It's a bit verbose because of the if (missing(group)). I don't know another way to make an optional parameter.
   observedClass <- enquo(observedClass)
   predictedProbs <- enquo(predictedProbs)
   group <- enquo(group)
@@ -2006,21 +1974,20 @@ whichThreshold <-
     dplyr::select(starts_with("Rate"), Threshold) %>%
     gather(Variable, Rate, Rate_TN,Rate_TP,Rate_FN,Rate_FP) 
 
-confusionMetric <- whichThreshold %>%
-  ggplot(.,aes(Threshold,Rate,colour = Variable)) +
-  geom_point() +
-  scale_colour_manual(values = c("magenta", "lavender", "turquoise", "light green")) +    
-  labs(title = "Confusion Metric Rates at Different Thresholds",
-       y = "Count") +
-  theme(plot.title = element_text(size = 30, face = "bold"), 
-        legend.title = element_text(size = 12)) +
-  plotTheme() +
-  guides(colour=guide_legend(title = "Confusion Metric")) 
-
-confusionMetric
+# curvePlot <- whichThreshold %>%
+#   ggplot(.,aes(Threshold,Rate,colour = Variable)) +
+#   geom_point() +
+#   scale_colour_manual(values = c("magenta", "lavender", "turquoise", "light green")) +    
+#   labs(title = "Confusion Metric Rates at Different Thresholds",
+#        y = "Count") +
+#   theme(plot.title = element_text(size = 30, face = "bold"), 
+#         legend.title = element_text(size = 12)) +
+#   plotTheme() +
+#   guides(colour=guide_legend(title = "Confusion Metric")) 
+# 
+# curvePlot
 ```
-
-![](Tree_Canopy_Loss_files/figure-html/confusion metrics-1.png)<!-- -->
+![ ](metricsCurve.png)  
 
 The receiver operating characteristic (ROC) curve visualizes trade-offs for different thresholds. As true positives in the model increase, the number of false positives also increases. For our goal of allocating tree planting resources, we are more interested in correctly allocating resources (true positive) than decreasing cases where we wrongly allocate resources (false positive). We also want to reduce false negatives, as we want the limited resources to be distributed to neighborhoods at the highest risk of tree canopy loss.  
 
@@ -2342,40 +2309,29 @@ confusion <- caret::confusionMatrix(reference = as.factor(testProbs2$Outcome),
    text(70, 20, round(as.numeric(cm$overall[2]), 3), cex=1.4)
  }
 
-#draw_confusion_matrix(confusion)
-#
-#
-finalTest2$uniqueID <- seq.int(nrow(finalTest))
-
-testProbs2$uniqueID <- seq.int(nrow(finalTest))
-
-try <- left_join(finalTest2, testProbs2)
-
-try <-
-  try%>%
-  mutate(result = "0")%>%
-  mutate(result = ifelse(Outcome == 0 & predClass == 0, "True Negative", result))%>%
-  mutate(result = ifelse(Outcome == 1 & predClass == 1, "True Positive", result))%>%
-  mutate(result = ifelse(Outcome == 0 & predClass == 1, "False Positive", result))%>%
-  mutate(result = ifelse(Outcome == 1 & predClass == 0, "False Negative", result))
+draw_confusion_matrix(confusion)
 ```
+
+![](Tree_Canopy_Loss_files/figure-html/accuracy and other metrics-1.png)<!-- -->
 
 Below, we plot the spatial distribution of our model's confusion metrics. We see that error is higher in South and Northeast Philadelphia as there is a higher density of false negatives and false positives.  
 
 
 ```r
-palette3 <- c("magenta",  "purple", "blue", "green")
-ggmap(base_map) +
-  geom_sf(data = ll(fishnet), fill = "white", colour = "transparent", inherit.aes = FALSE)+
-  geom_sf(data = ll(try), aes(fill = result), colour = "transparent", inherit.aes = FALSE)+
-  labs(title = "Mapped Correlation Matrix")+
-  scale_fill_manual(values = palette3, name = "Model Metric",
-                  guide = guide_legend(reverse = TRUE))+
-  theme(plot.title = element_text(size = 30, face = "bold"), 
-        legend.title = element_text(size = 12)) +  mapTheme()
-```
+#paletteA <- c("magenta",  "purple", "blue", "green")
+# 
+# confusionMap <- ggmap(base_map) +
+#   geom_sf(data = ll(FinalFishnet), fill = "white", colour = "transparent", inherit.aes = FALSE)+
+#   #geom_sf(data = ll(try), aes(fill = result), colour = "transparent", inherit.aes = FALSE)+
+#   labs(title = "Mapped Correlation Matrix")+
+#   scale_fill_manual(values = paletteA, name = "Model Metric",
+#                   guide = guide_legend(reverse = TRUE))+
+#   theme(plot.title = element_text(size = 30, face = "bold"), 
+#         legend.title = element_text(size = 12)) +  mapTheme()
 
-![](Tree_Canopy_Loss_files/figure-html/confusion plot-1.png)<!-- -->
+# confusionMap
+```
+![ ](confusionMap.png)  
 
 
 ## How generalizable is our model?
