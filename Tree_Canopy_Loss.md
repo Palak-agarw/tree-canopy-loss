@@ -80,14 +80,14 @@ GainPalette <- c("#D8F3DC",  "#95D5B2",  "#52B788",  "#2D6A4F","light blue")
 palette7 <- c("#D8F3DC", "#95D5B2", "#52B788", "#2D6A4F", "#1B4332", "#123024")
 
 GoalPalette2 <- c("#95D5B2", "#52B788", "#2D6A4F", "#1B4332", "#123024", "blue")
-
-palette8 <- c("#2D6A4F", "#52B788", "#B7E4C7", "#ADE8F4", "#00B4D8", "#023E8A")
-
-paletteJ <- c("green", "red", "yellow")
-
-paletteLG <- c("#1B4332","#2D6A4F", "#52B788","#D8F3DC", "blue")
-
-landusepal <- c("green", "dark green" )
+# 
+# palette8 <- c("#2D6A4F", "#52B788", "#B7E4C7", "#ADE8F4", "#00B4D8", "#023E8A")
+# 
+# paletteJ <- c("green", "red", "yellow")
+# 
+# paletteLG <- c("#1B4332","#2D6A4F", "#52B788","#D8F3DC", "blue")
+# 
+# landusepal <- c("green", "dark green" )
 
 paletteDiverge <- c("red", "orange", "yellow", "blue", "green")
 
@@ -333,7 +333,7 @@ ggmap(base_map) +
      
 **Why does the tree canopy matter?**  
 
-Tree canopy is defined as the area of land which, viewed from a bird's eye view, is covered by trees. Trees offer essential benefits to cities, including mitigating the urban heat island effect, absorbing stormwater runoff, a habitat for wildlife, and aesthetic and recreational benefits. In addition, trees are a preventative public health measure that improves mental health, increases social interactions and activity, and reduces crime, violence, and stress. A 2020 study published in The Lancet found that if Philadelphia reaches 30% tree canopy in all of its neighborhoods, the city would see [403 fewer premature deaths](https://www.fs.fed.us/nrs/pubs/jrnl/2020/nrs_2020_kondo_001.pdf) per year. However, despite the importance of trees to the city's health, appearance, and ecology, trees are regularly removed for reasons ranging from construction to homeowners' personal preference.     
+Tree canopy is defined as an area of land which, viewed from a bird's eye view, is covered by trees. Trees offer essential benefits to cities, including mitigating the urban heat island effect, absorbing stormwater runoff, a habitat for wildlife, aesthetics, and recreation. In addition, trees are a preventative public health measure that improves mental health, increases social interaction and activity, and reduces crime, violence, and stress. A 2020 study published in The Lancet found that if Philadelphia reaches 30% tree canopy in all of its neighborhoods, the city would see [403 fewer premature deaths](https://www.fs.fed.us/nrs/pubs/jrnl/2020/nrs_2020_kondo_001.pdf) per year. However, despite the importance of trees to the city's health, appearance, and ecology, trees are regularly removed for reasons ranging from construction to homeowners' personal preference.     
 
 ![Cherry blossom trees in Philadelphia's Fairmount Park](CherryBlossoms.png)   
   
@@ -342,11 +342,11 @@ Tree canopy is defined as the area of land which, viewed from a bird's eye view,
 
 30% Tree Canopy in each neighborhood by 2025       
   
-* Under a previous mayoral administration, the city of Philadelphia set the [goal](https://treephilly.org/about/) of achieving 30% tree canopy coverage in all neighborhoods by 2025. Currently, the citywide average is [20%](https://treephilly.org/wp-content/uploads/2019/12/Tree-Canopy-Assessment-Report-Philadelphia-2018.pdf), although this is highly uneven. More affluent neighborhoods in the northwest with many parks and large lawns have much higher tree canopy than industrial neighborhoods in south and north Philadelphia. The neighborhoods with lower canopy coverage tend to be historically disenfranchised, lower-income, and predominantly communities of color. This is an environmental justice problem. Neighborhoods like Philadelphia’s Hunting Park have a much lower ratio of the tree canopy to impervious surfaces than the citywide average, resulting in [higher temperatures](https://whyy.org/articles/racism-left-hunting-park-overheated-neighbors-are-making-a-cooler-future/) during summertime heat waves and inferior air quality.  
+* Under a previous mayoral administration, the city of Philadelphia set a [goal](https://treephilly.org/about/) of achieving 30% tree canopy coverage in all neighborhoods by 2025. Currently, the citywide average is [20%](https://treephilly.org/wp-content/uploads/2019/12/Tree-Canopy-Assessment-Report-Philadelphia-2018.pdf), although this is highly uneven. More affluent neighborhoods in the northwest with many parks and large lawns have much higher tree canopy than industrial neighborhoods in South and North Philadelphia. The neighborhoods with lower canopy coverage tend to be historically disenfranchised, lower-income, and predominantly communities of color. This is an environmental justice problem. Neighborhoods like Philadelphia’s Hunting Park have a much lower ratio of the tree canopy to impervious surfaces than the citywide average, resulting in [higher temperatures](https://whyy.org/articles/racism-left-hunting-park-overheated-neighbors-are-making-a-cooler-future/) during summertime heat waves and inferior air quality.  
   
 1 acre of tree canopy within a 10 minute walk for all residents   
   
-* 13% of Philadelphia's residents are considered under-served by green space, meaning that they live more than a 10-minute walk away from at least 1 acre of green space. The city has set a goal of ensuring that all residents are no more than 10 minutes away from at least 1 acre of green space by 2035. To this end, the city prioritizes adding green space in historically disenfranchised neighborhoods and making efforts to green spaces in schools and recreation centers.   
+* 13% of Philadelphia's residents are considered under-served by green space, meaning that they live more than a 10-minute walk away from at least 1 acre of green space. The city has set a goal of ensuring that all residents are no more than 10 minutes away from at least 1 acre of green space by 2035. To this end, the city prioritizes adding green space in historically disenfranchised neighborhoods, schools, and recreation centers.   
 
   
 # Data and Methods  
@@ -373,7 +373,7 @@ div.blue { background-color:#e6f0ff; border-radius: 5px; padding: 10px;}
 </div>  
   
 ## Unit of analysis: the fishnet cell
-Below, we visualize the study area for this analysis. We use fishnet grid cells as our unit of analysis to take advantage of high-resolution spatial data such as 311 service requests. Philadelphia is represented by fishnet cells of 1615 feet, roughly the size of a city block. Around 16% of Philadelphia's total area consists of [conservation easements](https://www.conservationeasement.us/what-is-a-conservation-easement/), hydrology, and parks. We omit fishnet cells which consist of more than 20% of these categories to isolate land that may be protected or experience different tree canopy change processes. All in all, we have 1411 fishnet cells representing Philadelphia.  
+Below, we visualize the study area for this analysis. We use fishnet grid cells as our unit of analysis to take advantage of high-resolution spatial data such as 311 service requests. Philadelphia is represented by fishnet cells of 1615 feet, roughly the size of a city block. Around 16% of Philadelphia's total area consists of [conservation easements](https://www.conservationeasement.us/what-is-a-conservation-easement/), hydrology, and parks. We omit fishnet cells which consist of more than 20% of these categories because they are protected and therefore are not vulnerable to the same external processes that cause tree canopy change (e.g. construction or street tree removal). All in all, we have 1411 fishnet cells representing Philadelphia.  
 
 
 ```r
@@ -423,11 +423,11 @@ div.blue { background-color:#e6f0ff; border-radius: 5px; padding: 20px;}
   
 2. How close are neighborhoods to achieving the 30% goal?    
   
-3. How does tree canopy change vary by demographic?    
+3. How does tree canopy change vary by demographic context?    
   
-4. How do current patterns of tree canopy coverage and loss reflect disinvestment as a result of redlining and older planning practices?    
+4. How do current patterns of tree canopy change reflect disinvestment as a result of redlining and older planning practices?    
   
-5. What other factors are associated with the tree canopy?  
+5. What other factors are associated with tree canopy change?   
 </div>
 
 ## What does Philadelphia's tree canopy look like today?
@@ -594,7 +594,7 @@ subtitle = "Philadelphia, PA") +
 ![](Tree_Canopy_Loss_files/figure-html/Existing Canopy fishnet-1.png)<!-- -->
   
 ### Tree Canopy Change
-Surprisingly, tree canopy loss and gain exhibit similar spatial patterns. Percent loss is the tree canopy lost from 2008 to 2018 divided by the total tree canopy area in 2008. Percent gain is the tree canopy lost from 2008 to 2018 divided by the total tree canopy area in 2018. Both percent gain and loss are highest in a few neighborhoods in South Philadelphia and in the Northeast. While this seems counter-intuitive, this is because these neighborhoods have the least tree canopy. Therefore each individual tree gained or lost has a greater overall impact.
+Surprisingly, tree canopy loss and gain exhibit similar spatial patterns. Percent loss is the tree canopy lost from 2008 to 2018 divided by the total tree canopy area in 2008. Percent gain is the tree canopy lost from 2008 to 2018 divided by the total tree canopy area in 2018. Both percent gain and loss are highest in a few neighborhoods in South Philadelphia and in the northeast. While this seems counter-intuitive, this is because these neighborhoods have the least tree canopy. Therefore each individual tree gained or lost has a greater overall impact.
 
 ```r
 v <- ggmap(base_map) +
@@ -643,8 +643,8 @@ gain <- ggplot(FinalFishnet %>% filter(pctCoverage18 > 0.01 & pctGain > 1), aes(
       scale_x_log10() + scale_y_log10() +
   labs(title = "Gain vs. 2018 Tree Canopy (%)", 
        subtitle = "Density of fishnet cells") + 
-  xlab("% Canopy Gain 2008 - 2018") + 
-  ylab("% Tree Canopy 2018") + 
+  xlab("Canopy Gain (%)") + 
+  ylab("2018 Tree Canopy (%)") + 
   theme(plot.title = element_text(size = 30, face = "bold"), 
         legend.title = element_text(size = 12),
         legend.position = "none") +
@@ -658,8 +658,8 @@ loss <- ggplot(FinalFishnet %>% filter(pctCoverage18 > 0.01 & pctGain > 1), aes(
       scale_x_log10() + scale_y_log10() +
   labs(title = "Loss vs. 2018 Tree Canopy (%)", 
        subtitle = "Density of fishnet cells") + 
-  xlab("% Canopy Loss 2008 - 2018") + 
-  ylab("% Tree Canopy 2018") + 
+  xlab("Canopy Loss (%)") + 
+  ylab("2018 Tree Canopy (%)") + 
   theme(plot.title = element_text(size = 30, face = "bold"), 
         legend.title = element_text(size = 12),
         legend.position = "none") +
@@ -676,8 +676,8 @@ change <- ggplot(pctChangeGraph, aes(x = pctChange, y = pctCoverage18))+
  # geom_point(colour = "black", alpha = 0.3, size = 4)+ 
   labs(title = "Change vs. 2018 Tree Canopy (%)",
        subtitle = "Density of fishnet cells") + 
-  xlab("% Change in Tree Canopy from 2008-2018 ") + 
-  ylab("% Tree Canopy 2018") + 
+  xlab("Tree Canopy Change (%)") + 
+  ylab("2018 Tree Canopy (%)") + 
   theme(plot.title = element_text(size = 30, face = "bold"), 
         legend.title = element_text(size = 12),
         legend.position = "none") +
@@ -687,8 +687,9 @@ change <- ggplot(pctChangeGraph, aes(x = pctChange, y = pctCoverage18))+
 grid.arrange(gain, loss, change, top = "Tree Canopy Change and Existing Tree Canopy", ncol = 2)
 ```
 
-![](Tree_Canopy_Loss_files/figure-html/Comparing Canopy Area to Loss/Gain2-1.png)<!-- -->
-   
+![](Tree_Canopy_Loss_files/figure-html/Comparing Canopy Area to change-1.png)<!-- -->
+     
+     
      
 Citywide, the majority of fishnet cells experienced a low net loss. A similar amount of cells experienced either substantial loss or gain.
 
@@ -801,7 +802,7 @@ FinalNeighborhood$GainMinusLossCat <- cut(FinalNeighborhood$GainMinusLoss,
                        right = FALSE)
 ```
 
-The neighborhoods farthest from 30% tree canopy are in South Philadelphia and parts of Center City. These neighborhoods are all along the Delaware River. The neighborhoods which meet this goal are largely in Northwest Philadelphia.   
+The neighborhoods furthest from 30% tree canopy are in South Philadelphia and parts of Center City. These neighborhoods are all along the Delaware River. The neighborhoods which meet this goal are largely in Northwest Philadelphia.   
 
 ```r
 goalProg <- ggmap(base_map) +
@@ -816,7 +817,7 @@ goalProg
 
 ![](Tree_Canopy_Loss_files/figure-html/Neighborhood Canopy goal-1.png)<!-- -->
   
-Most neighborhoods experienced a net loss in tree canopy. Interestingly, most tree gains were experienced in South Philadelphia and Center City, in neighborhoods that have low existing canopy.      
+Most neighborhoods experienced a net loss in tree canopy. Interestingly, most tree canopy gains were experienced in South Philadelphia and Center City, in neighborhoods that have low existing canopy today.      
 
 
 ```r
@@ -835,7 +836,7 @@ netChange
 
 
 ### A closer look: neighborhood-level tree canopy change   
-To better understand tree canopy change patterns, we analyze a neighborhood that has reached the 30% goal and one that is substantially below the goal.    
+To better understand tree canopy change patterns, we randomly select one neighborhood which has reached the 30% goal (Upper Roxborough) and one which is substantially below it (Richmond) to analyze in greater detail.     
 
 ```r
 paletteChange <- c("green", "orange", "purple")
@@ -857,7 +858,7 @@ RM <- ggmap(RMbase_map) +
    geom_sf(data = ll(RMBound), fill = "black", inherit.aes = FALSE) +
    geom_sf(data = ll(Richmond), aes(fill = CLASS_NAME), colour = "transparent", inherit.aes = FALSE) +
    scale_fill_manual(values = paletteChange, name = "Canopy Change") +
-   labs(title = "Richmond Tree Canopy Change 2008-2018", subtitle = "Philadelphia, PA") +
+   labs(title = "Richmond", subtitle = "Philadelphia, PA") +
   theme(plot.title = element_text(size = 30, face = "bold"), 
         legend.title = element_text(size = 12)) +  mapTheme()
  
@@ -866,7 +867,7 @@ UR <- ggmap(URbase_map) +
    geom_sf(data = ll(URBound), fill = "black", inherit.aes = FALSE) +
    geom_sf(data = ll(UpperRoxborough), aes(fill = CLASS_NAME), colour = "transparent", inherit.aes = FALSE) +
    scale_fill_manual(values = paletteChange, name = "Canopy Change") +
-   labs(title = "Upper Roxborough Tree Canopy Change 2008-2018", subtitle = "Philadelphia, PA") +
+   labs(title = "Upper Roxborough", subtitle = "Philadelphia, PA") +
   theme(plot.title = element_text(size = 30, face = "bold"), 
         legend.title = element_text(size = 12)) +  mapTheme()
 
@@ -875,18 +876,20 @@ refmap
 
 ![](Tree_Canopy_Loss_files/figure-html/UR and RM reference map-1.png)<!-- -->
 
-In both, the bulk of the tree canopy did not change between 2008 and 2018. However, when we look closer, we see that tree canopy loss and gain are much more clustered in Upper Roxborough, which meets the goal. Here, it appears that some of the loss is related to tree removal along an entire street or throughout a property, whereas, in Richmond, tree canopy change has been more piecemeal and scattered. This suggests land use and streets as potential risk factor variables related to tree canopy loss.      
+In both neighborhoods, the bulk of the tree canopy did not change between 2008 and 2018. However, when we look closer, we see that tree canopy loss and gain are much more clustered in Upper Roxborough, which meets the goal. Here, it appears that some of the loss is related to tree removal along an entire street or throughout a property, whereas, in Richmond, tree canopy change has been more piecemeal and scattered. This suggests land use and streets as potential risk factor variables related to tree canopy loss.      
 
 
 ```r
-grid.arrange(ncol = 2, UR, RM, top = "Neighborhood Level Tree Canopy Change")
+library(grid)
+
+grid.arrange(ncol = 2, UR, RM, top = "Neighborhood Level Tree Canopy Change 2008 - 2018")
 ```
 
-![](Tree_Canopy_Loss_files/figure-html/UR and RM maps-1.png)<!-- -->
+![](Tree_Canopy_Loss_files/figure-html/UR and RM Map-1.png)<!-- -->
 
   
 ## How does tree canopy change vary by demographic?  
-Tree canopy loss, like other urban environmental issues, has deep implications for equity. Low-income communities and communities of color are more likely to be in places with less tree canopy. Therefore, we explore demographics variables' correlation with tree canopy gain, loss, net change, and coverage. We use data from the U.S. Census Bureau's American Community Survey, which is provided at the census tract level.
+Tree canopy loss, like other urban environmental issues, has deep equity implications. Low-income communities and communities of color are more likely to be in places with [less tree canopy](https://www.nytimes.com/interactive/2020/08/24/climate/racism-redlining-cities-global-warming.html). Therefore, we explore demographic variables' correlation with tree canopy gain, loss, net change, and coverage. We use data from the U.S. Census Bureau's 2018 American Community Survey, which is provided at the census tract level.
 
 ```r
 ACS_select <- ACS %>%
@@ -915,7 +918,7 @@ for(i in vars){
         legend.title = element_text(size = 12)) +  mapTheme()
   }
 
-do.call(grid.arrange,c(mapList, ncol = 3, top = "Demographic Variables by Census Tract"))
+do.call(grid.arrange,c(mapList, ncol = 3, top = "2018 Demographic Variables by Census Tract"))
 ```
 
 ![](Tree_Canopy_Loss_files/figure-html/ACS tracts-1.png)<!-- -->
@@ -1055,7 +1058,7 @@ grid.arrange(ncol=2, top=textGrob("Neighborhood Attributes and Tree Canopy 2008-
 ![](Tree_Canopy_Loss_files/figure-html/Demographics-1.png)<!-- -->
 
 ## How do historical disinvestment and segregation relate to tree canopy loss?
-Next, we examine redlining boundaries from the Homeowner’s Loan Corporation (HOLC). As trees take decades to grow, historical planning decisions can determine the spatial configuration of today's tree canopy.  In 1937, HOLC created “redlining” maps that rated neighborhoods’ desirability in four categories. They rated neighborhoods with residents of color as the least desirable (D) and majority-white neighborhoods as the most desirable (A). As a result, the low-ranked neighborhoods experienced disinvestment and greater difficulty attracting investment.  
+Next, we examine redlining boundaries from the Homeowner’s Loan Corporation (HOLC). As trees take decades to grow, historical planning decisions can determine the spatial configuration of today's tree canopy.  In 1937, HOLC created “redlining” maps that rated neighborhoods’ desirability in four categories. It rated neighborhoods with residents of color as the least desirable (D) and majority-white neighborhoods as the most desirable (A). As a result, the low-ranked neighborhoods experienced disinvestment.    
 
 ```r
 HOLC2 <- HOLC %>%
@@ -1083,7 +1086,7 @@ ggmap(base_map) +
         legend.title = element_text(size = 12)) +  mapTheme()
 ```
 
-![](Tree_Canopy_Loss_files/figure-html/HOLC Grades Neighborhoods-1.png)<!-- -->
+![](Tree_Canopy_Loss_files/figure-html/HOLC Grades zones-1.png)<!-- -->
 
 ```r
  holc_net <- st_intersection(fishnet_centroid, HOLC) %>%
@@ -1236,8 +1239,8 @@ LandUseLong<-
   gather(variable, value, -c(Descriptio))
 ```
 
-### Land use
-As previously mentioned, land-use appears to be correlate with tree canopy. A [2018 report](https://treephilly.org/wp-content/uploads/2019/12/Tree-Canopy-Assessment-Report-Philadelphia-2018.pdf) showed that most trees were removed next to streets and on residential property. This proves true in our analysis: the top two land-use types that experienced tree canopy change are residential and transportation.   
+### Land use  
+As previously mentioned, land-use appears to be correlated with tree canopy. A [2018 report](https://treephilly.org/wp-content/uploads/2019/12/Tree-Canopy-Assessment-Report-Philadelphia-2018.pdf) showed that most trees were removed next to streets and on residential property. This proves true in our analysis: the top two land-use types that experienced tree canopy change are residential and transportation.   
 
 
 ```r
@@ -1257,7 +1260,7 @@ LandUse <- ggplot(LandUseLong, aes(fill = variable, y=Descriptio, x=value))+
   geom_bar(stat='identity', position = "stack", width = .75) +
  scale_fill_manual(values = c("light green", "magenta"), name = "Area Gain or Loss")+
   labs(title = "Land Use Type and Canopy Change",
-       subtitle = "Philadelphia, 2008-2018")+
+       subtitle = "Philadelphia, PA")+
   xlab("Total Area Lost")+
   ylab("Land Use Type") +
     theme(plot.title = element_text(size = 30, face = "bold"), 
@@ -1269,8 +1272,8 @@ LandUse <- ggplot(LandUseLong, aes(fill = variable, y=Descriptio, x=value))+
 resDensity <- ggplot(LandUse2, aes(y=C_DIG2DESC, x=pctChange))+
   geom_bar(stat='identity', fill="light green", width = 0.75)+
   labs(title = "Residential Density and Canopy Change",
-       subtitle = "('18 Canopy - '08 Canopy) / ('18 Canopy) * 100 ")+
-  ylab("Residential Land Use Type")+
+       subtitle = "Philadelphia, PA")+
+  ylab("Residential Density")+
   xlab("Percent Tree Canopy Change")+
     theme(plot.title = element_text(size = 30, face = "bold"), 
         legend.title = element_text(size = 12)) +  plotTheme()
@@ -1822,8 +1825,9 @@ div.blue { background-color:#e6f0ff; border-radius: 5px; padding: 20px;}
 * Percent transportation land use (Log)  
 * HOLC redlining grade    
 * Hydrology (%)  
-</div>
-
+</div>  
+  
+    
 The random forest predicts the probability of tree canopy loss occurring in a given grid cell from 0 to 1. To run our model, we randomly split the data into a test set and a training set. Our training set is the data we "train" our model on. Based on the training set, our model predicts if substantial tree canopy loss occurred in each grid within the test set. There are four potential outcomes to the model: 
 
 ```r
@@ -1917,6 +1921,10 @@ rf <- randomForest(
 testProbs2 <- data.frame(Outcome = as.factor(finalTest$Variable),
                         Probs = predict(rf, finalTest, type= "response"))
 ```
+<style>
+div.blue { background-color:#e6f0ff; border-radius: 5px; padding: 10px;}
+</style>
+<div class = "blue">
 1. **True Positive** - Substantial tree canopy loss was predicted and observed in grid cell
 
 2. **True negative** - Substantial tree canopy loss was not predicted and not observed in grid cell
@@ -1924,20 +1932,14 @@ testProbs2 <- data.frame(Outcome = as.factor(finalTest$Variable),
 3. **False Positive** - Substantial tree canopy loss was predicted but not observed in grid cell
 
 4. **False Negative** - Substantial tree canopy loss was not predicted but was observed in grid cell 
-
-To validate our model, we chose a probability threshold above which the model predicts future substantial tree canopy loss in a cell. Next, we plotted confusion metric rates at different thresholds to find an optimal threshold. For our use case, we want to maximize true positives and minimize false negatives in order to best allocate tree planting resources. Using the plot below which shows confusion metrics for thresholds from 0 to 1, we select 25% probability as our threshold. At this threshold, the true positive rate is high and the false negative rate is relatively low. A lower threshold would increase the true positive rate and decrease the false negatives, but this would be at the cost of increasing false positives. In our use case, this would mean that tree planting resources are wrongly allocated to areas that don't need them as much.  
+</div>   
+  
+To validate our model, we choose a probability threshold above which the model predicts future substantial tree canopy loss in a cell. Next, we plotted confusion metric rates at different thresholds to find an optimal threshold. For our use case, we want to maximize true positives and minimize false negatives in order to best allocate tree planting resources. Using the plot below which shows confusion metrics for thresholds from 0 to 1, we select 25% probability as our threshold. At this threshold, the true positive rate is high and the false negative rate is relatively low. A lower threshold would increase the true positive rate and decrease the false negatives, but this would be at the cost of increasing false positives. In our use case, this would mean that tree planting resources are wrongly allocated to areas that don't need them as much.  
 
 ```r
 # ROC Curve
 ## This us a goodness of fit measure, 1 would be a perfect fit, .5 is a coin toss
 auc(testProbs2$Outcome, testProbs2$Probs)
-
-rocCurve<- ggplot(testProbs2, aes(d = as.numeric(testProbs2$Outcome), m = Probs)) +
-  geom_roc(n.cuts = 50, labels = FALSE, colour = "magenta") +
-  style_roc(theme = theme_grey) +
-  geom_abline(slope = 1, intercept = 0, size = 1.5, color = 'black') +
-  labs(title = "ROC Curve - Model with Feature Engineering") +
-  plotTheme()
 
 
 ## optimizing threshold
@@ -2032,7 +2034,12 @@ The receiver operating characteristic (ROC) curve visualizes trade-offs for diff
 In the ROC curve below, the an area under the curve (AUC) ranges from 0 to 1. An AUC of 0.5 is called a "coin toss," meaning that the true positive and false positive rates are equal. An AUC of 1 means that the model is over-fitted, with all true negatives and no false positives. We have an AUC of about 0.82, indicating high model usefulness for resource allocation. 
 
 ```r
-rocCurve
+ggplot(testProbs2, aes(d = as.numeric(testProbs2$Outcome), m = Probs)) +
+  geom_roc(n.cuts = 50, labels = FALSE, colour = "magenta") +
+  style_roc(theme = theme_grey) +
+  geom_abline(slope = 1, intercept = 0, size = 1.5, color = 'black') +
+  labs(title = "ROC Curve") +
+  plotTheme()
 ```
 
 ![](Tree_Canopy_Loss_files/figure-html/ROC curve-1.png)<!-- -->
@@ -2237,16 +2244,22 @@ original <- ggmap(base_map) +
  # scale_fill_brewer(palette = "PiYG", name = "Risk Score", direction = -1, aesthetics = c("colour", "fill"))
   scale_fill_brewer(palette = "PuRd", name = "Predicted Risk", direction = 1, aesthetics = c("colour", "fill"), guide = guide_legend(reverse = TRUE))
 
-mylegend<-g_legend(original)
-scenarioPlots <- grid.arrange(arrangeGrob(less50 + theme(legend.position="none"), less25 + theme(legend.position="none"), more25 + theme(legend.position="none"), more50 + theme(legend.position="none"), ncol = 2, top = "Canopy Change Under 5 Construction Scenarios", mylegend))
-```
+predictionPlot <- ggmap(base_map) +
+  geom_sf(data = ll(fishnet), fill = "white", colour = "transparent", inherit.aes = FALSE)+
+  geom_sf(data= ll(construction5), aes(fill=Risk_Cat), color="transparent", inherit.aes = FALSE)+
+  labs(title="Predicted Risk of Substantial Canopy Loss")+
+  theme(plot.title = element_text(size = 30, face = "bold"), 
+        legend.title = element_text(size = 12)) +  mapTheme() +
+ # scale_fill_brewer(palette = "PiYG", name = "Risk Score", direction = -1, aesthetics = c("colour", "fill"))
+  scale_fill_brewer(palette = "PuRd", name = "Predicted Risk", direction = 1, aesthetics = c("colour", "fill"), guide = guide_legend(reverse = TRUE))
 
-![](Tree_Canopy_Loss_files/figure-html/Construction_scenarios-1.png)<!-- -->
+mylegend<-g_legend(original)
+```
 
 Below, we visualize the results of our model. The model predicts the highest risk of loss in South, North, and Northeast Philadelphia. Specifically, the areas at highest risk of loss are around the Point Breeze neighborhood in South Philadelphia, Kensington in the Northeast, and Rhawnhurst in the Northwest.  
 
 ```r
-original
+predictionPlot
 ```
 
 ![](Tree_Canopy_Loss_files/figure-html/prediction 1-1.png)<!-- -->
@@ -2261,7 +2274,14 @@ div.blue { background-color:#e6f0ff; border-radius: 5px; padding: 10px;}
 * 25% increase in completed construction permits       
 * 50% increase in completed construction permits      
 </div>    
-  
+
+
+```r
+grid.arrange(arrangeGrob(less50 + theme(legend.position="none"), less25 + theme(legend.position="none"), original + theme(legend.position="none"), more25 + theme(legend.position="none"), more50 + theme(legend.position="none"), ncol = 2, top = "Canopy Change Under 5 Construction Scenarios", mylegend))
+```
+
+![](Tree_Canopy_Loss_files/figure-html/multiple scenarios-1.png)<!-- -->
+
 Although the difference between scenario outcomes is slight, generally, as construction rates increase, the risk for substantial tree canopy loss also increases. Likewise, as construction rates decrease, risk for tree canopy loss generally decreases. Below, we visualize these four scenarios along with the prediction based on our current construction levels. For more detailed and high resolution data about citywide tree canopy loss under each scenario, please refer to our web application in Section 8.    
 
 
@@ -2292,13 +2312,13 @@ confusion <- caret::confusionMatrix(reference = as.factor(testProbs2$Outcome),
    rect(150, 430, 240, 370, col='#3F97D0')
    text(195, 435, 'Low Loss', cex=1.2)
    rect(250, 430, 340, 370, col='#F7AD50')
-   text(295, 435, 'Moderate - Substantial Loss', cex=1.2)
+   text(295, 435, 'Substantial Loss', cex=1.2)
    text(125, 370, 'Predicted', cex=1.3, srt=90, font=2)
    text(245, 450, 'Actual', cex=1.3, font=2)
    rect(150, 305, 240, 365, col='#F7AD50')
    rect(250, 305, 340, 365, col='#3F97D0')
    text(140, 400, 'Low Loss', cex=1.2, srt=90)
-   text(140, 335, 'Moderate - Substantial Loss', cex=1.2, srt=90)
+   text(140, 335, 'Substantial Loss', cex=1.2, srt=90)
 
    # add in the cm results
    res <- as.numeric(cm$table)
@@ -2327,12 +2347,7 @@ confusion <- caret::confusionMatrix(reference = as.factor(testProbs2$Outcome),
    text(70, 20, round(as.numeric(cm$overall[2]), 3), cex=1.4)
  }
 
-draw_confusion_matrix(confusion)
-```
-
-![](Tree_Canopy_Loss_files/figure-html/Confusion metrics-1.png)<!-- -->
-
-```r
+#draw_confusion_matrix(confusion)
 #
 #
 finalTest2$uniqueID <- seq.int(nrow(finalTest))
@@ -2355,8 +2370,7 @@ Below, we plot the spatial distribution of our model's confusion metrics. We see
 
 ```r
 palette3 <- c("magenta",  "blue", "purple", "green")
-
-confusionPlot <- ggmap(base_map) +
+ggmap(base_map) +
   geom_sf(data = ll(fishnet), fill = "white", colour = "transparent", inherit.aes = FALSE)+
   geom_sf(data = ll(try), aes(fill = result), colour = "transparent", inherit.aes = FALSE)+
   labs(title = "Mapped Correlation Matrix")+
@@ -2365,6 +2379,8 @@ confusionPlot <- ggmap(base_map) +
   theme(plot.title = element_text(size = 30, face = "bold"), 
         legend.title = element_text(size = 12)) +  mapTheme()
 ```
+
+![](Tree_Canopy_Loss_files/figure-html/confusion plot-1.png)<!-- -->
 
 
 ## How generalizable is our model?
