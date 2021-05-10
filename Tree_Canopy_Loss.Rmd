@@ -52,7 +52,7 @@ library(FNN)
 library(pROC)
 library(plotROC)
 library(RANN)
-#
+##
 root.dir = "https://raw.githubusercontent.com/urbanSpatial/Public-Policy-Analytics-Landing/master/DATA/"
 source("https://raw.githubusercontent.com/urbanSpatial/Public-Policy-Analytics-Landing/master/functions.r")
 
@@ -990,7 +990,7 @@ grid.arrange(ncol=2, top=textGrob("Neighborhood Attributes and Tree Canopy 2008-
 
 ## How do current patterns of tree canopy change reflect disinvestment as a result of redlining and older planning practices?  
 Next, we examine redlining boundaries from the Homeowner’s Loan Corporation (HOLC). As trees take decades to grow, historical planning decisions can determine the spatial configuration of today's tree canopy.  In 1937, HOLC created “redlining” maps that rated neighborhoods’ desirability in four categories. It rated neighborhoods with residents of color as the least desirable (D) and majority-white neighborhoods as the most desirable (A). As a result, the low-ranked neighborhoods experienced disinvestment.    
-```{r Redlining Neighborhoods, message=FALSE, warning=FALSE, include=FALSE, results='hide', cache='TRUE'}
+```{r Redlined Neighborhoods, message=FALSE, warning=FALSE, include=FALSE, results='hide', cache='TRUE'}
 
 HOLC2 <- HOLC %>%
   st_intersection(st_make_valid(Philadelphia), HOLC) %>%  
